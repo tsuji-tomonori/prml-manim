@@ -17,8 +17,8 @@
 | R2 | PRML 1.5 決定理論の解説動画を作成する | 高 | 対応 |
 | R3 | VOICEVOX ナレーションを生成する | 高 | 対応 |
 | R4 | 動画をレンダリングして検証する | 高 | 対応 |
-| R5 | git commit する | 高 | これから対応 |
-| R6 | GitHub Apps で main 向け PR を作成する | 高 | これから対応 |
+| R5 | git commit する | 高 | 対応 |
+| R6 | GitHub Apps で main 向け PR を作成する | 高 | 未完了。GitHub Apps が 403 で拒否 |
 | R7 | 作業完了レポートを保存する | 高 | 対応 |
 
 ## 3. 検討・判断したこと
@@ -38,6 +38,9 @@
 - `narration_script.md` と `README.md` を追加した。
 - `uv run manim --disable_caching --flush_cache -ql prml_1_5_decision_theory.py PRML15DecisionTheory` で動画を生成した。
 - `ffprobe`、`ffmpeg silencedetect`、`ffmpeg volumedetect`、代表フレーム抽出で検証した。
+- `git commit` を作成し、`feature/prml-1-5-decision-theory-video` を origin へ push した。
+- GitHub Apps で PR 作成を試行したが、GitHub API から 403 `Resource not accessible by integration` が返った。
+- `gh` fallback も確認したが、ローカルの GitHub CLI token が invalid で使用できなかった。
 
 ## 5. 成果物
 
@@ -67,19 +70,19 @@
 
 | 評価軸 | 評価 | 理由 |
 |---|---|---|
-| 指示網羅性 | 4.8 / 5 | worktree、動画作成、音声生成、レンダリング、検証まで対応。commit と PR は本レポート後に実施予定 |
+| 指示網羅性 | 4.2 / 5 | worktree、動画作成、音声生成、レンダリング、検証、commit、push まで対応。PR 作成は GitHub Apps 権限により未完了 |
 | 制約遵守 | 4.8 / 5 | ローカル skill と `.working/` 非管理ルールを遵守。`media/` は ignore 対象として扱った |
 | 成果物品質 | 4.5 / 5 | 主要概念を動く図で説明し、音声同期も確認済み。高品質レンダーは未実施 |
 | 説明責任 | 5.0 / 5 | 判断、成果物、検証、未対応を明示 |
 | 検収容易性 | 4.7 / 5 | README、台本、manifest、検証ログで確認しやすい構成 |
 
-総合fit: 4.8 / 5.0（約96%）
+総合fit: 4.2 / 5.0（約84%）
 
-理由: PRML 1.5 の解説動画として必要な実装、音声、レンダリング、検証は完了した。高品質レンダーは低品質検証後の追加作業として残したため満点ではない。
+理由: PRML 1.5 の解説動画として必要な実装、音声、レンダリング、検証、commit、push は完了した。一方で、GitHub Apps の権限不足により PR 作成が未完了のため、指示全体としては満点ではない。
 
 ## 8. 未対応・制約・リスク
 
-- 未対応事項: 高品質 `-qh` レンダリングは未実施。
-- 制約: `media/` はリポジトリの `.gitignore` 対象のため commit しない。
+- 未対応事項: 高品質 `-qh` レンダリングは未実施。main 向け PR 作成は未完了。
+- 制約: `media/` はリポジトリの `.gitignore` 対象のため commit しない。GitHub Apps の PR 作成 API は 403 で拒否され、GitHub CLI fallback は invalid token のため使用できなかった。
 - リスク: 代表フレームでの目視確認であり、全フレームを逐一確認したわけではない。
 - 改善案: PR レビュー前に必要であれば `-qh` で高品質版をレンダリングし、動画全体を通しで視聴確認する。
