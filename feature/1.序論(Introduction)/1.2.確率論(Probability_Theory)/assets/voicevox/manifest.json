@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "不確かさを数で扱う",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 25.517
+    },
+    {
+      "id": "scene02",
+      "title": "確率は可能性の重み",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 22.052
+    },
+    {
+      "id": "scene03",
+      "title": "同時確率と周辺化",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 25.327
+    },
+    {
+      "id": "scene04",
+      "title": "条件付き確率と積の法則",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 28.761
+    },
+    {
+      "id": "scene05",
+      "title": "ベイズの定理",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 27.0
+    },
+    {
+      "id": "scene06",
+      "title": "密度は面積で読む",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 25.785
+    },
+    {
+      "id": "scene07",
+      "title": "期待値と分散",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 26.211
+    },
+    {
+      "id": "scene08",
+      "title": "回帰を確率モデルにする",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 33.421
+    }
+  ]
+}
