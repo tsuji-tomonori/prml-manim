@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manim VOICEVOX教育動画"
+  short_description: "ManimとVOICEVOXで日本語教育動画を制作・改善する"
+  default_prompt: "ManimとVOICEVOXで日本語教育動画を作成・改善してください。"

@@ -1,0 +1,96 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "オープニング",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 23.819
+    },
+    {
+      "id": "scene02",
+      "title": "手書き数字から数値ベクトルへ",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 36.427
+    },
+    {
+      "id": "scene03",
+      "title": "学習とは generalization",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 24.032
+    },
+    {
+      "id": "scene04",
+      "title": "今回は regression",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 30.571
+    },
+    {
+      "id": "scene05",
+      "title": "10個の点から見えない曲線を想像する",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 35.691
+    },
+    {
+      "id": "scene06",
+      "title": "多項式モデル",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 40.427
+    },
+    {
+      "id": "scene07",
+      "title": "最小二乗",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 44.192
+    },
+    {
+      "id": "scene08",
+      "title": "M=1から9の比較",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 51.349
+    },
+    {
+      "id": "scene09",
+      "title": "訓練誤差とテスト誤差",
+      "path": "assets/voicevox/scene09.wav",
+      "duration": 58.048
+    },
+    {
+      "id": "scene10",
+      "title": "係数の暴走",
+      "path": "assets/voicevox/scene10.wav",
+      "duration": 36.832
+    },
+    {
+      "id": "scene11",
+      "title": "データ数を増やす",
+      "path": "assets/voicevox/scene11.wav",
+      "duration": 21.984
+    },
+    {
+      "id": "scene12",
+      "title": "正則化",
+      "path": "assets/voicevox/scene12.wav",
+      "duration": 44.405
+    },
+    {
+      "id": "scene13",
+      "title": "確率論への橋渡し",
+      "path": "assets/voicevox/scene13.wav",
+      "duration": 20.427
+    }
+  ]
+}
