@@ -1,0 +1,60 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "二値変数とは",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 26.443
+    },
+    {
+      "id": "scene02",
+      "title": "Bernoulli 分布",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 26.805
+    },
+    {
+      "id": "scene03",
+      "title": "最尤推定",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 28.587
+    },
+    {
+      "id": "scene04",
+      "title": "少ないデータの不安定さ",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 29.077
+    },
+    {
+      "id": "scene05",
+      "title": "Beta 事前分布から事後分布へ",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 29.323
+    },
+    {
+      "id": "scene06",
+      "title": "逐次更新",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 26.219
+    },
+    {
+      "id": "scene07",
+      "title": "予測分布と次節への橋渡し",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 29.515
+    }
+  ]
+}
