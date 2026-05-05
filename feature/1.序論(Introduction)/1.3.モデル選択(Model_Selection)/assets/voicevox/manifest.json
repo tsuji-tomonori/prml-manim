@@ -1,0 +1,58 @@
+[
+  {
+    "id": "scene01",
+    "title": "モデル選択とは",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene01.wav",
+    "duration": 29.522666666666666,
+    "skipped": false
+  },
+  {
+    "id": "scene02",
+    "title": "訓練誤差だけでは選べない",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene02.wav",
+    "duration": 31.581333333333333,
+    "skipped": false
+  },
+  {
+    "id": "scene03",
+    "title": "Validation set と Test set",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene03.wav",
+    "duration": 32.221333333333334,
+    "skipped": false
+  },
+  {
+    "id": "scene04",
+    "title": "Cross-validation",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene04.wav",
+    "duration": 33.044,
+    "skipped": false
+  },
+  {
+    "id": "scene05",
+    "title": "Leave-one-out",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene05.wav",
+    "duration": 21.532,
+    "skipped": false
+  },
+  {
+    "id": "scene06",
+    "title": "探索コスト",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene06.wav",
+    "duration": 25.8,
+    "skipped": false
+  },
+  {
+    "id": "scene07",
+    "title": "情報量基準",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene07.wav",
+    "duration": 31.058666666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene08",
+    "title": "1.4 への橋渡し",
+    "path": "/home/t-tsuji/project/prml-manim-model-selection/feature/1.序論(Introduction)/1.3.モデル選択(Model_Selection)/assets/voicevox/scene08.wav",
+    "duration": 34.04533333333333,
+    "skipped": false
+  }
+]
