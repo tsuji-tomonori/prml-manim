@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "二値から多値へ",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 26.489
+    },
+    {
+      "id": "scene02",
+      "title": "1-of-K 表現",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 27.599
+    },
+    {
+      "id": "scene03",
+      "title": "カテゴリ分布",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 27.215
+    },
+    {
+      "id": "scene04",
+      "title": "データはカウントに縮約される",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 24.047
+    },
+    {
+      "id": "scene05",
+      "title": "最尤推定は相対頻度",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 25.081
+    },
+    {
+      "id": "scene06",
+      "title": "多項分布",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 25.369
+    },
+    {
+      "id": "scene07",
+      "title": "ディリクレ分布",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 26.031
+    },
+    {
+      "id": "scene08",
+      "title": "事前カウントに実データを足す",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 24.825
+    }
+  ]
+}
