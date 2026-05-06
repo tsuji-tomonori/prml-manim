@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "focus": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "識別関数は直接クラスを選ぶ",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 48.369
+    },
+    {
+      "id": "scene02",
+      "title": "二クラス線形識別関数の幾何",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 48.829
+    },
+    {
+      "id": "scene03",
+      "title": "多クラスではスコアを同時に比較する",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 53.341
+    },
+    {
+      "id": "scene04",
+      "title": "最小二乗を分類に使うと何が起きるか",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 56.659
+    },
+    {
+      "id": "scene05",
+      "title": "Fisher の線形識別",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 45.532
+    },
+    {
+      "id": "scene06",
+      "title": "Fisher は方向、判定にはしきい値",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 48.188
+    },
+    {
+      "id": "scene07",
+      "title": "パーセプトロン更新",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 51.923
+    },
+    {
+      "id": "scene08",
+      "title": "識別関数のまとめ",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 41.073
+    }
+  ]
+}
