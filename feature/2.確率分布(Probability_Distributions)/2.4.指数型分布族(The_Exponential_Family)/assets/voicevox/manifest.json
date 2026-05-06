@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "指数型分布族とは",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 29.387
+    },
+    {
+      "id": "scene02",
+      "title": "標準形の部品",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 32.075
+    },
+    {
+      "id": "scene03",
+      "title": "ベルヌーイ分布の書き換え",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 27.968
+    },
+    {
+      "id": "scene04",
+      "title": "ガウス分布も同じ枠に入る",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 28.139
+    },
+    {
+      "id": "scene05",
+      "title": "十分統計量がデータを圧縮する",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 30.549
+    },
+    {
+      "id": "scene06",
+      "title": "最尤推定は平均合わせになる",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 28.789
+    },
+    {
+      "id": "scene07",
+      "title": "共役事前分布",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 28.299
+    },
+    {
+      "id": "scene08",
+      "title": "2.4節のまとめ",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 31.957
+    }
+  ]
+}
