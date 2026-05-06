@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "生成モデルで分類を見る",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 31.495
+    },
+    {
+      "id": "scene02",
+      "title": "二クラスではロジットがシグモイドに入る",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 31.836
+    },
+    {
+      "id": "scene03",
+      "title": "共有共分散ガウスから線形境界が出る",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 28.721
+    },
+    {
+      "id": "scene04",
+      "title": "事前確率は境界を平行移動する",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 29.809
+    },
+    {
+      "id": "scene05",
+      "title": "多クラスではソフトマックスになる",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 32.167
+    },
+    {
+      "id": "scene06",
+      "title": "最尤推定で部品を学習する",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 32.455
+    },
+    {
+      "id": "scene07",
+      "title": "離散特徴ではナイーブベイズが線形スコアを作る",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 29.628
+    },
+    {
+      "id": "scene08",
+      "title": "生成モデルから識別モデルへの橋渡し",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 39.185
+    }
+  ]
+}
