@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "情報量は驚きの大きさ",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 23.925
+    },
+    {
+      "id": "scene02",
+      "title": "エントロピーは平均情報量",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 26.251
+    },
+    {
+      "id": "scene03",
+      "title": "広がった分布ほどエントロピーが高い",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 24.779
+    },
+    {
+      "id": "scene04",
+      "title": "連続分布とガウス分布",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 25.312
+    },
+    {
+      "id": "scene05",
+      "title": "条件付きエントロピー",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 24.032
+    },
+    {
+      "id": "scene06",
+      "title": "KLダイバージェンス",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 31.787
+    },
+    {
+      "id": "scene07",
+      "title": "KL最小化と最尤推定",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 22.165
+    },
+    {
+      "id": "scene08",
+      "title": "相互情報量",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 22.955
+    }
+  ]
+}
