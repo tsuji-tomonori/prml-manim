@@ -1,0 +1,51 @@
+[
+  {
+    "id": "scene01",
+    "title": "固定基底関数とは",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene01.wav",
+    "duration": 26.149333333333335,
+    "skipped": false
+  },
+  {
+    "id": "scene02",
+    "title": "幅のトレードオフ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene02.wav",
+    "duration": 28.561333333333334,
+    "skipped": false
+  },
+  {
+    "id": "scene03",
+    "title": "高次元で増える基底数",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene03.wav",
+    "duration": 22.982666666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene04",
+    "title": "空白にも基底を置いてしまう",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene04.wav",
+    "duration": 25.82,
+    "skipped": false
+  },
+  {
+    "id": "scene05",
+    "title": "基底の形が合わない問題",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene05.wav",
+    "duration": 28.124,
+    "skipped": false
+  },
+  {
+    "id": "scene06",
+    "title": "データ適応的な基底へ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene06.wav",
+    "duration": 27.206666666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene07",
+    "title": "まとめ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-6-fixed-basis-limitations-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.6.固定基底関数の限界(Limitations_of_Fixed_Basis_Functions)/assets/voicevox/scene07.wav",
+    "duration": 30.14,
+    "skipped": false
+  }
+]
