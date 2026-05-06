@@ -15,8 +15,8 @@
 | R1 | worktree を作成して作業する | 高 | 対応 |
 | R2 | PRML 5.4 ヘッセ行列の解説動画を作る | 高 | 対応 |
 | R3 | VOICEVOX ナレーション付きで動画化する | 高 | 対応 |
-| R4 | git commit する | 高 | 対応予定 |
-| R5 | main 向け PR を GitHub Apps で作成する | 高 | 対応予定 |
+| R4 | git commit する | 高 | 対応 |
+| R5 | main 向け PR を GitHub Apps で作成する | 高 | 対応 |
 | R6 | 作業完了レポートを `reports/working/` に残す | 高 | 対応 |
 
 ## 3. 検討・判断したこと
@@ -35,6 +35,8 @@
 - `README.md` にレンダリング手順、成果物パス、原文参照、制作方針、音声クレジットを記載した。
 - `uv run manim --disable_caching --flush_cache -ql ...` で mp4 を生成した。
 - MathTex の LaTeX エラーと final scene のテキスト重なりを修正した。
+- `32c3091` として動画成果物を commit した。
+- GitHub Apps で main 向け draft PR #22 を作成した。
 
 ## 5. 成果物
 
@@ -46,6 +48,7 @@
 | `feature/5.ニューラルネットワーク(Neural_Networks)/5.4.ヘッセ行列(The_Hessian_Matrix)/README.md` | Markdown | レンダリング手順と制作方針 | 利用・検収補助 |
 | `feature/5.ニューラルネットワーク(Neural_Networks)/5.4.ヘッセ行列(The_Hessian_Matrix)/assets/voicevox/` | WAV/JSON | 生成済みナレーション | 動画音声 |
 | `feature/5.ニューラルネットワーク(Neural_Networks)/5.4.ヘッセ行列(The_Hessian_Matrix)/media/videos/prml_5_4_hessian_matrix/480p15/PRML54HessianMatrix.mp4` | MP4 | 生成済み確認用動画 | 解説動画 |
+| `https://github.com/tsuji-tomonori/prml-manim/pull/22` | GitHub PR | main 向け draft PR | PR 作成要件 |
 
 ## 6. 検証
 
@@ -61,7 +64,7 @@
 
 | 評価軸 | 評価 | 理由 |
 |---|---|---|
-| 指示網羅性 | 5 | worktree、動画制作、ナレーション、検証、commit/PR 準備まで対応した |
+| 指示網羅性 | 5 | worktree、動画制作、ナレーション、検証、commit、PR 作成まで対応した |
 | 制約遵守 | 5 | ローカル skill、レポート規約、GitHub Apps 利用方針に従った |
 | 成果物品質 | 4 | 低品質確認用レンダリングまで生成済み。高品質レンダリングは未実施 |
 | 説明責任 | 5 | 構成判断、成果物、検証結果、制約を記録した |
