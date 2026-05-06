@@ -1,0 +1,54 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "focus": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "学習は誤差関数を下げること",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 38.104
+    },
+    {
+      "id": "scene02",
+      "title": "出力と誤差関数は組で選ぶ",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 41.677
+    },
+    {
+      "id": "scene03",
+      "title": "重み空間の地形を下る",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 30.2
+    },
+    {
+      "id": "scene04",
+      "title": "局所二次近似とヘッセ行列",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 31.043
+    },
+    {
+      "id": "scene05",
+      "title": "勾配情報を使う理由",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 34.829
+    },
+    {
+      "id": "scene06",
+      "title": "バッチ更新とオンライン更新",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 40.419
+    }
+  ]
+}
