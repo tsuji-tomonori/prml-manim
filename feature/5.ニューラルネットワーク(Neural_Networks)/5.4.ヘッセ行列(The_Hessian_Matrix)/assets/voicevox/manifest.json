@@ -1,0 +1,60 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "focus": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "勾配の次に曲率を見る",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 35.612
+    },
+    {
+      "id": "scene02",
+      "title": "局所二次近似",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 31.089
+    },
+    {
+      "id": "scene03",
+      "title": "固有値と正定値性",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 33.425
+    },
+    {
+      "id": "scene04",
+      "title": "ニューラルネットワークでの役割",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 41.181
+    },
+    {
+      "id": "scene05",
+      "title": "近似の考え方",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 36.54
+    },
+    {
+      "id": "scene06",
+      "title": "逆ヘッセ行列と有限差分",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 35.068
+    },
+    {
+      "id": "scene07",
+      "title": "正確な評価とヘッセベクトル積",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 42.823
+    }
+  ]
+}
