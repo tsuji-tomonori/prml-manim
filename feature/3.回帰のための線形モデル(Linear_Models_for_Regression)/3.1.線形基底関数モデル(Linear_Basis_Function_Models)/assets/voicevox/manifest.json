@@ -1,0 +1,58 @@
+[
+  {
+    "id": "scene01",
+    "title": "線形基底関数モデルとは",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene01.wav",
+    "duration": 29.336,
+    "skipped": false
+  },
+  {
+    "id": "scene02",
+    "title": "基底関数を足して曲線を作る",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene02.wav",
+    "duration": 27.298666666666666,
+    "skipped": false
+  },
+  {
+    "id": "scene03",
+    "title": "基底関数の選び方",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene03.wav",
+    "duration": 23.810666666666666,
+    "skipped": false
+  },
+  {
+    "id": "scene04",
+    "title": "ガウスノイズと最小二乗",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene04.wav",
+    "duration": 29.730666666666668,
+    "skipped": false
+  },
+  {
+    "id": "scene05",
+    "title": "デザイン行列と正規方程式",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene05.wav",
+    "duration": 28.706666666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene06",
+    "title": "逐次学習",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene06.wav",
+    "duration": 26.04,
+    "skipped": false
+  },
+  {
+    "id": "scene07",
+    "title": "正則化付き最小二乗",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene07.wav",
+    "duration": 27.437333333333335,
+    "skipped": false
+  },
+  {
+    "id": "scene08",
+    "title": "q 正則化とまとめ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-1-linear-basis-function-models-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.1.線形基底関数モデル(Linear_Basis_Function_Models)/assets/voicevox/scene08.wav",
+    "duration": 29.378666666666668,
+    "skipped": false
+  }
+]
