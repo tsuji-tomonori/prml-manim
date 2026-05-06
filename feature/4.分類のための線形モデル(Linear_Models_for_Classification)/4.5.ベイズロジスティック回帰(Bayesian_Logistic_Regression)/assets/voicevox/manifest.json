@@ -1,0 +1,60 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "formula": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "重みを一点ではなく分布として扱う",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 36.465
+    },
+    {
+      "id": "scene02",
+      "title": "事前分布と尤度から事後分布を作る",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 31.772
+    },
+    {
+      "id": "scene03",
+      "title": "ラプラス近似でMAPの近くをガウスにする",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 36.977
+    },
+    {
+      "id": "scene04",
+      "title": "MAPのロジスティック分類器",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 32.007
+    },
+    {
+      "id": "scene05",
+      "title": "重みの不確実性はロジットの不確実性になる",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 44.221
+    },
+    {
+      "id": "scene06",
+      "title": "予測分布は確率を0.5側へ戻す",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 45.693
+    },
+    {
+      "id": "scene07",
+      "title": "4.5節の要点",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 37.82
+    }
+  ]
+}
