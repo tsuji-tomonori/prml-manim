@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "点推定から分布へ",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 26.859
+    },
+    {
+      "id": "scene02",
+      "title": "重みの事前分布",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 29.728
+    },
+    {
+      "id": "scene03",
+      "title": "尤度で重みをふるいにかける",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 26.624
+    },
+    {
+      "id": "scene04",
+      "title": "事後分布",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 27.264
+    },
+    {
+      "id": "scene05",
+      "title": "予測分布",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 30.603
+    },
+    {
+      "id": "scene06",
+      "title": "ラプラス近似",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 26.645
+    },
+    {
+      "id": "scene07",
+      "title": "エビデンスと複雑さ",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 29.163
+    },
+    {
+      "id": "scene08",
+      "title": "まとめ",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 30.251
+    }
+  ]
+}
