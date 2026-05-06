@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "なぜ分解するのか",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 29.543
+    },
+    {
+      "id": "scene02",
+      "title": "損失の出発点",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 25.573
+    },
+    {
+      "id": "scene03",
+      "title": "データ集合を取り替える思考実験",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 23.099
+    },
+    {
+      "id": "scene04",
+      "title": "式としての分解",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 19.931
+    },
+    {
+      "id": "scene05",
+      "title": "正則化が強いとき",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 20.347
+    },
+    {
+      "id": "scene06",
+      "title": "正則化が弱いとき",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 21.36
+    },
+    {
+      "id": "scene07",
+      "title": "トレードオフ",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 23.173
+    },
+    {
+      "id": "scene08",
+      "title": "限界と次節への橋渡し",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 26.128
+    }
+  ]
+}
