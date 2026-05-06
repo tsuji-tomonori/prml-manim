@@ -1,0 +1,58 @@
+[
+  {
+    "id": "scene01",
+    "title": "エビデンス近似の位置づけ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene01.wav",
+    "duration": 32.14533333333333,
+    "skipped": false
+  },
+  {
+    "id": "scene02",
+    "title": "エビデンスとは",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene02.wav",
+    "duration": 24.817333333333334,
+    "skipped": false
+  },
+  {
+    "id": "scene03",
+    "title": "log evidence の分解",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene03.wav",
+    "duration": 29.04,
+    "skipped": false
+  },
+  {
+    "id": "scene04",
+    "title": "alpha を evidence で選ぶ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene04.wav",
+    "duration": 23.708,
+    "skipped": false
+  },
+  {
+    "id": "scene05",
+    "title": "有効パラメータ数 gamma",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene05.wav",
+    "duration": 24.208,
+    "skipped": false
+  },
+  {
+    "id": "scene06",
+    "title": "beta の更新",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene06.wav",
+    "duration": 22.458666666666666,
+    "skipped": false
+  },
+  {
+    "id": "scene07",
+    "title": "再推定の反復",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene07.wav",
+    "duration": 26.641333333333332,
+    "skipped": false
+  },
+  {
+    "id": "scene08",
+    "title": "まとめ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/prml-3-5-evidence-approximation/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.5.エビデンス近似(The_Evidence_Approximation)/assets/voicevox/scene08.wav",
+    "duration": 31.793333333333333,
+    "skipped": false
+  }
+]
