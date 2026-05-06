@@ -1,0 +1,58 @@
+[
+  {
+    "id": "scene01",
+    "title": "ベイズモデル比較の問い",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene01.wav",
+    "duration": 26.758666666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene02",
+    "title": "モデルの事後確率",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene02.wav",
+    "duration": 24.912,
+    "skipped": false
+  },
+  {
+    "id": "scene03",
+    "title": "重みを積分して消す",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene03.wav",
+    "duration": 23.216,
+    "skipped": false
+  },
+  {
+    "id": "scene04",
+    "title": "当てはまりとオッカム因子",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene04.wav",
+    "duration": 26.69333333333333,
+    "skipped": false
+  },
+  {
+    "id": "scene05",
+    "title": "多項式モデルで比べる",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene05.wav",
+    "duration": 24.474666666666668,
+    "skipped": false
+  },
+  {
+    "id": "scene06",
+    "title": "モデル同士の比",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene06.wav",
+    "duration": 20.901333333333334,
+    "skipped": false
+  },
+  {
+    "id": "scene07",
+    "title": "モデル平均",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene07.wav",
+    "duration": 20.069333333333333,
+    "skipped": false
+  },
+  {
+    "id": "scene08",
+    "title": "次節への橋渡し",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-4-bayesian-model-comparison-video/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)/assets/voicevox/scene08.wav",
+    "duration": 26.032,
+    "skipped": false
+  }
+]
