@@ -1,0 +1,72 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "隠れユニット数だけで複雑さは決まらない",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 35.281
+    },
+    {
+      "id": "scene02",
+      "title": "重み減衰は大きすぎる重みを抑える",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 26.375
+    },
+    {
+      "id": "scene03",
+      "title": "ガウス事前分布として見る",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 37.532
+    },
+    {
+      "id": "scene04",
+      "title": "早期終了は暗黙の正則化",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 35.527
+    },
+    {
+      "id": "scene05",
+      "title": "不変性を学習に入れる",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 35.505
+    },
+    {
+      "id": "scene06",
+      "title": "タンジェント伝播",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 28.839
+    },
+    {
+      "id": "scene07",
+      "title": "変換データで訓練することとの関係",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 33.756
+    },
+    {
+      "id": "scene08",
+      "title": "畳み込みネットワークは構造で不変性を入れる",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 32.284
+    },
+    {
+      "id": "scene09",
+      "title": "ソフト重み共有とまとめ",
+      "path": "assets/voicevox/scene09.wav",
+      "duration": 34.716
+    }
+  ]
+}
