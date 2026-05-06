@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "emphasis": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "固定基底から学習される基底へ",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 34.929
+    },
+    {
+      "id": "scene02",
+      "title": "順伝播でネットワーク関数を評価する",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 35.612
+    },
+    {
+      "id": "scene03",
+      "title": "隠れユニットは学習される非線形基底",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 34.961
+    },
+    {
+      "id": "scene04",
+      "title": "出力活性化はタスクで変わる",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 30.961
+    },
+    {
+      "id": "scene05",
+      "title": "非線形がなければ多層でも線形",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 35.516
+    },
+    {
+      "id": "scene06",
+      "title": "Feed-forward topology",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 36.764
+    },
+    {
+      "id": "scene07",
+      "title": "Universal approximator の意味",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 37.415
+    },
+    {
+      "id": "scene08",
+      "title": "重み空間の対称性",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 39.143
+    }
+  ]
+}
