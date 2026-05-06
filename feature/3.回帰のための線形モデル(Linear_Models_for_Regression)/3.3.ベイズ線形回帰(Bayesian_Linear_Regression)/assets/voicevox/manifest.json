@@ -1,0 +1,51 @@
+[
+  {
+    "id": "scene01",
+    "title": "点推定から分布へ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene01.wav",
+    "duration": 25.890666666666668,
+    "skipped": false
+  },
+  {
+    "id": "scene02",
+    "title": "事前分布と重み空間",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene02.wav",
+    "duration": 25.549333333333333,
+    "skipped": false
+  },
+  {
+    "id": "scene03",
+    "title": "尤度が重みを絞る",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene03.wav",
+    "duration": 27.021333333333335,
+    "skipped": false
+  },
+  {
+    "id": "scene04",
+    "title": "逐次更新",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene04.wav",
+    "duration": 28.674666666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene05",
+    "title": "予測分布",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene05.wav",
+    "duration": 28.376,
+    "skipped": false
+  },
+  {
+    "id": "scene06",
+    "title": "アルファとベータ",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene06.wav",
+    "duration": 26.17866666666667,
+    "skipped": false
+  },
+  {
+    "id": "scene07",
+    "title": "3.4 への橋渡し",
+    "path": "/home/t-tsuji/project/prml-manim/.working/worktrees/prml-3-3-bayesian-linear-regression/feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.3.ベイズ線形回帰(Bayesian_Linear_Regression)/assets/voicevox/scene07.wav",
+    "duration": 23.552,
+    "skipped": false
+  }
+]
