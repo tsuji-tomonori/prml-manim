@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "ガウス分布の形",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 30.016
+    },
+    {
+      "id": "scene02",
+      "title": "中心極限定理",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 25.579
+    },
+    {
+      "id": "scene03",
+      "title": "多変量ガウスの幾何",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 30.293
+    },
+    {
+      "id": "scene04",
+      "title": "共分散の制限と限界",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 30.635
+    },
+    {
+      "id": "scene05",
+      "title": "条件付き分布と周辺分布",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 25.152
+    },
+    {
+      "id": "scene06",
+      "title": "最尤推定",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 29.259
+    },
+    {
+      "id": "scene07",
+      "title": "平均のベイズ推定",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 30.069
+    },
+    {
+      "id": "scene08",
+      "title": "t分布と混合ガウスへの橋渡し",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 28.736
+    }
+  ]
+}
