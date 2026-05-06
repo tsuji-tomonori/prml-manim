@@ -1,0 +1,60 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "focus": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "逆問題と多峰性",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 36.672
+    },
+    {
+      "id": "scene02",
+      "title": "条件付き混合分布",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 34.24
+    },
+    {
+      "id": "scene03",
+      "title": "ネットワーク出力から分布パラメータへ",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 31.221
+    },
+    {
+      "id": "scene04",
+      "title": "尤度で学習する",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 34.965
+    },
+    {
+      "id": "scene05",
+      "title": "入力で変わる密度",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 33.077
+    },
+    {
+      "id": "scene06",
+      "title": "平均とモード",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 33.472
+    },
+    {
+      "id": "scene07",
+      "title": "まとめ",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 38.432
+    }
+  ]
+}
