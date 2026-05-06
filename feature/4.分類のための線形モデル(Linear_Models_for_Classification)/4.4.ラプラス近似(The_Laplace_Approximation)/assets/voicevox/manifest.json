@@ -1,0 +1,60 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "focus": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "なぜラプラス近似か",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 37.557
+    },
+    {
+      "id": "scene02",
+      "title": "1変数の手順",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 36.416
+    },
+    {
+      "id": "scene03",
+      "title": "曲率は不確かさを決める",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 26.688
+    },
+    {
+      "id": "scene04",
+      "title": "多変数では Hessian が精度行列になる",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 39.232
+    },
+    {
+      "id": "scene05",
+      "title": "Z とモデル証拠",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 32.875
+    },
+    {
+      "id": "scene06",
+      "title": "BIC への橋渡し",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 36.203
+    },
+    {
+      "id": "scene07",
+      "title": "何が得意で、何が苦手か",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 32.629
+    }
+  ]
+}
