@@ -1,0 +1,66 @@
+{
+  "speakers": {
+    "main": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "question": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    },
+    "summary": {
+      "label": "VOICEVOX:WhiteCUL",
+      "id": 23
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "オープニング",
+      "path": "assets/voicevox/scene01.wav",
+      "duration": 25.991
+    },
+    {
+      "id": "scene02",
+      "title": "格子数の指数増加",
+      "path": "assets/voicevox/scene02.wav",
+      "duration": 26.001
+    },
+    {
+      "id": "scene03",
+      "title": "局所領域が広くなる",
+      "path": "assets/voicevox/scene03.wav",
+      "duration": 31.357
+    },
+    {
+      "id": "scene04",
+      "title": "境界近くの体積",
+      "path": "assets/voicevox/scene04.wav",
+      "duration": 28.06
+    },
+    {
+      "id": "scene05",
+      "title": "近傍点が遠くなる",
+      "path": "assets/voicevox/scene05.wav",
+      "duration": 28.689
+    },
+    {
+      "id": "scene06",
+      "title": "空の箱だらけになる",
+      "path": "assets/voicevox/scene06.wav",
+      "duration": 27.409
+    },
+    {
+      "id": "scene07",
+      "title": "何が助けになるか",
+      "path": "assets/voicevox/scene07.wav",
+      "duration": 26.419
+    },
+    {
+      "id": "scene08",
+      "title": "まとめ",
+      "path": "assets/voicevox/scene08.wav",
+      "duration": 32.764
+    }
+  ]
+}
