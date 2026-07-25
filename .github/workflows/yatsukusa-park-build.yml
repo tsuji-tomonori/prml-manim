@@ -38,6 +38,34 @@ jobs:
           sed -i '/COLLECTIONS\["COLLIDERS"\]\.hide_render = True/d' /tmp/yatsukusa_build.py
           sed -i '/COLLECTIONS\["GUIDES"\]\.hide_viewport = True/d' /tmp/yatsukusa_build.py
           sed -i '/COLLECTIONS\["GUIDES"\]\.hide_render = True/d' /tmp/yatsukusa_build.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('/tmp/yatsukusa_build.py')
+          source = path.read_text(encoding='utf-8')
+
+          old = 'create_house(f"{prefix}_House_{i}", (x, y, 0), dims, MATERIALS[mname], collection, rotate=math.radians(90) if x > 90 else 0)'
+          new = 'create_house(f"{prefix}_House_{i}", (x, y), dims, MATERIALS[mname], collection, rotate=math.radians(90) if x > 90 else 0)'
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          old = '''def export_collection(collection_name: str, stem: str) -> None:\n    coll = COLLECTIONS[collection_name]\n    selected = select_collection_objects(coll)'''
+          new = '''def export_collection(collection_name: str, stem: str) -> None:\n    coll = COLLECTIONS[collection_name]\n    previous_viewport = coll.hide_viewport\n    previous_render = coll.hide_render\n    coll.hide_viewport = False\n    coll.hide_render = False\n    bpy.context.view_layer.update()\n    selected = select_collection_objects(coll)'''
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          old = '''        path_mode="AUTO",\n    )\n    bpy.ops.object.select_all(action="DESELECT")\n\n\ndef render_cameras()'''
+          new = '''        path_mode="AUTO",\n    )\n    bpy.ops.object.select_all(action="DESELECT")\n    coll.hide_viewport = previous_viewport\n    coll.hide_render = previous_render\n    bpy.context.view_layer.update()\n\n\ndef render_cameras()'''
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          old = '''    setup_lighting_and_cameras()\n    set_collection_visibility(True, False)'''
+          new = '''    setup_lighting_and_cameras()\n    COLLECTIONS["COLLIDERS"].hide_viewport = True\n    COLLECTIONS["COLLIDERS"].hide_render = True\n    COLLECTIONS["GUIDES"].hide_viewport = True\n    COLLECTIONS["GUIDES"].hide_render = True\n    set_collection_visibility(True, False)'''
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          path.write_text(source, encoding='utf-8')
+          PY
           python3 -m py_compile /tmp/yatsukusa_build.py
 
       - name: Build Blender project, exports, and comparison views
