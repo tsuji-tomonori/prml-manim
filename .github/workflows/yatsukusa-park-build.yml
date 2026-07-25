@@ -1,0 +1,52 @@
+name: Temporary Yatsukusa Park Blender Build
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-yatsukusa-park:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk xz-utils libegl1 libgl1 libx11-6 libxi6 libxrender1 libxfixes3 libxxf86vm1
+
+      - name: Download Blender 4.5 LTS
+        run: |
+          curl --fail --location --retry 5 --retry-delay 4 \
+            https://download.blender.org/release/Blender4.5/blender-4.5.12-linux-x64.tar.xz \
+            --output /tmp/blender.tar.xz
+          mkdir -p /tmp/blender
+          tar -xJf /tmp/blender.tar.xz -C /tmp/blender --strip-components=1
+          /tmp/blender/blender --version
+
+      - name: Materialize procedural build script
+        run: |
+          cat .tmp-yatsukusa/part*.txt | base64 --decode | gzip --decompress > /tmp/yatsukusa_build.py
+          python3 -m py_compile /tmp/yatsukusa_build.py
+          test "$(sha256sum /tmp/yatsukusa_build.py | cut -d' ' -f1)" = "d8275e2908ff7a109aeee92553adae51f5baa72547c6121f5a143a071ae23d88"
+
+      - name: Build Blender project, exports, and comparison views
+        env:
+          YATSUKUSA_OUT: ${{ github.workspace }}/yatsukusa-output
+        run: |
+          mkdir -p "$YATSUKUSA_OUT"
+          /tmp/blender/blender --background --factory-startup --python /tmp/yatsukusa_build.py
+          cp /tmp/yatsukusa_build.py "$YATSUKUSA_OUT/build_yatsukusa_park.py"
+          find "$YATSUKUSA_OUT" -maxdepth 2 -type f -printf '%p %k KB\n' | sort
+
+      - name: Upload Blender deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: yatsukusa-park-vrchat-blender
+          path: yatsukusa-output/**
+          if-no-files-found: error
+          retention-days: 3
