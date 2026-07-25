@@ -28,22 +28,33 @@ jobs:
           tar -xJf /tmp/blender.tar.xz -C /tmp/blender --strip-components=1
           /tmp/blender/blender --version
 
-      - name: Materialize procedural build script
+      - name: Materialize and patch procedural build script
         run: |
           cat .tmp-yatsukusa/part*.txt | base64 --decode | gzip --decompress > /tmp/yatsukusa_build.py
-          python3 -m py_compile /tmp/yatsukusa_build.py
           test "$(sha256sum /tmp/yatsukusa_build.py | cut -d' ' -f1)" = "d8275e2908ff7a109aeee92553adae51f5baa72547c6121f5a143a071ae23d88"
+          sed -i '/COLLECTIONS\["QUEST_WORLD"\]\.hide_viewport = True/d' /tmp/yatsukusa_build.py
+          sed -i '/COLLECTIONS\["QUEST_WORLD"\]\.hide_render = True/d' /tmp/yatsukusa_build.py
+          sed -i '/COLLECTIONS\["COLLIDERS"\]\.hide_viewport = True/d' /tmp/yatsukusa_build.py
+          sed -i '/COLLECTIONS\["COLLIDERS"\]\.hide_render = True/d' /tmp/yatsukusa_build.py
+          sed -i '/COLLECTIONS\["GUIDES"\]\.hide_viewport = True/d' /tmp/yatsukusa_build.py
+          sed -i '/COLLECTIONS\["GUIDES"\]\.hide_render = True/d' /tmp/yatsukusa_build.py
+          python3 -m py_compile /tmp/yatsukusa_build.py
 
       - name: Build Blender project, exports, and comparison views
         env:
           YATSUKUSA_OUT: ${{ github.workspace }}/yatsukusa-output
         run: |
+          set -o pipefail
           mkdir -p "$YATSUKUSA_OUT"
-          /tmp/blender/blender --background --factory-startup --python /tmp/yatsukusa_build.py
+          /tmp/blender/blender --background --factory-startup --python /tmp/yatsukusa_build.py 2>&1 | tee "$YATSUKUSA_OUT/blender-build.log"
           cp /tmp/yatsukusa_build.py "$YATSUKUSA_OUT/build_yatsukusa_park.py"
+          test -s "$YATSUKUSA_OUT/Yatsukusa_Park_VRChat.blend"
+          test -s "$YATSUKUSA_OUT/Yatsukusa_Park_PC.glb"
+          test -s "$YATSUKUSA_OUT/renders/01_front_entrance.png"
           find "$YATSUKUSA_OUT" -maxdepth 2 -type f -printf '%p %k KB\n' | sort
 
       - name: Upload Blender deliverables
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: yatsukusa-park-vrchat-blender
