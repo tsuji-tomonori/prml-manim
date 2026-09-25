@@ -114,7 +114,8 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(d.animate.set_value(3),start_sentence=1)
         formula=tex(r'y=w_0+w_1x+w_2x^2+w_3x^3',28,MODEL_RED).move_to([0,-1.97,0])
         self.beat(Write(formula),Create(errs))
-        self.beat(d.animate.set_value(9),FadeOut(formula))
+        self.remove(formula)
+        self.beat(d.animate.set_value(9))
         self.beat(d.animate.set_value(5))
         self.beat(d.animate.set_value(9))
         q=jp('未知の点でも、当たる？',28,ORANGE_DATA).move_to([0,-1.98,0])
@@ -138,8 +139,8 @@ class PRML13ModelSelection(NarratedScene):
         formula.move_to([0,-2.03,0])
         self.beat(Write(formula),Indicate(errs,color=ORANGE_DATA))
         # Same central space becomes a score plot. New points are computed, never hand drawn.
-        self.remove(train,valid,line,errs,axes_group,slider)
-        self.remove(legend)
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]),formula)
         self.legend([('訓練誤差',BLUE_DATA),('検証誤差',ORANGE_DATA)])
         ex=Axes(x_range=[1,9,1],y_range=[0,.22,.05],x_length=8.4,y_length=3.35,tips=False,
                 axis_config={'color':MUTED,'stroke_width':1.3}).move_to([0,.35,0])
@@ -178,7 +179,8 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(Create(loop),Indicate(rows[1],color=ORANGE_DATA))
         warning=jp('選ぶほど、検証にも合わせ込める',25,YELLOW_ERROR).move_to([0,-2.35,0])
         self.beat(Write(warning),Indicate(box,color=GREEN_TEST))
-        self.remove(rows,rows[0],rows[1],rows[2],box,locked,loop,warning)
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
         self.legend([('訓練',BLUE_DATA),('選択済みの三次式',MODEL_RED),('最終テスト',GREEN_TEST)])
         ax,_=self.graph()
         self.add(dots(ax,model.X,model.T),curve(ax,model.WEIGHTS[2]))
@@ -208,8 +210,9 @@ class PRML13ModelSelection(NarratedScene):
                   *[points[int(i)].animate.set_color(ORANGE_DATA) for i in model.FOLDS[0]])
         bx=Axes(x_range=[.5,4.5,1],y_range=[0,.18,.05],x_length=3.4,y_length=2.65,tips=False,
                 axis_config={'color':MUTED,'stroke_width':1}).move_to([3.4,-.15,0])
-        self.add(bx,jp('各回の平均二乗誤差',19,ORANGE_DATA).move_to([3.4,1.65,0]))
-        for y in [0,.1]:self.add(tex(str(y),16,MUTED).next_to(bx.c2p(.5,y),LEFT,buff=.1))
+        score_head=jp('各回の平均二乗誤差',19,ORANGE_DATA).move_to([3.4,1.65,0])
+        score_ticks=VGroup(*[tex(str(y),16,MUTED).next_to(bx.c2p(.5,y),LEFT,buff=.1) for y in [0,.1]])
+        self.add(bx,score_head,score_ticks)
         bars=VGroup()
         for i,score in enumerate(model.CV_SCORES):
             height=score/.18*2.65
@@ -227,13 +230,14 @@ class PRML13ModelSelection(NarratedScene):
                       GrowFromEdge(bars[fold][0],DOWN),FadeIn(bars[fold][1:]))
         mean=model.CV_SCORES.mean()
         mean_line=DashedLine(bx.c2p(.5,mean),bx.c2p(4.5,mean),color=YELLOW_ERROR)
-        formula=tex(r'E_{\rm CV}=\frac{E_1+E_2+E_3+E_4}{4}=%.4f'%mean,29,ORANGE_DATA).move_to([0,-2.28,0])
+        formula=tex(r'E_{\rm CV}=\frac{E_1+E_2+E_3+E_4}{4}=%.4f'%mean,25,ORANGE_DATA).move_to([0,-2.18,0])
         self.beat(Create(mean_line),Write(formula))
         ratio=tex(r'\frac{S-1}{S}=\frac34\qquad d^*_{\rm CV}=3',25,BLUE_DATA).move_to([0,-2.7,0])
         # Explicitly record the candidate scores used to select, without reading the final test set.
         comparison=VGroup(*[VGroup(tex(str(d),19),tex(f'{v:.3f}',19,ORANGE_DATA)).arrange(DOWN,buff=.1)
                            for d,v in zip(model.CV_DEGREES,model.CV_MEANS)]).arrange(RIGHT,buff=.4).move_to([3.35,.2,0])
-        self.remove(bx,mean_line,*[obj for bar in bars for obj in bar])
+        self.remove(*bx.get_family(),mean_line,*bars.get_family(),*score_ticks.get_family(),score_head)
+        self.add(jp('次数と交差検証の平均誤差',18,ORANGE_DATA).move_to([3.4,1.65,0]))
         self.beat(Write(ratio),FadeIn(comparison))
 
     def leave_one_out(self):
@@ -248,11 +252,15 @@ class PRML13ModelSelection(NarratedScene):
         points=dots(ax,model.XC,model.TC); self.add(points)
         line=curve(ax,model.CV_WEIGHTS[0]); self.add(line)
         fraction=tex(r'S=4:\quad 18/24',30).move_to([1,-2.3,0])
-        self.beat(Create(marker),Write(fraction))
+        self.beat(Create(marker),Write(fraction),*[points[int(i)].animate.set_color(ORANGE_DATA) for i in model.FOLDS[0]])
         f6=tex(r'S=6:\quad 20/24',30).move_to(fraction)
-        self.beat(Transform(marker,SurroundingRectangle(VGroup(*blocks[:4]),color=ORANGE_DATA,buff=.045)),count.animate.set_value(20),TransformMatchingTex(fraction,f6))
+        six_groups=np.array_split(model.PERMUTATION,6)
+        six_w=model.cross_validate(groups=six_groups)[0][0]
+        self.beat(Transform(marker,SurroundingRectangle(VGroup(*blocks[:4]),color=ORANGE_DATA,buff=.045)),count.animate.set_value(20),TransformMatchingTex(fraction,f6),Transform(line,curve(ax,six_w)),
+                  *[p.animate.set_color(ORANGE_DATA if i in six_groups[0] else BLUE_DATA) for i,p in enumerate(points)])
         f24=tex(r'S=N=24:\quad 23/24',30).move_to(f6)
-        self.beat(Transform(marker,SurroundingRectangle(blocks[0],color=ORANGE_DATA,buff=.045)),count.animate.set_value(23),TransformMatchingTex(f6,f24))
+        self.beat(Transform(marker,SurroundingRectangle(blocks[0],color=ORANGE_DATA,buff=.045)),count.animate.set_value(23),TransformMatchingTex(f6,f24),Transform(line,curve(ax,model.LOO_WEIGHTS[0])),
+                  *[p.animate.set_color(BLUE_DATA) for p in points])
         self.remove(line)
         turn=ValueTracker(0)
         index=lambda:min(23,int(turn.get_value()))
@@ -275,7 +283,7 @@ class PRML13ModelSelection(NarratedScene):
             for layer in range(layers):
                 for r in range(rows):
                     for c in range(5):
-                        box=Square(side_length=.61,color=BLUE_DATA,fill_color=BLUE_DATA,fill_opacity=.25)
+                        box=Square(side_length=.61,color=BLUE_DATA,fill_color=BG,fill_opacity=1 if layers>1 else .25)
                         box.move_to([-4.4+c*.74+layer*.3,1.25-r*.74+layer*.25,0]); group.add(box)
             return group
         g=grid(1,1)
