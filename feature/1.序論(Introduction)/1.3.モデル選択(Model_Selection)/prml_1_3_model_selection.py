@@ -1,506 +1,359 @@
-from __future__ import annotations
-
-import wave
+"""PRML 1.3: measured model selection experiments in Manim Community."""
 from pathlib import Path
-
+import json
 import numpy as np
 from manim import *
+from scene_support import NarratedScene, jp, tex
+from narration_content import SCENES
+from make_voicevox_narration import MANIFEST
+import model_selection as model
+
+BLUE_DATA = ManimColor('#58B5ED')
+ORANGE_DATA = ManimColor('#FFB45B')
+MODEL_RED = ManimColor('#FF6B77')
+GREEN_TEST = ManimColor('#77D49A')
+PURPLE_TERM = ManimColor('#C29AFF')
+YELLOW_ERROR = ManimColor('#FFE079')
+MUTED = ManimColor('#A8B2C5')
+BG = '#10141F'
 
 
-BLUE_DATA = BLUE_C
-MODEL_RED = RED_C
-VALIDATION_ORANGE = ORANGE
-TEST_TEAL = TEAL_C
-TRAIN_GREEN = GREEN_C
-PENALTY_PURPLE = PURPLE_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def polyline(points, color, width=3):
+    return VMobject().set_points_as_corners(points).set_stroke(color, width)
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def curve(ax, w, color=MODEL_RED):
+    return polyline([ax.c2p(x,y) for x,y in zip(model.GRID, model.predict(w,model.GRID))], color)
 
 
-def make_sine_data(n: int = 10, noise_std: float = 0.25, seed: int = 3) -> tuple[np.ndarray, np.ndarray]:
-    rng = np.random.default_rng(seed)
-    x = np.linspace(0.0, 1.0, n)
-    t = np.sin(2.0 * np.pi * x) + rng.normal(0.0, noise_std, size=n)
-    return x, t
+def dots(ax, x, t, color=BLUE_DATA):
+    return VGroup(*[Dot(ax.c2p(a,b), radius=.055, color=color) for a,b in zip(x,t)])
 
 
-def design_matrix(x: np.ndarray | float, degree: int) -> np.ndarray:
-    x_array = np.atleast_1d(np.asarray(x, dtype=float))
-    return np.vander(x_array, N=degree + 1, increasing=True)
+def residuals(ax, w, x, t, color=YELLOW_ERROR):
+    return VGroup(*[Line(ax.c2p(a,b),ax.c2p(a,c),color=color,stroke_width=2)
+                   for a,b,c in zip(x,t,model.predict(w,x))])
 
 
-def fit_polynomial(x: np.ndarray, t: np.ndarray, degree: int, lam: float = 0.0) -> np.ndarray:
-    phi = design_matrix(x, degree)
-    if lam == 0:
-        return np.linalg.lstsq(phi, t, rcond=None)[0]
-    penalty = lam * np.eye(degree + 1)
-    penalty[0, 0] = 0.0
-    return np.linalg.solve(phi.T @ phi + penalty, phi.T @ t)
+def number(label, getter, position, color=WHITE, places=3, size=24):
+    prefix = tex(label,size,color)
+    n = DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
+    group = VGroup(prefix,n).arrange(RIGHT,buff=.12).move_to(position)
+    anchor=n.get_left().copy()
+    n.add_updater(lambda m: m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return group
 
 
-def eval_poly(w: np.ndarray, x: np.ndarray | float) -> np.ndarray:
-    return design_matrix(x, len(w) - 1) @ w
+class PRML13ModelSelection(NarratedScene):
+    def construct(self):
+        self.camera.background_color = BG
+        self.timeline=[]
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        for i, method in enumerate([self.question,self.validation,self.roles,self.cross_validation,
+                                     self.leave_one_out,self.cost,self.aic,self.limits]):
+            self.begin(i)
+            if self.audio_entry is None:
+                raise RuntimeError('Generate matching WhiteCUL narration before rendering')
+            method()
+            assert self.beat_index == len(self.story['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        out=Path(config.media_dir)/'prml13_timeline.json'
+        out.write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
+    def legend(self, entries):
+        g=VGroup(*[VGroup(Dot(radius=.045,color=c),jp(s,18,c)).arrange(RIGHT,buff=.10)
+                   for s,c in entries]).arrange(RIGHT,buff=.55).move_to([0,2.75,0])
+        self.add(g)
+        return g
 
-def rms_error(w: np.ndarray, x: np.ndarray, t: np.ndarray) -> float:
-    residual = eval_poly(w, x) - t
-    return float(np.sqrt(np.mean(residual**2)))
+    def graph(self, center=(-.7,.3,0), width=8, height=3.45):
+        ax=Axes(x_range=[0,1,.25],y_range=[-1.5,1.5,.5],x_length=width,y_length=height,
+                tips=False,axis_config={'color':MUTED,'stroke_width':1.2})
+        ax.move_to(center)
+        labels=VGroup(tex('x',22).next_to(ax.c2p(1,0),RIGHT,buff=.12),
+                      tex(r't,\ y',22).next_to(ax.c2p(0,1.5),UP,buff=.12))
+        for x in [0,.5,1]: labels.add(tex(str(x),17,MUTED).next_to(ax.c2p(x,-1.5),DOWN,buff=.1))
+        for y in [-1,1]: labels.add(tex(str(y),17,MUTED).next_to(ax.c2p(0,y),LEFT,buff=.1))
+        self.add(ax,labels)
+        return ax,VGroup(ax,labels)
 
+    def slider(self, tracker, lo=1, hi=9, y=-2.55, label='d', color=MODEL_RED):
+        line=NumberLine(x_range=[lo,hi,1],length=7.1,include_ticks=True,include_numbers=False,
+                        color=MUTED,stroke_width=2).move_to([-.5,y,0])
+        group=VGroup(line,tex(label,27,color).next_to(line,LEFT,buff=.25))
+        for n in range(lo,hi+1): group.add(tex(str(n),17,MUTED).next_to(line.n2p(n),DOWN,buff=.13))
+        knob=Dot(line.n2p(tracker.get_value()),color=color,radius=.085)
+        knob.add_updater(lambda m:m.move_to(line.n2p(tracker.get_value())))
+        group.add(knob)
+        self.add(group)
+        return group
 
-class PRML13ModelSelection(Scene):
-    """PRML 1.3 model selection overview.
+    def cursor(self, ax, w_getter, x=.0):
+        scan=ValueTracker(x)
+        dot=always_redraw(lambda:Dot(ax.c2p(scan.get_value(),model.predict(w_getter(),[scan.get_value()])[0]),
+                                   radius=.075,color=YELLOW_ERROR))
+        self.add(dot)
+        return scan,dot
 
-    Render example:
-        uv run manim -pql prml_1_3_model_selection.py PRML13ModelSelection
-    """
+    def question(self):
+        self.legend([('訓練',BLUE_DATA),('予測',MODEL_RED),('ずれ',YELLOW_ERROR)])
+        ax,_=self.graph()
+        points=dots(ax,model.X,model.T)
+        d=ValueTracker(1)
+        w=lambda:model.interpolated_weights(d.get_value())
+        line=always_redraw(lambda:curve(ax,w()))
+        errs=always_redraw(lambda:residuals(ax,w(),model.X,model.T))
+        self.slider(d)
+        badge=jp('整数で候補を比較',18,MUTED).move_to([4.5,-2.55,0])
+        self.add(badge)
+        self.beat(LaggedStart(*[FadeIn(p) for p in points],lag_ratio=.08))
+        self.add(line)
+        scan,probe=self.cursor(ax,w)
+        self.beat(scan.animate.set_value(1))
+        self.remove(probe)
+        self.beat(d.animate.set_value(3),start_sentence=1)
+        formula=tex(r'y=w_0+w_1x+w_2x^2+w_3x^3',28,MODEL_RED).move_to([0,-1.97,0])
+        self.beat(Write(formula),Create(errs))
+        self.beat(d.animate.set_value(9),FadeOut(formula))
+        self.beat(d.animate.set_value(5))
+        self.beat(d.animate.set_value(9))
+        q=jp('未知の点でも、当たる？',28,ORANGE_DATA).move_to([0,-1.98,0])
+        self.beat(Write(q))
 
-    def construct(self) -> None:
-        self.camera.background_color = "#111111"
-        self.x_train, self.t_train = make_sine_data(n=10, seed=7)
-        self.x_test, self.t_test = make_sine_data(n=80, seed=17)
+    def validation(self):
+        legend=self.legend([('訓練',BLUE_DATA),('検証',ORANGE_DATA),('予測',MODEL_RED)])
+        ax,axes_group=self.graph()
+        train=dots(ax,model.X,model.T)
+        valid=dots(ax,model.XV,model.TV,ORANGE_DATA)
+        d=ValueTracker(9); w=lambda:model.interpolated_weights(d.get_value())
+        line=always_redraw(lambda:curve(ax,w()))
+        errs=always_redraw(lambda:residuals(ax,w(),model.XV,model.TV,ORANGE_DATA))
+        slider=self.slider(d)
+        self.add(train,line)
+        self.beat(LaggedStart(*[FadeIn(p) for p in valid],lag_ratio=.04))
+        self.beat(Create(errs))
+        self.beat(d.animate.set_value(3))
+        formula=MathTex(r'E_{\rm val}', '=',r'\frac1{N_{\rm val}}\sum_n',r'(y(x_n)-t_n)^2',font_size=29)
+        formula[0].set_color(ORANGE_DATA); formula[3].set_color(ORANGE_DATA)
+        formula.move_to([0,-2.03,0])
+        self.beat(Write(formula),Indicate(errs,color=ORANGE_DATA))
+        # Same central space becomes a score plot. New points are computed, never hand drawn.
+        self.remove(train,valid,line,errs,axes_group,slider)
+        self.remove(legend)
+        self.legend([('訓練誤差',BLUE_DATA),('検証誤差',ORANGE_DATA)])
+        ex=Axes(x_range=[1,9,1],y_range=[0,.22,.05],x_length=8.4,y_length=3.35,tips=False,
+                axis_config={'color':MUTED,'stroke_width':1.3}).move_to([0,.35,0])
+        labels=VGroup(jp('平均二乗誤差',19,MUTED).move_to([-4,2.3,0]),tex('d',24).next_to(ex.c2p(9,0),RIGHT))
+        for v in [1,3,5,7,9]: labels.add(tex(str(v),18,MUTED).next_to(ex.c2p(v,0),DOWN,buff=.12))
+        for v in [0,.1,.2]: labels.add(tex(str(v),18,MUTED).next_to(ex.c2p(1,v),LEFT,buff=.12))
+        self.add(ex,labels)
+        tr=VGroup(*[Dot(ex.c2p(int(k),float(v)),color=BLUE_DATA,radius=.06) for k,v in zip(model.DEGREES,model.TRAIN)])
+        va=VGroup(*[Dot(ex.c2p(int(k),float(v)),color=ORANGE_DATA,radius=.06) for k,v in zip(model.DEGREES,model.VALID)])
+        trline=polyline([p.get_center() for p in tr],BLUE_DATA)
+        valine=polyline([p.get_center() for p in va],ORANGE_DATA)
+        self.beat(Create(trline),LaggedStart(*[FadeIn(p) for p in tr],lag_ratio=.2))
+        self.beat(Create(valine),LaggedStart(*[FadeIn(p) for p in va],lag_ratio=.2))
+        connectors=VGroup(*[Line(tr[i].get_center(),va[i].get_center(),color=PURPLE_TERM,stroke_width=3) for i in [6,7,8]])
+        self.beat(LaggedStart(*[Create(l) for l in connectors],lag_ratio=.25))
+        choice=SurroundingRectangle(va[model.SELECTED-1],color=YELLOW_ERROR,buff=.12)
+        result=tex(r'd^*=3,\quad E_{\rm val}=%.4f'%model.VALID[2],27,ORANGE_DATA).move_to([0,-2.6,0])
+        self.beat(Create(choice),Write(result))
 
-        self.opening_model_selection()
-        self.training_error_trap()
-        self.validation_and_test_split()
-        self.cross_validation()
-        self.leave_one_out()
-        self.search_cost()
-        self.information_criteria()
-        self.bridge_to_dimensionality()
+    def roles(self):
+        role_labels=['訓練：係数を学ぶ','検証：モデルを選ぶ','テスト：最後に測る']
+        colors=[BLUE_DATA,ORANGE_DATA,GREEN_TEST]
+        rows=VGroup()
+        for i,(label,color) in enumerate(zip(role_labels,colors)):
+            y=1.65-i*1.4
+            blocks=VGroup(*[Square(side_length=.27,color=color,fill_color=color,fill_opacity=.65) for _ in range(10)])
+            blocks.arrange(RIGHT,buff=.07).move_to([-2,y,0])
+            txt=jp(label,26,color).move_to([2.45,y,0])
+            rows.add(VGroup(blocks,txt))
+        self.beat(FadeIn(rows[0],shift=RIGHT*.4))
+        self.beat(FadeIn(rows[1],shift=RIGHT*.4))
+        box=RoundedRectangle(width=3.6,height=.65,color=GREEN_TEST,fill_color=BG,fill_opacity=1).move_to(rows[2][0])
+        locked=jp('選択が終わるまで未使用',20,GREEN_TEST).move_to(box)
+        self.beat(FadeIn(rows[2]),FadeIn(box),Write(locked))
+        loop=CurvedArrow([4,.7,0],[4,-.2,0],angle=-TAU*.8,color=ORANGE_DATA)
+        self.beat(Create(loop),Indicate(rows[1],color=ORANGE_DATA))
+        warning=jp('選ぶほど、検証にも合わせ込める',25,YELLOW_ERROR).move_to([0,-2.35,0])
+        self.beat(Write(warning),Indicate(box,color=GREEN_TEST))
+        self.remove(rows,rows[0],rows[1],rows[2],box,locked,loop,warning)
+        self.legend([('訓練',BLUE_DATA),('選択済みの三次式',MODEL_RED),('最終テスト',GREEN_TEST)])
+        ax,_=self.graph()
+        self.add(dots(ax,model.X,model.T),curve(ax,model.WEIGHTS[2]))
+        td=dots(ax,model.XT,model.TT,GREEN_TEST)
+        score=tex(r'E_{\rm test}=%.4f'%model.TEST_MSE,30,GREEN_TEST).move_to([0,-2.2,0])
+        self.beat(LaggedStart(*[FadeIn(p) for p in td],lag_ratio=.02),Write(score),start_sentence=1)
+        scan,probe=self.cursor(ax,lambda:model.WEIGHTS[2])
+        self.beat(scan.animate.set_value(1))
+        self.remove(probe)
+        note=VGroup(tex(r'd,\ \lambda',34,PURPLE_TERM),jp('学習方法の設定',22,PURPLE_TERM)).arrange(RIGHT,buff=.4).move_to([0,-2.7,0])
+        self.beat(Write(note))
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
-
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            self.wait(0.6)
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
-
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
-
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.28)
-        return title
-
-    def make_axes(self, width: float = 6.4, height: float = 3.8) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[-1.6, 1.6, 0.8],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def data_dots(self, axes: Axes, color: ManimColor = BLUE_DATA, radius: float = 0.06) -> VGroup:
-        return VGroup(
-            *[
-                Dot(axes.c2p(float(x), float(t)), color=color, radius=radius)
-                for x, t in zip(self.x_train, self.t_train)
-            ]
-        )
-
-    def model_curve(self, axes: Axes, degree: int, color: ManimColor = MODEL_RED, lam: float = 0.0) -> VMobject:
-        w = fit_polynomial(self.x_train, self.t_train, degree, lam=lam)
-
-        def model(u: float) -> float:
-            return float(np.clip(eval_poly(w, u)[0], -1.7, 1.7))
-
-        curve = axes.plot(model, x_range=[0, 1], color=color, use_smoothing=False)
-        curve.set_stroke(width=4)
-        return curve
-
-    def error_axes(self) -> Axes:
-        return Axes(
-            x_range=[0, 9, 1],
-            y_range=[0, 1.2, 0.3],
-            x_length=7.0,
-            y_length=3.8,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def error_curves(self, axes: Axes) -> tuple[VMobject, VMobject, list[float], list[float]]:
-        degrees = list(range(10))
-        train = []
-        test = []
-        for degree in degrees:
-            w = fit_polynomial(self.x_train, self.t_train, degree)
-            train.append(min(rms_error(w, self.x_train, self.t_train), 1.15))
-            test.append(min(rms_error(w, self.x_test, self.t_test), 1.15))
-        train_curve = axes.plot_line_graph(
-            x_values=degrees,
-            y_values=train,
-            line_color=BLUE_C,
-            add_vertex_dots=False,
-            stroke_width=4,
-        )
-        test_curve = axes.plot_line_graph(
-            x_values=degrees,
-            y_values=test,
-            line_color=VALIDATION_ORANGE,
-            add_vertex_dots=False,
-            stroke_width=4,
-        )
-        return train_curve, test_curve, train, test
-
-    def block_row(
-        self,
-        count: int,
-        width: float,
-        height: float,
-        colors: list[ManimColor],
-        labels: list[str] | None = None,
-    ) -> VGroup:
-        blocks = VGroup()
-        for i in range(count):
-            rect = Rectangle(width=width, height=height, stroke_width=2, stroke_color=GREY_D, fill_opacity=0.85)
-            rect.set_fill(colors[i])
-            if i > 0:
-                rect.next_to(blocks[-1], RIGHT, buff=0.03)
-            label = Text(labels[i], font_size=18, color=WHITE) if labels else VMobject()
-            if labels:
-                label.move_to(rect)
-                blocks.add(VGroup(rect, label))
-            else:
-                blocks.add(rect)
-        blocks.move_to(ORIGIN)
+    def fold_blocks(self, count=4, y=2.3):
+        blocks=VGroup(*[Rectangle(width=8/count-.06,height=.33,color=BLUE_DATA,fill_color=BLUE_DATA,fill_opacity=.5) for _ in range(count)])
+        blocks.arrange(RIGHT,buff=.06).move_to([0,y,0]); self.add(blocks)
         return blocks
 
-    def opening_model_selection(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene01")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("モデルの複雑さを選ぶ")
+    def cross_validation(self):
+        self.legend([('その回の訓練',BLUE_DATA),('その回の評価',ORANGE_DATA)])
+        ax,_=self.graph(center=(-2,-.15,0),width=6.4,height=3.05)
+        points=dots(ax,model.XC,model.TC)
+        self.add(points)
+        blocks=self.fold_blocks()
+        self.beat(LaggedStart(*[Indicate(p,color=BLUE_DATA) for p in points],lag_ratio=.025))
+        line=curve(ax,model.CV_WEIGHTS[0]); errs=residuals(ax,model.CV_WEIGHTS[0],model.XC[model.FOLDS[0]],model.TC[model.FOLDS[0]],ORANGE_DATA)
+        self.beat(Create(line),blocks[0].animate.set_fill(ORANGE_DATA,1),
+                  *[points[int(i)].animate.set_color(ORANGE_DATA) for i in model.FOLDS[0]])
+        bx=Axes(x_range=[.5,4.5,1],y_range=[0,.18,.05],x_length=3.4,y_length=2.65,tips=False,
+                axis_config={'color':MUTED,'stroke_width':1}).move_to([3.4,-.15,0])
+        self.add(bx,jp('各回の平均二乗誤差',19,ORANGE_DATA).move_to([3.4,1.65,0]))
+        for y in [0,.1]:self.add(tex(str(y),16,MUTED).next_to(bx.c2p(.5,y),LEFT,buff=.1))
+        bars=VGroup()
+        for i,score in enumerate(model.CV_SCORES):
+            height=score/.18*2.65
+            bar=Rectangle(width=.45,height=height,color=ORANGE_DATA,fill_opacity=.65).move_to(bx.c2p(i+1,0),aligned_edge=DOWN)
+            label=tex(f'{score:.3f}',19,ORANGE_DATA).next_to(bar,UP,buff=.12)
+            idx=tex(str(i+1),18,MUTED).next_to(bx.c2p(i+1,0),DOWN,buff=.13)
+            bars.add(VGroup(bar,label,idx))
+        self.beat(Create(errs),GrowFromEdge(bars[0][0],DOWN),FadeIn(bars[0][1:]))
+        for fold in range(1,4):
+            held=set(model.FOLDS[fold])
+            self.beat(Transform(line,curve(ax,model.CV_WEIGHTS[fold])),
+                      Transform(errs,residuals(ax,model.CV_WEIGHTS[fold],model.XC[model.FOLDS[fold]],model.TC[model.FOLDS[fold]],ORANGE_DATA)),
+                      *[p.animate.set_color(ORANGE_DATA if i in held else BLUE_DATA) for i,p in enumerate(points)],
+                      blocks[fold-1].animate.set_fill(BLUE_DATA,.5),blocks[fold].animate.set_fill(ORANGE_DATA,1),
+                      GrowFromEdge(bars[fold][0],DOWN),FadeIn(bars[fold][1:]))
+        mean=model.CV_SCORES.mean()
+        mean_line=DashedLine(bx.c2p(.5,mean),bx.c2p(4.5,mean),color=YELLOW_ERROR)
+        formula=tex(r'E_{\rm CV}=\frac{E_1+E_2+E_3+E_4}{4}=%.4f'%mean,29,ORANGE_DATA).move_to([0,-2.28,0])
+        self.beat(Create(mean_line),Write(formula))
+        ratio=tex(r'\frac{S-1}{S}=\frac34\qquad d^*_{\rm CV}=3',25,BLUE_DATA).move_to([0,-2.7,0])
+        # Explicitly record the candidate scores used to select, without reading the final test set.
+        comparison=VGroup(*[VGroup(tex(str(d),19),tex(f'{v:.3f}',19,ORANGE_DATA)).arrange(DOWN,buff=.1)
+                           for d,v in zip(model.CV_DEGREES,model.CV_MEANS)]).arrange(RIGHT,buff=.4).move_to([3.35,.2,0])
+        self.remove(bx,mean_line,*[obj for bar in bars for obj in bar])
+        self.beat(Write(ratio),FadeIn(comparison))
 
-        axes = self.make_axes(width=5.6, height=3.5).shift(LEFT * 2.4 + DOWN * 0.15)
-        dots = self.data_dots(axes)
-        curve_simple = self.model_curve(axes, 1)
-        curve_good = self.model_curve(axes, 3, color=TRAIN_GREEN)
-        curve_complex = self.model_curve(axes, 9)
-        axis_labels = VGroup(
-            MathTex("x", font_size=28).next_to(axes.x_axis, RIGHT, buff=0.12),
-            MathTex("t", font_size=28).next_to(axes.y_axis, UP, buff=0.12),
-        )
+    def leave_one_out(self):
+        self.legend([('訓練へ',BLUE_DATA),('評価へ',ORANGE_DATA)])
+        blocks=self.fold_blocks(24,y=2.2)
+        # Fixed random ordering; adjacent blocks are not adjacent x intervals.
+        marker=SurroundingRectangle(VGroup(*blocks[:6]),color=ORANGE_DATA,buff=.045)
+        count=ValueTracker(18)
+        readout=number(r'N_{\rm train}=',count.get_value,[3.6,.4,0],BLUE_DATA,0,29)
+        self.add(readout)
+        ax,_=self.graph(center=(-2,-.2,0),width=6.2,height=3)
+        points=dots(ax,model.XC,model.TC); self.add(points)
+        line=curve(ax,model.CV_WEIGHTS[0]); self.add(line)
+        fraction=tex(r'S=4:\quad 18/24',30).move_to([1,-2.3,0])
+        self.beat(Create(marker),Write(fraction))
+        f6=tex(r'S=6:\quad 20/24',30).move_to(fraction)
+        self.beat(Transform(marker,SurroundingRectangle(VGroup(*blocks[:4]),color=ORANGE_DATA,buff=.045)),count.animate.set_value(20),TransformMatchingTex(fraction,f6))
+        f24=tex(r'S=N=24:\quad 23/24',30).move_to(f6)
+        self.beat(Transform(marker,SurroundingRectangle(blocks[0],color=ORANGE_DATA,buff=.045)),count.animate.set_value(23),TransformMatchingTex(f6,f24))
+        self.remove(line)
+        turn=ValueTracker(0)
+        index=lambda:min(23,int(turn.get_value()))
+        moving_curve=always_redraw(lambda:curve(ax,model.LOO_WEIGHTS[index()]))
+        moving_point=always_redraw(lambda:Dot(points[int(model.PERMUTATION[index()])].get_center(),radius=.085,color=ORANGE_DATA))
+        marker.add_updater(lambda m:m.become(SurroundingRectangle(blocks[index()],color=ORANGE_DATA,buff=.045)))
+        self.add(moving_curve,moving_point)
+        self.beat(turn.animate.set_value(8))
+        self.beat(turn.animate.set_value(23))
+        marker.clear_updaters()
+        final=curve(ax,model.fit(model.XC,model.TC,model.CV_SELECTED),GREEN_TEST)
+        self.beat(FadeOut(moving_curve),FadeOut(moving_point),FadeOut(marker),Create(final))
+        note=jp('学習に使う量・評価のばらつき・計算量',23,YELLOW_ERROR).move_to([0,-2.8,0])
+        self.beat(Write(note))
 
-        dial_center = RIGHT * 3.6 + DOWN * 0.15
-        dial = Circle(radius=1.05, color=GREY_B, stroke_width=4).move_to(dial_center)
-        pointer = Line(dial_center, dial_center + UP * 0.75, color=MODEL_RED, stroke_width=7)
-        dial_title = Text("複雑さ M", font_size=28, color=MODEL_RED).next_to(dial, UP, buff=0.35)
-        low = Text("硬い", font_size=22, color=TEXT_GREY).next_to(dial, LEFT, buff=0.35)
-        high = Text("自由", font_size=22, color=TEXT_GREY).next_to(dial, RIGHT, buff=0.35)
-        message = Text("選びたいのは初見データに強いモデル", font_size=27, color=WHITE)
-        message.to_edge(DOWN).shift(UP * 0.25)
+    def cost(self):
+        self.legend([('1マス＝1候補',BLUE_DATA),('交差検証＝候補ごとに4回',ORANGE_DATA)])
+        def grid(layers, rows):
+            group=VGroup()
+            for layer in range(layers):
+                for r in range(rows):
+                    for c in range(5):
+                        box=Square(side_length=.61,color=BLUE_DATA,fill_color=BLUE_DATA,fill_opacity=.25)
+                        box.move_to([-4.4+c*.74+layer*.3,1.25-r*.74+layer*.25,0]); group.add(box)
+            return group
+        g=grid(1,1)
+        self.beat(LaggedStart(*[FadeIn(b) for b in g],lag_ratio=.15))
+        g20=grid(1,4)
+        label=tex(r'd\quad\times\quad\lambda',34,PURPLE_TERM).move_to([-2.9,-2,0])
+        self.beat(ReplacementTransform(g,g20),Write(label))
+        formula=tex(r'5\times4=20',40).move_to([3,.9,0])
+        self.beat(Write(formula))
+        counter=ValueTracker(0)
+        runs=number(r'\mathrm{runs}=',counter.get_value,[3,-.25,0],ORANGE_DATA,0,32)
+        scan=SurroundingRectangle(g20[0],color=ORANGE_DATA,buff=.025)
+        scan.add_updater(lambda m:m.become(SurroundingRectangle(g20[min(19,int(counter.get_value()/4))],color=ORANGE_DATA,buff=.025)))
+        self.add(runs,scan)
+        f80=tex(r'20\times4=80',32,ORANGE_DATA).move_to([3,-1.25,0])
+        self.beat(counter.animate.set_value(80),Write(f80))
+        scan.clear_updaters(); self.remove(scan)
+        g60=grid(3,4)
+        self.beat(ReplacementTransform(g20,g60),counter.animate.set_value(240),
+                  Transform(formula,tex(r'5\times4\times3=60',34).move_to(formula)),
+                  Transform(f80,tex(r'60\times4=240',32,ORANGE_DATA).move_to(f80)))
+        general=tex(r'k^h\ \mathrm{candidates}\quad\Longrightarrow\quad S k^h\ \mathrm{runs}',34,YELLOW_ERROR).move_to([0,-2.55,0])
+        self.beat(Write(general))
+        self.beat(Indicate(runs,color=YELLOW_ERROR),Indicate(g60,color=YELLOW_ERROR))
 
-        self.play(FadeIn(label), Write(title))
-        self.play(Create(axes), FadeIn(axis_labels), FadeIn(dots), run_time=1.0)
-        self.play(Create(curve_simple), FadeIn(dial), Write(dial_title), FadeIn(low), FadeIn(high), Create(pointer))
-        for curve, angle in [(curve_good, -0.75), (curve_complex, -1.3), (curve_good.copy(), 0.75)]:
-            new_pointer = pointer.copy().rotate(angle, about_point=dial_center)
-            self.play(Transform(pointer, new_pointer), Transform(curve_simple, curve), run_time=1.0)
-            self.wait(0.15)
-        self.play(Write(message))
-        self.finish_narration(narration)
+    def aic(self):
+        formula=MathTex(r'\ln p(\mathcal D\mid\mathbf w_{\rm ML})','-', 'M',font_size=34)
+        formula[0].set_color(BLUE_DATA);formula[2].set_color(PURPLE_TERM)
+        formula.move_to([0,2.6,0])
+        ax=Axes(x_range=[1,9,1],y_range=[-16,6,5],x_length=8.5,y_length=3.5,tips=False,
+                axis_config={'color':MUTED,'stroke_width':1.2}).move_to([0,.25,0])
+        labels=VGroup(jp('スコア：大きいほどよい',19,MUTED).move_to([-3.55,2.2,0]))
+        for d in [1,3,5,7,9]:labels.add(tex(str(d),18,MUTED).next_to(ax.c2p(d,-16),DOWN,buff=.1))
+        for v in [-15,-10,-5,0,5]:labels.add(tex(str(v),17,MUTED).next_to(ax.c2p(1,v),LEFT,buff=.1))
+        labels.add(tex('d',24).next_to(ax.c2p(9,-16),RIGHT,buff=.15))
+        self.add(ax,labels)
+        likelihood=polyline([ax.c2p(int(d),float(v)) for d,v in zip(model.DEGREES,model.LOG_LIKELIHOOD)],BLUE_DATA)
+        self.beat(Create(likelihood))
+        likelihood_label=tex(r'p(\mathcal D\mid\mathbf w)',35,BLUE_DATA).move_to([0,-2.3,0])
+        self.beat(Write(likelihood_label))
+        self.beat(ReplacementTransform(likelihood_label,formula[0]))
+        self.add(formula[0])
+        fixed=tex(r'\ln p=-\frac N2\ln(2\pi\sigma^2)-\frac{\sum_n(y(x_n)-t_n)^2}{2\sigma^2}',28,BLUE_DATA).move_to([0,-2.3,0])
+        note=tex(r'\sigma=0.25\quad\mathrm{(known)}',22,MUTED).move_to([0,-2.8,0])
+        self.beat(Write(fixed),Write(note))
+        mapping=tex(r'M=d+1\qquad d=3\Rightarrow M=4',30,PURPLE_TERM).move_to([0,-2.3,0])
+        self.beat(FadeOut(fixed),FadeOut(note),Write(mapping),FadeIn(formula[2]))
+        strength=ValueTracker(0)
+        values=lambda:model.LOG_LIKELIHOOD-strength.get_value()*model.PARAMETERS
+        adjusted=always_redraw(lambda:polyline([ax.c2p(int(d),float(v)) for d,v in zip(model.DEGREES,values())],ORANGE_DATA))
+        penalties=always_redraw(lambda:VGroup(*[Line(ax.c2p(int(d),float(top)),ax.c2p(int(d),float(bottom)-1e-6),
+                         color=PURPLE_TERM,stroke_width=2) for d,top,bottom in zip(model.DEGREES,model.LOG_LIKELIHOOD,values())]))
+        self.add(adjusted,penalties)
+        self.beat(FadeIn(formula[1]),strength.animate.set_value(.5))
+        selected=Dot(ax.c2p(3,float(model.AIC_SCORE[2])),radius=.085,color=YELLOW_ERROR)
+        self.beat(strength.animate.set_value(1),FadeIn(selected),end_sentence=1)
+        aic=tex(r'\mathrm{AIC}=-2\ln p(\mathcal D\mid\mathbf w_{\rm ML})+2M\quad\to\min',29,ORANGE_DATA).move_to([0,-2.8,0])
+        self.beat(Write(aic),Indicate(selected,color=YELLOW_ERROR))
 
-    def training_error_trap(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene02")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("訓練誤差だけでは選べない")
-
-        axes = self.error_axes().shift(DOWN * 0.2)
-        train_curve, test_curve, train, test = self.error_curves(axes)
-        x_label = Text("次数 M", font_size=22, color=TEXT_GREY).next_to(axes.x_axis, DOWN, buff=0.35)
-        y_label = Text("誤差", font_size=22, color=TEXT_GREY).next_to(axes.y_axis, LEFT, buff=0.25)
-        y_label.rotate(PI / 2)
-        legend = VGroup(
-            Line(ORIGIN, RIGHT * 0.45, color=BLUE_C, stroke_width=5),
-            Text("訓練", font_size=22),
-            Line(ORIGIN, RIGHT * 0.45, color=VALIDATION_ORANGE, stroke_width=5),
-            Text("初見", font_size=22),
-        ).arrange(RIGHT, buff=0.18).to_corner(UR).shift(DOWN * 0.45)
-
-        train_best = Dot(axes.c2p(9, train[9]), color=BLUE_C, radius=0.08)
-        test_best_degree = int(np.argmin(test))
-        test_best = Dot(axes.c2p(test_best_degree, test[test_best_degree]), color=VALIDATION_ORANGE, radius=0.08)
-        train_callout = Text("訓練だけなら M=9", font_size=22, color=BLUE_C).next_to(train_best, DOWN, buff=0.25)
-        test_callout = Text("初見では中くらい", font_size=22, color=VALIDATION_ORANGE).next_to(test_best, UP, buff=0.2)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(Create(axes), Write(x_label), Write(y_label), FadeIn(legend))
-        self.play(Create(train_curve), run_time=1.4)
-        self.play(FadeIn(train_best), Write(train_callout))
-        self.play(Create(test_curve), run_time=1.4)
-        self.play(FadeIn(test_best), Write(test_callout))
-        warning = Text("training error は predictive performance の代理にならない", font_size=25, color=WHITE)
-        warning.to_edge(DOWN).shift(UP * 0.25)
-        self.play(Write(warning))
-        self.finish_narration(narration)
-
-    def validation_and_test_split(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene03")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("データを役割で分ける")
-
-        colors = [TRAIN_GREEN] * 12 + [VALIDATION_ORANGE] * 4 + [TEST_TEAL] * 4
-        row = self.block_row(20, width=0.48, height=0.55, colors=colors).shift(UP * 1.75)
-        captions = VGroup(
-            Text("train", font_size=24, color=TRAIN_GREEN).next_to(row[5], DOWN, buff=0.28),
-            Text("validation", font_size=24, color=VALIDATION_ORANGE).next_to(row[13], DOWN, buff=0.28),
-            Text("test", font_size=24, color=TEST_TEAL).next_to(row[17], DOWN, buff=0.28),
-        )
-        candidates = VGroup(
-            self.model_card("M=1", "underfit", BLUE_D),
-            self.model_card("M=3", "selected", TRAIN_GREEN),
-            self.model_card("M=9", "overfit", MODEL_RED),
-        ).arrange(RIGHT, buff=0.55).shift(DOWN * 0.3)
-        arrows = VGroup(
-            Arrow(captions[0].get_bottom(), candidates[0].get_top(), buff=0.25, color=TRAIN_GREEN),
-            Arrow(captions[1].get_bottom(), candidates[1].get_top(), buff=0.25, color=VALIDATION_ORANGE),
-        )
-        lock = VGroup(
-            RoundedRectangle(width=1.25, height=0.62, corner_radius=0.08, color=TEST_TEAL, stroke_width=4),
-            Text("final check", font_size=17, color=TEST_TEAL),
-        )
-        lock[1].move_to(lock[0])
-        lock.next_to(row[17], UP, buff=0.22)
-        note = Text("test は最後に一度だけ", font_size=26, color=WHITE).to_edge(DOWN).shift(UP * 0.25)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(row, lag_ratio=0.04), FadeIn(captions))
-        self.play(FadeIn(candidates, lag_ratio=0.2), GrowArrow(arrows[0]))
-        self.play(GrowArrow(arrows[1]), candidates[1][0].animate.set_stroke(WHITE, width=5))
-        self.play(FadeIn(lock), Write(note))
-        self.finish_narration(narration)
-
-    def model_card(self, main: str, sub: str, color: ManimColor) -> VGroup:
-        rect = RoundedRectangle(width=2.2, height=1.35, corner_radius=0.08, stroke_color=color, stroke_width=3)
-        rect.set_fill("#1B1B1B", opacity=0.85)
-        main_text = MathTex(main, font_size=34, color=color)
-        sub_text = Text(sub, font_size=20, color=TEXT_GREY).next_to(main_text, DOWN, buff=0.16)
-        content = VGroup(main_text, sub_text).move_to(rect)
-        return VGroup(rect, content)
-
-    def cross_validation(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene04")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("S-fold cross-validation")
-
-        rows = VGroup()
-        score_labels = VGroup()
-        for run in range(4):
-            colors = [TRAIN_GREEN] * 4
-            colors[run] = MODEL_RED
-            labels = ["eval" if i == run else "train" for i in range(4)]
-            row = self.block_row(4, width=1.55, height=0.5, colors=colors, labels=labels)
-            row.shift(UP * (1.25 - run * 0.62))
-            run_label = Text(f"run {run + 1}", font_size=20, color=TEXT_GREY).next_to(row, LEFT, buff=0.35)
-            score = Text(f"score {run + 1}", font_size=20, color=VALIDATION_ORANGE).next_to(row, RIGHT, buff=0.35)
-            rows.add(VGroup(run_label, row))
-            score_labels.add(score)
-
-        formula = VGroup(
-            Text("平均スコア", font_size=25, color=WHITE),
-            MathTex(r"= {s_1+s_2+s_3+s_4 \over 4}", font_size=36, color=VALIDATION_ORANGE),
-        ).arrange(RIGHT, buff=0.25).to_edge(DOWN).shift(UP * 0.35)
-
-        self.play(FadeIn(label), Write(title))
-        for i, row in enumerate(rows):
-            self.play(FadeIn(row), FadeIn(score_labels[i]), run_time=0.55)
-        brace = Brace(rows, LEFT, color=GREY_B)
-        ratio = MathTex(r"{S-1 \over S}", r"\ \mathrm{for\ training}", font_size=32)
-        ratio.next_to(brace, LEFT, buff=0.2)
-        self.play(FadeIn(brace), Write(ratio))
-        self.play(Write(formula))
-        self.finish_narration(narration)
-
-    def leave_one_out(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene05")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("データが少ないとき")
-
-        count = 18
-        colors = [TRAIN_GREEN] * count
-        colors[0] = MODEL_RED
-        row = self.block_row(count, width=0.42, height=0.55, colors=colors).shift(UP * 0.8)
-        marker = SurroundingRectangle(row[0], color=MODEL_RED, buff=0.05, stroke_width=4)
-        equations = VGroup(
-            MathTex("S=N", font_size=46, color=WHITE),
-            Text("leave-one-out", font_size=32, color=MODEL_RED),
-            Text("学習回数も N 回", font_size=28, color=TEXT_GREY),
-        ).arrange(DOWN, buff=0.25).shift(DOWN * 1.15)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(row, lag_ratio=0.03), Create(marker))
-        for index in [4, 9, 13, 17]:
-            self.play(marker.animate.move_to(row[index]), run_time=0.35)
-        self.play(Write(equations[0]), Write(equations[1]))
-        self.play(Write(equations[2]))
-        self.finish_narration(narration)
-
-    def search_cost(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene06")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("複雑さのつまみが増える")
-
-        grid = VGroup()
-        rows, cols = 4, 5
-        for r in range(rows):
-            for c in range(cols):
-                cell = Square(side_length=0.55, color=GREY_B, stroke_width=2)
-                cell.set_fill("#202020", opacity=0.8)
-                cell.move_to(np.array([(c - 2) * 0.62, (1.5 - r) * 0.62, 0.0]))
-                grid.add(cell)
-        grid.shift(LEFT * 2.2 + DOWN * 0.1)
-        x_label = Text("M", font_size=28, color=MODEL_RED).next_to(grid, DOWN, buff=0.25)
-        y_label = MathTex(r"\lambda", font_size=36, color=PENALTY_PURPLE).next_to(grid, LEFT, buff=0.25)
-        layers = VGroup(
-            grid.copy().set_opacity(0.35).shift(RIGHT * 0.25 + UP * 0.2),
-            grid.copy().set_opacity(0.2).shift(RIGHT * 0.5 + UP * 0.4),
-        )
-        count = VGroup(
-            Text("候補", font_size=26, color=TEXT_GREY),
-            MathTex("5\\times4=20", font_size=42, color=WHITE),
-            Text("4-fold なら 80 回学習", font_size=25, color=VALIDATION_ORANGE),
-        ).arrange(DOWN, buff=0.25).shift(RIGHT * 3.0)
-        explosion = Text("つまみが増えると組み合わせが増える", font_size=25, color=WHITE)
-        explosion.to_edge(DOWN).shift(UP * 0.25)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(grid), Write(x_label), Write(y_label))
-        self.play(LaggedStart(*[cell.animate.set_fill(VALIDATION_ORANGE, opacity=0.6) for cell in grid], lag_ratio=0.025), run_time=1.1)
-        self.play(FadeIn(layers), Write(count))
-        self.play(Write(explosion))
-        self.finish_narration(narration)
-
-    def information_criteria(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene07")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("訓練データだけで補正する考え方")
-
-        formula = MathTex(r"\mathrm{AIC\ score}", "=", r"\ln p(D|w_{\mathrm{ML}})", "-", "M", font_size=42)
-        formula.shift(UP * 1.55)
-        formula[2].set_color(TRAIN_GREEN)
-        formula[4].set_color(PENALTY_PURPLE)
-
-        fit_box = VGroup(
-            RoundedRectangle(width=3.0, height=1.35, corner_radius=0.08, color=TRAIN_GREEN, stroke_width=3),
-            Text("当てはまり", font_size=25, color=TRAIN_GREEN),
-            MathTex(r"\ln p(D|w_{\mathrm{ML}})", font_size=31, color=TRAIN_GREEN),
-        )
-        fit_box[1].move_to(fit_box[0].get_center() + UP * 0.25)
-        fit_box[2].move_to(fit_box[0].get_center() + DOWN * 0.25)
-        penalty_box = VGroup(
-            RoundedRectangle(width=3.0, height=1.35, corner_radius=0.08, color=PENALTY_PURPLE, stroke_width=3),
-            Text("複雑さ", font_size=25, color=PENALTY_PURPLE),
-            MathTex("M", font_size=35, color=PENALTY_PURPLE),
-        )
-        penalty_box[1].move_to(penalty_box[0].get_center() + UP * 0.25)
-        penalty_box[2].move_to(penalty_box[0].get_center() + DOWN * 0.25)
-        boxes = VGroup(fit_box, penalty_box).arrange(RIGHT, buff=0.8).shift(DOWN * 0.2)
-
-        bars = VGroup()
-        labels = VGroup()
-        values = [1.1, 1.55, 1.35]
-        names = ["M=1", "M=3", "M=9"]
-        colors = [BLUE_D, TRAIN_GREEN, MODEL_RED]
-        for i, (value, name, color) in enumerate(zip(values, names, colors)):
-            bar = Rectangle(width=0.55, height=value, color=color, fill_opacity=0.85, stroke_width=0)
-            bar.align_to(ORIGIN, DOWN).shift(RIGHT * (i - 1) * 0.8)
-            bars.add(bar)
-            labels.add(MathTex(name, font_size=24, color=color).next_to(bar, DOWN, buff=0.18))
-        chart = VGroup(bars, labels).shift(DOWN * 2.05 + RIGHT * 3.7)
-        chart_title = Text("補正後スコア", font_size=22, color=TEXT_GREY).next_to(chart, UP, buff=0.2)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(Write(formula))
-        self.play(FadeIn(boxes, lag_ratio=0.2))
-        self.play(FadeIn(chart_title), GrowFromEdge(bars, DOWN), FadeIn(labels))
-        self.finish_narration(narration)
-
-    def bridge_to_dimensionality(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene08")
-        label = self.section_label("1.3 Model Selection")
-        title = self.scene_title("見えている点と初見への強さを分ける")
-
-        items = VGroup(
-            self.summary_item("train / validation / test", TRAIN_GREEN),
-            self.summary_item("cross-validation", VALIDATION_ORANGE),
-            self.summary_item("information criteria", PENALTY_PURPLE),
-            self.summary_item("Bayesian approach", TEST_TEAL),
-        ).arrange(DOWN, buff=0.2, aligned_edge=LEFT).shift(LEFT * 2.45 + DOWN * 0.05)
-
-        grid_1d = self.dimension_grid(1).shift(RIGHT * 2.55 + UP * 0.8)
-        grid_2d = self.dimension_grid(2).shift(RIGHT * 2.55 + UP * 0.8)
-        grid_3d = self.dimension_grid(3).shift(RIGHT * 2.55 + UP * 0.8)
-        next_label = Text("次: 1.4 次元の呪い", font_size=30, color=WHITE).to_edge(DOWN).shift(UP * 0.35)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(items, lag_ratio=0.15))
-        self.play(FadeIn(grid_1d))
-        self.play(Transform(grid_1d, grid_2d), run_time=0.8)
-        self.play(Transform(grid_1d, grid_3d), run_time=0.8)
-        self.play(Write(next_label))
-        self.finish_narration(narration)
-
-    def summary_item(self, text: str, color: ManimColor) -> VGroup:
-        bullet = Dot(color=color, radius=0.08)
-        label = Text(text, font_size=26, color=WHITE)
-        return VGroup(bullet, label).arrange(RIGHT, buff=0.2)
-
-    def dimension_grid(self, dimension: int) -> VGroup:
-        if dimension == 1:
-            cells = VGroup(*[Square(side_length=0.38, color=GREY_B, stroke_width=2) for _ in range(5)]).arrange(RIGHT, buff=0.03)
-            label = MathTex("D=1", font_size=30, color=TEXT_GREY).next_to(cells, DOWN, buff=0.25)
-            return VGroup(cells, label)
-        if dimension == 2:
-            cells = VGroup()
-            for r in range(5):
-                for c in range(5):
-                    cell = Square(side_length=0.28, color=GREY_B, stroke_width=1.4)
-                    cell.move_to(np.array([(c - 2) * 0.31, (2 - r) * 0.31, 0.0]))
-                    cells.add(cell)
-            label = MathTex("D=2", font_size=30, color=TEXT_GREY).next_to(cells, DOWN, buff=0.25)
-            return VGroup(cells, label)
-        cubes = VGroup()
-        for layer in range(3):
-            for r in range(4):
-                for c in range(4):
-                    cell = Square(side_length=0.24, color=GREY_B, stroke_width=1.2)
-                    cell.set_fill("#1F1F1F", opacity=0.35)
-                    cell.move_to(np.array([(c - 1.5) * 0.27 + layer * 0.18, (1.5 - r) * 0.27 + layer * 0.14, 0.0]))
-                    cubes.add(cell)
-        label = MathTex("D=3", font_size=30, color=TEXT_GREY).next_to(cubes, DOWN, buff=0.25)
-        return VGroup(cubes, label)
+    def limits(self):
+        self.legend([('観測',BLUE_DATA),('最適な係数の一本',MODEL_RED),('別の係数（模式図）',PURPLE_TERM)])
+        ax,ag=self.graph()
+        data=dots(ax,model.X,model.T); line=curve(ax,model.WEIGHTS[2])
+        self.add(data,line)
+        self.beat(Indicate(line,color=MODEL_RED))
+        variants=VGroup()
+        for shift in np.linspace(-.18,.18,7):
+            w=model.WEIGHTS[2].copy();w[0]+=shift;w[1]-=shift*.8
+            variants.add(curve(ax,w,PURPLE_TERM).set_stroke(opacity=.35,width=2))
+        self.beat(LaggedStart(*[Create(v) for v in variants],lag_ratio=.1))
+        note=jp('一本の最適解と、係数の不確かさ',26,YELLOW_ERROR).move_to([0,-2.15,0])
+        self.beat(Write(note),Indicate(variants,color=PURPLE_TERM))
+        road=VGroup(tex(r'\mathrm{BIC}\ \to\ 4.4.1',28,PURPLE_TERM),jp('ベイズ的モデル比較 → 3.4',23,GREEN_TEST)).arrange(RIGHT,buff=.7).move_to([0,-2.75,0])
+        self.beat(Write(road))
+        self.beat(LaggedStart(*[Indicate(v,color=PURPLE_TERM,scale_factor=1.025) for v in variants],lag_ratio=.2))
+        self.remove(variants,note,road)
+        valid=dots(ax,model.XV,model.TV,ORANGE_DATA)
+        question=jp('未知の点を予測するために、選ぶ',27,ORANGE_DATA).move_to([0,-2.15,0])
+        self.beat(FadeIn(valid),Write(question))
+        roles=VGroup(*[jp(s,23,c) for s,c in [('学ぶ',BLUE_DATA),('選ぶ',ORANGE_DATA),('最後に測る',GREEN_TEST)]]).arrange(RIGHT,buff=.8).move_to([0,-2.75,0])
+        self.beat(LaggedStart(*[Write(r) for r in roles],lag_ratio=.5))
