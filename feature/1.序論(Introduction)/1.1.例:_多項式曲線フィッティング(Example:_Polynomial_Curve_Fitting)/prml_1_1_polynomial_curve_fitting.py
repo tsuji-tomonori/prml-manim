@@ -50,7 +50,11 @@ def graph_curve(ax, weights=None, values=None, color=MODEL_RED, opacity=1):
 
 
 def data_dots(ax, x=X, t=T, color=BLUE_DATA, radius=.052):
-    return VGroup(*[Dot(ax.c2p(a, b), radius=radius, color=color) for a, b in zip(x, t)])
+    dots = VGroup(*[Dot(ax.c2p(a, b), radius=radius, color=color) for a, b in zip(x, t)])
+    if getattr(ax, 'dynamic_span', False):
+        for dot, a, b in zip(dots, x, t):
+            dot.add_updater(lambda m, a=a, b=b: m.move_to(ax.c2p(a, b)))
+    return dots
 
 
 def residuals(ax, w, x=X, t=T, color=RESIDUAL_YELLOW):
@@ -134,19 +138,37 @@ class PRML11PolynomialCurveFitting(Scene):
             self.wait((frames + 1e-5) / fps, frozen_frame=True)
         self.beat_index += 1
 
-    def axes(self, center=(-3.1, .1, 0), width=5.7, height=3.5, yr=(-3, 2, 1)):
-        ax = Axes(x_range=[0, 1, .25], y_range=yr, x_length=width, y_length=height,
-                  tips=False, axis_config={'color': MUTED, 'stroke_width': 1.4}).move_to(center)
-        grid = VGroup(*[Line(ax.c2p(0, y), ax.c2p(1, y), color=MUTED, stroke_opacity=.12) for y in [-2, -1, 1, 2] if yr[0] <= y <= yr[1]])
+    def axes(self, center=(-3.1, .1, 0), width=5.7, height=3.5, span=None):
+        # A symmetric, continuously varying vertical scale preserves every peak.
+        # Only the high-degree experiments zoom; ordinary curves use +/-1.5.
+        span_fn = span or (lambda: 1.5)
+        ax = Axes(x_range=[0, 1, .25], y_range=[-1.5, 1.5, 1],
+                  x_length=width, y_length=height, tips=False,
+                  axis_config={'color': MUTED, 'stroke_width': 1.4},
+                  y_axis_config={'include_ticks': False}).move_to(center)
+        origin = ax.c2p(0, 0).copy()
+        unit_x = ax.c2p(1, 0) - origin
+        half_y = (ax.c2p(0, 1.5) - origin).copy()
+        ax.c2p = lambda x, y=0: origin + x * unit_x + y * half_y / span_fn()
+        ax.dynamic_span = span is not None
+        grid = always_redraw(lambda: VGroup(*[
+            Line(ax.c2p(0, y), ax.c2p(1, y), color=MUTED, stroke_opacity=.12)
+            for y in [-3, -2, -1, 1, 2, 3] if abs(y) < span_fn()]))
         labels = VGroup()
         for x in [0, .5, 1]:
-            labels.add(tex(str(x), 18, MUTED).move_to(ax.c2p(x, yr[0]) + DOWN * .22))
-        for y in range(int(yr[0]) + 1, int(yr[1]) + 1):
-            labels.add(tex(str(y), 18, MUTED).next_to(ax.c2p(0, y), LEFT, buff=.12))
-        labels.add(tex('x', 22).next_to(ax.c2p(1, yr[0]), RIGHT, buff=.18))
-        labels.add(tex(r't,\ y', 22).next_to(ax.c2p(0, yr[1]), UP, buff=.17))
+            labels.add(tex(str(x), 19, MUTED).move_to(ax.c2p(x, -span_fn()) + DOWN * .22))
+        for y in [-3, -2, -1, 0, 1, 2, 3]:
+            label = tex(str(y), 19, MUTED)
+            label.add_updater(lambda m, y=y: m.next_to(ax.c2p(0, y), LEFT, buff=.12)
+                              .set_opacity(1 if abs(y) < span_fn() else 0))
+            labels.add(label)
+        labels.add(tex('x', 22).next_to(ax.c2p(1, -span_fn()), RIGHT, buff=.18))
+        labels.add(tex(r't,\ y', 22).next_to(ax.c2p(0, span_fn()), UP, buff=.17))
         self.add(grid, ax, labels)
         return ax
+
+    def curve_span(self, weights, minimum=1.5):
+        return max(minimum, 1.10 * float(np.max(np.abs(eval_poly(weights, np.linspace(0, 1, 241))))))
 
     def slider(self, tracker, low, high, position, width=4.8, label='M', ticks=None, color=MODEL_RED):
         base = NumberLine(x_range=[low, high, 1], length=width, include_ticks=False,
@@ -179,7 +201,7 @@ class PRML11PolynomialCurveFitting(Scene):
         dots = data_dots(ax)
         self.beat(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=.15), moving=False)
         cursor = ValueTracker(.45)
-        guide = always_redraw(lambda: DashedLine(ax.c2p(cursor.get_value(), -2.8), ax.c2p(cursor.get_value(), 1.7), color=MUTED))
+        guide = always_redraw(lambda: DashedLine(ax.c2p(cursor.get_value(), -1.4), ax.c2p(cursor.get_value(), 1.4), color=MUTED))
         self.add(guide)
         self.beat(cursor.animate.set_value(.72))
         truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4)
@@ -238,7 +260,7 @@ class PRML11PolynomialCurveFitting(Scene):
         formula = MathTex(r'r_n=', r'y(x_n,\mathbf w)', '-', 't_n', font_size=32).move_to([0, -2.47, 0])
         formula[1].set_color(MODEL_RED); formula[3].set_color(BLUE_DATA)
         self.beat(Create(lines), Write(formula), moving=False)
-        signed = VGroup(jp('符号付きの和', 25), tex(r'(+1)+(-1)=0', 34, BLUE_DATA),
+        signed = VGroup(jp('符号付きの和（例）', 25), tex(r'(+1)+(-1)=0', 34, BLUE_DATA),
                         jp('ずれていても、ゼロになる', 21, MUTED)).arrange(DOWN, buff=.25).move_to([3.1, 1.1, 0])
         signed_vectors = VGroup(Arrow([1.6, .15, 0], [3.1, .15, 0], buff=0, color=BLUE_DATA),
                                 Arrow([3.1, -.05, 0], [1.6, -.05, 0], buff=0, color=TEST_ORANGE))
@@ -246,9 +268,9 @@ class PRML11PolynomialCurveFitting(Scene):
         squared = VGroup(jp('二乗和', 25), tex(r'(+1)^2+(-1)^2=2', 33, RESIDUAL_YELLOW)).arrange(DOWN, buff=.2).move_to([3.1, -1, 0])
         self.beat(FadeIn(squared), Indicate(signed_vectors), moving=False)
         self.remove(signed, squared, signed_vectors)
-        title = jp('各残差の二乗（面積）', 24, RESIDUAL_YELLOW).move_to([3.1, 2.1, 0])
+        title = jp('各残差の二乗（共通縮尺の面積）', 22, RESIDUAL_YELLOW).move_to([3.1, 2.1, 0])
         self.add(title)
-        scale = np.linalg.norm(ax.c2p(0, 1) - ax.c2p(0, 0))
+        scale = .62  # One common area scale; independent of curve-axis zoom.
         def tiles():
             result = VGroup()
             for i, r in enumerate(eval_poly(w(), X) - T):
@@ -315,10 +337,10 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(Create(truth), Indicate(line))
 
     def degrees(self):
-        ax = self.axes(width=5.5)
         tracker = ValueTracker(0)
         w = lambda: degree_weights(tracker.get_value())
-        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.35))
+        ax = self.axes(width=5.5, span=lambda: self.curve_span(w()))
+        self.add(data_dots(ax), always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.35)))
         model = always_redraw(lambda: graph_curve(ax, w()))
         lines = always_redraw(lambda: residuals(ax, w()))
         test_dots = data_dots(ax, XT[::10], TT[::10], TEST_ORANGE, .033)
@@ -369,26 +391,37 @@ class PRML11PolynomialCurveFitting(Scene):
                   tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to(center)
         self.add(ax)
         for i in range(10):
-            self.add(tex(str(i), 16, MUTED).move_to(ax.c2p(i, -6.5) + DOWN * .17))
+            self.add(tex(str(i), 18, MUTED).move_to(ax.c2p(i, -6.5) + DOWN * .17))
         for y in [-6, -3, 3, 6]:
-            self.add(tex(str(y), 16, MUTED).next_to(ax.c2p(-.5, y), LEFT, buff=.12))
+            self.add(tex(str(y), 18, MUTED).next_to(ax.c2p(-.5, y), LEFT, buff=.12))
         return ax
 
     def coefficient_bars(self, ax, weights, color=REG_PURPLE):
-        return VGroup(*[Line(ax.c2p(j, 0), ax.c2p(j, np.sign(v) * np.log10(1 + abs(v)) + 1e-8), color=color, stroke_width=9)
-                        for j, v in enumerate(weights)])
+        bars = VGroup()
+        for j, value in enumerate(weights):
+            height = np.sign(value) * np.log10(1 + abs(value))
+            a, b = ax.c2p(j, 0), ax.c2p(j, height)
+            bars.add(Rectangle(width=.22, height=max(.006, abs(b[1] - a[1])),
+                               stroke_width=0, fill_color=color, fill_opacity=.95)
+                     .move_to((a + b) / 2))
+        return bars
+
+    def coefficient_scale_label(self, position):
+        # A single TeX expression with explicit delimiters avoids split-glyph artifacts.
+        return tex(r'\operatorname{sgn}(w_j)\,\log_{10}\!\left(1+\lvert w_j\rvert\right)',
+                   28, REG_PURPLE).move_to(position)
 
     def coefficients(self):
-        ax = self.axes(width=5.4)
         tracker = ValueTracker(3)
         w = lambda: degree_weights(tracker.get_value())
-        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
+        ax = self.axes(width=5.4, span=lambda: self.curve_span(w()))
+        self.add(data_dots(ax), always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3)))
         self.add(always_redraw(lambda: graph_curve(ax, w())))
         barsax = self.coefficient_axes()
         bars = always_redraw(lambda: self.coefficient_bars(barsax, w()))
         self.add(bars, self.degree_label(tracker, [-3, -2.35, 0]))
-        scale_formula = tex(r'\operatorname{sgn}(w_j)\log_{10}(1+|w_j|)', 25, REG_PURPLE).move_to([3.3, 2.15, 0])
-        maximum = readout(r'\log_{10}(1+\max_j|w_j|)=', lambda: np.log10(1 + np.max(abs(w()))), [3.3, -2.35, 0], REG_PURPLE, 2, 25)
+        scale_formula = self.coefficient_scale_label([3.3, 2.15, 0])
+        maximum = readout(r'\log_{10}\!\left(1+\max_j\lvert w_j\rvert\right)=', lambda: np.log10(1 + np.max(abs(w()))), [3.3, -2.35, 0], REG_PURPLE, 2, 25)
         self.add(maximum)
         self.beat(Create(bars), moving=False)
         self.beat(Write(scale_formula), moving=False)
@@ -398,15 +431,17 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(tracker.animate.set_value(9))
 
     def more_data(self):
-        ax = self.axes(center=(0, .1, 0), width=9, height=3.65, yr=(-3.5, 2, 1))
         n = ValueTracker(10)
+        ax = self.axes(center=(0, .1, 0), width=9, height=3.65,
+                       span=lambda: self.curve_span(growing_weights(n.get_value()), minimum=1.7))
         curve = always_redraw(lambda: graph_curve(ax, growing_weights(n.get_value())))
-        self.add(graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4), curve)
+        self.add(always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4)), curve)
         dots = data_dots(ax, X_ALL, T_ALL, radius=.034)
         # Existing points stay fixed. Each new point falls as its data weight is introduced.
         for i, dot in enumerate(dots):
-            target = dot.get_center().copy()
-            def update(m, i=i, target=target):
+            dot.clear_updaters()
+            def update(m, i=i):
+                target = ax.c2p(X_ALL[i], T_ALL[i])
                 a = np.clip(n.get_value() - i, 0, 1) if i >= 10 else 1
                 m.move_to(target + UP * .45 * (1 - a)).set_opacity(a)
             dot.add_updater(update)
@@ -421,40 +456,44 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(Indicate(curve, color=TRUE_GREEN, scale_factor=1.02))
 
     def regularization(self):
-        ax = self.axes(center=(-3.15, .45, 0), width=5.45, height=3.1)
         loglam = ValueTracker(-32)
         w = lambda: ridge_weights(float(loglam.get_value()))
-        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
+        ax = self.axes(center=(-3.15, .45, 0), width=5.45, height=3.1,
+                       span=lambda: self.curve_span(w()))
+        self.add(data_dots(ax), always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3)))
         curve = always_redraw(lambda: graph_curve(ax, w()))
         lines = always_redraw(lambda: residuals(ax, w()).set_opacity(.55))
         self.add(curve, lines)
-        barsax = self.coefficient_axes(center=(3.3, 1.17, 0), height=1.65, width=4.7)
+        barsax = self.coefficient_axes(center=(3.3, 1.25, 0), height=1.55, width=4.7)
         bars = always_redraw(lambda: self.coefficient_bars(barsax, w()))
         self.add(bars)
-        self.add(tex(r'\operatorname{sgn}(w_j)\log_{10}(1+|w_j|)', 21, REG_PURPLE).move_to([3.3, 2.27, 0]))
+        self.add(self.coefficient_scale_label([3.3, 2.35, 0]))
         def springs():
-            result = VGroup()
-            for j, value in enumerate(w()):
-                h = np.sign(value) * np.log10(1 + abs(value))
-                a, b = barsax.c2p(j, 0) + RIGHT * .13, barsax.c2p(j, h) + RIGHT * .13
-                pts = [a + (b - a) * u + RIGHT * .09 * np.sin(8 * PI * u) for u in np.linspace(0, 1, 33)]
-                result.add(polyline(pts, REG_PURPLE, 2.0))
-            return result
+            # One representative spring, beside w6: two coils leave the bar visible.
+            j = 6
+            value = w()[j]
+            h = np.sign(value) * np.log10(1 + abs(value))
+            a, b = barsax.c2p(j, 0) + RIGHT * .21, barsax.c2p(j, h) + RIGHT * .21
+            pts = [a + (b - a) * u + RIGHT * .045 * np.sin(4 * PI * u)
+                   for u in np.linspace(0, 1, 25)]
+            return VGroup(polyline(pts, RESIDUAL_YELLOW, 1.4, .85),
+                          Dot(a, radius=.022, color=RESIDUAL_YELLOW),
+                          Dot(b, radius=.022, color=RESIDUAL_YELLOW))
         rubber = always_redraw(springs)
         self.beat(FadeIn(rubber), moving=False)
-        formula = MathTex(r'\widetilde E=', r'\frac12\sum_n(y(x_n,\mathbf w)-t_n)^2', '+', r'\frac{\lambda}{2}\sum_{j=0}^{9}w_j^2', font_size=30).move_to([0, -2.62, 0])
+        formula = MathTex(r'\widetilde E=', r'\frac12\sum_n(y(x_n,\mathbf w)-t_n)^2', '+', r'\frac{\lambda}{2}\sum_{j=0}^{9}w_j^2', font_size=30).move_to([0, -2.55, 0])
         formula[1].set_color(RESIDUAL_YELLOW); formula[3].set_color(REG_PURPLE)
         self.beat(Write(formula), Indicate(lines), Indicate(bars), moving=False)
         slider = self.slider(loglam, -32, 0, [-3, -1.9, 0], width=4.6, label=r'\ln\lambda', ticks=[-32, -24, -16, -8, 0], color=REG_PURPLE)
         self.add(slider, readout(r'\ln\lambda=', loglam.get_value, [-3.1, 2.25, 0], REG_PURPLE, 1, 25))
-        err = Axes(x_range=[0, 32, 8], y_range=[0, 1.1, .5], x_length=4.65, y_length=1.42,
-                   tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to([3.3, -1.07, 0])
+        err = Axes(x_range=[0, 32, 8], y_range=[0, 1.1, .5], x_length=4.65, y_length=1.32,
+                   tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to([3.3, -1.25, 0])
         values = np.linspace(-32, 0, 161)
         training = [rms_error(ridge_weights(float(l)), X, T) for l in values]
         testing = [rms_error(ridge_weights(float(l)), XT, TT) for l in values]
-        self.add(err, jp('RMS', 19).move_to([.65, -.16, 0]),
-                 jp('訓練', 19, BLUE_DATA).move_to([2.4, -.03, 0]),
-                 jp('テスト', 19, TEST_ORANGE).move_to([4.0, -.03, 0]))
+        self.add(err, jp('RMS', 19).move_to([1.15, -.23, 0]),
+                 jp('訓練', 19, BLUE_DATA).move_to([2.8, -.23, 0]),
+                 jp('テスト', 19, TEST_ORANGE).move_to([4.4, -.23, 0]))
         for v in [-32, -16, 0]:
             self.add(tex(str(v), 16, MUTED).next_to(err.c2p(v + 32, 0), DOWN, buff=.08))
         for v in [0, 1]:
