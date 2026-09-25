@@ -256,10 +256,16 @@ class PRML13ModelSelection(NarratedScene):
         f6=tex(r'S=6:\quad 20/24',30).move_to(fraction)
         six_groups=np.array_split(model.PERMUTATION,6)
         six_w=model.cross_validate(groups=six_groups)[0][0]
-        self.beat(Transform(marker,SurroundingRectangle(VGroup(*blocks[:4]),color=ORANGE_DATA,buff=.045)),count.animate.set_value(20),TransformMatchingTex(fraction,f6),Transform(line,curve(ax,six_w)),
+        self.remove(fraction)
+        count.set_value(20)
+        self.add(f6)
+        self.beat(Transform(marker,SurroundingRectangle(VGroup(*blocks[:4]),color=ORANGE_DATA,buff=.045)),Transform(line,curve(ax,six_w)),
                   *[p.animate.set_color(ORANGE_DATA if i in six_groups[0] else BLUE_DATA) for i,p in enumerate(points)])
         f24=tex(r'S=N=24:\quad 23/24',30).move_to(f6)
-        self.beat(Transform(marker,SurroundingRectangle(blocks[0],color=ORANGE_DATA,buff=.045)),count.animate.set_value(23),TransformMatchingTex(f6,f24),Transform(line,curve(ax,model.LOO_WEIGHTS[0])),
+        self.remove(f6)
+        count.set_value(23)
+        self.add(f24)
+        self.beat(Transform(marker,SurroundingRectangle(blocks[0],color=ORANGE_DATA,buff=.045)),Transform(line,curve(ax,model.LOO_WEIGHTS[0])),
                   *[p.animate.set_color(BLUE_DATA) for p in points])
         self.remove(line)
         turn=ValueTracker(0)
@@ -272,6 +278,9 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(turn.animate.set_value(23))
         marker.clear_updaters()
         final=curve(ax,model.fit(model.XC,model.TC,model.CV_SELECTED),GREEN_TEST)
+        self.remove(f24)
+        count.set_value(24)
+        self.add(jp('選択後は、全24点で再学習',25,GREEN_TEST).move_to([1,-2.3,0]))
         self.beat(FadeOut(moving_curve),FadeOut(moving_point),FadeOut(marker),Create(final))
         note=jp('学習に使う量・評価のばらつき・計算量',23,YELLOW_ERROR).move_to([0,-2.8,0])
         self.beat(Write(note))
@@ -348,7 +357,7 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(Write(aic),Indicate(selected,color=YELLOW_ERROR))
 
     def limits(self):
-        self.legend([('観測',BLUE_DATA),('最適な係数の一本',MODEL_RED),('別の係数（模式図）',PURPLE_TERM)])
+        legend=self.legend([('観測',BLUE_DATA),('最適な係数の一本',MODEL_RED),('別の係数（模式図）',PURPLE_TERM)])
         ax,ag=self.graph()
         data=dots(ax,model.X,model.T); line=curve(ax,model.WEIGHTS[2])
         self.add(data,line)
@@ -363,7 +372,8 @@ class PRML13ModelSelection(NarratedScene):
         road=VGroup(tex(r'\mathrm{BIC}\ \to\ 4.4.1',28,PURPLE_TERM),jp('ベイズ的モデル比較 → 3.4',23,GREEN_TEST)).arrange(RIGHT,buff=.7).move_to([0,-2.75,0])
         self.beat(Write(road))
         self.beat(LaggedStart(*[Indicate(v,color=PURPLE_TERM,scale_factor=1.025) for v in variants],lag_ratio=.2))
-        self.remove(*variants.get_family(),note,road)
+        self.remove(*variants.get_family(),note,road,legend)
+        self.legend([('訓練',BLUE_DATA),('予測',MODEL_RED),('検証',ORANGE_DATA)])
         valid=dots(ax,model.XV,model.TV,ORANGE_DATA)
         question=jp('未知の点を予測するために、選ぶ',27,ORANGE_DATA).move_to([0,-2.15,0])
         self.beat(FadeIn(valid),Write(question))
