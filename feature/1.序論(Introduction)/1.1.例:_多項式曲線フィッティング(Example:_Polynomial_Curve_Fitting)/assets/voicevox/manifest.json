@@ -1,96 +1,158 @@
 {
-  "speakers": {
-    "main": {
-      "label": "VOICEVOX:WhiteCUL",
-      "id": 23
-    },
-    "question": {
-      "label": "VOICEVOX:WhiteCUL",
-      "id": 23
-    },
-    "summary": {
-      "label": "VOICEVOX:WhiteCUL",
-      "id": 23
-    }
+  "version": 2,
+  "speaker": {
+    "label": "VOICEVOX:WhiteCUL",
+    "id": 23,
+    "speed_scale": 1.08
   },
   "scenes": [
     {
       "id": "scene01",
-      "title": "オープニング",
-      "path": "assets/voicevox/scene01.wav",
-      "duration": 23.819
+      "title": "この点を生んだ曲線は？",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "ee293ec223c2810f35ae5688237a4febc657f555a1e2e832354225e6b0c5f140",
+      "beat_durations": [
+        9.8,
+        9.0,
+        10.133333333333335,
+        9.0,
+        9.0,
+        10.3
+      ]
     },
     {
       "id": "scene02",
-      "title": "手書き数字から数値ベクトルへ",
-      "path": "assets/voicevox/scene02.wav",
-      "duration": 36.427
+      "title": "多項式は、つまみの集まり",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "54932d2d7696205fe2a6029e8e211f9c78905e3ce866d6bfe0d96c626998904c",
+      "beat_durations": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ]
     },
     {
       "id": "scene03",
-      "title": "学習とは generalization",
-      "path": "assets/voicevox/scene03.wav",
-      "duration": 24.032
+      "title": "ずれを、面積に変える",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "ef9c35b0d202c40425e3bfee8cf4ca32ef5be290696d6af796fa881c0983b023",
+      "beat_durations": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.133333333333335,
+        10.3,
+        10.3,
+        10.0,
+        10.0
+      ]
     },
     {
       "id": "scene04",
-      "title": "今回は regression",
-      "path": "assets/voicevox/scene04.wav",
-      "duration": 30.571
+      "title": "二つのつまみで、谷底へ",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "c03435d185727c0744d24ebb85f91c73ea2240484572fe80646868d519d400a4",
+      "beat_durations": [
+        10.0,
+        10.633333333333335,
+        10.0,
+        10.133333333333335,
+        10.0,
+        10.0
+      ]
     },
     {
       "id": "scene05",
-      "title": "10個の点から見えない曲線を想像する",
-      "path": "assets/voicevox/scene05.wav",
-      "duration": 35.691
+      "title": "点を通れば、予測もよくなる？",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "c16c0011806391e865418268297fc4eaf2031bdd1e53fb3f99916dc5f84d1ecb",
+      "beat_durations": [
+        10.466666666666667,
+        10.0,
+        10.633333333333335,
+        10.0,
+        10.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        12.8,
+        10.633333333333335
+      ]
     },
     {
       "id": "scene06",
-      "title": "多項式モデル",
-      "path": "assets/voicevox/scene06.wav",
-      "duration": 40.427
+      "title": "曲線の裏側で、係数が膨らむ",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "b8a242859dce9129eb299918beb784ea6cbb28c8e3356415d38f3d1e0268387d",
+      "beat_durations": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.133333333333335
+      ]
     },
     {
       "id": "scene07",
-      "title": "最小二乗",
-      "path": "assets/voicevox/scene07.wav",
-      "duration": 44.192
+      "title": "点が増えると、同じ九次式は？",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "ffa0eb0ce9896d64bc79cc1af686f0d64d7cc2020bd537f5eb47a9e02ffbf504",
+      "beat_durations": [
+        10.0,
+        12.0,
+        10.0,
+        12.0,
+        12.0,
+        10.966666666666667
+      ]
     },
     {
       "id": "scene08",
-      "title": "M=1から9の比較",
-      "path": "assets/voicevox/scene08.wav",
-      "duration": 51.349
+      "title": "係数を、ゼロへ引くバネ",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "8d9db70c6b83beb309bc87ca62764002cb3300c2afda8b412735554ca98ae73f",
+      "beat_durations": [
+        10.0,
+        10.133333333333335,
+        10.0,
+        14.0,
+        12.0,
+        14.0,
+        14.0,
+        10.633333333333335,
+        10.466666666666667
+      ]
     },
     {
       "id": "scene09",
-      "title": "訓練誤差とテスト誤差",
-      "path": "assets/voicevox/scene09.wav",
-      "duration": 58.048
-    },
-    {
-      "id": "scene10",
-      "title": "係数の暴走",
-      "path": "assets/voicevox/scene10.wav",
-      "duration": 36.832
-    },
-    {
-      "id": "scene11",
-      "title": "データ数を増やす",
-      "path": "assets/voicevox/scene11.wav",
-      "duration": 21.984
-    },
-    {
-      "id": "scene12",
-      "title": "正則化",
-      "path": "assets/voicevox/scene12.wav",
-      "duration": 44.405
-    },
-    {
-      "id": "scene13",
-      "title": "確率論への橋渡し",
-      "path": "assets/voicevox/scene13.wav",
-      "duration": 20.427
+      "title": "一本の線の、その先へ",
+      "status": "pending",
+      "path": null,
+      "script_sha256": "6741adfd82beb1303a542424c7f930e7e3c9e9ab5ec4b347779fa99a44041969",
+      "beat_durations": [
+        10.0,
+        11.3,
+        10.0,
+        12.633333333333335,
+        10.0
+      ]
     }
   ]
 }
