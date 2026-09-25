@@ -166,10 +166,10 @@ class PRML12ProbabilityTheory(NarratedScene):
         strip=VGroup(*[rect(7*j[k],2.65,[-3.5+7*j[:k].sum()+3.5*j[k],.325,0],[RED,BLUE][k],.65) for k in range(2)])
         normalized=VGroup(*[rect(7*j[k]/total,2.65,[-3.5+7*j[:k].sum()/total+3.5*j[k]/total,.325,0],[RED,BLUE][k],.65) for k in range(2)])
         self.beat(phases=[('equal-height area',self.sentence_duration(0),lambda:AnimationGroup(Transform(cells[0],strip[0]),Transform(cells[2],strip[1]))),('normalize',self.sentence_duration(1),lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1])))])
-        val=tex(f'{box_posterior()[0]*100:.1f}\\%',40,RED).move_to([-1,0.4,0])
+        val=tex(f'{box_posterior()[0]*100:.1f}\\%',40,WHITE).move_to([-1,0.4,0])
         self.beat(FadeIn(val),self.formula(r'\frac{0.225}{0.225+0.140}=0.6164\ldots'))
         self.beat(self.formula(r'p(B\mid F)=',r'\frac{p(F\mid B)p(B)}{p(F)}',colors={0:RED,1:ORANGE}),Indicate(val))
-        self.remove(cells,val)
+        self.remove(cells, cells[0], cells[2], val)
         q=ValueTracker(.3); a=ValueTracker(.2)
         def bars():
             z=box_posterior(q.get_value(),.75,a.get_value())[0]
@@ -240,7 +240,7 @@ class PRML12ProbabilityTheory(NarratedScene):
         cov=lambda:float(np.mean((xx-xx.mean())*(yy()-yy().mean())))
         cv=number(r'\operatorname{cov}[x,y]=',cov,[2.8,2.1,0],PURPLE);self.add(cloud,cv)
         self.beat(slope.animate.set_value(-.8),self.formula(r'\operatorname{cov}[x,y]=\mathbb E[(x-\mathbb E[x])(y-\mathbb E[y])] ',size=29))
-        self.beat(bend.animate.set_value(1),self.formula(r'y=x^2-1,\qquad \operatorname{cov}[x,y]=0'))
+        self.beat(bend.animate.set_value(1),self.formula(r'y=x^2-1,\qquad \operatorname{cov}[x,y]=0'),end_sentence=1)
         self.beat(self.formula(r'\mathbb E[f]\approx\frac1N\sum_n f(x_n),\quad \Sigma_{ij}=\operatorname{cov}[x_i,x_j]',size=29),Indicate(cloud,scale_factor=1.03))
 
     def likelihood(self):
@@ -277,11 +277,15 @@ class PRML12ProbabilityTheory(NarratedScene):
         self.beat(phases=[('draw 2',self.sentence_duration(0),lambda:AnimationGroup(Transform(dots,dotgroup(pairs[1])),Transform(curve,fitted(pairs[1])))),('draw 3',self.sentence_duration(1),lambda:AnimationGroup(Transform(dots,dotgroup(pairs[2])),Transform(curve,fitted(pairs[2]))))])
         self.remove(ax,ax.labels,truth,dots,curve)
         ax=self.axes([0,4000,1000],[0,1.2,.4],xlabel='K',ylabel=r'\overline{\sigma^2_{ML}}',height=3.2)
-        theory=DashedLine(ax.c2p(0,.5),ax.c2p(4000,.5),color=YELLOW);self.add(theory)
+        theory=DashedLine(ax.c2p(0,.5),ax.c2p(4000,.5),color=YELLOW)
+        truevar=DashedLine(ax.c2p(0,1),ax.c2p(4000,1),color=GREEN)
+        self.legend(('真の分散 = 1',GREEN),('推定分散の平均',RED),('理論値 = 0.5',YELLOW))
+        self.add(theory,truevar)
         # Display all partial averages, revealing actual computed samples over time.
         running=line_graph(ax,np.arange(1,4001),VAR_RUNNING,RED)
         self.beat(Create(running),self.formula(r'N=2,\quad \sigma^2=1,\quad \mathbb E[\sigma^2_{\rm ML}]=0.5'))
-        self.remove(ax,ax.labels,theory,running)
+        self.remove(ax,ax.labels,theory,truevar,running)
+        self.legend(('推定分散の期待値 / 真の分散',YELLOW))
         ax=self.axes([2,30,7],[0,1,.25],xlabel='N',ylabel=r'(N-1)/N',height=3.2)
         ns=np.arange(2,31);curve=line_graph(ax,ns,(ns-1)/ns,YELLOW)
         self.beat(Create(curve),self.formula(r'\mathbb E[\sigma^2_{\rm ML}]=\frac{N-1}{N}\sigma^2'))
@@ -291,6 +295,7 @@ class PRML12ProbabilityTheory(NarratedScene):
         self.legend(('尤度',ORANGE),('事前密度',BLUE),('事後密度',PURPLE))
         ax=self.axes([0,1,.2],[0,2.6,.65],xlabel=r'\theta',ylabel=r'L,\ p',height=3.2)
         xx=np.linspace(0,1,241);like=line_graph(ax,xx,xx**3,ORANGE)
+        self.add(jp('D：観測済みデータ（表が3回）',18,MUTED).move_to([2.3,2.28,0]))
         self.beat(Create(like),self.formula(r'\theta=P(\mathrm{heads}),\quad L(\theta)=\theta^3'))
         dot=Dot(ax.c2p(.5,.125),color=YELLOW)
         self.add(dot)
@@ -347,7 +352,7 @@ class PRML12ProbabilityTheory(NarratedScene):
             return Polygon(*[ax.c2p(x,y) for x,y in zip(xx,m+sd)],*[ax.c2p(x,y) for x,y in zip(xx[::-1],(m-sd)[::-1])],stroke_width=0,fill_color=color,fill_opacity=opacity)
         totalband=band(np.sqrt(v),PURPLE,.3)
         meanline=line_graph(ax,xx,m,RED)
-        self.beat(FadeOut(samples),FadeIn(totalband),Create(meanline),self.formula(r'p(t|x,D)=\mathcal N(t|m(x),s^2(x))'))
+        self.beat(FadeOut(samples),FadeIn(totalband),FadeIn(meanline),self.formula(r'p(t|x,D)=\mathcal N(t|m(x),s^2(x))'))
         noiseband=band(np.full_like(xx,.15),YELLOW,.35)
         self.beat(FadeIn(noiseband),self.formula(r's^2(x)=',r'\beta^{-1}',r'+\phi(x)^T S\phi(x)',colors={1:YELLOW,2:PURPLE}))
         # A separate stacked bar is in variance units, not standard deviations.

@@ -2,6 +2,7 @@
 import re
 import numpy as np
 from manim import *
+from manim.animation.animation import prepare_animation
 
 def jp(text, size=25, color=WHITE):
     return Text(text, font="Noto Sans CJK JP", font_size=size, color=color)
@@ -141,7 +142,16 @@ class NarratedScene(Scene):
         if animations:
             if action_start > 0:
                 visual.append(Wait(action_start))
-            visual.append(AnimationGroup(*animations, run_time=action_end-action_start))
+            # Keep formulas and labels readable early in the spoken sentence.
+            # Parameter motion retains the full speech duration.
+            action_duration = action_end-action_start
+            prepared = []
+            for item_animation in animations:
+                animation = prepare_animation(item_animation)
+                quick = isinstance(animation, (FadeIn, FadeOut, ReplacementTransform))
+                animation.set_run_time(min(.5, action_duration) if quick else action_duration)
+                prepared.append(animation)
+            visual.append(AnimationGroup(*prepared, Wait(action_duration), run_time=action_duration))
             visual.append(Wait(max(.001, duration-action_end)))
         else:
             visual.append(Wait(duration))
