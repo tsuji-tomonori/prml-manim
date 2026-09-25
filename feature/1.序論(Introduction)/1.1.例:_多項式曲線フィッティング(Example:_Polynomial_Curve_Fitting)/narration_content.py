@@ -117,4 +117,3 @@ def estimated_duration(beat):
 def script_hash(scene):
     payload = {"version": 2, "scene": scene, "speaker": 23, "speed": 1.08}
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
-
