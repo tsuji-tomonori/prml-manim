@@ -1,887 +1,492 @@
+"""PRML 1.1 — continuous, linked visual experiments (Manim Community)."""
 from __future__ import annotations
 
-import wave
+import json
+import math
 from pathlib import Path
 
 import numpy as np
 from manim import *
 
+from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
+from narration_content import SCENES, estimated_duration
+from polynomial_model import (
+    NOISE_STD, T, TT, T_ALL, WEIGHTS, X, XT, X_ALL, TRAIN_RMS, TEST_RMS,
+    degree_weights, design_matrix, eval_poly, growing_weights, ridge_weights,
+    rms_error, sine,
+)
 
-BLUE_DATA = BLUE_C
-TRUE_GREEN = GREEN_C
-MODEL_RED = RED_C
-TEST_ORANGE = ORANGE
-RESIDUAL_YELLOW = YELLOW_C
-REG_PURPLE = PURPLE_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
+BLUE_DATA = ManimColor("#58B5ED")
+TRUE_GREEN = ManimColor("#77D49A")
+MODEL_RED = ManimColor("#FF6B77")
+TEST_ORANGE = ManimColor("#FFB45B")
+RESIDUAL_YELLOW = ManimColor("#FFE079")
+REG_PURPLE = ManimColor("#C29AFF")
+MUTED = ManimColor("#A8B2C5")
+BG = "#10141F"
+TERM_COLORS = [BLUE_DATA, RESIDUAL_YELLOW, REG_PURPLE, TEST_ORANGE]
 SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def jp(text, size=25, color=WHITE):
+    return Text(text, font="Noto Sans CJK JP", font_size=size, color=color)
 
 
-def make_sine_data(
-    n: int = 10,
-    noise_std: float = 0.25,
-    seed: int = 3,
-    endpoint: bool = True,
-) -> tuple[np.ndarray, np.ndarray]:
-    rng = np.random.default_rng(seed)
-    x = np.linspace(0.0, 1.0, n, endpoint=endpoint)
-    t = np.sin(2.0 * np.pi * x) + rng.normal(0.0, noise_std, size=n)
-    return x, t
+def tex(text, size=30, color=WHITE):
+    return MathTex(text, font_size=size, color=color)
 
 
-def design_matrix(x: np.ndarray, degree: int) -> np.ndarray:
-    return np.vander(np.asarray(x), N=degree + 1, increasing=True)
+def polyline(points, color, width=3, opacity=1):
+    return VMobject().set_points_as_corners(points).set_stroke(color, width, opacity)
 
 
-def fit_polynomial(
-    x: np.ndarray,
-    t: np.ndarray,
-    degree: int,
-    lam: float = 0.0,
-    regularize_bias: bool = False,
-) -> np.ndarray:
-    phi = design_matrix(x, degree)
-    if lam == 0:
-        return np.linalg.lstsq(phi, t, rcond=None)[0]
-    penalty = lam * np.eye(degree + 1)
-    if not regularize_bias:
-        penalty[0, 0] = 0.0
-    return np.linalg.solve(phi.T @ phi + penalty, phi.T @ t)
+def graph_curve(ax, weights=None, values=None, color=MODEL_RED, opacity=1):
+    u = np.linspace(0, 1, 241)
+    v = eval_poly(weights, u) if values is None else values(u)
+    # All experimental curves are displayed at their true values; no clipping.
+    origin = ax.c2p(0, 0)
+    points = origin + u[:, None] * (ax.c2p(1, 0) - origin) + v[:, None] * (ax.c2p(0, 1) - origin)
+    return polyline(points, color, 3, opacity)
 
 
-def eval_poly(w: np.ndarray, x: np.ndarray | float) -> np.ndarray:
-    return design_matrix(np.asarray(x), len(w) - 1) @ w
+def data_dots(ax, x=X, t=T, color=BLUE_DATA, radius=.052):
+    return VGroup(*[Dot(ax.c2p(a, b), radius=radius, color=color) for a, b in zip(x, t)])
 
 
-def rms_error(w: np.ndarray, x: np.ndarray, t: np.ndarray) -> float:
-    residual = eval_poly(w, x) - t
-    return float(np.sqrt(np.mean(residual**2)))
+def residuals(ax, w, x=X, t=T, color=RESIDUAL_YELLOW):
+    return VGroup(*[Line(ax.c2p(a, b), ax.c2p(a, c), color=color, stroke_width=2)
+                    for a, b, c in zip(x, t, eval_poly(w, x))])
 
 
-def sine(x: float | np.ndarray) -> float | np.ndarray:
-    return np.sin(2.0 * np.pi * x)
+def readout(label, getter, position, color=WHITE, places=3, size=25):
+    prefix = tex(label, size, color)
+    number = DecimalNumber(getter(), num_decimal_places=places, font_size=size, color=color)
+    group = VGroup(prefix, number).arrange(RIGHT, buff=.15).move_to(position)
+    anchor = number.get_left().copy()
+    number.add_updater(lambda m: m.set_value(getter()).move_to(anchor, aligned_edge=LEFT))
+    return group
 
 
 class PRML11PolynomialCurveFitting(Scene):
-    """PRML 1.1 overview for a high-school math audience.
+    def construct(self):
+        self.camera.background_color = BG
+        self.timeline = []
+        self.manifest = {e['id']: e for e in json.loads(MANIFEST.read_text()).get('scenes', [])} if MANIFEST.exists() else {}
+        methods = [self.question, self.knobs, self.squares, self.valley, self.degrees,
+                   self.coefficients, self.more_data, self.regularization, self.uncertainty]
+        for i, method in enumerate(methods):
+            self.begin(i)
+            method()
+            if self.beat_index != len(self.story['beats']):
+                raise RuntimeError(f"Unconsumed narration in {self.story['id']}")
+            self.timeline[-1]['end'] = float(self.time)
+        out = Path(config.media_dir) / 'prml11_timeline.json'
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(self.timeline, ensure_ascii=False, indent=2) + '\n')
 
-    Render example:
-        uv run manim -pql prml_1_1_polynomial_curve_fitting.py PRML11PolynomialCurveFitting
-    """
+    def begin(self, index):
+        self.clear()
+        self.story = SCENES[index]
+        self.beat_index = 0
+        self.subtitle = None
+        self.next_section(self.story['id'])
+        title = jp(self.story['title'], 34).move_to([0, 3.35, 0])
+        self.add(title)
+        legend = VGroup(*[VGroup(Dot(radius=.045, color=c), jp(s, 18, c)).arrange(RIGHT, buff=.1)
+                          for s, c in [('観測', BLUE_DATA), ('生成関数', TRUE_GREEN), ('モデル', MODEL_RED)]]).arrange(RIGHT, buff=.55)
+        legend.move_to([0, 2.78, 0])
+        self.add(legend)
+        entry = self.manifest.get(self.story['id'], {})
+        audio_valid = valid_entry(self.story, entry)
+        self.durations = entry['beat_durations'] if audio_valid else [estimated_duration(b) for b in self.story['beats']]
+        # Frame quantization is applied to cumulative boundaries, so audio does not drift.
+        fps = config.frame_rate
+        self.boundaries = np.ceil(np.cumsum(self.durations) * fps - 1e-6) / fps
+        self.scene_start = float(self.time)
+        if audio_valid:
+            self.add_sound(str(OUTPUT_DIR / f"{self.story['id']}.wav"))
+        self.timeline.append({'id': self.story['id'], 'title': self.story['title'],
+                              'start': self.scene_start, 'reference': self.story['reference'],
+                              'audio': audio_valid, 'beats': []})
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.x_train, self.t_train = make_sine_data(n=10, seed=7)
-        self.x_test, self.t_test = make_sine_data(n=100, seed=17)
+    def beat(self, *animations, moving=True):
+        item = self.story['beats'][self.beat_index]
+        if self.subtitle is not None:
+            self.remove(self.subtitle)
+        self.subtitle = jp(item['subtitle'], 24).move_to([0, -3.35, 0])
+        if self.subtitle.width > 12.9:
+            raise ValueError(f"Subtitle too wide: {item['subtitle']}")
+        self.add(self.subtitle)
+        start = float(self.time)
+        fps = config.frame_rate
+        frames = round((self.scene_start + self.boundaries[self.beat_index] - start) * fps)
+        duration = frames / fps
+        self.timeline[-1]['beats'].append({'start': start, 'end': start + duration, 'subtitle': item['subtitle']})
+        if animations:
+            motion_frames = max(1, frames - round(.8 * fps)) if moving else min(round(2 * fps), frames - 1)
+            # Cairo animates with ceil and freezes with floor. Keep both on the
+            # intended integer frame counts, even after floating-point sums.
+            self.play(*animations, run_time=(motion_frames - 1e-5) / fps)
+            hold_frames = frames - motion_frames
+            if hold_frames:
+                self.wait((hold_frames + 1e-5) / fps, frozen_frame=True)
+        else:
+            self.wait((frames + 1e-5) / fps, frozen_frame=True)
+        self.beat_index += 1
 
-        self.opening_pattern_recognition()
-        self.handwritten_digit_vector()
-        self.learning_generalization()
-        self.task_types()
-        self.curve_fitting_problem()
-        self.polynomial_model()
-        self.least_squares()
-        self.compare_degrees()
-        self.train_vs_test_error()
-        self.coefficient_growth()
-        self.more_data()
-        self.regularization()
-        self.bridge_to_probability()
-
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
-
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
-
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
-
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
-
-    def make_axes(self, width: float = 7.0, height: float = 4.0) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[-1.5, 1.5, 0.5],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def plot_true_curve(self, axes: Axes, opacity: float = 1.0) -> VMobject:
-        curve = axes.plot(lambda u: np.sin(2 * np.pi * u), x_range=[0, 1], color=TRUE_GREEN)
-        curve.set_stroke(width=4, opacity=opacity)
-        return curve
-
-    def plot_model_curve(
-        self,
-        axes: Axes,
-        degree: int,
-        x: np.ndarray | None = None,
-        t: np.ndarray | None = None,
-        lam: float = 0.0,
-        color: ManimColor = MODEL_RED,
-    ) -> VMobject:
-        if x is None:
-            x = self.x_train
-        if t is None:
-            t = self.t_train
-        w = fit_polynomial(x, t, degree, lam=lam)
-
-        def model(u: float) -> float:
-            return float(eval_poly(w, np.array([u]))[0])
-
-        curve = axes.plot(model, x_range=[0, 1], color=color, use_smoothing=False)
-        curve.set_stroke(width=4)
-        return curve
-
-    def make_data_dots(
-        self,
-        axes: Axes,
-        x: np.ndarray,
-        t: np.ndarray,
-        color: ManimColor = BLUE_DATA,
-        radius: float = 0.065,
-    ) -> VGroup:
-        return VGroup(
-            *[
-                Dot(axes.c2p(float(xi), float(ti)), radius=radius, color=color)
-                for xi, ti in zip(x, t)
-            ]
-        )
-
-    def make_residuals(
-        self,
-        axes: Axes,
-        degree: int,
-        x: np.ndarray | None = None,
-        t: np.ndarray | None = None,
-        color: ManimColor = RESIDUAL_YELLOW,
-        stroke_width: float = 4,
-    ) -> VGroup:
-        if x is None:
-            x = self.x_train
-        if t is None:
-            t = self.t_train
-        w = fit_polynomial(x, t, degree)
-        lines = VGroup()
-        for xi, ti in zip(x, t):
-            yi = float(eval_poly(w, np.array([xi]))[0])
-            line = Line(
-                axes.c2p(float(xi), float(ti)),
-                axes.c2p(float(xi), yi),
-                color=color,
-                stroke_width=stroke_width,
-            )
-            lines.add(line)
-        return lines
-
-    def make_degree_slider(
-        self,
-        values: list[int],
-        current_index: int,
-        width: float = 3.6,
-        color: ManimColor = MODEL_RED,
-    ) -> tuple[VGroup, Dot, Text]:
-        line = Line(LEFT * width / 2, RIGHT * width / 2, color=GREY_B, stroke_width=4)
-        label_size = 17 if len(values) > 6 else 22
-        ticks = VGroup()
+    def axes(self, center=(-3.1, .1, 0), width=5.7, height=3.5, yr=(-3, 2, 1)):
+        ax = Axes(x_range=[0, 1, .25], y_range=yr, x_length=width, y_length=height,
+                  tips=False, axis_config={'color': MUTED, 'stroke_width': 1.4}).move_to(center)
+        grid = VGroup(*[Line(ax.c2p(0, y), ax.c2p(1, y), color=MUTED, stroke_opacity=.12) for y in [-2, -1, 1, 2] if yr[0] <= y <= yr[1]])
         labels = VGroup()
-        for i, value in enumerate(values):
-            proportion = i / (len(values) - 1)
-            point = line.point_from_proportion(proportion)
-            ticks.add(Line(point + DOWN * 0.08, point + UP * 0.08, color=GREY_B, stroke_width=3))
-            labels.add(MathTex(str(value), font_size=label_size).next_to(point, DOWN, buff=0.14))
-        knob = Dot(line.point_from_proportion(current_index / (len(values) - 1)), color=color, radius=0.09)
-        title = Text("次数 M", font_size=22, color=color).next_to(line, UP, buff=0.16)
-        slider = VGroup(line, ticks, labels, title)
-        return slider, knob, title
-
-    def opening_pattern_recognition(self) -> None:
-        narration = self.start_narration("scene01")
-        title = Text(
-            "PRML Chapter 1: データの点から“見えない関数”を探す",
-            font_size=36,
-            color=WHITE,
-        )
-        subtitle = Text(
-            "1.1 Example: Polynomial Curve Fitting",
-            font_size=26,
-            color=TEXT_GREY,
-        ).next_to(title, DOWN, buff=0.25)
-
-        rng = np.random.default_rng(10)
-        random_points = VGroup(
-            *[
-                Dot(
-                    np.array(
-                        [
-                            rng.uniform(-5.5, 5.5),
-                            rng.uniform(-2.8, 2.8),
-                            0.0,
-                        ]
-                    ),
-                    radius=0.028,
-                    color=BLUE_E,
-                )
-                for _ in range(120)
-            ]
-        )
-
-        curve_points = VGroup(
-            *[
-                Dot(
-                    np.array(
-                        [
-                            -5.5 + 11.0 * u,
-                            1.3 * np.sin(2 * np.pi * u),
-                            0.0,
-                        ]
-                    ),
-                    radius=0.032,
-                    color=BLUE_DATA,
-                )
-                for u in np.linspace(0, 1, 120)
-            ]
-        )
-
-        key_sentence = Text(
-            "データの中の規則性を見つけ、まだ見ていない入力に使う",
-            font_size=30,
-            color=WHITE,
-        ).to_edge(DOWN)
-
-        self.play(FadeIn(random_points, lag_ratio=0.01), run_time=1.5)
-        self.play(Transform(random_points, curve_points), run_time=2.0)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1.2)
-        self.play(Write(key_sentence), run_time=1.5)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(random_points), FadeOut(title), FadeOut(subtitle), FadeOut(key_sentence))
-
-    def handwritten_digit_vector(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("PRML 1章冒頭 / Fig. 1.1")
-        heading = self.scene_title("手書き数字は、機械には数値のリスト", font_size=34)
-
-        grid_size = 14
-        cell = 0.16
-        pattern = np.zeros((grid_size, grid_size))
-        for r in range(2, 12):
-            pattern[r, 9] = 1
-        for c in range(4, 10):
-            pattern[2, c] = 1
-            pattern[6, c] = 1
-            pattern[11, c] = 1
-        pattern[3:6, 10] = 1
-        pattern[7:11, 10] = 1
-        pattern += np.random.default_rng(0).normal(0, 0.08, pattern.shape)
-        pattern = np.clip(pattern, 0, 1)
-
-        pixels = VGroup()
-        for r in range(grid_size):
-            for c in range(grid_size):
-                value = pattern[r, c]
-                square = Square(side_length=cell)
-                square.set_fill(WHITE, opacity=0.12 + 0.78 * value)
-                square.set_stroke(GREY_D, width=0.35)
-                square.move_to(np.array([c * cell, -r * cell, 0]))
-                pixels.add(square)
-        pixels.center().shift(LEFT * 3.6)
-
-        calculation = MathTex(r"28\times 28 = 784", font_size=42)
-        calculation.next_to(pixels, DOWN, buff=0.45)
-
-        vector_entries = VGroup(
-            *[Text(f"{v:.1f}", font_size=18, color=GREY_A) for v in [0.0, 0.1, 0.8, 1.0, 0.7, 0.2]]
-        ).arrange(DOWN, buff=0.08)
-        left_bracket = Text("[", font_size=78, color=GREY_A)
-        right_bracket = Text("]", font_size=78, color=GREY_A)
-        vector = VGroup(left_bracket, vector_entries, right_bracket).arrange(RIGHT, buff=0.05)
-        vector.shift(RIGHT * 3.6)
-        ellipsis = Text("...", font_size=24, color=TEXT_GREY).next_to(vector_entries, DOWN, buff=0.03)
-
-        arrow = Arrow(pixels.get_right() + RIGHT * 0.25, vector.get_left() + LEFT * 0.25, buff=0.1)
-        note = Text("この例では: 白黒 28×28 ピクセル", font_size=25, color=BLUE_DATA)
-        note.next_to(arrow, UP)
-        bw_note = Text("白黒なので 1ピクセル = 明るさ1つ", font_size=23, color=TEXT_GREY)
-        bw_note.next_to(arrow, DOWN, buff=0.28)
-
-        self.play(FadeIn(label), Write(heading))
-        self.play(FadeIn(pixels, lag_ratio=0.005), run_time=1.2)
-        self.play(Write(calculation), run_time=0.8)
-        self.play(GrowArrow(arrow), Write(note), FadeIn(vector), FadeIn(ellipsis), run_time=1.4)
-        self.play(Write(bw_note), run_time=0.8)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(m) for m in [label, heading, pixels, calculation, arrow, note, bw_note, vector, ellipsis]])
-
-    def learning_generalization(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("PRML 1章冒頭: training set / test set / generalization")
-        title = self.scene_title("学習とは、練習問題から初見問題に強くなること", font_size=34)
-
-        train_box = RoundedRectangle(width=3.0, height=1.4, corner_radius=0.12, color=BLUE_DATA)
-        train_text = Text("training set\n練習問題", font_size=28).move_to(train_box)
-        model_box = RoundedRectangle(width=2.6, height=1.4, corner_radius=0.12, color=MODEL_RED)
-        model_text = Text("model\ny(x)", font_size=30).move_to(model_box)
-        test_box = RoundedRectangle(width=3.0, height=1.4, corner_radius=0.12, color=TEST_ORANGE)
-        test_text = Text("test input\n初見問題", font_size=28).move_to(test_box)
-        pred_box = RoundedRectangle(width=2.5, height=1.4, corner_radius=0.12, color=GREEN_C)
-        pred_text = Text("prediction\n予測", font_size=28).move_to(pred_box)
-
-        flow = VGroup(
-            VGroup(train_box, train_text),
-            Arrow(RIGHT, RIGHT * 1.7, buff=0),
-            VGroup(model_box, model_text),
-            Arrow(RIGHT, RIGHT * 1.7, buff=0),
-            VGroup(test_box, test_text),
-            Arrow(RIGHT, RIGHT * 1.7, buff=0),
-            VGroup(pred_box, pred_text),
-        ).arrange(RIGHT, buff=0.35)
-        flow.scale(0.78).move_to(ORIGIN)
-
-        core = Text("目的: 訓練データの暗記ではなく generalization", font_size=30, color=WHITE)
-        core.to_edge(DOWN)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(flow[0]), GrowArrow(flow[1]), FadeIn(flow[2]))
-        self.play(GrowArrow(flow[3]), FadeIn(flow[4]), GrowArrow(flow[5]), FadeIn(flow[6]))
-        self.play(Write(core))
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(flow), FadeOut(core))
-
-    def task_types(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("PRML 1章冒頭: supervised / classification / regression")
-        title = self.scene_title("今回は、連続値を予測する regression", font_size=34)
-
-        panels = VGroup()
-        contents = [
-            ("classification", "0,1,2,... のどれ？", BLUE_DATA),
-            ("regression", "x から t を予測", MODEL_RED),
-            ("unsupervised", "似たものを探す", REG_PURPLE),
-        ]
-        for name, desc, color in contents:
-            box = RoundedRectangle(width=3.5, height=2.1, corner_radius=0.12, color=color)
-            name_text = Text(name, font_size=28, color=color).move_to(box.get_top() + DOWN * 0.45)
-            desc_text = Text(desc, font_size=24).move_to(box.get_center() + DOWN * 0.25)
-            panels.add(VGroup(box, name_text, desc_text))
-        panels.arrange(RIGHT, buff=0.35).scale(0.95)
-
-        arrow = MathTex(r"x \longrightarrow t", font_size=58, color=MODEL_RED)
-        arrow.next_to(panels[1], DOWN, buff=0.4)
-        function_box = RoundedRectangle(width=4.7, height=0.72, corner_radius=0.08, color=MODEL_RED)
-        function_text = Text("回帰では  x を入れると t を返す関数  y(x)  を作る", font_size=22)
-        function_text.move_to(function_box)
-        function_group = VGroup(function_box, function_text).to_edge(DOWN, buff=0.45)
-        candidate = Text("今回は、その候補として多項式を使う", font_size=25, color=MODEL_RED)
-        candidate.next_to(function_group, UP, buff=0.22)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(panels, lag_ratio=0.25))
-        self.play(Write(arrow))
-        self.play(FadeIn(function_group), Write(candidate), run_time=1.1)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(panels), FadeOut(arrow), FadeOut(function_group), FadeOut(candidate))
-
-    def curve_fitting_problem(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("PRML 1.1 / Fig. 1.2")
-        title = self.scene_title("10個の点から、見えない曲線を想像する", font_size=34)
-        axes = self.make_axes()
-        axes.shift(DOWN * 0.25)
-        x_label = MathTex("x", font_size=30).next_to(axes.x_axis.get_end(), RIGHT)
-        t_label = MathTex("t", font_size=30).next_to(axes.y_axis.get_end(), UP)
-        dots = self.make_data_dots(axes, self.x_train, self.t_train)
-        true_curve = self.plot_true_curve(axes)
-        true_curve.set_opacity(0.0)
-
-        note = Text("学習アルゴリズムに見えるのは青い点だけ", font_size=28, color=BLUE_DATA)
-        note.to_edge(DOWN)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(x_label), FadeIn(t_label))
-        self.play(FadeIn(dots, lag_ratio=0.12), run_time=1.4)
-        self.play(Write(note))
-        self.wait(0.7)
-        reveal = Text("今回は比較用に、背後の sin(2πx) を薄く表示", font_size=26, color=TRUE_GREEN)
-        reveal.to_edge(DOWN)
-        self.play(Transform(note, reveal), true_curve.animate.set_opacity(0.35), run_time=1.2)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(x_label), FadeOut(t_label), FadeOut(dots), FadeOut(true_curve), FadeOut(note))
-
-    def polynomial_model(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("PRML 1.1 / 式 (1.1)")
-        title = self.scene_title("次数 M を動かすと、曲線の自由さが変わる", font_size=32)
-
-        axes = self.make_axes(width=6.0, height=3.65).shift(LEFT * 0.55 + DOWN * 0.2)
-        dots = self.make_data_dots(axes, self.x_train, self.t_train)
-        true_curve = self.plot_true_curve(axes, opacity=0.22)
-        degrees = list(range(1, 10))
-        curves = [self.plot_model_curve(axes, degree=degree) for degree in degrees]
-
-        slider, knob, _ = self.make_degree_slider(degrees, 0, width=3.05)
-        slider.next_to(axes, RIGHT, buff=0.28).shift(UP * 0.75)
-        knob.move_to(slider[0].point_from_proportion(0))
-        degree_text = MathTex("M=1", font_size=34, color=MODEL_RED)
-        degree_text.next_to(slider, DOWN, buff=0.35)
-        comment = Text("直線から始める", font_size=24, color=TEXT_GREY)
-        comment.next_to(degree_text, DOWN, buff=0.18)
-
-        formula = MathTex(r"y(x,\mathbf{w})=\sum_{j=0}^{M}w_jx^j", font_size=36, color=WHITE)
-        formula.to_edge(DOWN, buff=0.45)
-        ingredients = Text("材料: 1, x, x², x³, ... をどこまで使うか", font_size=24, color=TEXT_GREY)
-        ingredients.next_to(formula, UP, buff=0.18)
-
-        comments = {
-            1: "直線から始める",
-            2: "少し曲がる",
-            3: "波に近づく",
-            4: "さらに合わせる",
-            5: "細部も追う",
-            6: "曲がりが増える",
-            7: "揺れも拾う",
-            8: "かなり自由",
-            9: "自由すぎる",
-        }
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(dots), Create(true_curve))
-        self.play(Create(curves[0]), FadeIn(slider), FadeIn(knob), Write(degree_text), Write(comment))
-        self.play(Write(ingredients), Write(formula), run_time=1.0)
-        current_curve = curves[0]
-        for i, degree in enumerate(degrees[1:], start=1):
-            next_text = MathTex(f"M={degree}", font_size=34, color=MODEL_RED).move_to(degree_text)
-            next_comment = Text(comments[degree], font_size=23, color=TEXT_GREY).move_to(comment)
-            self.play(
-                Transform(current_curve, curves[i]),
-                knob.animate.move_to(slider[0].point_from_proportion(i / (len(degrees) - 1))),
-                Transform(degree_text, next_text),
-                Transform(comment, next_comment),
-                run_time=0.65,
-            )
-            self.wait(0.08)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(true_curve), FadeOut(current_curve), FadeOut(slider), FadeOut(knob), FadeOut(degree_text), FadeOut(comment), FadeOut(ingredients), FadeOut(formula))
-
-    def least_squares(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("PRML 1.1 / Fig. 1.3 / 式 (1.2)")
-        title = self.scene_title("最小二乗: ズレを二乗して足す", font_size=34)
-        axes = self.make_axes(width=5.5, height=3.35).shift(LEFT * 1.7 + DOWN * 0.15)
-        dots = self.make_data_dots(axes, self.x_train, self.t_train)
-        curve = self.plot_model_curve(axes, degree=3)
-        residuals = self.make_residuals(axes, degree=3)
-
-        signed_values = [0.45, -0.40, 0.22, -0.23]
-        signed_rows = VGroup(
-            *[
-                MathTex(
-                    f"{value:+.2f}",
-                    font_size=26,
-                    color=BLUE_DATA if value > 0 else TEST_ORANGE,
-                )
-                for value in signed_values
-            ]
-        ).arrange(DOWN, buff=0.16, aligned_edge=RIGHT)
-        signed_title = Text("足す", font_size=22, color=TEXT_GREY)
-        signed_sum = MathTex(r"\approx 0.04", font_size=30, color=YELLOW)
-        signed_panel = VGroup(signed_title, signed_rows, Line(LEFT * 0.75, RIGHT * 0.75, color=GREY_B), signed_sum).arrange(DOWN, buff=0.16)
-        signed_panel.to_edge(RIGHT, buff=2.0).shift(UP * 0.15)
-
-        cancel_note = Text("上と下が打ち消す", font_size=20, color=YELLOW)
-        cancel_note.next_to(signed_panel, DOWN, buff=0.28)
-
-        square_rows = VGroup()
-        for value in signed_values:
-            side = 0.22 + abs(value) * 0.62
-            square = Square(side_length=side, color=RESIDUAL_YELLOW)
-            square.set_fill(RESIDUAL_YELLOW, opacity=0.25)
-            label = MathTex(f"({value:+.2f})^2", font_size=20, color=WHITE)
-            row = VGroup(square, label).arrange(RIGHT, buff=0.16)
-            square_rows.add(row)
-        square_rows.arrange(DOWN, buff=0.14, aligned_edge=LEFT)
-        square_title = Text("二乗して足す", font_size=20, color=RESIDUAL_YELLOW)
-        square_sum = MathTex(r">0", font_size=30, color=RESIDUAL_YELLOW)
-        square_note = Text("大きいズレほど点数が増える", font_size=18, color=RESIDUAL_YELLOW)
-        square_panel = VGroup(square_title, square_rows, Line(LEFT * 0.72, RIGHT * 0.72, color=GREY_B), square_sum, square_note)
-        square_panel.arrange(DOWN, buff=0.13, aligned_edge=LEFT)
-        square_panel.to_edge(RIGHT, buff=1.25).shift(UP * 0.05)
-
-        formula_words = Text("外し具合 = ズレ₁² + ズレ₂² + ... + ズレₙ²", font_size=25)
-        formula_words.to_edge(DOWN, buff=0.35)
-        formula = MathTex(
-            r"E(\mathbf{w})=\frac12\sum_{n=1}^{N}\{y(x_n,\mathbf{w})-t_n\}^2",
-            font_size=31,
-            color=WHITE,
-        )
-        formula.next_to(formula_words, UP, buff=0.25)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(dots), Create(curve))
-        self.wait(1.4)
-        self.play(Create(residuals), run_time=2.8)
-        self.wait(1.5)
-        self.play(FadeIn(signed_panel), Write(cancel_note), run_time=2.3)
-        for item in signed_rows:
-            self.play(Indicate(item, scale_factor=1.12), run_time=0.65)
-        self.wait(2.2)
-        self.play(FadeOut(signed_panel), FadeOut(cancel_note), FadeIn(square_panel), run_time=2.2)
-        for row in square_rows:
-            self.play(Indicate(row, scale_factor=1.08), run_time=0.7)
-        self.wait(2.0)
-        self.play(Write(formula_words), run_time=1.8)
-        self.wait(1.4)
-        self.play(Write(formula), run_time=2.0)
-        self.wait(3.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(curve), FadeOut(residuals), FadeOut(square_panel), FadeOut(formula_words), FadeOut(formula))
-        self.remove(label, title, axes, dots, curve, residuals, signed_panel, cancel_note, square_panel, formula_words, formula)
-
-    def compare_degrees(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene08")
-        label = self.section_label("PRML 1.1 / Fig. 1.4")
-        title = self.scene_title("同じ点で M=1 から 9 まで動かす", font_size=32)
-        axes = self.make_axes(width=6.65, height=3.75).shift(LEFT * 0.9 + DOWN * 0.1)
-        dots = self.make_data_dots(axes, self.x_train, self.t_train)
-        true_curve = self.plot_true_curve(axes, opacity=0.3)
-        degrees = list(range(1, 10))
-        curves = [self.plot_model_curve(axes, degree=degree) for degree in degrees]
-
-        slider, knob, _ = self.make_degree_slider(degrees, 0, width=3.05)
-        slider.next_to(axes, RIGHT, buff=0.35).shift(UP * 0.9)
-        knob.move_to(slider[0].point_from_proportion(0))
-        degree_label = MathTex("M=1", font_size=36, color=MODEL_RED).next_to(slider, DOWN, buff=0.32)
-        comment = Text("直線ではまだ硬い", font_size=23, color=TEXT_GREY).next_to(degree_label, DOWN, buff=0.18)
-        comments = {
-            1: ("直線ではまだ硬い", TEXT_GREY),
-            2: ("曲がれるが浅い", TEXT_GREY),
-            3: ("全体の流れをつかむ", TRUE_GREEN),
-            4: ("点に寄り始める", TRUE_GREEN),
-            5: ("細部も拾い始める", TEXT_GREY),
-            6: ("揺れが増える", TEXT_GREY),
-            7: ("点を追い込み始める", MODEL_RED),
-            8: ("かなり細かい", MODEL_RED),
-            9: ("点には合うが暴れる", MODEL_RED),
-        }
-        definition = Text("過学習 = 練習問題に合わせすぎて、初見問題に弱くなること", font_size=28, color=YELLOW)
-        definition.to_edge(DOWN)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(dots), Create(true_curve))
-        self.play(Create(curves[0]), FadeIn(slider), FadeIn(knob), Write(degree_label), Write(comment))
-        current_curve = curves[0]
-        for i, degree in enumerate(degrees[1:], start=1):
-            text, color = comments[degree]
-            next_degree = MathTex(f"M={degree}", font_size=36, color=MODEL_RED).move_to(degree_label)
-            next_comment = Text(text, font_size=23, color=color).move_to(comment)
-            self.play(
-                Transform(current_curve, curves[i]),
-                knob.animate.move_to(slider[0].point_from_proportion(i / (len(degrees) - 1))),
-                Transform(degree_label, next_degree),
-                Transform(comment, next_comment),
-                run_time=0.85 if degree < 7 else 1.05,
-            )
-            self.wait(0.12)
-        self.play(Write(definition), run_time=1.2)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(true_curve), FadeOut(current_curve), FadeOut(slider), FadeOut(knob), FadeOut(degree_label), FadeOut(comment), FadeOut(definition))
-
-    def train_vs_test_error(self) -> None:
-        self.clear()
-        narration = self.start_narration("scene09")
-        label = self.section_label("PRML 1.1 / Fig. 1.5 / 式 (1.3)")
-        title = self.scene_title("曲線のズレを測り、Mごとの誤差として記録する", font_size=31)
-        degrees = np.arange(0, 10)
-        selected = list(range(1, 10))
-        train_errors = []
-        test_errors = []
-        for degree in degrees:
-            w = fit_polynomial(self.x_train, self.t_train, int(degree))
-            train_errors.append(rms_error(w, self.x_train, self.t_train))
-            test_errors.append(rms_error(w, self.x_test, self.t_test))
-
-        model_axes = self.make_axes(width=4.2, height=2.85).shift(LEFT * 3.35 + DOWN * 0.12)
-        train_dots = self.make_data_dots(model_axes, self.x_train, self.t_train, radius=0.052)
-        test_sample_x = self.x_test[::10]
-        test_sample_t = self.t_test[::10]
-        test_dots = self.make_data_dots(model_axes, test_sample_x, test_sample_t, color=TEST_ORANGE, radius=0.032)
-        curves = [self.plot_model_curve(model_axes, degree=int(degree)) for degree in selected]
-        residual_sets = [
-            self.make_residuals(model_axes, degree=int(degree), color=RESIDUAL_YELLOW, stroke_width=3)
-            for degree in selected
-        ]
-
-        error_axes = Axes(
-            x_range=[1, 9, 1],
-            y_range=[0, max(test_errors) * 1.15, 0.5],
-            x_length=4.25,
-            y_length=3.0,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(RIGHT * 2.25 + DOWN * 0.2)
-        x_label = MathTex("M", font_size=28).next_to(error_axes.x_axis.get_end(), RIGHT)
-        y_label = Text("RMS", font_size=20).next_to(error_axes.y_axis.get_end(), LEFT, buff=0.12)
-
-        legend = VGroup(
-            VGroup(Line(LEFT * 0.3, RIGHT * 0.3, color=BLUE_DATA, stroke_width=5), Text("training", font_size=20)).arrange(RIGHT, buff=0.12),
-            VGroup(Line(LEFT * 0.3, RIGHT * 0.3, color=TEST_ORANGE, stroke_width=5), Text("test", font_size=20)).arrange(RIGHT, buff=0.12),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-        legend.next_to(error_axes, RIGHT, buff=0.22).shift(UP * 0.85)
-
-        model_title = Text("左: いまの曲線とズレ", font_size=22, color=TEXT_GREY).next_to(model_axes, UP, buff=0.15)
-        error_title = Text("右: ズレの記録", font_size=22, color=TEXT_GREY).next_to(error_axes, UP, buff=0.3)
-        degree_label = MathTex("M=1", font_size=30, color=MODEL_RED).next_to(model_axes, DOWN, buff=0.16)
-
-        count_marks = VGroup(*[Dot(radius=0.035, color=RESIDUAL_YELLOW) for _ in self.x_train])
-        count_marks.arrange(RIGHT, buff=0.06)
-        count_label = Text("training: ズレを 10 本数える / test: 100 本も同じ計算", font_size=18, color=TEXT_GREY)
-
-        def rms_formula_for(degree: int) -> MathTex:
-            w = fit_polynomial(self.x_train, self.t_train, degree)
-            residual = eval_poly(w, self.x_train) - self.t_train
-            sum_sq = float(np.sum(residual**2))
-            return MathTex(
-                rf"\sum r_n^2={sum_sq:.2f},\quad E_{{RMS}}=\sqrt{{{sum_sq:.2f}/10}}={train_errors[degree]:.2f}",
-                font_size=24,
-                color=WHITE,
-            )
-
-        calc_formula = rms_formula_for(1)
-        calc_panel = VGroup(count_label, count_marks, calc_formula).arrange(DOWN, buff=0.11)
-        calc_panel.to_edge(DOWN, buff=0.22)
-
-        train_points = VGroup()
-        test_points = VGroup()
-        train_segments = VGroup()
-        test_segments = VGroup()
-        for i, degree in enumerate(selected):
-            train_point = Dot(error_axes.c2p(degree, train_errors[degree]), color=BLUE_DATA, radius=0.055)
-            test_point = Dot(error_axes.c2p(degree, test_errors[degree]), color=TEST_ORANGE, radius=0.055)
-            train_points.add(train_point)
-            test_points.add(test_point)
-            if i > 0:
-                prev_degree = selected[i - 1]
-                train_segments.add(Line(error_axes.c2p(prev_degree, train_errors[prev_degree]), error_axes.c2p(degree, train_errors[degree]), color=BLUE_DATA, stroke_width=4))
-                test_segments.add(Line(error_axes.c2p(prev_degree, test_errors[prev_degree]), error_axes.c2p(degree, test_errors[degree]), color=TEST_ORANGE, stroke_width=4))
-
-        self.play(FadeIn(label), Write(title), Create(model_axes), Create(error_axes), FadeIn(x_label), FadeIn(y_label))
-        self.play(FadeIn(model_title), FadeIn(error_title), FadeIn(train_dots), Create(curves[0]), Create(residual_sets[0]), Write(degree_label))
-        self.play(FadeIn(calc_panel[0]), FadeIn(count_marks, lag_ratio=0.08), Write(calc_formula), run_time=1.7)
-        self.play(FadeIn(legend), FadeIn(train_points[0]), run_time=0.7)
-        self.play(FadeIn(test_dots), FadeIn(test_points[0]), run_time=0.8)
-        current_curve = curves[0]
-        current_residuals = residual_sets[0]
-        for i, degree in enumerate(selected[1:], start=1):
-            next_label = MathTex(f"M={degree}", font_size=30, color=MODEL_RED).move_to(degree_label)
-            next_formula = rms_formula_for(degree).move_to(calc_formula)
-            self.play(
-                Transform(current_curve, curves[i]),
-                Transform(current_residuals, residual_sets[i]),
-                Transform(degree_label, next_label),
-                Transform(calc_formula, next_formula),
-                Create(train_segments[i - 1]),
-                Create(test_segments[i - 1]),
-                FadeIn(train_points[i]),
-                FadeIn(test_points[i]),
-                run_time=0.95,
-            )
-            self.wait(0.12)
-        self.play(Indicate(calc_panel, scale_factor=1.03), run_time=1.2)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(model_axes), FadeOut(error_axes), FadeOut(x_label), FadeOut(y_label), FadeOut(model_title), FadeOut(error_title), FadeOut(train_dots), FadeOut(test_dots), FadeOut(current_curve), FadeOut(current_residuals), FadeOut(degree_label), FadeOut(train_points), FadeOut(test_points), FadeOut(train_segments), FadeOut(test_segments), FadeOut(legend), FadeOut(calc_panel))
-
-    def coefficient_growth(self) -> None:
-        narration = self.start_narration("scene10")
-        label = self.section_label("PRML 1.1 / Table 1.1")
-        title = self.scene_title("曲線の裏側では、係数つまみが大きく動いている", font_size=31)
-        w3 = fit_polynomial(self.x_train, self.t_train, 3)
-        w9 = fit_polynomial(self.x_train, self.t_train, 9)
-        w3_padded = np.zeros(10)
-        w3_padded[: len(w3)] = w3
-
-        model_axes = self.make_axes(width=4.7, height=3.15).shift(LEFT * 3.0 + DOWN * 0.18)
-        dots = self.make_data_dots(model_axes, self.x_train, self.t_train, radius=0.052)
-        curve3 = self.plot_model_curve(model_axes, degree=3)
-        curve9 = self.plot_model_curve(model_axes, degree=9)
-
-        bar_axes = Axes(
-            x_range=[0, 10, 1],
-            y_range=[-1, 1, 0.5],
-            x_length=4.7,
-            y_length=3.15,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(RIGHT * 2.5 + DOWN * 0.18)
-
-        max_abs = max(float(np.max(np.abs(w9))), 1e-6)
-
-        def normalized_bars(weights: np.ndarray, color: ManimColor) -> VGroup:
-            bars = VGroup()
-            for i, weight in enumerate(weights):
-                scaled = np.sign(weight) * np.log10(1.0 + abs(float(weight))) / np.log10(1.0 + max_abs)
-                start = bar_axes.c2p(i + 0.55, 0)
-                end = bar_axes.c2p(i + 0.55, scaled)
-                bar = Line(start, end, color=color, stroke_width=10)
-                bars.add(bar)
-            return bars
-
-        bars3 = normalized_bars(w3_padded, TRUE_GREEN)
-        bars9 = normalized_bars(w9, MODEL_RED)
-        labels = VGroup(*[MathTex(f"w_{i}", font_size=20) for i in range(10)])
-        for i, item in enumerate(labels):
-            item.move_to(bar_axes.c2p(i + 0.55, -0.14))
-        model_caption = Text("曲線", font_size=23, color=TEXT_GREY).next_to(model_axes, UP, buff=0.15)
-        bar_caption = Text("係数つまみ", font_size=23, color=TEXT_GREY).next_to(bar_axes, UP, buff=0.15)
-        m3_text = Text("M=3: 少ない係数で全体を見る", font_size=23, color=TRUE_GREEN).to_edge(DOWN, buff=0.5)
-        m9_text = Text("M=9: 係数を大きく振って点を追う", font_size=23, color=MODEL_RED).move_to(m3_text)
-        note = Text("棒は係数の大きさを log 表示。極端な係数が曲線の暴れ方につながる", font_size=21, color=TEXT_GREY)
-        note.to_edge(DOWN)
-
-        self.play(FadeIn(label), Write(title), Create(model_axes), Create(bar_axes), FadeIn(model_caption), FadeIn(bar_caption), FadeIn(dots), FadeIn(labels))
-        self.play(Create(curve3), Create(bars3), Write(m3_text), run_time=1.0)
-        self.wait(0.5)
-        self.play(Transform(curve3, curve9), Transform(bars3, bars9), Transform(m3_text, m9_text), run_time=1.5)
-        self.play(Write(note))
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(model_axes), FadeOut(bar_axes), FadeOut(model_caption), FadeOut(bar_caption), FadeOut(dots), FadeOut(curve3), FadeOut(labels), FadeOut(bars3), FadeOut(m3_text), FadeOut(note))
-
-    def more_data(self) -> None:
-        narration = self.start_narration("scene11")
-        label = self.section_label("PRML 1.1 / Fig. 1.6")
-        title = self.scene_title("同じ M=9 でも、点が増えると曲線が支えられる", font_size=32)
-        axes = self.make_axes(width=7.0, height=3.75).shift(DOWN * 0.05)
-        x15, t15 = make_sine_data(n=15, seed=5)
-        x100, t100 = make_sine_data(n=100, seed=6)
-        dots15 = self.make_data_dots(axes, x15, t15, radius=0.055)
-        dots100 = self.make_data_dots(axes, x100, t100, radius=0.026)
-        true_curve = self.plot_true_curve(axes, opacity=0.25)
-        model15 = self.plot_model_curve(axes, degree=9, x=x15, t=t15)
-        model100 = self.plot_model_curve(axes, degree=9, x=x100, t=t100)
-        caption15 = MathTex(r"N=15,\ M=9", font_size=31, color=MODEL_RED).next_to(axes, UP, buff=0.1)
-        caption100 = MathTex(r"N=100,\ M=9", font_size=31, color=TRUE_GREEN).move_to(caption15)
-        flow = VGroup(
-            Text("少ない点", font_size=22, color=MODEL_RED),
-            Arrow(LEFT * 0.6, RIGHT * 0.6, buff=0),
-            Text("多い点", font_size=22, color=TRUE_GREEN),
-        ).arrange(RIGHT, buff=0.18).to_edge(RIGHT, buff=0.9).shift(UP * 1.55)
-        note = Text("複雑なモデルを使うには、それを支えるデータも必要", font_size=28, color=WHITE).to_edge(DOWN)
-
-        self.play(FadeIn(label), Write(title), Create(axes), Create(true_curve))
-        self.play(FadeIn(dots15, lag_ratio=0.05), Create(model15), Write(caption15), run_time=1.2)
-        self.play(FadeIn(flow), run_time=0.7)
-        self.play(FadeOut(dots15), FadeIn(dots100, lag_ratio=0.01), Transform(model15, model100), Transform(caption15, caption100), run_time=2.0)
-        self.play(Write(note), run_time=0.9)
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(true_curve), FadeOut(dots100), FadeOut(model15), FadeOut(caption15), FadeOut(flow), FadeOut(note))
-
-    def regularization(self) -> None:
-        narration = self.start_narration("scene12")
-        label = self.section_label("PRML 1.1 / Fig. 1.7, 1.8 / 式 (1.4)")
-        title = self.scene_title("正則化: 係数の大きさも外し具合の点数に足す", font_size=30)
-        axes = self.make_axes(width=6.2, height=3.6).shift(LEFT * 1.0 + DOWN * 0.25)
-        dots = self.make_data_dots(axes, self.x_train, self.t_train)
-        true_curve = self.plot_true_curve(axes, opacity=0.35)
-
-        lambda_values = [0.0, np.exp(-18), np.exp(-6), np.exp(-18), np.exp(-6), 1.0]
-        labels = [r"\lambda=0", r"\ln\lambda=-18", r"\ln\lambda=-6", r"\ln\lambda=-18", r"\ln\lambda=-6", r"\ln\lambda=0"]
-        slider_positions = [0, 1, 2, 1, 2, 3]
-        curves = [self.plot_model_curve(axes, degree=9, lam=lam) for lam in lambda_values]
-
-        slider_line = Line(LEFT * 1.35, RIGHT * 1.35, color=GREY_B).to_edge(RIGHT, buff=0.85).shift(UP * 0.85)
-        slider_title = Text("なめらかさ λ", font_size=22, color=REG_PURPLE).next_to(slider_line, UP, buff=0.18)
-        knob = Dot(slider_line.get_start(), color=REG_PURPLE)
-        lambda_text = MathTex(labels[0], font_size=24, color=REG_PURPLE).next_to(slider_line, DOWN, buff=0.18)
-        formula = MathTex(
-            r"\tilde{E}=\frac12\sum_n\{y(x_n)-t_n\}^2+\frac{\lambda}{2}\sum_j w_j^2",
-            font_size=27,
-        )
-        formula.to_edge(DOWN)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(dots), Create(true_curve))
-        self.play(Create(curves[0]), Create(slider_line), FadeIn(knob), Write(slider_title), Write(lambda_text))
-        self.play(Write(formula))
-        current_curve = curves[0]
-        for i in range(1, len(curves)):
-            target_pos = slider_line.point_from_proportion(slider_positions[i] / 3)
-            new_text = MathTex(labels[i], font_size=24, color=REG_PURPLE).next_to(slider_line, DOWN, buff=0.18)
-            self.play(
-                Transform(current_curve, curves[i]),
-                knob.animate.move_to(target_pos),
-                Transform(lambda_text, new_text),
-                run_time=1.45,
-            )
-            self.wait(0.35)
-
-        note = Text("λ は、点への合い方と曲線の暴れにくさのバランスを取るつまみ", font_size=22, color=WHITE)
-        note.next_to(formula, UP, buff=0.18)
-        self.play(Write(note))
-        self.wait(1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(true_curve), FadeOut(current_curve), FadeOut(slider_line), FadeOut(slider_title), FadeOut(knob), FadeOut(lambda_text), FadeOut(formula), FadeOut(note))
-
-    def bridge_to_probability(self) -> None:
-        narration = self.start_narration("scene13")
-        title = self.scene_title("次回: 不確かさをどう扱うか", font_size=36)
-        axes = self.make_axes(width=7.2, height=4.0).shift(DOWN * 0.25)
-        dots = self.make_data_dots(axes, self.x_train, self.t_train)
-        model = self.plot_model_curve(axes, degree=3)
-        band_upper = axes.plot(lambda u: np.sin(2 * np.pi * u) + 0.35, x_range=[0, 1], color=GREY_C)
-        band_lower = axes.plot(lambda u: np.sin(2 * np.pi * u) - 0.35, x_range=[0, 1], color=GREY_C)
-        band_upper.set_stroke(opacity=0.45)
-        band_lower.set_stroke(opacity=0.45)
-        noise_clouds = VGroup(
-            *[
-                Circle(radius=0.18, color=GREY_B, stroke_opacity=0.4)
-                .set_fill(GREY_B, opacity=0.08)
-                .move_to(dot.get_center())
-                for dot in dots
-            ]
-        )
-        message = Text(
-            "一本の曲線だけでなく、「どれくらい不確かか」を表すために確率論へ進む",
-            font_size=28,
-            color=WHITE,
-        ).to_edge(DOWN)
-        self.play(Write(title), Create(axes), FadeIn(dots), Create(model))
-        self.play(FadeIn(noise_clouds), Create(band_upper), Create(band_lower), run_time=1.2)
-        self.play(Write(message), run_time=1.2)
-        self.wait(1.5)
-        self.finish_narration(narration)
-        self.play(FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(model), FadeOut(noise_clouds), FadeOut(band_upper), FadeOut(band_lower), FadeOut(message))
+        for x in [0, .5, 1]:
+            labels.add(tex(str(x), 18, MUTED).move_to(ax.c2p(x, yr[0]) + DOWN * .22))
+        for y in range(int(yr[0]) + 1, int(yr[1]) + 1):
+            labels.add(tex(str(y), 18, MUTED).next_to(ax.c2p(0, y), LEFT, buff=.12))
+        labels.add(tex('x', 22).next_to(ax.c2p(1, yr[0]), RIGHT, buff=.18))
+        labels.add(tex(r't,\ y', 22).next_to(ax.c2p(0, yr[1]), UP, buff=.17))
+        self.add(grid, ax, labels)
+        return ax
+
+    def slider(self, tracker, low, high, position, width=4.8, label='M', ticks=None, color=MODEL_RED):
+        base = NumberLine(x_range=[low, high, 1], length=width, include_ticks=False,
+                          color=MUTED, stroke_width=2).move_to(position)
+        group = VGroup(base)
+        for v in (ticks if ticks is not None else range(int(low), int(high) + 1)):
+            pos = base.n2p(v)
+            group.add(Line(pos + DOWN * .07, pos + UP * .07, color=MUTED))
+            group.add(tex(str(v), 17, MUTED).next_to(pos, DOWN, buff=.13))
+        group.add(tex(label, 26, color).next_to(base, LEFT, buff=.25))
+        knob = Dot(base.n2p(tracker.get_value()), color=color, radius=.075)
+        knob.add_updater(lambda m: m.move_to(base.n2p(tracker.get_value())))
+        group.add(knob)
+        return group
+
+    def degree_label(self, tracker, pos):
+        labels = VGroup(*[tex(f'M={i}', 28, MODEL_RED).move_to(pos) for i in range(10)])
+        labels.add(jp('遷移中', 22, MUTED).move_to(pos))
+        def update(m):
+            value = tracker.get_value()
+            key = round(value) if abs(value - round(value)) < 1e-5 else 10
+            for i, item in enumerate(m):
+                item.set_opacity(1 if i == key else 0)
+        labels.add_updater(update)
+        update(labels)
+        return labels
+
+    def question(self):
+        ax = self.axes(center=(0, .1, 0), width=9, height=3.7)
+        dots = data_dots(ax)
+        self.beat(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=.15), moving=False)
+        cursor = ValueTracker(.45)
+        guide = always_redraw(lambda: DashedLine(ax.c2p(cursor.get_value(), -2.8), ax.c2p(cursor.get_value(), 1.7), color=MUTED))
+        self.add(guide)
+        self.beat(cursor.animate.set_value(.72))
+        truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4)
+        equation = tex(r't_n=\sin(2\pi x_n)+\epsilon_n', 32).move_to([0, -2.45, 0])
+        self.beat(Create(truth), Write(equation), moving=False)
+        self.beat(Indicate(dots, color=BLUE_DATA, scale_factor=1.04))
+        model = graph_curve(ax, WEIGHTS[3])
+        self.beat(Create(model), FadeOut(guide))
+        test = data_dots(ax, XT[::10], TT[::10], TEST_ORANGE, .05)
+        self.beat(LaggedStart(*[FadeIn(d, shift=DOWN * .3) for d in test], lag_ratio=.1), moving=False)
+
+    def knobs(self):
+        ax = self.axes()
+        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
+        trackers = [ValueTracker(0) for _ in range(4)]
+        weights = lambda: np.array([v.get_value() for v in trackers])
+        model = always_redraw(lambda: graph_curve(ax, weights()))
+        self.add(model)
+        formula = MathTex('y=', 'w_0', '+', 'w_1 x', '+', 'w_2 x^2', '+', 'w_3 x^3', font_size=33).move_to([0, -2.45, 0])
+        for j, c in enumerate(TERM_COLORS):
+            formula[1 + 2 * j].set_color(c)
+        self.add(formula)
+        knobs = []
+        for j, tracker in enumerate(trackers):
+            x = 1.2 + j * 1.45
+            rail = Line([x, -1.25, 0], [x, 1.55, 0], color=MUTED)
+            dot = Dot(color=TERM_COLORS[j], radius=.08)
+            dot.add_updater(lambda m, tr=tracker, xx=x: m.move_to([xx, .15 + tr.get_value() * .4, 0]))
+            number = readout('', tracker.get_value, [x, -1.68, 0], TERM_COLORS[j], 1, 22)
+            group = VGroup(rail, dot, tex(f'w_{j}', 28, TERM_COLORS[j]).move_to([x, 2.02, 0]), number)
+            knobs.append(group)
+        self.add(knobs[0])
+        self.beat(trackers[0].animate.set_value(.8), Indicate(formula[1]))
+        self.add(knobs[1])
+        self.beat(trackers[1].animate.set_value(-1.6), Indicate(formula[3]))
+        self.add(knobs[2])
+        self.beat(trackers[2].animate.set_value(1.8), Indicate(formula[5]))
+        self.add(knobs[3])
+        self.beat(trackers[3].animate.set_value(-1.6), Indicate(formula[7]))
+        self.beat(trackers[0].animate.set_value(.1), trackers[1].animate.set_value(1.5),
+                  trackers[2].animate.set_value(-2.5), trackers[3].animate.set_value(.7))
+        compact = tex(r'y(x,\mathbf w)=\sum_{j=0}^{M}w_jx^j', 35).move_to(formula)
+        count = tex(r'M=3\quad\Rightarrow\quad 4', 32, RESIDUAL_YELLOW).move_to([3.35, -2.3, 0])
+        compact.move_to([-2.7, -2.45, 0])
+        self.beat(TransformMatchingTex(formula, compact), FadeIn(count), moving=False)
+        self.beat(trackers[3].animate.set_value(0))
+        self.beat(trackers[0].animate.set_value(.8), trackers[1].animate.set_value(-1.4), trackers[2].animate.set_value(0))
+
+    def squares(self):
+        ax = self.axes(width=5.4)
+        offset = ValueTracker(.35)
+        w = lambda: WEIGHTS[1] + np.r_[offset.get_value(), np.zeros(9)]
+        model = always_redraw(lambda: graph_curve(ax, w()))
+        lines = always_redraw(lambda: residuals(ax, w()))
+        self.add(data_dots(ax), model)
+        formula = MathTex(r'r_n=', r'y(x_n,\mathbf w)', '-', 't_n', font_size=32).move_to([0, -2.47, 0])
+        formula[1].set_color(MODEL_RED); formula[3].set_color(BLUE_DATA)
+        self.beat(Create(lines), Write(formula), moving=False)
+        signed = VGroup(jp('符号付きの和', 25), tex(r'(+1)+(-1)=0', 34, BLUE_DATA),
+                        jp('ずれていても、ゼロになる', 21, MUTED)).arrange(DOWN, buff=.25).move_to([3.1, 1.1, 0])
+        signed_vectors = VGroup(Arrow([1.6, .15, 0], [3.1, .15, 0], buff=0, color=BLUE_DATA),
+                                Arrow([3.1, -.05, 0], [1.6, -.05, 0], buff=0, color=TEST_ORANGE))
+        self.beat(FadeIn(signed), Succession(GrowArrow(signed_vectors[0]), GrowArrow(signed_vectors[1])), moving=False)
+        squared = VGroup(jp('二乗和', 25), tex(r'(+1)^2+(-1)^2=2', 33, RESIDUAL_YELLOW)).arrange(DOWN, buff=.2).move_to([3.1, -1, 0])
+        self.beat(FadeIn(squared), Indicate(signed_vectors), moving=False)
+        self.remove(signed, squared, signed_vectors)
+        title = jp('各残差の二乗（面積）', 24, RESIDUAL_YELLOW).move_to([3.1, 2.1, 0])
+        self.add(title)
+        scale = np.linalg.norm(ax.c2p(0, 1) - ax.c2p(0, 0))
+        def tiles():
+            result = VGroup()
+            for i, r in enumerate(eval_poly(w(), X) - T):
+                square = Square(side_length=max(.008, scale * abs(r)), color=RESIDUAL_YELLOW,
+                                fill_color=RESIDUAL_YELLOW, fill_opacity=.3, stroke_width=1.5)
+                square.move_to([.9 + 1.05 * (i % 5), 1.12 - 1.45 * (i // 5), 0])
+                result.add(square)
+            return result
+        tile_static = tiles()
+        self.beat(LaggedStart(*[TransformFromCopy(lines[i], tile_static[i]) for i in range(10)], lag_ratio=.1))
+        self.remove(tile_static, *tile_static)
+        tile_dynamic = always_redraw(tiles)
+        self.add(tile_dynamic)
+        energy = lambda: .5 * np.sum((eval_poly(w(), X) - T) ** 2)
+        bar_start = np.array([.8, -1.55, 0])
+        bar = always_redraw(lambda: Rectangle(width=max(.005, energy() * .63), height=.18,
+                            stroke_width=0, fill_color=RESIDUAL_YELLOW, fill_opacity=.85).move_to(bar_start, aligned_edge=LEFT))
+        energy_num = readout('E=', energy, [3, -1.98, 0], RESIDUAL_YELLOW)
+        objective = MathTex(r'E(\mathbf w)=', r'\frac12', r'\sum_{n=1}^N', 'r_n^2', font_size=33).move_to(formula)
+        objective[-1].set_color(RESIDUAL_YELLOW)
+        self.add(bar, energy_num)
+        collected = VGroup(*[Dot(bar_start + RIGHT * energy() * .315, radius=.04, color=RESIDUAL_YELLOW) for _ in tile_static])
+        self.beat(TransformMatchingTex(formula, objective),
+                  LaggedStart(*[TransformFromCopy(s, target) for s, target in zip(tile_static, collected)], lag_ratio=.1))
+        self.remove(collected, *collected)
+        self.beat(offset.animate.set_value(.7))
+        self.beat(offset.animate.set_value(-.6))
+        self.beat(Indicate(objective[2]), Indicate(objective[1]), moving=False)
+        self.beat(offset.animate.set_value(0))
+
+    def valley(self):
+        ax = self.axes(width=5.3)
+        alpha = ValueTracker(0)
+        best = WEIGHTS[1][:2]
+        initial = np.array([-.8, .5])
+        weights = lambda: (1 - alpha.get_value()) * initial + alpha.get_value() * best
+        self.add(data_dots(ax))
+        line = always_redraw(lambda: graph_curve(ax, weights()))
+        errors = always_redraw(lambda: residuals(ax, weights()))
+        self.add(line, errors)
+        plane = Axes(x_range=[-1.5, 1.5, .5], y_range=[-3, 1.5, .5], x_length=4.7, y_length=3.6,
+                     tips=False, axis_config={'color': MUTED, 'stroke_width': 1.3}).move_to([3.35, .1, 0])
+        self.add(plane, tex('w_0', 26).next_to(plane.c2p(1.5, 0), RIGHT, buff=.1),
+                 tex('w_1', 26).next_to(plane.c2p(0, 1.5), UP, buff=.1))
+        hessian = design_matrix(X, 1).T @ design_matrix(X, 1)
+        vals, vecs = np.linalg.eigh(hessian)
+        contours = VGroup()
+        for level in [.04, .14, .32, .7, 1.3]:
+            theta = np.linspace(0, 2 * PI, 181)
+            xy = best[:, None] + vecs @ (np.sqrt(2 * level / vals)[:, None] * np.array([np.cos(theta), np.sin(theta)]))
+            contours.add(polyline([plane.c2p(a, b) for a, b in xy.T], REG_PURPLE, 1.7, .65))
+        dot = always_redraw(lambda: Dot(plane.c2p(*weights()), color=RESIDUAL_YELLOW, radius=.085))
+        bottom = Dot(plane.c2p(*best), color=TRUE_GREEN, radius=.055)
+        self.add(dot)
+        self.beat(Indicate(dot), Indicate(line), moving=False)
+        self.beat(Create(contours), FadeIn(bottom), moving=False)
+        energy = readout('E=', lambda: .5 * np.sum((eval_poly(weights(), X) - T)**2), [3.2, -2.35, 0], RESIDUAL_YELLOW)
+        formula = tex(r'y=w_0+w_1x', 32).move_to([-3, -2.35, 0])
+        self.add(energy, formula)
+        self.beat(alpha.animate.set_value(.45))
+        self.beat(alpha.animate.set_value(.85))
+        self.beat(alpha.animate.set_value(1))
+        truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.55)
+        self.beat(Create(truth), Indicate(line))
+
+    def degrees(self):
+        ax = self.axes(width=5.5)
+        tracker = ValueTracker(0)
+        w = lambda: degree_weights(tracker.get_value())
+        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.35))
+        model = always_redraw(lambda: graph_curve(ax, w()))
+        lines = always_redraw(lambda: residuals(ax, w()))
+        test_dots = data_dots(ax, XT[::10], TT[::10], TEST_ORANGE, .033)
+        test_lines = always_redraw(lambda: residuals(ax, w(), XT[::10], TT[::10], TEST_ORANGE).set_opacity(.6))
+        errax = Axes(x_range=[0, 9, 1], y_range=[0, 1.1, .25], x_length=4.65, y_length=3.0,
+                     tips=False, axis_config={'color': MUTED, 'stroke_width': 1.5}).move_to([3.45, .1, 0])
+        self.add(errax, tex('M', 23).next_to(errax.c2p(9, 0), RIGHT, buff=.13),
+                 jp('RMS', 23).move_to([1.25, 2.02, 0]))
+        for v in [0, .5, 1.0]:
+            self.add(tex(str(v), 18, MUTED).next_to(errax.c2p(0, v), LEFT, buff=.12))
+        for v in [0, 3, 6, 9]:
+            self.add(tex(str(v), 18, MUTED).next_to(errax.c2p(v, 0), DOWN, buff=.12))
+        self.add(jp('訓練', 21, BLUE_DATA).move_to([3.4, 2.1, 0]), jp('テスト', 21, TEST_ORANGE).move_to([5, 2.1, 0]))
+        self.add(self.slider(tracker, 0, 9, [-3.1, -2.35, 0], width=4.6), self.degree_label(tracker, [-3.1, 2.12, 0]))
+        self.add(model, lines)
+        self.beat(FadeIn(test_dots), Create(test_lines), moving=False)
+        rms_formula = tex(r'E_{\rm RMS}=\sqrt{\frac1N\sum_n r_n^2}', 27).move_to([3.4, -2.45, 0])
+        self.add(rms_formula)
+        counter = ValueTracker(0)
+        count_label = readout(r'n=', counter.get_value, [3.6, 1.75, 0], RESIDUAL_YELLOW, 0, 20)
+        self.add(count_label)
+        train_pts = [Dot(errax.c2p(m, TRAIN_RMS[m]), color=BLUE_DATA, radius=.05) for m in range(10)]
+        test_pts = [Dot(errax.c2p(m, TEST_RMS[m]), color=TEST_ORANGE, radius=.05) for m in range(10)]
+        # One growing path per set; no duplicate completed lines.
+        train_path = VMobject(color=BLUE_DATA, stroke_width=2.5)
+        test_path = VMobject(color=TEST_ORANGE, stroke_width=2.5)
+        self.add(train_path, test_path)
+        def stamp(m):
+            counter.set_value(0)
+            pulses = Succession(*[AnimationGroup(Indicate(lines[i], scale_factor=1.1), counter.animate.set_value(i + 1)) for i in range(10)], run_time=2)
+            transfers = AnimationGroup(TransformFromCopy(lines, train_pts[m]), TransformFromCopy(test_lines, test_pts[m]))
+            return Succession(pulses, transfers)
+        self.beat(stamp(0))
+        for m in range(1, 10):
+            # Use callbacks only at the fitted endpoint; RMS markers are never interpolated observations.
+            motion = tracker.animate(run_time=5).set_value(m)
+            def add_paths(m=m):
+                train_path.set_points_as_corners([p.get_center() for p in train_pts[:m + 1]])
+                test_path.set_points_as_corners([p.get_center() for p in test_pts[:m + 1]])
+            # Succession gives most of each beat to the linked morph, then the count and transfer.
+            self.beat(Succession(motion, stamp(m)))
+            add_paths()
+        highlight = Circle(radius=.23, color=RESIDUAL_YELLOW).move_to(ax.c2p(.05, eval_poly(WEIGHTS[9], .05)))
+        self.beat(Create(highlight), Indicate(test_pts[9]), moving=False)
+
+    def coefficient_axes(self, center=(3.3, .1, 0), width=4.8, height=3.25):
+        ax = Axes(x_range=[-.5, 9.5, 1], y_range=[-6.5, 6.5, 2], x_length=width, y_length=height,
+                  tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to(center)
+        self.add(ax)
+        for i in range(10):
+            self.add(tex(str(i), 16, MUTED).move_to(ax.c2p(i, -6.5) + DOWN * .17))
+        for y in [-6, -3, 3, 6]:
+            self.add(tex(str(y), 16, MUTED).next_to(ax.c2p(-.5, y), LEFT, buff=.12))
+        return ax
+
+    def coefficient_bars(self, ax, weights, color=REG_PURPLE):
+        return VGroup(*[Line(ax.c2p(j, 0), ax.c2p(j, np.sign(v) * np.log10(1 + abs(v)) + 1e-8), color=color, stroke_width=9)
+                        for j, v in enumerate(weights)])
+
+    def coefficients(self):
+        ax = self.axes(width=5.4)
+        tracker = ValueTracker(3)
+        w = lambda: degree_weights(tracker.get_value())
+        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
+        self.add(always_redraw(lambda: graph_curve(ax, w())))
+        barsax = self.coefficient_axes()
+        bars = always_redraw(lambda: self.coefficient_bars(barsax, w()))
+        self.add(bars, self.degree_label(tracker, [-3, -2.35, 0]))
+        scale_formula = tex(r'\operatorname{sgn}(w_j)\log_{10}(1+|w_j|)', 25, REG_PURPLE).move_to([3.3, 2.15, 0])
+        maximum = readout(r'\log_{10}(1+\max_j|w_j|)=', lambda: np.log10(1 + np.max(abs(w()))), [3.3, -2.35, 0], REG_PURPLE, 2, 25)
+        self.add(maximum)
+        self.beat(Create(bars), moving=False)
+        self.beat(Write(scale_formula), moving=False)
+        self.beat(tracker.animate.set_value(6))
+        self.beat(tracker.animate.set_value(9))
+        self.beat(tracker.animate.set_value(3))
+        self.beat(tracker.animate.set_value(9))
+
+    def more_data(self):
+        ax = self.axes(center=(0, .1, 0), width=9, height=3.65, yr=(-3.5, 2, 1))
+        n = ValueTracker(10)
+        curve = always_redraw(lambda: graph_curve(ax, growing_weights(n.get_value())))
+        self.add(graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4), curve)
+        dots = data_dots(ax, X_ALL, T_ALL, radius=.034)
+        # Existing points stay fixed. Each new point falls as its data weight is introduced.
+        for i, dot in enumerate(dots):
+            target = dot.get_center().copy()
+            def update(m, i=i, target=target):
+                a = np.clip(n.get_value() - i, 0, 1) if i >= 10 else 1
+                m.move_to(target + UP * .45 * (1 - a)).set_opacity(a)
+            dot.add_updater(update)
+        self.add(dots)
+        count = readout('N=', lambda: np.floor(n.get_value() + 1e-6), [-1.1, -2.45, 0], BLUE_DATA, 0, 32)
+        self.add(count, tex('M=9', 32, MODEL_RED).move_to([1.5, -2.45, 0]))
+        self.beat(Indicate(dots[:10], scale_factor=1.08), moving=False)
+        self.beat(n.animate.set_value(15))
+        self.beat(Indicate(dots[10:15], scale_factor=1.4))
+        self.beat(n.animate.set_value(40))
+        self.beat(n.animate.set_value(100))
+        self.beat(Indicate(curve, color=TRUE_GREEN, scale_factor=1.02))
+
+    def regularization(self):
+        ax = self.axes(center=(-3.15, .45, 0), width=5.45, height=3.1)
+        loglam = ValueTracker(-32)
+        w = lambda: ridge_weights(float(loglam.get_value()))
+        self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
+        curve = always_redraw(lambda: graph_curve(ax, w()))
+        lines = always_redraw(lambda: residuals(ax, w()).set_opacity(.55))
+        self.add(curve, lines)
+        barsax = self.coefficient_axes(center=(3.3, 1.17, 0), height=1.65, width=4.7)
+        bars = always_redraw(lambda: self.coefficient_bars(barsax, w()))
+        self.add(bars)
+        self.add(tex(r'\operatorname{sgn}(w_j)\log_{10}(1+|w_j|)', 21, REG_PURPLE).move_to([3.3, 2.27, 0]))
+        def springs():
+            result = VGroup()
+            for j, value in enumerate(w()):
+                h = np.sign(value) * np.log10(1 + abs(value))
+                a, b = barsax.c2p(j, 0) + RIGHT * .13, barsax.c2p(j, h) + RIGHT * .13
+                pts = [a + (b - a) * u + RIGHT * .09 * np.sin(8 * PI * u) for u in np.linspace(0, 1, 33)]
+                result.add(polyline(pts, REG_PURPLE, 2.0))
+            return result
+        rubber = always_redraw(springs)
+        self.beat(FadeIn(rubber), moving=False)
+        formula = MathTex(r'\widetilde E=', r'\frac12\sum_n(y(x_n,\mathbf w)-t_n)^2', '+', r'\frac{\lambda}{2}\sum_{j=0}^{9}w_j^2', font_size=30).move_to([0, -2.62, 0])
+        formula[1].set_color(RESIDUAL_YELLOW); formula[3].set_color(REG_PURPLE)
+        self.beat(Write(formula), Indicate(lines), Indicate(bars), moving=False)
+        slider = self.slider(loglam, -32, 0, [-3, -1.9, 0], width=4.6, label=r'\ln\lambda', ticks=[-32, -24, -16, -8, 0], color=REG_PURPLE)
+        self.add(slider, readout(r'\ln\lambda=', loglam.get_value, [-3.1, 2.25, 0], REG_PURPLE, 1, 25))
+        err = Axes(x_range=[0, 32, 8], y_range=[0, 1.1, .5], x_length=4.65, y_length=1.42,
+                   tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to([3.3, -1.07, 0])
+        values = np.linspace(-32, 0, 161)
+        training = [rms_error(ridge_weights(float(l)), X, T) for l in values]
+        testing = [rms_error(ridge_weights(float(l)), XT, TT) for l in values]
+        self.add(err, jp('RMS', 19).move_to([.65, -.16, 0]),
+                 jp('訓練', 19, BLUE_DATA).move_to([2.4, -.03, 0]),
+                 jp('テスト', 19, TEST_ORANGE).move_to([4.0, -.03, 0]))
+        for v in [-32, -16, 0]:
+            self.add(tex(str(v), 16, MUTED).next_to(err.c2p(v + 32, 0), DOWN, buff=.08))
+        for v in [0, 1]:
+            self.add(tex(str(v), 16, MUTED).next_to(err.c2p(0, v), LEFT, buff=.08))
+        self.add(tex(r'\ln\lambda', 20).next_to(err.c2p(32, 0), RIGHT, buff=.12))
+        train_path = polyline([err.c2p(l + 32, e) for l, e in zip(values, training)], BLUE_DATA, 2)
+        test_path = polyline([err.c2p(l + 32, e) for l, e in zip(values, testing)], TEST_ORANGE, 2)
+        markers = always_redraw(lambda: VGroup(Dot(err.c2p(loglam.get_value() + 32, rms_error(w(), X, T)), radius=.055, color=BLUE_DATA),
+                                              Dot(err.c2p(loglam.get_value() + 32, rms_error(w(), XT, TT)), radius=.055, color=TEST_ORANGE)))
+        self.add(train_path, test_path, markers)
+        self.beat(Indicate(formula[3]), Indicate(rubber), moving=False)
+        self.beat(loglam.animate.set_value(-18))
+        self.beat(loglam.animate.set_value(0))
+        self.beat(loglam.animate.set_value(-32))
+        self.beat(loglam.animate.set_value(-18))
+        self.beat(loglam.animate.set_value(-8))
+        self.beat(loglam.animate.set_value(-18))
+
+    def uncertainty(self):
+        ax = self.axes(center=(0, .1, 0), width=9, height=3.6)
+        observations = data_dots(ax)
+        self.add(observations, graph_curve(ax, ridge_weights(-18)))
+        truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.65)
+        self.beat(Create(truth), moving=False)
+        repeated = np.random.default_rng(44).normal(float(sine(.65)), NOISE_STD, 18)
+        newdots = data_dots(ax, np.full(18, .65), repeated, TEST_ORANGE, .04)
+        self.beat(LaggedStart(*[FadeIn(d, shift=DOWN * .15) for d in newdots], lag_ratio=.2))
+        u = np.linspace(0, 1, 160)
+        vertices = [ax.c2p(x, sine(x) + 2 * NOISE_STD) for x in u] + [ax.c2p(x, sine(x) - 2 * NOISE_STD) for x in u[::-1]]
+        band = Polygon(*vertices, stroke_width=0, fill_color=TRUE_GREEN, fill_opacity=.15).set_z_index(-1)
+        label = tex(r'\sigma=0.25\qquad \sin(2\pi x)\pm 2\sigma', 31, TRUE_GREEN).move_to([0, -2.45, 0])
+        self.beat(FadeIn(band), Write(label), moving=False)
+        self.beat(Indicate(newdots, scale_factor=1.12), Indicate(observations, scale_factor=1.03))
+        question = jp('どんな値が、どれくらいありそうか？', 34).move_to([0, -2.45, 0])
+        self.beat(ReplacementTransform(label, question), moving=False)
