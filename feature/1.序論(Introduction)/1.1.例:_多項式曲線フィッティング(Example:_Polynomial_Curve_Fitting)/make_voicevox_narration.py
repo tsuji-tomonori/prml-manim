@@ -5,16 +5,18 @@ import argparse
 import hashlib
 import io
 import json
+import math
 import urllib.parse
 import urllib.request
 import wave
 from pathlib import Path
 
-from narration_content import SCENES, estimated_duration, script_hash
+from narration_content import SCENES, SYNTHESIS_SETTINGS, estimated_duration, script_hash, spoken_segments
 
 SCENE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCENE_DIR / "assets" / "voicevox"
 MANIFEST = OUTPUT_DIR / "manifest.json"
+CACHE_DIR = SCENE_DIR.parents[2] / ".working" / "voicevox-lines"
 SPEAKER = {"label": "VOICEVOX:WhiteCUL", "id": 23, "speed_scale": 1.08}
 
 
@@ -32,6 +34,11 @@ def valid_entry(scene, entry):
     beats = entry.get("beat_durations", [])
     if len(beats) != len(scene["beats"]) or any(d <= 0 for d in beats):
         return False
+    cues = entry.get("subtitle_cues", [])
+    if "".join(c["text"] for c in cues) != "".join(b["text"] for b in scene["beats"]):
+        return False
+    if len(entry.get("beat_speech_ends", [])) != len(beats):
+        return False
     try:
         return abs(sum(beats) - wav_duration(path)) < 0.02
     except (wave.Error, EOFError):
@@ -47,7 +54,7 @@ def pending_entry(scene):
 def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     temporary = MANIFEST.with_suffix(".tmp.json")
-    temporary.write_text(json.dumps({"version": 2, "speaker": SPEAKER, "scenes": entries},
+    temporary.write_text(json.dumps({"version": 3, "speaker": SPEAKER, "scenes": entries},
                                     ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(MANIFEST)
 
@@ -74,35 +81,62 @@ def post_json(base, endpoint, params, body=None):
         return response.read()
 
 
+def sentence_audio(base, text):
+    key = hashlib.sha256(json.dumps([base, "0.25.2", 23, SYNTHESIS_SETTINGS, text],
+                                  ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache = CACHE_DIR / f"{key}.wav"
+    if cache.exists():
+        return cache.read_bytes()
+    query = json.loads(post_json(base, "audio_query", {"speaker": 23, "text": text}))
+    query.update(SYNTHESIS_SETTINGS)
+    data = post_json(base, "synthesis", {"speaker": 23}, json.dumps(query).encode())
+    cache.write_bytes(data)
+    return data
+
+
 def generate_scene(base, scene):
     path = OUTPUT_DIR / f"{scene['id']}.wav"
     temporary = path.with_suffix(".tmp.wav")
-    durations = []
+    durations, speech_ends, cues = [], [], []
     expected = None
+    total_frames = 0
     with wave.open(str(temporary), "wb") as output:
         for i, beat in enumerate(scene["beats"]):
             print(f"{scene['id']} beat {i + 1}", flush=True)
-            query = json.loads(post_json(base, "audio_query", {"speaker": 23, "text": beat["text"]}))
-            query.update(speedScale=1.08, intonationScale=0.95,
-                         prePhonemeLength=0.12, postPhonemeLength=0.22)
-            data = post_json(base, "synthesis", {"speaker": 23}, json.dumps(query).encode())
-            with wave.open(io.BytesIO(data), "rb") as source:
-                params = (source.getnchannels(), source.getsampwidth(), source.getframerate())
-                if expected is None:
-                    expected = params
-                    output.setnchannels(params[0]); output.setsampwidth(params[1]); output.setframerate(params[2])
-                elif params != expected:
-                    raise RuntimeError("VOICEVOX changed WAV format within a scene")
-                count = source.getnframes()
-                output.writeframes(source.readframes(count))
-                target = max(round(estimated_duration(beat) * params[2]), count + round(0.5 * params[2]))
-                output.writeframes(b"\0" * ((target - count) * params[0] * params[1]))
-                durations.append(target / params[2])
+            beat_start = total_frames
+            for text in spoken_segments(beat["text"]):
+                data = sentence_audio(base, text)
+                with wave.open(io.BytesIO(data), "rb") as source:
+                    params = (source.getnchannels(), source.getsampwidth(), source.getframerate())
+                    if expected is None:
+                        expected = params
+                        output.setnchannels(params[0])
+                        output.setsampwidth(params[1])
+                        output.setframerate(params[2])
+                    elif params != expected:
+                        raise RuntimeError("VOICEVOX changed WAV format within a scene")
+                    count = source.getnframes()
+                    cues.append({"beat_index": i, "text": text,
+                                 "start": total_frames / params[2],
+                                 "end": (total_frames + count) / params[2]})
+                    output.writeframes(source.readframes(count))
+                    total_frames += count
+            speech_ends.append((total_frames - beat_start) / params[2])
+            # Only a short breath after actual speech; never pad to the old
+            # silent-storyboard duration. Align to the 15fps preview boundaries.
+            target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            target_frames = round(target_seconds * params[2])
+            padding = target_frames - (total_frames - beat_start)
+            output.writeframes(b"\0" * (padding * params[0] * params[1]))
+            total_frames += padding
+            durations.append(target_frames / params[2])
     temporary.replace(path)
     return {"id": scene["id"], "title": scene["title"], "status": "generated",
             "path": str(path.relative_to(SCENE_DIR)), "script_sha256": script_hash(scene),
             "wav_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-            "duration": wav_duration(path), "beat_durations": durations}
+            "duration": wav_duration(path), "beat_durations": durations,
+            "beat_speech_ends": speech_ends, "subtitle_cues": cues}
 
 
 def main():
@@ -111,6 +145,9 @@ def main():
     parser.add_argument("--from-scene", choices=[s["id"] for s in SCENES], default="scene01")
     parser.add_argument("--prepare-only", action="store_true", help="Invalidate stale audio without contacting Engine")
     args = parser.parse_args()
+    if not args.prepare_only:
+        with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
+            print("VOICEVOX Engine", response.read().decode(), flush=True)
     entries = prepare_manifest()
     if args.prepare_only:
         print("Manifest prepared. Audio not regenerated.")

@@ -83,10 +83,13 @@ class AudioChecks(unittest.TestCase):
             def fake_post(base, endpoint, params, body=None):
                 return b'{}' if endpoint == 'audio_query' else wav_bytes
             with patch.object(voice, 'OUTPUT_DIR', root), patch.object(voice, 'SCENE_DIR', root), \
-                 patch.object(voice, 'MANIFEST', root / 'manifest.json'), patch.object(voice, 'post_json', fake_post):
+                 patch.object(voice, 'MANIFEST', root / 'manifest.json'), patch.object(voice, 'post_json', fake_post), \
+                 patch.object(voice, 'CACHE_DIR', root / 'cache'):
                 scene = SCENES[0]
                 entry = voice.generate_scene('fixture', scene)
                 self.assertTrue(voice.valid_entry(scene, entry))
+                self.assertEqual(''.join(c['text'] for c in entry['subtitle_cues']), ''.join(b['text'] for b in scene['beats']))
+                self.assertTrue(all(d-e < .42 for d, e in zip(entry['beat_durations'], entry['beat_speech_ends'])))
                 self.assertAlmostEqual(sum(entry['beat_durations']), voice.wav_duration(root / 'scene01.wav'))
                 voice.save_manifest([entry])
                 prepared = voice.prepare_manifest()

@@ -9,7 +9,7 @@ import numpy as np
 from manim import *
 
 from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
-from narration_content import SCENES, estimated_duration
+from narration_content import SCENES, estimated_duration, spoken_segments
 from polynomial_model import (
     NOISE_STD, T, TT, T_ALL, WEIGHTS, X, XT, X_ALL, TRAIN_RMS, TEST_RMS,
     degree_weights, design_matrix, eval_poly, growing_weights, ridge_weights,
@@ -102,6 +102,7 @@ class PRML11PolynomialCurveFitting(Scene):
         self.add(legend)
         entry = self.manifest.get(self.story['id'], {})
         audio_valid = valid_entry(self.story, entry)
+        self.audio_entry = entry if audio_valid else None
         self.durations = entry['beat_durations'] if audio_valid else [estimated_duration(b) for b in self.story['beats']]
         # Frame quantization is applied to cumulative boundaries, so audio does not drift.
         fps = config.frame_rate
@@ -113,29 +114,69 @@ class PRML11PolynomialCurveFitting(Scene):
                               'start': self.scene_start, 'reference': self.story['reference'],
                               'audio': audio_valid, 'beats': []})
 
-    def beat(self, *animations, moving=True):
+    def beat_cues(self):
+        offset = sum(self.durations[:self.beat_index])
+        if self.audio_entry:
+            return [dict(c, start=c['start'] - offset, end=c['end'] - offset)
+                    for c in self.audio_entry['subtitle_cues'] if c['beat_index'] == self.beat_index]
+        texts = spoken_segments(self.story['beats'][self.beat_index]['text'])
+        lengths = np.array([len(t) for t in texts], dtype=float)
+        boundaries = np.r_[0, np.cumsum(lengths / lengths.sum() * self.durations[self.beat_index])]
+        return [dict(text=t, start=float(a), end=float(b)) for t, a, b in zip(texts, boundaries, boundaries[1:])]
+
+    def sentence_duration(self, index):
+        cue = self.beat_cues()[index]
+        return cue['end'] - cue['start']
+
+    def beat(self, *animations, moving=True, start_sentence=0, end_sentence=None, actions=None):
+        # Captions use the exact text and PCM duration of each synthesized sentence.
+        # The visual action shares this clock; no minimum-duration silent padding.
         item = self.story['beats'][self.beat_index]
         if self.subtitle is not None:
             self.remove(self.subtitle)
-        self.subtitle = jp(item['subtitle'], 24).move_to([0, -3.35, 0])
-        if self.subtitle.width > 12.9:
-            raise ValueError(f"Subtitle too wide: {item['subtitle']}")
-        self.add(self.subtitle)
+        cues = self.beat_cues()
+        captions = VGroup()
+        for cue in cues:
+            text = cue['text']
+            if len(text) > 32:
+                split = min(range(max(1, len(text)//2 - 7), min(33, len(text))),
+                            key=lambda i: abs(i - len(text)/2) + (0 if text[i-1] in '、。' else 5))
+                text = text[:split] + '\n' + text[split:]
+            caption = VGroup(*[jp(line, 22) for line in text.split('\n')]).arrange(DOWN, buff=.13)
+            caption.move_to([0, -3.4, 0]).set_opacity(0)
+            if caption.width > 12.9 or caption.height > .9:
+                raise ValueError(f'Caption outside safe area ({caption.width}, {caption.height}): {text}')
+            captions.add(caption)
+        self.subtitle = captions
+        self.add(captions)
         start = float(self.time)
         fps = config.frame_rate
         frames = round((self.scene_start + self.boundaries[self.beat_index] - start) * fps)
         duration = frames / fps
-        self.timeline[-1]['beats'].append({'start': start, 'end': start + duration, 'subtitle': item['subtitle']})
+        action_start = cues[start_sentence]['start']
+        action_end = cues[end_sentence - 1]['end'] if end_sentence is not None else cues[-1]['end']
+        def caption_at(m, alpha):
+            clock = alpha * duration
+            index = max(i for i, c in enumerate(cues) if c['start'] <= clock + 1e-8)
+            for i, caption in enumerate(m):
+                caption.set_opacity(1 if i == index else 0)
+        caption_at(captions, 0)
+        record = {'start': start, 'end': start + duration, 'subtitle': item['subtitle'],
+                  'action_start': start + action_start, 'action_end': start + action_end,
+                  'cues': [dict(c, start=start+c['start'], end=start+c['end']) for c in cues]}
+        if actions:
+            record['actions'] = [dict(a, start=start+a['start'], end=start+a['end']) for a in actions]
+        self.timeline[-1]['beats'].append(record)
+        visual = []
         if animations:
-            motion_frames = max(1, frames - round(.8 * fps)) if moving else min(round(2 * fps), frames - 1)
-            # Cairo animates with ceil and freezes with floor. Keep both on the
-            # intended integer frame counts, even after floating-point sums.
-            self.play(*animations, run_time=(motion_frames - 1e-5) / fps)
-            hold_frames = frames - motion_frames
-            if hold_frames:
-                self.wait((hold_frames + 1e-5) / fps, frozen_frame=True)
+            if action_start > 0:
+                visual.append(Wait(action_start))
+            visual.append(AnimationGroup(*animations, run_time=action_end-action_start))
+            visual.append(Wait(max(.001, duration-action_end)))
         else:
-            self.wait((frames + 1e-5) / fps, frozen_frame=True)
+            visual.append(Wait(duration))
+        self.play(Succession(*visual), UpdateFromAlphaFunc(captions, caption_at, rate_func=linear),
+                  run_time=(frames - 1e-5) / fps, rate_func=linear)
         self.beat_index += 1
 
     def axes(self, center=(-3.1, .1, 0), width=5.7, height=3.5, span=None):
@@ -199,14 +240,15 @@ class PRML11PolynomialCurveFitting(Scene):
     def question(self):
         ax = self.axes(center=(0, .1, 0), width=9, height=3.7)
         dots = data_dots(ax)
-        self.beat(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=.15), moving=False)
+        self.beat(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=.15), moving=False, end_sentence=1)
         cursor = ValueTracker(.45)
         guide = always_redraw(lambda: DashedLine(ax.c2p(cursor.get_value(), -1.4), ax.c2p(cursor.get_value(), 1.4), color=MUTED))
         self.add(guide)
         self.beat(cursor.animate.set_value(.72))
         truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4)
         equation = tex(r't_n=\sin(2\pi x_n)+\epsilon_n', 32).move_to([0, -2.45, 0])
-        self.beat(Create(truth), Write(equation), moving=False)
+        self.add(equation)
+        self.beat(Create(truth), Indicate(equation, scale_factor=1.015), moving=False)
         self.beat(Indicate(dots, color=BLUE_DATA, scale_factor=1.04))
         model = graph_curve(ax, WEIGHTS[3])
         self.beat(Create(model), FadeOut(guide))
@@ -234,9 +276,9 @@ class PRML11PolynomialCurveFitting(Scene):
             group = VGroup(rail, dot, tex(f'w_{j}', 28, TERM_COLORS[j]).move_to([x, 2.02, 0]), number)
             knobs.append(group)
         self.add(knobs[0])
-        self.beat(trackers[0].animate.set_value(.8), Indicate(formula[1]))
+        self.beat(trackers[0].animate.set_value(.8), Indicate(formula[1]), start_sentence=1)
         self.add(knobs[1])
-        self.beat(trackers[1].animate.set_value(-1.6), Indicate(formula[3]))
+        self.beat(trackers[1].animate.set_value(-1.6), Indicate(formula[3]), start_sentence=1)
         self.add(knobs[2])
         self.beat(trackers[2].animate.set_value(1.8), Indicate(formula[5]))
         self.add(knobs[3])
@@ -246,7 +288,9 @@ class PRML11PolynomialCurveFitting(Scene):
         compact = tex(r'y(x,\mathbf w)=\sum_{j=0}^{M}w_jx^j', 35).move_to(formula)
         count = tex(r'M=3\quad\Rightarrow\quad 4', 32, RESIDUAL_YELLOW).move_to([3.35, -2.3, 0])
         compact.move_to([-2.7, -2.45, 0])
-        self.beat(TransformMatchingTex(formula, compact), FadeIn(count), moving=False)
+        duration = self.beat_cues()[-1]['end']
+        self.beat(Succession(AnimationGroup(TransformMatchingTex(formula, compact), FadeIn(count), run_time=1.2),
+                             Indicate(compact, scale_factor=1.015, run_time=duration-1.2)), moving=False)
         self.beat(trackers[3].animate.set_value(0))
         self.beat(trackers[0].animate.set_value(.8), trackers[1].animate.set_value(-1.4), trackers[2].animate.set_value(0))
 
@@ -259,7 +303,8 @@ class PRML11PolynomialCurveFitting(Scene):
         self.add(data_dots(ax), model)
         formula = MathTex(r'r_n=', r'y(x_n,\mathbf w)', '-', 't_n', font_size=32).move_to([0, -2.47, 0])
         formula[1].set_color(MODEL_RED); formula[3].set_color(BLUE_DATA)
-        self.beat(Create(lines), Write(formula), moving=False)
+        self.add(formula)
+        self.beat(Create(lines), Indicate(formula, scale_factor=1.015), moving=False)
         signed = VGroup(jp('符号付きの和（例）', 25), tex(r'(+1)+(-1)=0', 34, BLUE_DATA),
                         jp('ずれていても、ゼロになる', 21, MUTED)).arrange(DOWN, buff=.25).move_to([3.1, 1.1, 0])
         signed_vectors = VGroup(Arrow([1.6, .15, 0], [3.1, .15, 0], buff=0, color=BLUE_DATA),
@@ -293,8 +338,9 @@ class PRML11PolynomialCurveFitting(Scene):
         objective[-1].set_color(RESIDUAL_YELLOW)
         self.add(bar, energy_num)
         collected = VGroup(*[Dot(bar_start + RIGHT * energy() * .315, radius=.04, color=RESIDUAL_YELLOW) for _ in tile_static])
-        self.beat(TransformMatchingTex(formula, objective),
-                  LaggedStart(*[TransformFromCopy(s, target) for s, target in zip(tile_static, collected)], lag_ratio=.1))
+        self.beat(TransformMatchingTex(formula, objective, run_time=1.2),
+                  LaggedStart(*[TransformFromCopy(s, target) for s, target in zip(tile_static, collected)],
+                              lag_ratio=.1, run_time=self.beat_cues()[-1]['end']))
         self.remove(collected, *collected)
         self.beat(offset.animate.set_value(.7))
         self.beat(offset.animate.set_value(-.6))
@@ -332,7 +378,10 @@ class PRML11PolynomialCurveFitting(Scene):
         self.add(energy, formula)
         self.beat(alpha.animate.set_value(.45))
         self.beat(alpha.animate.set_value(.85))
-        self.beat(alpha.animate.set_value(1))
+        arrival = self.sentence_duration(0)
+        remainder = self.beat_cues()[-1]['end'] - arrival
+        self.beat(Succession(alpha.animate(run_time=arrival).set_value(1),
+                             AnimationGroup(Indicate(line, scale_factor=1.015), Indicate(energy), run_time=remainder)))
         truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.55)
         self.beat(Create(truth), Indicate(line))
 
@@ -368,20 +417,31 @@ class PRML11PolynomialCurveFitting(Scene):
         train_path = VMobject(color=BLUE_DATA, stroke_width=2.5)
         test_path = VMobject(color=TEST_ORANGE, stroke_width=2.5)
         self.add(train_path, test_path)
-        def stamp(m):
+        def stamp(m, seconds=3):
             counter.set_value(0)
-            pulses = Succession(*[AnimationGroup(Indicate(lines[i], scale_factor=1.1), counter.animate.set_value(i + 1)) for i in range(10)], run_time=2)
-            transfers = AnimationGroup(TransformFromCopy(lines, train_pts[m]), TransformFromCopy(test_lines, test_pts[m]))
+            pulses = Succession(*[AnimationGroup(Indicate(lines[i], scale_factor=1.1), counter.animate.set_value(i + 1)) for i in range(10)], run_time=seconds * .64)
+            transfers = AnimationGroup(TransformFromCopy(lines, train_pts[m]), TransformFromCopy(test_lines, test_pts[m]), run_time=seconds * .36)
             return Succession(pulses, transfers)
         self.beat(stamp(0))
         for m in range(1, 10):
             # Use callbacks only at the fitted endpoint; RMS markers are never interpolated observations.
-            motion = tracker.animate(run_time=5).set_value(m)
+            cues = self.beat_cues()
+            morph_seconds = cues[0]['end']
+            count_seconds = cues[1]['end'] - cues[1]['start']
+            motion = tracker.animate(run_time=morph_seconds).set_value(m)
             def add_paths(m=m):
                 train_path.set_points_as_corners([p.get_center() for p in train_pts[:m + 1]])
                 test_path.set_points_as_corners([p.get_center() for p in test_pts[:m + 1]])
             # Succession gives most of each beat to the linked morph, then the count and transfer.
-            self.beat(Succession(motion, stamp(m)))
+            motion_and_stamp = [motion, stamp(m, count_seconds)]
+            remaining = cues[-1]['end'] - morph_seconds - count_seconds
+            if remaining > .01:
+                motion_and_stamp.append(AnimationGroup(Indicate(model, scale_factor=1.01),
+                                                       Indicate(test_pts[m]), run_time=remaining))
+            self.beat(Succession(*motion_and_stamp), actions=[
+                {'name': 'M slider', 'start': 0, 'end': morph_seconds},
+                {'name': 'count residuals', 'start': morph_seconds, 'end': morph_seconds + count_seconds * .64},
+                {'name': 'RMS stamp', 'start': morph_seconds + count_seconds * .64, 'end': morph_seconds + count_seconds}])
             add_paths()
         highlight = Circle(radius=.23, color=RESIDUAL_YELLOW).move_to(ax.c2p(.05, eval_poly(WEIGHTS[9], .05)))
         self.beat(Create(highlight), Indicate(test_pts[9]), moving=False)
@@ -424,7 +484,8 @@ class PRML11PolynomialCurveFitting(Scene):
         maximum = readout(r'\log_{10}\!\left(1+\max_j\lvert w_j\rvert\right)=', lambda: np.log10(1 + np.max(abs(w()))), [3.3, -2.35, 0], REG_PURPLE, 2, 25)
         self.add(maximum)
         self.beat(Create(bars), moving=False)
-        self.beat(Write(scale_formula), moving=False)
+        self.add(scale_formula)
+        self.beat(Indicate(scale_formula, scale_factor=1.02), moving=False)
         self.beat(tracker.animate.set_value(6))
         self.beat(tracker.animate.set_value(9))
         self.beat(tracker.animate.set_value(3))
@@ -452,7 +513,10 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(n.animate.set_value(15))
         self.beat(Indicate(dots[10:15], scale_factor=1.4))
         self.beat(n.animate.set_value(40))
-        self.beat(n.animate.set_value(100))
+        arrival = self.sentence_duration(0)
+        remainder = self.beat_cues()[-1]['end'] - arrival
+        self.beat(Succession(n.animate(run_time=arrival).set_value(100),
+                             Indicate(curve, color=TRUE_GREEN, scale_factor=1.015, run_time=remainder)))
         self.beat(Indicate(curve, color=TRUE_GREEN, scale_factor=1.02))
 
     def regularization(self):
@@ -483,7 +547,11 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(FadeIn(rubber), moving=False)
         formula = MathTex(r'\widetilde E=', r'\frac12\sum_n(y(x_n,\mathbf w)-t_n)^2', '+', r'\frac{\lambda}{2}\sum_{j=0}^{9}w_j^2', font_size=30).move_to([0, -2.55, 0])
         formula[1].set_color(RESIDUAL_YELLOW); formula[3].set_color(REG_PURPLE)
-        self.beat(Write(formula), Indicate(lines), Indicate(bars), moving=False)
+        self.add(formula)
+        self.beat(Succession(
+            AnimationGroup(Indicate(formula[1], scale_factor=1.015), Indicate(lines), run_time=self.sentence_duration(0)),
+            AnimationGroup(Indicate(formula[3], scale_factor=1.015), Indicate(bars), run_time=self.sentence_duration(1)),
+            Indicate(formula[0], scale_factor=1.015, run_time=self.sentence_duration(2))), moving=False)
         slider = self.slider(loglam, -32, 0, [-3, -1.9, 0], width=4.6, label=r'\ln\lambda', ticks=[-32, -24, -16, -8, 0], color=REG_PURPLE)
         self.add(slider, readout(r'\ln\lambda=', loglam.get_value, [-3.1, 2.25, 0], REG_PURPLE, 1, 25))
         err = Axes(x_range=[0, 32, 8], y_range=[0, 1.1, .5], x_length=4.65, y_length=1.32,
@@ -525,7 +593,8 @@ class PRML11PolynomialCurveFitting(Scene):
         vertices = [ax.c2p(x, sine(x) + 2 * NOISE_STD) for x in u] + [ax.c2p(x, sine(x) - 2 * NOISE_STD) for x in u[::-1]]
         band = Polygon(*vertices, stroke_width=0, fill_color=TRUE_GREEN, fill_opacity=.15).set_z_index(-1)
         label = tex(r'\sigma=0.25\qquad \sin(2\pi x)\pm 2\sigma', 31, TRUE_GREEN).move_to([0, -2.45, 0])
-        self.beat(FadeIn(band), Write(label), moving=False)
+        self.add(label)
+        self.beat(FadeIn(band), Indicate(label, scale_factor=1.015), moving=False)
         self.beat(Indicate(newdots, scale_factor=1.12), Indicate(observations, scale_factor=1.03))
         question = jp('どんな値が、どれくらいありそうか？', 34).move_to([0, -2.45, 0])
         self.beat(ReplacementTransform(label, question), moving=False)

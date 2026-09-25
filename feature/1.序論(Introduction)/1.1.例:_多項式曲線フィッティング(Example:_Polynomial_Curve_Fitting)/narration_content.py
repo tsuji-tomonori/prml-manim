@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 
-# Each beat is (minimum seconds, spoken Japanese, on-screen subtitle).
-# Motion occupies the beat; audio generation pads each beat individually.
+# Each beat is (silent-preview duration, spoken Japanese, visual direction).
+# With narration, real speech timing replaces the silent-preview estimate.
 RAW_SCENES = [
     ("この点を生んだ曲線は？", "pp.2–5 / Fig.1.2", [
         (9, "ここに十個の点があります。この点を生んだ曲線は、どんな形でしょう。まずは、点だけを見て予想してみてください。", "この点を生んだ曲線は？"),
@@ -29,7 +30,7 @@ RAW_SCENES = [
         (10, "赤い予測から、青い観測を引いた値を残差と呼びます。画面の縦線が、そのずれの大きさです。", "残差 rₙ = 予測 y(xₙ,w) − 観測 tₙ"),
         (10, "まず二つの残差だけを見ます。プラスとマイナスをそのまま足すと、大きなずれがあっても、打ち消し合います。", "符号付きの和：逆向きのずれが打ち消し合う"),
         (10, "二乗するとどうでしょう。プラス一もマイナス一も、二乗すれば一です。ずれの向きが違っても、両方を数えられます。", "二乗和：どちらの向きのずれも正に数える"),
-        (10, "それぞれの縦線を、一辺が同じ長さの正方形へ変えます。正方形の面積が、残差の二乗を表します。", "一辺 |rₙ| の正方形　→　面積 rₙ²"),
+        (10, "それぞれの縦線の長さを、共通の縮尺で正方形の一辺へ移します。正方形の面積が、残差の二乗を表します。", "一辺 |rₙ| の正方形　→　面積 rₙ²"),
         (10, "十個の面積を集めて、一本の棒へ移します。この合計の半分を、誤差関数イーと呼びます。小さいほど、点によく合います。", "正方形の面積を集める　→　E(w)"),
         (10, "曲線を上下に動かすと、正方形と棒もいっしょに変わります。大きなずれほど、面積が急に増えるところに注目してください。", "曲線・残差・面積・合計が連動する"),
         (10, "反対方向にも動かしてみます。符号付きの和だけでは、よい曲線を選べません。二乗した面積の合計を、小さくしたいのです。", "小さくしたいのは、二乗した面積の合計"),
@@ -100,7 +101,7 @@ SCENES = [
         "title": title,
         "reference": reference,
         "beats": [
-            {"seconds": seconds, "text": text, "subtitle": subtitle}
+            {"seconds": seconds, "text": text, "subtitle": text, "visual_note": subtitle}
             for seconds, text, subtitle in beats
         ],
         "lines": [("main", text) for _, text, _ in beats],
@@ -114,6 +115,28 @@ def estimated_duration(beat):
     return max(float(beat["seconds"]), len(beat["text"]) / 6.0 + 0.8)
 
 
+SYNTHESIS_SETTINGS = {
+    "speedScale": 1.08, "intonationScale": 0.95,
+    "prePhonemeLength": 0.08, "postPhonemeLength": 0.12,
+    "volumeScale": 1.0,
+}
+
+
+def spoken_segments(text):
+    """Exact spoken text, split at sentences/commas into readable caption cues."""
+    segments = []
+    for sentence in re.findall(r"[^。！？]+[。！？]?", text):
+        while len(sentence) > 64:
+            split = sentence.rfind("、", 24, 64) + 1
+            split = split if split > 0 else 60
+            segments.append(sentence[:split])
+            sentence = sentence[split:]
+        if sentence:
+            segments.append(sentence)
+    assert "".join(segments) == text
+    return segments
+
+
 def script_hash(scene):
-    payload = {"version": 2, "scene": scene, "speaker": 23, "speed": 1.08}
+    payload = {"version": 3, "scene": scene, "speaker": 23, "settings": SYNTHESIS_SETTINGS}
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
