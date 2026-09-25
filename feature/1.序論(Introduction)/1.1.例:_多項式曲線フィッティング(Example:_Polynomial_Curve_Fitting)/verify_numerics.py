@@ -88,7 +88,12 @@ class AudioChecks(unittest.TestCase):
                 scene = SCENES[0]
                 entry = voice.generate_scene('fixture', scene)
                 self.assertTrue(voice.valid_entry(scene, entry))
-                self.assertEqual(''.join(c['text'] for c in entry['subtitle_cues']), ''.join(b['text'] for b in scene['beats']))
+                for key in ('id', 'display', 'speech'):
+                    self.assertEqual([c[key] for c in entry['subtitle_cues']],
+                                     [s[key] for b in scene['beats'] for s in b['segments']])
+                broken = dict(entry, subtitle_cues=[dict(c) for c in entry['subtitle_cues']])
+                broken['subtitle_cues'][0]['display'] = 'wrong display'
+                self.assertFalse(voice.valid_entry(scene, broken))
                 self.assertTrue(all(d-e < .42 for d, e in zip(entry['beat_durations'], entry['beat_speech_ends'])))
                 self.assertAlmostEqual(sum(entry['beat_durations']), voice.wav_duration(root / 'scene01.wav'))
                 voice.save_manifest([entry])

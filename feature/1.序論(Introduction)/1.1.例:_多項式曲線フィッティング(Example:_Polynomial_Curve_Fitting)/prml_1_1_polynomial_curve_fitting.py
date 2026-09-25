@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from pathlib import Path
 
 import numpy as np
 from manim import *
 
 from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
-from narration_content import SCENES, estimated_duration, spoken_segments
+from narration_content import SCENES, estimated_duration
 from polynomial_model import (
     NOISE_STD, T, TT, T_ALL, WEIGHTS, X, XT, X_ALL, TRAIN_RMS, TEST_RMS,
     degree_weights, design_matrix, eval_poly, growing_weights, ridge_weights,
@@ -34,6 +35,47 @@ def jp(text, size=25, color=WHITE):
 
 def tex(text, size=30, color=WHITE):
     return MathTex(text, font_size=size, color=color)
+
+
+def caption_mobject(display):
+    """Wrap Japanese and atomic inline math without splitting a formula."""
+    tokens = re.findall(r"\$[^$]+\$|.", display)
+    # Wrap by visible width, not LaTeX source length; math remains one token.
+    weights = [max(1, tex(t[1:-1], 26).width / .30) if t.startswith('$')
+               else (.55 if t.isascii() else 1) for t in tokens]
+    if sum(weights) > 32:
+        cumulative = np.cumsum(weights)
+        split = min(range(1, len(tokens)), key=lambda i:
+                    abs(cumulative[i-1] - sum(weights)/2) + (0 if tokens[i-1] in '、。' else 4))
+        lines = [tokens[:split], tokens[split:]]
+    else:
+        lines = [tokens]
+    def line_mobject(parts):
+        runs = re.split(r"(\$[^$]+\$)", ''.join(parts))
+        mobs, baseline_offsets = [], []
+        for run in (r for r in runs if r.strip()):
+            if run.startswith('$'):
+                # The trailing x is a baseline reference, never displayed.
+                reference = MathTex(run[1:-1], 'x', font_size=26)
+                mob = reference[0].copy()
+                baseline = reference[1].get_bottom()[1]
+            else:
+                # Punctuation alone has a short bounding box. Reference glyphs
+                # preserve its natural baseline instead of vertically centering it.
+                reference = jp('あ' + run.strip() + 'あ', 22)
+                mob = VGroup(*reference[1:-1])
+                baseline = reference[0].get_bottom()[1]
+            baseline_offsets.append(mob.get_center()[1] - baseline)
+            mobs.append(mob)
+        line = VGroup(*mobs).arrange(RIGHT, buff=.045)
+        for mob, offset in zip(mobs, baseline_offsets):
+            mob.shift(UP * offset)
+        return line
+    caption = VGroup(*[line_mobject(line) for line in lines]).arrange(DOWN, buff=.13)
+    caption.move_to([0, -3.4, 0])
+    if caption.width > 12.9 or caption.height > .9:
+        raise ValueError(f'Caption outside safe area ({caption.width}, {caption.height}): {display}')
+    return caption
 
 
 def polyline(points, color, width=3, opacity=1):
@@ -117,19 +159,20 @@ class PRML11PolynomialCurveFitting(Scene):
     def beat_cues(self):
         offset = sum(self.durations[:self.beat_index])
         if self.audio_entry:
-            return [dict(c, start=c['start'] - offset, end=c['end'] - offset)
+            return [dict(id=c['id'], display=c['display'], start=c['start'] - offset, end=c['end'] - offset)
                     for c in self.audio_entry['subtitle_cues'] if c['beat_index'] == self.beat_index]
-        texts = spoken_segments(self.story['beats'][self.beat_index]['text'])
-        lengths = np.array([len(t) for t in texts], dtype=float)
+        segments = self.story['beats'][self.beat_index]['segments']
+        lengths = np.array([len(s['speech']) for s in segments], dtype=float)
         boundaries = np.r_[0, np.cumsum(lengths / lengths.sum() * self.durations[self.beat_index])]
-        return [dict(text=t, start=float(a), end=float(b)) for t, a, b in zip(texts, boundaries, boundaries[1:])]
+        return [dict(id=s['id'], display=s['display'], start=float(a), end=float(b))
+                for s, a, b in zip(segments, boundaries, boundaries[1:])]
 
     def sentence_duration(self, index):
         cue = self.beat_cues()[index]
         return cue['end'] - cue['start']
 
     def beat(self, *animations, moving=True, start_sentence=0, end_sentence=None, actions=None, phases=None):
-        # Captions use the exact text and PCM duration of each synthesized sentence.
+        # Captions use display notation and the PCM duration of the paired speech.
         # The visual action shares this clock; no minimum-duration silent padding.
         item = self.story['beats'][self.beat_index]
         if self.subtitle is not None:
@@ -137,15 +180,7 @@ class PRML11PolynomialCurveFitting(Scene):
         cues = self.beat_cues()
         captions = VGroup()
         for cue in cues:
-            text = cue['text']
-            if len(text) > 32:
-                split = min(range(max(1, len(text)//2 - 7), min(33, len(text))),
-                            key=lambda i: abs(i - len(text)/2) + (0 if text[i-1] in '、。' else 5))
-                text = text[:split] + '\n' + text[split:]
-            caption = VGroup(*[jp(line, 22) for line in text.split('\n')]).arrange(DOWN, buff=.13)
-            caption.move_to([0, -3.4, 0]).set_opacity(0)
-            if caption.width > 12.9 or caption.height > .9:
-                raise ValueError(f'Caption outside safe area ({caption.width}, {caption.height}): {text}')
+            caption = caption_mobject(cue['display']).set_opacity(0)
             captions.add(caption)
         self.subtitle = captions
         self.add(captions)
@@ -161,7 +196,7 @@ class PRML11PolynomialCurveFitting(Scene):
             for i, caption in enumerate(m):
                 caption.set_opacity(1 if i == index else 0)
         caption_at(captions, 0)
-        record = {'start': start, 'end': start + duration, 'subtitle': item['subtitle'],
+        record = {'start': start, 'end': start + duration, 'display': ''.join(s['display'] for s in item['segments']),
                   'action_start': start + action_start, 'action_end': start + action_end,
                   'cues': [dict(c, start=start+c['start'], end=start+c['end']) for c in cues]}
         if actions:

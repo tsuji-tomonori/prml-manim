@@ -11,7 +11,7 @@ import urllib.request
 import wave
 from pathlib import Path
 
-from narration_content import SCENES, SYNTHESIS_SETTINGS, estimated_duration, script_hash, spoken_segments
+from narration_content import SCENES, SYNTHESIS_SETTINGS, estimated_duration, script_hash
 
 SCENE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCENE_DIR / "assets" / "voicevox"
@@ -35,7 +35,8 @@ def valid_entry(scene, entry):
     if len(beats) != len(scene["beats"]) or any(d <= 0 for d in beats):
         return False
     cues = entry.get("subtitle_cues", [])
-    if "".join(c["text"] for c in cues) != "".join(b["text"] for b in scene["beats"]):
+    if [(c.get("id"), c.get("display"), c.get("speech")) for c in cues] != [
+            (s["id"], s["display"], s["speech"]) for b in scene["beats"] for s in b["segments"]]:
         return False
     if len(entry.get("beat_speech_ends", [])) != len(beats):
         return False
@@ -54,7 +55,7 @@ def pending_entry(scene):
 def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     temporary = MANIFEST.with_suffix(".tmp.json")
-    temporary.write_text(json.dumps({"version": 3, "speaker": SPEAKER, "scenes": entries},
+    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "scenes": entries},
                                     ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(MANIFEST)
 
@@ -105,8 +106,8 @@ def generate_scene(base, scene):
         for i, beat in enumerate(scene["beats"]):
             print(f"{scene['id']} beat {i + 1}", flush=True)
             beat_start = total_frames
-            for text in spoken_segments(beat["text"]):
-                data = sentence_audio(base, text)
+            for segment in beat["segments"]:
+                data = sentence_audio(base, segment["speech"])
                 with wave.open(io.BytesIO(data), "rb") as source:
                     params = (source.getnchannels(), source.getsampwidth(), source.getframerate())
                     if expected is None:
@@ -117,7 +118,7 @@ def generate_scene(base, scene):
                     elif params != expected:
                         raise RuntimeError("VOICEVOX changed WAV format within a scene")
                     count = source.getnframes()
-                    cues.append({"beat_index": i, "text": text,
+                    cues.append({"beat_index": i, **segment,
                                  "start": total_frames / params[2],
                                  "end": (total_frames + count) / params[2]})
                     output.writeframes(source.readframes(count))
