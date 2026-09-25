@@ -158,4 +158,3 @@ class NarratedScene(Scene):
         self.play(Succession(*visual), UpdateFromAlphaFunc(captions, caption_at, rate_func=linear),
                   run_time=(frames - 1e-5) / fps, rate_func=linear)
         self.beat_index += 1
-
