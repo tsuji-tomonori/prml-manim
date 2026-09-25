@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import numpy as np
 from manim import *
+from manim.animation.animation import prepare_animation
 from caption_layout import jp, tex, caption_mobject
 from dimension_model import *
 from narration_content import SCENES, estimated_duration
@@ -33,6 +34,21 @@ def meter(label, getter, pos, color=YELLOW, places=2):
     anchor=number.get_left().copy()
     number.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
     return g
+
+
+def pace_visual(animation, duration):
+    """Finish text reveals promptly while tracker changes use the speech clock."""
+    animation = prepare_animation(animation)
+    if isinstance(animation, (FadeIn, FadeOut, Create, Write, ReplacementTransform,
+                              TransformMatchingTex, TransformFromCopy, LaggedStart)):
+        short = min(1.0, duration * .3)
+        animation.set_run_time(short)
+        return Succession(animation, Wait(max(.001, duration-short)))
+    if isinstance(animation, AnimationGroup):
+        return AnimationGroup(*[pace_visual(a, duration) for a in animation.animations],
+                              run_time=duration)
+    animation.set_run_time(duration)
+    return animation
 
 
 class PRML14CurseOfDimensionality(Scene):
@@ -135,7 +151,7 @@ class PRML14CurseOfDimensionality(Scene):
                 phase_start = float(self.time)
                 offset = elapsed_frames / fps
                 phase_duration = phase_frames / fps
-                self.play(animation, UpdateFromAlphaFunc(captions,
+                self.play(pace_visual(animation, phase_duration), UpdateFromAlphaFunc(captions,
                           lambda m, alpha, offset=offset, d=phase_duration: caption_at(m, (offset + alpha*d) / duration),
                           rate_func=linear), run_time=(phase_frames-1e-5)/fps, rate_func=linear)
                 record['actions'].append({'name': name, 'start': phase_start, 'end': float(self.time)})
@@ -146,7 +162,7 @@ class PRML14CurseOfDimensionality(Scene):
         if animations:
             if action_start > 0:
                 visual.append(Wait(action_start))
-            visual.append(AnimationGroup(*animations, run_time=action_end-action_start))
+            visual.append(AnimationGroup(*[pace_visual(a, action_end-action_start) for a in animations], run_time=action_end-action_start))
             visual.append(Wait(max(.001, duration-action_end)))
         else:
             visual.append(Wait(duration))
@@ -185,20 +201,22 @@ class PRML14CurseOfDimensionality(Scene):
         self.add(axes,dots,query)
         self.beat(FadeIn(question),Indicate(query,scale_factor=1.8))
         legend=VGroup(*[VGroup(Dot(color=c,radius=.07),jp(n,24,c)).arrange(RIGHT,buff=.2) for n,c in zip(['種類 A','種類 B','種類 C'],colors)]).arrange(DOWN,buff=.3).move_to([3.5,.2,0])
-        self.beat(FadeOut(question),FadeIn(legend),Indicate(axes))
+        self.beat(FadeOut(question),FadeIn(legend),Indicate(axes, scale_factor=1))
         note=jp('分類の仕組みを見る自作データ',23,MUTED).move_to([0,2.65,0])
-        self.beat(FadeIn(note),LaggedStart(*[Indicate(d) for d in dots[::10]],lag_ratio=.12))
+        self.beat(FadeIn(note),LaggedStart(*[Indicate(d, scale_factor=1) for d in dots[::10]],lag_ratio=.12))
         cell=Polygon(ax.c2p(.2,.4),ax.c2p(.6,.4),ax.c2p(.6,.8),ax.c2p(.2,.8),color=YELLOW,fill_opacity=.07)
         inside=np.all((pts>=[.2,.4])&(pts<[.6,.8]),axis=1)
         counts=np.bincount(labels[inside],minlength=3)
         count=jp('箱の中  '+ ' / '.join(f'{n}: {v}' for n,v in zip('ABC',counts)),23,YELLOW).move_to([0,-2.4,0])
-        self.two(lambda:Create(cell),lambda:AnimationGroup(FadeIn(count),*[Indicate(d) for d,v in zip(dots,inside) if v]))
+        self.two(lambda:Create(cell),lambda:AnimationGroup(FadeIn(count),*[Indicate(d, scale_factor=1) for d,v in zip(dots,inside) if v]))
         answer=jp('予測：種類 A',29,RED).move_to([3.5,-1.45,0])
         self.beat(FadeIn(answer),query.animate.set_color(RED))
         vec=tex(r'\mathbf{x}=(x_1,x_2,\ldots,x_{12})',34,PURPLE).move_to([0,2.6,0])
-        self.beat(FadeOut(note),FadeIn(vec))
+        self.remove(note)
+        self.beat(FadeIn(vec))
         hidden=VGroup(*[Line([2.1+i*.27,-2.2,0],[2.1+i*.27,-.8-.8*(i%3)/2,0],color=PURPLE,stroke_width=5) for i in range(10)])
-        self.beat(FadeOut(answer),FadeIn(hidden),Indicate(vec))
+        self.remove(answer)
+        self.beat(FadeIn(hidden),Indicate(vec, scale_factor=1))
 
     def grid(self):
         row=VGroup(*[Square(.66,color=BLUE,fill_opacity=.16).move_to([(i-2)*.68,.5,0]) for i in range(5)])
@@ -259,22 +277,23 @@ class PRML14CurseOfDimensionality(Scene):
         self.remove(mesh,interaction,sl)
         eq=MathTex(r'y(\mathbf{x},\mathbf{w})=',r'w_0',r'+\sum_{i=1}^Dw_ix_i',r'+\sum_{i,j=1}^Dw_{ij}x_ix_j',r'+\sum_{i,j,k=1}^Dw_{ijk}x_ix_jx_k',font_size=29).move_to([0,1,0])
         for m,col in zip(eq,[WHITE,WHITE,BLUE,YELLOW,PURPLE]):m.set_color(col)
-        label=jp('定数       一次               二次                  三次',24).move_to([.4,-.25,0])
+        label=VGroup(*[jp(t,22,c).next_to(eq[i],DOWN,buff=.4) for i,t,c in [(1,'定数',WHITE),(2,'一次',BLUE),(3,'二次',YELLOW),(4,'三次',PURPLE)]])
         ref=jp('式 (1.74)',21,MUTED).move_to([0,2.5,0])
         self.beat(FadeIn(eq),FadeIn(label),FadeIn(ref))
         symmetry=tex(r'x_1x_2=x_2x_1',39,YELLOW).move_to([0,-1.4,0])
-        self.two(lambda:FadeIn(symmetry),lambda:Indicate(eq[3]))
+        self.two(lambda:FadeIn(symmetry),lambda:Indicate(eq[3], scale_factor=1))
         self.remove(eq,label,symmetry,ref)
         d=ValueTracker(2); dv=lambda:int(round(d.get_value()))
         formula=tex(r'\binom{D+3}{3}=\frac{(D+1)(D+2)(D+3)}6',40,PURPLE).move_to([0,2.15,0])
-        counter=meter(r'\text{coefficients}=',lambda:coefficient_count(dv()),[0,.5,0],PURPLE,0)
+        counter=meter('=',lambda:coefficient_count(dv()),[.8,.5,0],PURPLE,0)
+        count_label=jp('係数の数',26,PURPLE).move_to([-2.2,.5,0])
         dcount=meter('D=',dv,[0,-.55,0],BLUE,0)
         slide=self.slider(d,1,100,[0,-2.2,0],width=8,ticks=[1,10,50,100])
-        self.add(formula,counter,dcount,slide)
+        self.add(formula,counter,count_label,dcount,slide)
         self.two(lambda:d.animate.set_value(10),lambda:d.animate.set_value(100))
         asym=tex(r'\binom{D+3}{3}\sim\frac{D^3}{6}\qquad(D\to\infty)',34,YELLOW).move_to([0,1.4,0])
         note=jp('固定した次数 M：係数数は D の M 乗のオーダー',24).move_to([0,-1.25,0])
-        self.beat(FadeIn(asym),FadeIn(note),Indicate(counter))
+        self.beat(FadeIn(asym),FadeIn(note),Indicate(counter, scale_factor=1))
 
     def sphere(self):
         center=np.array([-3.6,.3,0]); radius=1.65
@@ -301,7 +320,7 @@ class PRML14CurseOfDimensionality(Scene):
         self.beat(FadeIn(vol),FadeIn(volnote),eps.animate.set_value(.2))
         ratio=tex(r'\frac{K_D-K_D(1-\varepsilon)^D}{K_D}',40).move_to([2.4,-.25,0])
         ratio.set_color_by_tex('K_D',PURPLE)
-        self.beat(FadeIn(ratio),Indicate(vol[1]))
+        self.beat(FadeIn(ratio),Indicate(vol[1], scale_factor=1))
         final=MathTex(r'1-',r'(1-\varepsilon)^D',font_size=44).move_to([2.4,-.25,0]);final[0].set_color(YELLOW);final[1].set_color(GREEN)
         result=tex(r'D=2,\ \varepsilon=0.1\quad\Rightarrow\quad19\%',32,YELLOW).move_to([1.6,-1.65,0])
         self.beat(ReplacementTransform(ratio,final),FadeIn(result),eps.animate.set_value(.1))
@@ -317,18 +336,18 @@ class PRML14CurseOfDimensionality(Scene):
         num=meter(r'f(\%)=',lambda:100*shell_fraction(d.get_value(),eps.get_value()),[2.8,2.55,0],YELLOW,2)
         sl=self.slider(d,1,50,[-2.6,-2.3,0],width=4.3,ticks=[1,20,50])
         se=self.slider(eps,0,.3,[3.2,-2.3,0],width=3.6,label=r'\varepsilon',ticks=[0,.1,.3],color=RED)
-        dc=meter('D=',d.get_value,[5.4,1,0],PURPLE,0)
+        dc=meter('D=',d.get_value,[5.4,1,0],PURPLE,1)
         self.add(axes,formula,curve,marker,cross,num,sl,se,dc)
         self.beat(d.animate.set_value(3))
-        self.two(lambda:Indicate(num),lambda:d.animate.set_value(20))
-        self.beat(d.animate.set_value(50))
-        self.beat(d.animate.set_value(2))
+        self.two(lambda:Indicate(num, scale_factor=1),lambda:d.animate.set_value(20))
+        self.two(lambda:d.animate.set_value(50),lambda:Indicate(num,scale_factor=1))
+        self.beat(d.animate.set_value(20))
         self.two(lambda:d.animate.set_value(20),lambda:eps.animate.set_value(.01))
-        self.two(lambda:AnimationGroup(d.animate.set_value(50),eps.animate.set_value(1-2**(-1/50))),lambda:Indicate(num))
-        self.beat(eps.animate.set_value(.1),Indicate(formula))
+        self.two(lambda:AnimationGroup(d.animate.set_value(50),eps.animate.set_value(1-2**(-1/50))),lambda:Indicate(num, scale_factor=1))
+        self.beat(eps.animate.set_value(.1),Indicate(formula, scale_factor=1))
 
     def gaussian(self):
-        ax,axes=self.graph_axes([-3.5,3.5,1],[-3.5,3.5,1],center=(-2.8,0,0),width=4.1,height=4.1,xlabel='x_1',ylabel='x_2')
+        ax,axes=self.graph_axes([-4,4,1],[-4,4,1],center=(-2.8,0,0),width=4.1,height=4.1,xlabel='x_1',ylabel='x_2')
         dots=VGroup(*[Dot(ax.c2p(*xy),radius=.023,color=BLUE) for xy in GAUSSIAN_POINTS])
         formula=tex(r'p(\mathbf{x})=(2\pi)^{-D/2}e^{-\|\mathbf{x}\|^2/2}',32,BLUE).move_to([0,2.6,0])
         assumption=tex(r'\mu=0,\quad\sigma=1',33).move_to([3.2,1.25,0])
@@ -346,7 +365,15 @@ class PRML14CurseOfDimensionality(Scene):
         counts,bins=np.histogram(GAUSSIAN_RADII,bins=np.linspace(0,4,21));dens=counts/(len(GAUSSIAN_RADII)*.2)
         bars=VGroup(*[Rectangle(width=.235,height=max(.001,h*4),color=BLUE,fill_opacity=.55,stroke_width=.5).move_to(rax.c2p((a+b)/2,h/2)) for a,b,h in zip(bins[:-1],bins[1:],dens)])
         histnote=jp('600点の半径 → 確率密度',23,BLUE).move_to([2.6,2.15,0])
-        self.beat(FadeIn(ra),TransformFromCopy(dots,bars),FadeIn(histnote))
+        bins_used=np.clip(np.searchsorted(bins,GAUSSIAN_RADII,side='right')-1,0,19)
+        levels=np.zeros(20,dtype=int)
+        histdots=VGroup()
+        for j in bins_used:
+            levels[j]+=1
+            histdots.add(Dot(rax.c2p((bins[j]+bins[j+1])/2,levels[j]/120),radius=.023,color=BLUE))
+        self.two(lambda:AnimationGroup(FadeIn(ra),TransformFromCopy(dots,histdots)),
+                 lambda:AnimationGroup(FadeOut(histdots),FadeIn(bars),FadeIn(histnote)))
+        self.remove(histdots)
         rr=np.linspace(0,4,181);curve=line_graph(rax,rr,radial_pdf(rr,2),GREEN)
         area=always_redraw(lambda:line_graph(rax,np.linspace(rad.get_value(),rad.get_value()+.3,35),radial_pdf(np.linspace(rad.get_value(),rad.get_value()+.3,35),2),YELLOW,True))
         self.add(area)
@@ -366,14 +393,14 @@ class PRML14CurseOfDimensionality(Scene):
         curve=always_redraw(lambda:line_graph(ax,r,radial_pdf(r,d.get_value()),GREEN))
         mode=always_redraw(lambda:Dot(ax.c2p(np.sqrt(max(d.get_value()-1,0)),radial_pdf(np.sqrt(max(d.get_value()-1,0)),d.get_value())),radius=.07,color=YELLOW))
         sl=self.slider(d,1,100,[0,-2.4,0],width=8,ticks=[1,20,50,100])
-        dn=meter('D=',d.get_value,[3.7,2.5,0],PURPLE,0)
+        dn=meter('D=',d.get_value,[3.7,2.5,0],PURPLE,1)
         note=jp('各座標：独立・平均0・標準偏差1',23,MUTED).move_to([-1.6,2.5,0])
         self.add(axes,curve,mode,sl,dn,note)
         self.two(lambda:d.animate.set_value(2),lambda:d.animate.set_value(20))
         formula=tex(r'r_{\rm mode}=\sqrt{D-1}\simeq4.36',32,YELLOW).move_to([.6,1.4,0])
-        self.beat(FadeIn(formula),Indicate(mode))
+        self.beat(FadeIn(formula),Indicate(mode, scale_factor=1))
         tail=line_graph(ax,np.linspace(5.4,7,80),radial_pdf(np.linspace(5.4,7,80),20),YELLOW,True)
-        self.beat(FadeIn(tail),Indicate(formula))
+        self.beat(FadeIn(tail),Indicate(formula, scale_factor=1))
         self.remove(axes,curve,mode,formula,tail,note)
         uax,ua=self.graph_axes([0,2,.25],[0,6,1],center=(-.5,0,0),width=9.6,height=3.6,xlabel='u',ylabel='q(u)')
         u=np.linspace(0,2,301)
@@ -382,10 +409,10 @@ class PRML14CurseOfDimensionality(Scene):
         one=DashedLine(uax.c2p(1,0),uax.c2p(1,6),color=YELLOW)
         self.add(ua,uc,label,one)
         self.beat(d.animate.set_value(30))
-        sums=tex(r'r^2=\sum_{i=1}^D x_i^2\quad\quad\frac{\operatorname{sd}(r^2)}{\mathbb E[r^2]}=\sqrt{\frac2D}',28,BLUE).move_to([0,1.45,0])
+        sums=VGroup(tex(r'r^2=\sum_{i=1}^D x_i^2',30,BLUE),tex(r'\frac{\operatorname{sd}(r^2)}{\mathbb E[r^2]}=\sqrt{\frac2D}',27,BLUE)).arrange(DOWN,buff=.3).move_to([-3.5,.9,0])
         self.beat(FadeIn(sums),d.animate.set_value(20))
         self.remove(sums)
-        self.two(lambda:d.animate.set_value(100),lambda:Indicate(label))
+        self.two(lambda:d.animate.set_value(100),lambda:Indicate(label, scale_factor=1))
         self.beat(d.animate.set_value(20))
 
     def manifold(self):
@@ -399,14 +426,14 @@ class PRML14CurseOfDimensionality(Scene):
         self.add(image,border)
         question=jp('256個の数字を全部覚える？',28,YELLOW).move_to([2.7,.5,0])
         self.beat(FadeIn(question),theta.animate.set_value(.25))
-        self.beat(theta.animate.set_value(0),Indicate(border))
+        self.beat(theta.animate.set_value(0),Indicate(border, scale_factor=1))
         self.remove(question)
         vector=tex(r'\mathbf{x}=(x_1,\ldots,x_{256})',36,BLUE).move_to([2.7,1.8,0])
         number=jp('16 × 16 = 256 画素',25,BLUE).move_to([-3.4,-1.95,0])
         strip=VGroup(*[Rectangle(width=.11,height=.7,stroke_width=.2) for i in range(32)]).arrange(RIGHT,buff=.025).move_to([2.7,.7,0])
         strip.add_updater(lambda g:[m.set_fill(interpolate_color(ManimColor('#151923'),WHITE,float(v)),1) for m,v in zip(g,object_pixels(x.get_value(),y.get_value(),theta.get_value()).ravel()[::8])])
         stripnote=jp('ベクトルの一部を表示',19,MUTED).move_to([2.7,-.05,0])
-        self.beat(FadeIn(vector),FadeIn(number),TransformFromCopy(image,strip),FadeIn(stripnote))
+        self.beat(FadeIn(vector),FadeIn(number),TransformFromCopy(VGroup(*image[::8]),strip),FadeIn(stripnote))
         sx=self.slider(x,-.5,.5,[1.8,-.9,0],width=2.6,label='a',color=BLUE)
         sy=self.slider(y,-.5,.5,[1.8,-1.7,0],width=2.6,label='b',color=GREEN)
         st=self.slider(theta,-1,1,[1.8,-2.5,0],width=2.6,label=r'\theta',color=YELLOW)
@@ -416,7 +443,7 @@ class PRML14CurseOfDimensionality(Scene):
         self.beat(FadeIn(dim),x.animate.set_value(-.3),y.animate.set_value(-.2))
         angle=meter(r'\theta=',theta.get_value,[5,-.9,0],YELLOW,2)
         self.add(angle)
-        self.beat(x.animate.set_value(.3),y.animate.set_value(.2),Indicate(angle))
+        self.beat(x.animate.set_value(.3),y.animate.set_value(.2),Indicate(angle, scale_factor=1))
         self.beat(theta.animate.set_value(.25))
         target=jp('向きの予測に効く自由度 1',27,YELLOW).move_to([2.5,1.8,0])
         self.beat(ReplacementTransform(vector,target),x.animate.set_value(0),y.animate.set_value(0),theta.animate.set_value(.5))
