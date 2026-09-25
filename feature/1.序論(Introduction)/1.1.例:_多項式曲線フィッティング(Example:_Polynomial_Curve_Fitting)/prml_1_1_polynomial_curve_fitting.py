@@ -128,7 +128,7 @@ class PRML11PolynomialCurveFitting(Scene):
         cue = self.beat_cues()[index]
         return cue['end'] - cue['start']
 
-    def beat(self, *animations, moving=True, start_sentence=0, end_sentence=None, actions=None):
+    def beat(self, *animations, moving=True, start_sentence=0, end_sentence=None, actions=None, phases=None):
         # Captions use the exact text and PCM duration of each synthesized sentence.
         # The visual action shares this clock; no minimum-duration silent padding.
         item = self.story['beats'][self.beat_index]
@@ -167,6 +167,31 @@ class PRML11PolynomialCurveFitting(Scene):
         if actions:
             record['actions'] = [dict(a, start=start+a['start'], end=start+a['end']) for a in actions]
         self.timeline[-1]['beats'].append(record)
+        if phases:
+            # Build later animations only after the previous phase has finished.
+            # Otherwise Manim can suspend a future target's updater from frame 0,
+            # or add a not-yet-stamped RMS marker to the scene prematurely.
+            elapsed_frames = 0
+            elapsed_seconds = 0.
+            record['actions'] = []
+            for name, seconds, factory in [*phases, ('breath', duration - sum(p[1] for p in phases), lambda: Wait())]:
+                elapsed_seconds += seconds
+                end_frame = min(frames, round(elapsed_seconds * fps))
+                phase_frames = end_frame - elapsed_frames
+                if phase_frames <= 0:
+                    continue
+                self.update_mobjects(0)
+                animation = factory()
+                phase_start = float(self.time)
+                offset = elapsed_frames / fps
+                phase_duration = phase_frames / fps
+                self.play(animation, UpdateFromAlphaFunc(captions,
+                          lambda m, alpha, offset=offset, d=phase_duration: caption_at(m, (offset + alpha*d) / duration),
+                          rate_func=linear), run_time=(phase_frames-1e-5)/fps, rate_func=linear)
+                record['actions'].append({'name': name, 'start': phase_start, 'end': float(self.time)})
+                elapsed_frames = end_frame
+            self.beat_index += 1
+            return
         visual = []
         if animations:
             if action_start > 0:
@@ -380,8 +405,8 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(alpha.animate.set_value(.85))
         arrival = self.sentence_duration(0)
         remainder = self.beat_cues()[-1]['end'] - arrival
-        self.beat(Succession(alpha.animate(run_time=arrival).set_value(1),
-                             AnimationGroup(Indicate(line, scale_factor=1.015), Indicate(energy), run_time=remainder)))
+        self.beat(phases=[('arrive', arrival, lambda: alpha.animate.set_value(1)),
+                          ('explain fit', remainder, lambda: AnimationGroup(Indicate(line, scale_factor=1.015), Indicate(energy)))])
         truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.55)
         self.beat(Create(truth), Indicate(line))
 
@@ -391,9 +416,18 @@ class PRML11PolynomialCurveFitting(Scene):
         ax = self.axes(width=5.5, span=lambda: self.curve_span(w()))
         self.add(data_dots(ax), always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.35)))
         model = always_redraw(lambda: graph_curve(ax, w()))
-        lines = always_redraw(lambda: residuals(ax, w()))
+        def live_residuals(xs, ts, color):
+            group = VGroup()
+            for a, b in zip(xs, ts):
+                line = Line(ax.c2p(a, b), ax.c2p(a, float(eval_poly(w(), a))) + UP * 1e-8,
+                            color=color, stroke_width=2)
+                line.add_updater(lambda m, a=a, b=b: m.put_start_and_end_on(
+                    ax.c2p(a, b), ax.c2p(a, float(eval_poly(w(), a))) + UP * 1e-8))
+                group.add(line)
+            return group
+        lines = live_residuals(X, T, RESIDUAL_YELLOW)
         test_dots = data_dots(ax, XT[::10], TT[::10], TEST_ORANGE, .033)
-        test_lines = always_redraw(lambda: residuals(ax, w(), XT[::10], TT[::10], TEST_ORANGE).set_opacity(.6))
+        test_lines = live_residuals(XT[::10], TT[::10], TEST_ORANGE).set_opacity(.6)
         errax = Axes(x_range=[0, 9, 1], y_range=[0, 1.1, .25], x_length=4.65, y_length=3.0,
                      tips=False, axis_config={'color': MUTED, 'stroke_width': 1.5}).move_to([3.45, .1, 0])
         self.add(errax, tex('M', 23).next_to(errax.c2p(9, 0), RIGHT, buff=.13),
@@ -405,7 +439,10 @@ class PRML11PolynomialCurveFitting(Scene):
         self.add(jp('訓練', 21, BLUE_DATA).move_to([3.4, 2.1, 0]), jp('テスト', 21, TEST_ORANGE).move_to([5, 2.1, 0]))
         self.add(self.slider(tracker, 0, 9, [-3.1, -2.35, 0], width=4.6), self.degree_label(tracker, [-3.1, 2.12, 0]))
         self.add(model, lines)
-        self.beat(FadeIn(test_dots), Create(test_lines), moving=False)
+        preview_lines = residuals(ax, w(), XT[::10], TT[::10], TEST_ORANGE).set_opacity(.6)
+        self.beat(FadeIn(test_dots), Create(preview_lines), moving=False)
+        self.remove(preview_lines)
+        self.add(test_lines)
         rms_formula = tex(r'E_{\rm RMS}=\sqrt{\frac1N\sum_n r_n^2}', 27).move_to([3.4, -2.45, 0])
         self.add(rms_formula)
         counter = ValueTracker(0)
@@ -417,31 +454,35 @@ class PRML11PolynomialCurveFitting(Scene):
         train_path = VMobject(color=BLUE_DATA, stroke_width=2.5)
         test_path = VMobject(color=TEST_ORANGE, stroke_width=2.5)
         self.add(train_path, test_path)
-        def stamp(m, seconds=3):
+        def count_residuals(seconds):
             counter.set_value(0)
-            pulses = Succession(*[AnimationGroup(Indicate(lines[i], scale_factor=1.1), counter.animate.set_value(i + 1)) for i in range(10)], run_time=seconds * .64)
-            transfers = AnimationGroup(TransformFromCopy(lines, train_pts[m]), TransformFromCopy(test_lines, test_pts[m]), run_time=seconds * .36)
-            return Succession(pulses, transfers)
-        self.beat(stamp(0))
+            return AnimationGroup(
+                Succession(*[ShowPassingFlash(lines[i].copy().clear_updaters().set_stroke(RESIDUAL_YELLOW, 4), time_width=.8) for i in range(10)], run_time=seconds),
+                counter.animate(run_time=seconds, rate_func=linear).set_value(10))
+        duration = self.beat_cues()[-1]['end']
+        self.beat(phases=[
+            ('count residuals', duration * .64, lambda: count_residuals(duration * .64)),
+            ('RMS stamp', duration * .36, lambda: AnimationGroup(TransformFromCopy(lines.copy().clear_updaters(), train_pts[0]),
+                                                              TransformFromCopy(test_lines.copy().clear_updaters(), test_pts[0])))])
         for m in range(1, 10):
+            counter.set_value(0)
             # Use callbacks only at the fitted endpoint; RMS markers are never interpolated observations.
             cues = self.beat_cues()
             morph_seconds = cues[0]['end']
             count_seconds = cues[1]['end'] - cues[1]['start']
-            motion = tracker.animate(run_time=morph_seconds).set_value(m)
             def add_paths(m=m):
                 train_path.set_points_as_corners([p.get_center() for p in train_pts[:m + 1]])
                 test_path.set_points_as_corners([p.get_center() for p in test_pts[:m + 1]])
-            # Succession gives most of each beat to the linked morph, then the count and transfer.
-            motion_and_stamp = [motion, stamp(m, count_seconds)]
+            # Each factory runs after the preceding phase, using the current fitted residuals.
+            phases = [('M slider', morph_seconds, lambda m=m: tracker.animate.set_value(m)),
+                      ('count residuals', count_seconds * .64, lambda: count_residuals(count_seconds * .64)),
+                      ('RMS stamp', count_seconds * .36,
+                       lambda m=m: AnimationGroup(TransformFromCopy(lines.copy().clear_updaters(), train_pts[m]),
+                                                   TransformFromCopy(test_lines.copy().clear_updaters(), test_pts[m])))]
             remaining = cues[-1]['end'] - morph_seconds - count_seconds
             if remaining > .01:
-                motion_and_stamp.append(AnimationGroup(Indicate(model, scale_factor=1.01),
-                                                       Indicate(test_pts[m]), run_time=remaining))
-            self.beat(Succession(*motion_and_stamp), actions=[
-                {'name': 'M slider', 'start': 0, 'end': morph_seconds},
-                {'name': 'count residuals', 'start': morph_seconds, 'end': morph_seconds + count_seconds * .64},
-                {'name': 'RMS stamp', 'start': morph_seconds + count_seconds * .64, 'end': morph_seconds + count_seconds}])
+                phases.append(('explain RMS', remaining, lambda: Indicate(rms_formula, scale_factor=1.015)))
+            self.beat(phases=phases)
             add_paths()
         highlight = Circle(radius=.23, color=RESIDUAL_YELLOW).move_to(ax.c2p(.05, eval_poly(WEIGHTS[9], .05)))
         self.beat(Create(highlight), Indicate(test_pts[9]), moving=False)
@@ -515,8 +556,8 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(n.animate.set_value(40))
         arrival = self.sentence_duration(0)
         remainder = self.beat_cues()[-1]['end'] - arrival
-        self.beat(Succession(n.animate(run_time=arrival).set_value(100),
-                             Indicate(curve, color=TRUE_GREEN, scale_factor=1.015, run_time=remainder)))
+        self.beat(phases=[('N to 100', arrival, lambda: n.animate.set_value(100)),
+                          ('explain fit', remainder, lambda: Indicate(curve, color=TRUE_GREEN, scale_factor=1.015))])
         self.beat(Indicate(curve, color=TRUE_GREEN, scale_factor=1.02))
 
     def regularization(self):
