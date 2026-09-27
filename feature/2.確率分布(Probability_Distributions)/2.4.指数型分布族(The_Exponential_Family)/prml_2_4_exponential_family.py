@@ -17,7 +17,7 @@ class PRML24ExponentialFamily(NarratedScene):
                 tips=False,axis_config=dict(color=MUTED),
                 y_axis_config=dict(include_numbers=True,font_size=22))
         ax.move_to([0,.05,0])
-        ax.y_axis.shift(ax.c2p(-.7,0)-ax.c2p(0,0))
+        display_axes=VGroup(ax.x_axis,ax.y_axis.copy().shift(ax.c2p(-.7,0)-ax.c2p(0,0)))
         group=VGroup()
         for k,color in enumerate(colors):
             bar=always_redraw(lambda k=k,color=color: Rectangle(width=.85,height=max(.001,3*getter()[k]/ymax),
@@ -26,7 +26,7 @@ class PRML24ExponentialFamily(NarratedScene):
             value.add_updater(lambda m,k=k:m.set_value(getter()[k]).move_to(ax.c2p(k,getter()[k])+UP*.25))
             label=jp(labels[k],23,color).move_to(ax.c2p(k,0)+DOWN*.36)
             group.add(bar,value,label)
-        return VGroup(ax,group)
+        return VGroup(display_axes,group)
 
     def weights(self):
         eta=ValueTracker(0.)
@@ -60,17 +60,20 @@ class PRML24ExponentialFamily(NarratedScene):
         graph=curve(ax,sigmoid,-3,3,GREEN)
         dot=always_redraw(lambda:Dot(ax.c2p(eta.get_value(),sigmoid(eta.get_value())),color=YELLOW,radius=.08))
         eq=formula(r'p(x|\mu)=\mu^x(1-\mu)^{1-x}')
-        self.add(eq,ax,labels,graph,dot,slider(eta,-3,3))
+        control=slider(eta,-3,3)
+        self.add(eq,ax,labels,graph,dot,control)
         self.beat(self.highlight(eq),self.highlight(graph))
         logit=formula(r'\eta=\ln\frac{\mu}{1-\mu},\qquad \mu=\frac{1}{1+e^{-\eta}}')
         self.beat(self.match(eq,logit),eta.animate.set_value(2.))
         self.beat(eta.animate.set_value(-1.),eta.animate.set_value(0.))
-        self.remove(ax,labels,graph,dot)
+        self.remove(ax,labels,graph,dot,control)
         full=MathTex(r'p(x|\eta)=',r'h(x)',r'g(\eta)',r'\exp\{',r'\eta^{\mathrm T}',r'u(x)',r'\}',font_size=43).move_to([0,.65,0])
         for i,c in [(1,MUTED),(2,PURPLE),(4,YELLOW),(5,BLUE)]: full[i].set_color(c)
         self.beat(self.match(logit,full),self.highlight(VGroup(full[4],full[5])))
         meanings=VGroup(jp('特徴量：データから作る材料',24,BLUE),jp('自然パラメータ：材料の重み',24,YELLOW),jp('土台 × 正規化係数',24,PURPLE)).arrange(DOWN,buff=.22).move_to([0,-.8,0])
-        self.beat(FadeIn(meanings[:2]),FadeIn(meanings[2]))
+        self.add(jp('連続：積分　離散：和',18,MUTED).move_to([0,-1.8,0]))
+        normalization=formula(r'g(\eta)\int h(x)\exp\{\eta^{\mathrm T}u(x)\}\,dx=1',(0,-2.3,0),30)
+        self.beat(FadeIn(meanings[:2]),AnimationGroup(FadeIn(meanings[2]),FadeIn(normalization)))
         sub=formula(r'u(x)=x,\quad h(x)=1,\quad g(\eta)=\frac{1}{1+e^\eta}',(0,2.35,0),31)
         self.beat(FadeIn(sub),self.highlight(full))
 
