@@ -58,7 +58,11 @@ class PRML25NonparametricMethods(NarratedScene):
             return r'\textcolor[HTML]{'+color.to_hex().lstrip('#')+'}{'+token+'}' if color else token
         colored=re.sub(r"\\[A-Za-z]+(?:_[A-Za-z0-9])?|[A-Za-z](?:_[A-Za-z0-9])?",paint,formula)
         f=MathTex(colored,font_size=size,tex_template=COLOR_TEMPLATE)
+        if y < -2 and f.height > .88:
+            f.scale(.88/f.height)
         f.move_to([0,y,0])
+        if y < -2 and f.get_bottom()[1] < -2.97:
+            f.shift(UP*(-2.97-f.get_bottom()[1]))
         assert f.width<13 and f.height<1.2,(formula,f.width,f.height)
         self.add(f)
         return f
@@ -152,7 +156,9 @@ class PRML25NonparametricMethods(NarratedScene):
         self.beat(Create(select))
         self.remove(select,f)
         f=self.formula(r'p_i={n_i\over N\Delta_i},\qquad p_i\Delta_i={n_i\over N}',colors={'n_i':COUNT,r'\Delta_i':VOLUME})
-        self.beat(Indicate(bars[3],color=COUNT,scale_factor=1.03))
+        # Animate the independent outline, preserving the redraw group as one root.
+        self.beat(Create(select),Indicate(f,color=COUNT,scale_factor=1.01))
+        self.remove(select)
         self.beat(w.animate.set_value(.025))
         self.beat(w.animate.set_value(.5))
         self.beat(phases=[('restore_width',self.sentence_duration(0),lambda:w.animate.set_value(.08)),
@@ -193,7 +199,7 @@ class PRML25NonparametricMethods(NarratedScene):
         self.formula(r'\mathbb E[K/N]=P,\quad\mathrm{var}[K/N]={P(1-P)\over N}',size=30)
         tr=ValueTracker(20)
         bx=Axes(x_range=[0,1,.2],y_range=[0,.2,.1],x_length=9,y_length=2.7,tips=False).move_to([0,-.2,0])
-        self.add(bx,tex('K/N',25).next_to(bx.x_axis,RIGHT),tex('P=0.35',25).move_to([2.5,1.7,0]),
+        self.add(bx,tex('P(K)',20,MUTED).next_to(bx.y_axis,LEFT),tex('K/N',25).next_to(bx.x_axis,RIGHT),tex('P=0.35',25).move_to([2.5,1.7,0]),
                  readout('N=',lambda:round(tr.get_value()),[-2.5,1.7,0],DATA,0))
         def binomial_bars():
             n=round(tr.get_value())
@@ -204,7 +210,8 @@ class PRML25NonparametricMethods(NarratedScene):
         self.beat(tr.animate.set_value(200))
 
     def boxes(self):
-        ax=self.density_axes(6);x=ValueTracker(.12);h=.12
+        span=ValueTracker(6)
+        ax=self.density_axes(dynamic=span.get_value);x=ValueTracker(.12);h=.12
         win=self.window(ax,x,lambda:h,5)
         line=curve(ax,GRID,box_kde(GRID,h),MODEL)
         self.add(self.rug(ax,lambda p:abs(p-x.get_value())<=h/2),win,line)
@@ -213,29 +220,35 @@ class PRML25NonparametricMethods(NarratedScene):
         self.beat(x.animate.set_value(.38))
         point=float(SAMPLES[15]);self.remove(win,mark,line)
         selected=Dot(ax.c2p(point,0),radius=.08,color=COUNT);self.add(selected)
-        interval=Line(ax.c2p(point-h/2,1),ax.c2p(point+h/2,1),stroke_width=9,color=VOLUME)
-        self.beat(Create(interval))
-        box=Rectangle(width=h*10,height=3.15/(6*N*h),fill_color=COUNT,fill_opacity=.7,stroke_color=COUNT).move_to(ax.c2p(point,1/(2*N*h)))
-        self.beat(ReplacementTransform(interval,box))
+        interval=always_redraw(lambda:Line(ax.c2p(point-h/2,.2),ax.c2p(point+h/2,.2),stroke_width=5,color=VOLUME))
+        self.add(interval)
+        self.beat(span.animate.set_value(.3))
+        box=Rectangle(width=h*10,height=3.15/(.3*N*h),fill_color=COUNT,fill_opacity=.55,stroke_color=COUNT).move_to(ax.c2p(point,1/(2*N*h)))
+        self.remove(interval)
+        self.beat(GrowFromEdge(box,DOWN))
+        self.remove(box,selected)
+        span.set_value(6)
+        line=curve(ax,GRID,box_kde(GRID,h),MODEL)
         boxes=VGroup(*[Rectangle(width=h*10,height=3.15/(6*N*h),fill_color=DATA,fill_opacity=.12,stroke_color=DATA,stroke_width=.6)
                        .move_to(ax.c2p(p,1/(2*N*h))) for p in SAMPLES])
-        self.add(boxes);self.beat(Create(line),FadeOut(box))
+        self.add(boxes);self.beat(Create(line))
         self.remove(f);f=self.formula(r'\widehat p(x)={1\over N}\sum_{n=1}^N{1\over h^D}k\!\left({x-x_n\over h}\right)',size=33,colors={'h':VOLUME})
-        top=tex(r'V=h^D\qquad k(u)=\mathbf1\{|u_i|\leq 1/2\}',28).move_to([0,2.1,0]);self.add(top)
+        top=tex(r'V=h^D\qquad k(u)=\mathbf1\{|u_i|\leq 1/2\;\forall i\}',28).move_to([0,2.1,0]);self.add(top)
         self.beat(x.animate.set_value(.7),Indicate(boxes,scale_factor=1.01))
         self.add(mark)
         self.beat(x.animate.set_value(.82))
 
     def gaussians(self):
         h=ValueTracker(.06);number=ValueTracker(1)
-        span=lambda:max(5,1.1*float(kde(SMOOTH_GRID,h.get_value()).max()))
-        ax=self.density_axes(dynamic=span)
         # Fractional final contribution visualizes accumulation; denominator stays N.
         def cumulative():
             n=number.get_value();weights=np.clip(n-np.arange(N),0,1)
             return gaussian(SMOOTH_GRID[:,None],SAMPLES,h.get_value())@weights/N
+        truth_visible=False
+        span=lambda:max(.2,1.12*float(cumulative().max()),1.12*float(truth(SMOOTH_GRID).max()) if truth_visible else 0)
+        ax=self.density_axes(dynamic=span)
         total=always_redraw(lambda:curve(ax,SMOOTH_GRID,cumulative()))
-        kernels=always_redraw(lambda:VGroup(*[curve(ax,SMOOTH_GRID,gaussian(SMOOTH_GRID,p,h.get_value())/N,DATA,1,.3) for p in SAMPLES[::5]]))
+        kernels=always_redraw(lambda:VGroup(*[curve(ax,SMOOTH_GRID,gaussian(SMOOTH_GRID,p,h.get_value())/N,DATA,1,.3) for p in SAMPLES[:max(1,int(number.get_value())):5]]))
         self.add(self.rug(ax),total,kernels)
         self.slider(h,.012,.25,'h')
         f=self.formula(r'\widehat p(x)={1\over N}\sum_n\mathcal N(x\mid x_n,h^2)',colors={'h':VOLUME})
@@ -247,6 +260,7 @@ class PRML25NonparametricMethods(NarratedScene):
         self.beat(h.animate.set_value(.25))
         self.remove(f);f=self.formula(r'k(u)\geq0,\quad\int k(u)\,du=1\quad\Longrightarrow\quad\int\widehat p(x)\,dx=1',size=29)
         self.beat(h.animate.set_value(.06))
+        truth_visible=True
         true=always_redraw(lambda:curve(ax,SMOOTH_GRID,truth(SMOOTH_GRID),TRUE,2,.6));self.add(true)
         self.beat(h.animate(rate_func=there_and_back).set_value(.1))
 
@@ -287,7 +301,7 @@ class PRML25NonparametricMethods(NarratedScene):
         dot=always_redraw(lambda:Dot(ax.c2p(*q()),radius=.075,color=WHITE))
         circle=always_redraw(lambda:Circle(radius=neighbours(q(),5)[1]*1.5*grow.get_value(),color=VOLUME,stroke_width=2).move_to(ax.c2p(*q())))
         self.add(dot)
-        self.beat(LaggedStart(*[Indicate(d,scale_factor=1.3) for d in dots],lag_ratio=.04))
+        self.beat(LaggedStart(*[Indicate(d,color=d.get_color(),scale_factor=1.3) for d in dots],lag_ratio=.04))
         self.add(circle);self.beat(grow.animate.set_value(1))
         links=always_redraw(lambda:VGroup(*[Line(ax.c2p(*q()),ax.c2p(*POINTS[i]),color=COUNT,stroke_width=1.6) for i in index()]))
         self.add(links)
@@ -296,12 +310,13 @@ class PRML25NonparametricMethods(NarratedScene):
         f=tex(r'K=5',32,COUNT).move_to([3.6,.4,0]);self.add(f)
         self.beat(Indicate(circle,scale_factor=1.02))
         a=self.formula(r'p(x\mid C_k)={K_k\over N_kV},\quad p(C_k)={N_k\over N},\quad p(x)={K\over NV}',size=28)
-        self.beat(LaggedStart(*[Indicate(dots[i],color=COUNT) for i in index()],lag_ratio=.15))
+        self.beat(LaggedStart(*[Circumscribe(dots[i],color=COUNT,buff=.04) for i in index()],lag_ratio=.15))
         self.remove(a)
         a=self.formula(r'p(C_k\mid x)={p(x\mid C_k)p(C_k)\over p(x)}={K_k\over N_kV}{N_k\over N}{NV\over K}',size=29)
         self.beat(Indicate(a,scale_factor=1.01))
         b=MathTex(r'p(C_k\mid x)={K_k\over K}',font_size=37).move_to([0,-2.55,0])
-        self.beat(TransformMatchingTex(a,b))
+        self.beat(phases=[('cancel_factors',.9,lambda:TransformMatchingTex(a,b)),
+                          ('read_posterior',sum(self.sentence_duration(i) for i in [0,1])-.9,lambda:Indicate(b,color=COUNT,scale_factor=1.01))])
         self.remove(f);self.add(readout(r'p(C_{\rm red}\mid x)=',lambda:posterior(q(),5)[0],[3.6,-.4,0],MODEL,1),
                                 readout(r'p(C_{\rm blue}\mid x)=',lambda:posterior(q(),5)[1],[3.6,-1.1,0],DATA,1))
         self.beat(qx.animate.set_value(.65),qy.animate.set_value(-.4))
@@ -321,12 +336,14 @@ class PRML25NonparametricMethods(NarratedScene):
         inset=VGroup(Dot(p1,color=MODEL),Dot(p2,color=DATA),Line(p1,p2,color=MUTED),
                      DashedLine(mid+UP*.8,mid+DOWN*.8,color=COUNT),jp('二点だけの場合',20).move_to([3.5,-1.2,0]))
         self.beat(Create(inset))
-        nxt=field(5)
-        self.beat(FadeOut(bg),FadeIn(nxt),Transform(label,tex('K=5',36,COUNT).move_to(label)))
-        bg=nxt;nxt=field(11)
-        self.beat(FadeOut(bg),FadeIn(nxt),Transform(label,tex('K=11',36,COUNT).move_to(label)))
-        bg=nxt;nxt=field(5)
-        self.beat(FadeOut(bg),FadeIn(nxt),Transform(label,tex('K=5',36,COUNT).move_to(label)),cursor.animate.move_to(ax.c2p(-.5,.3)))
+        for k,target in [(5,(-.5,.3)),(11,(1.2,.2)),(5,(-.5,.3))]:
+            self.remove(bg,label)
+            bg=field(k);label=tex(f'K={k}',36,COUNT).move_to([3.5,1.8,0])
+            self.add(bg,label)
+            self.beat(cursor.animate.move_to(ax.c2p(*target)))
+        self.remove(bg,label)
+        bg=field(1);label=tex('K=1',36,COUNT).move_to([3.5,1.8,0])
+        self.add(bg,label)
         self.remove(inset)
         self.add(jp('極限での保証',25).move_to([3.5,.5,0]),tex(r'R^*\leq R_{1\mathrm{NN}}\leq2R^*',29).move_to([3.5,-.2,0]),
                  jp('最適な誤り率：',19).move_to([3.1,-1,0]),tex('R^*',24).move_to([4.5,-1,0]))
@@ -341,19 +358,23 @@ class PRML25NonparametricMethods(NarratedScene):
         f=self.formula(r'V\ \mathrm{fixed}\quad\longleftrightarrow\quad K\ \mathrm{fixed}',colors={'V':VOLUME,'K':COUNT})
         self.beat(mode.animate.set_value(1),x.animate.set_value(.5))
         links=VGroup(*[Line(ax.c2p(.5,4.5),ax.c2p(p,0),stroke_width=.6,color=COUNT,stroke_opacity=.35) for p in SAMPLES])
-        self.remove(f);f=self.formula(r'\mathrm{KDE}:\quad N\ \mathrm{terms}\ \Longrightarrow\ O(N)\ \mathrm{per\ query}',size=31)
+        self.remove(f);f=VGroup(tex('N',32,COUNT),jp('個の寄与を、評価のたびに足す',24)).arrange(RIGHT,buff=.2).move_to([0,-2.55,0]);self.add(f)
         self.beat(LaggedStart(*[Create(l) for l in links],lag_ratio=.015))
         bars=self.hist(ax,.1)
-        self.remove(f,links,win)
+        self.remove(f,links,*links,win)
         self.beat(FadeOut(rug),FadeIn(bars))
         self.clear();self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
-        grid=VGroup(*[Square(side_length=.24,color=DATA,fill_opacity=.25).move_to([-1.35+i*.28,-1.25+j*.28,0]) for i in range(10) for j in range(10)])
         count=ValueTracker(1)
+        grid=always_redraw(lambda:VGroup(*[
+            Square(side_length=.24,color=DATA,fill_opacity=.25).move_to([-1.35+i*.28,1.0-j*.43,0])
+            for j in range(round(count.get_value())) for i in range(10)]))
         self.add(grid,readout('D=',lambda:round(count.get_value()),[-3.8,1.8,0],COUNT,0),
-                 readout('10^D=',lambda:10**round(count.get_value()),[1.8,1.8,0],VOLUME,0))
+                 readout('10^D=',lambda:10**round(count.get_value()),[1.8,1.8,0],VOLUME,0),
+                 jp('各行は一つの軸\n各軸を10分割',22).move_to([3.7,0,0]))
         self.formula(r'M^D\quad (M=10)',size=36)
         self.beat(count.animate.set_value(6))
-        self.remove(grid)
+        self.clear();self.add(jp(self.story['title'],34).move_to([0,3.35,0]),
+                              jp('候補を絞って、近い点を探す',26).move_to([0,2.0,0]))
         nodes=[np.array([0,1.0,0]),np.array([-2,0,0]),np.array([2,0,0]),np.array([-3,-1,0]),np.array([-1,-1,0]),np.array([1,-1,0]),np.array([3,-1,0])]
         tree=VGroup(*[Line(nodes[(i-1)//2],nodes[i],color=MUTED) for i in range(1,7)],*[Dot(p,color=DATA) for p in nodes])
         self.add(tree);path=VGroup(Line(nodes[0],nodes[1],color=COUNT,stroke_width=5),Line(nodes[1],nodes[4],color=COUNT,stroke_width=5))
