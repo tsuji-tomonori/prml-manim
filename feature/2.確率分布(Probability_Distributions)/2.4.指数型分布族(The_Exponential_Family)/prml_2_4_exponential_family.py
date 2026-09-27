@@ -1,418 +1,246 @@
-from __future__ import annotations
-
-import math
-import wave
-from pathlib import Path
-
-import numpy as np
+"""PRML 2.4 — linked visual experiments, implemented in Manim Community."""
 from manim import *
+import numpy as np
+from scene_support import *
+from exponential_model import COINS, POINTS, sigmoid, softmax, normal, gaussian_natural, beta_pdf, log_likelihood, transformed_density
 
 
-JAPANESE_FONT = "Noto Sans CJK JP"
-BG = "#101010"
-TEXT_GREY = GREY_B
-ACCENT_BLUE = BLUE_C
-ACCENT_GREEN = GREEN_C
-ACCENT_RED = RED_C
-ACCENT_ORANGE = ORANGE
-ACCENT_PURPLE = PURPLE_C
-ACCENT_YELLOW = YELLOW_C
+class PRML24ExponentialFamily(NarratedScene):
+    def construct(self):
+        self.run_scenes([self.weights,self.family,self.categories,self.gaussian,
+                         self.statistics,self.likelihood,self.conjugacy,
+                         self.coordinates,self.invariance,self.summary])
 
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
+    def bars(self, getter, colors=(BLUE,RED), ymax=1., labels=('0 / 裏','1 / 表')):
+        n=len(colors)
+        ax=Axes(x_range=[-.7,n-.3,1],y_range=[0,ymax,ymax/2],x_length=7,y_length=3,
+                tips=False,axis_config=dict(color=MUTED),
+                y_axis_config=dict(include_numbers=True,font_size=22))
+        ax.move_to([0,.05,0])
+        group=VGroup()
+        for k,color in enumerate(colors):
+            bar=always_redraw(lambda k=k,color=color: Rectangle(width=.85,height=max(.001,3*getter()[k]/ymax),
+                    color=color,fill_opacity=.7).move_to(ax.c2p(k,0),aligned_edge=DOWN))
+            value=DecimalNumber(getter()[k],num_decimal_places=2,font_size=25,color=color)
+            value.add_updater(lambda m,k=k:m.set_value(getter()[k]).move_to(ax.c2p(k,getter()[k])+UP*.25))
+            label=jp(labels[k],23,color).move_to(ax.c2p(k,0)+DOWN*.36)
+            group.add(bar,value,label)
+        return VGroup(ax,group)
 
-ManimText = Text
+    def weights(self):
+        eta=ValueTracker(0.)
+        norm=ValueTracker(1.)
+        def vals():
+            w=np.array([1.,np.exp(eta.get_value())])
+            return w/(1+norm.get_value()*(w.sum()-1))
+        # Fixed 0..1 probability chart, replaced explicitly by a 0..3 weights chart.
+        bars=self.bars(vals)
+        label=jp('確率：合計 1',25,GREEN).move_to([0,2.4,0])
+        control=slider(eta,-2,2)
+        self.add(bars,label,control)
+        self.beat(self.highlight(bars),eta.animate.set_value(.4))
+        self.beat(eta.animate.set_value(1.6),eta.animate.set_value(0.))
+        self.remove(bars,label)
+        norm.set_value(0.)
+        bars=self.bars(vals,ymax=3.)
+        label=jp('重み：まだ合計 1 ではない',25,YELLOW).move_to([0,2.4,0])
+        self.add(bars,label)
+        self.beat(eta.animate.set_value(np.log(2.5)),self.highlight(bars))
+        eq=formula(r'w_0=1,\quad w_1=e^\eta',(0,2.4,0))
+        self.remove(label); self.add(eq)
+        self.beat(self.highlight(eq),eta.animate.set_value(-1.5))
+        self.beat(norm.animate.set_value(1.),eta.animate.set_value(np.log(2.)))
+        final=formula(r'p(0)=\frac{1}{1+e^\eta},\quad p(1)=\frac{e^\eta}{1+e^\eta}',(0,2.4,0))
+        self.beat(Transform(eq,final),eta.animate.set_value(0.))
 
+    def family(self):
+        eta=ValueTracker(-2.)
+        ax,labels=axes([-3,3,1],[0,1,.5],width=7,height=2.8,center=(0,-.1,0),xlabel=r'\eta',ylabel=r'\mu')
+        graph=curve(ax,sigmoid,-3,3,GREEN)
+        dot=always_redraw(lambda:Dot(ax.c2p(eta.get_value(),sigmoid(eta.get_value())),color=YELLOW,radius=.08))
+        eq=formula(r'p(x|\mu)=\mu^x(1-\mu)^{1-x}')
+        self.add(eq,ax,labels,graph,dot,slider(eta,-3,3))
+        self.beat(self.highlight(eq),self.highlight(graph))
+        logit=formula(r'\eta=\ln\frac{\mu}{1-\mu},\qquad \mu=\frac{1}{1+e^{-\eta}}')
+        self.beat(TransformMatchingTex(eq,logit),eta.animate.set_value(2.))
+        self.beat(eta.animate.set_value(-1.),eta.animate.set_value(0.))
+        self.remove(ax,labels,graph,dot)
+        full=MathTex(r'p(x|\eta)=',r'h(x)',r'g(\eta)',r'\exp\{',r'\eta^{\mathrm T}',r'u(x)',r'\}',font_size=43).move_to([0,.65,0])
+        for i,c in [(1,MUTED),(2,PURPLE),(4,YELLOW),(5,BLUE)]: full[i].set_color(c)
+        self.beat(TransformMatchingTex(logit,full),self.highlight(VGroup(full[4],full[5])))
+        meanings=VGroup(jp('特徴量：データから作る材料',24,BLUE),jp('自然パラメータ：材料の重み',24,YELLOW),jp('土台 × 正規化係数',24,PURPLE)).arrange(DOWN,buff=.22).move_to([0,-.8,0])
+        self.beat(FadeIn(meanings[:2]),FadeIn(meanings[2]))
+        sub=formula(r'u(x)=x,\quad h(x)=1,\quad g(\eta)=\frac{1}{1+e^\eta}',(0,2.35,0),31)
+        self.beat(FadeIn(sub),self.highlight(full))
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+    def categories(self):
+        a,b=ValueTracker(0),ValueTracker(0)
+        values=lambda:softmax([a.get_value(),b.get_value(),0])
+        bars=self.bars(values,colors=(RED,BLUE,GREEN),labels=('赤','青','緑'))
+        eq=formula(r'x=(1,0,0),\ (0,1,0),\ (0,0,1)',(0,2.45,0))
+        controls=VGroup(slider(a,-2,2,(-3.2,-2.35,0),r'\eta_1',width=3.0,color=RED),
+                        slider(b,-2,2,(2.8,-2.35,0),r'\eta_2',width=3.0,color=BLUE))
+        self.add(bars,eq,controls)
+        self.beat(self.highlight(bars),self.highlight(eq))
+        self.beat(Transform(eq,formula(r'w=(e^{\eta_1},e^{\eta_2},1)',(0,2.45,0))),a.animate.set_value(1.7))
+        self.beat(b.animate.set_value(1.3),a.animate.set_value(-.7))
+        soft=formula(r'\mu_k=\frac{e^{\eta_k}}{1+e^{\eta_1}+e^{\eta_2}},\quad\mu_3=\frac{1}{1+e^{\eta_1}+e^{\eta_2}}',(0,2.45,0),29)
+        self.beat(Transform(eq,soft),self.highlight(eq))
+        self.beat(AnimationGroup(a.animate.set_value(.8),b.animate.set_value(-1.2)),self.highlight(bars))
+        reduced=formula(r'p(x|\eta)=\frac{\exp(\eta_1 x_1+\eta_2 x_2)}{1+e^{\eta_1}+e^{\eta_2}}',(0,2.45,0),31)
+        self.beat(Transform(eq,reduced),AnimationGroup(a.animate.set_value(0),b.animate.set_value(0)))
 
+    def gaussian(self):
+        mu,sigma=ValueTracker(-.8),ValueTracker(1.)
+        ax,labels=axes([-4,4,2],[0,.8,.4],width=8.4,height=2.8,center=(0,-.1,0),ylabel=r'p(x)')
+        graph=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),sigma.get_value()),-4,4,GREEN,True))
+        vertical=always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),normal(mu.get_value(),mu.get_value(),sigma.get_value())),color=YELLOW))
+        eq=formula(r'p(x)=\frac{1}{\sqrt{2\pi}\sigma}\exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]',(0,2.4,0),31)
+        controls=VGroup(slider(mu,-1,1,(-3.4,-2.35,0),r'\mu',width=2.7),slider(sigma,.5,1.5,(2.6,-2.35,0),r'\sigma',width=2.7,color=PURPLE))
+        self.add(ax,labels,graph,vertical,eq,controls)
+        self.beat(self.highlight(graph),mu.animate.set_value(.8))
+        self.beat(sigma.animate.set_value(.55),sigma.animate.set_value(1.))
+        expansion=MathTex(r'-\frac{(x-\mu)^2}{2\sigma^2}=',r'\frac{\mu}{\sigma^2}x',r'-\frac{1}{2\sigma^2}x^2',r'-\frac{\mu^2}{2\sigma^2}',font_size=31).move_to([0,2.4,0])
+        expansion[1].set_color(YELLOW); expansion[2].set_color(PURPLE)
+        self.beat(TransformMatchingTex(eq,expansion),self.highlight(expansion[1:3]))
+        natural=formula(r'\eta_1=\mu/\sigma^2,\quad\eta_2=-1/(2\sigma^2),\quad u(x)=(x,x^2)^{\mathrm T}',(0,2.5,0),28)
+        self.remove(expansion);self.add(natural)
+        nums=VGroup(readout(r'\eta_1=',lambda:gaussian_natural(mu.get_value(),sigma.get_value())[0],(-3,1.7,0)),
+                    readout(r'\eta_2=',lambda:gaussian_natural(mu.get_value(),sigma.get_value())[1],(3,1.7,0),PURPLE))
+        self.add(nums)
+        self.beat(self.highlight(natural),AnimationGroup(mu.animate.set_value(-.5),sigma.animate.set_value(.7)))
+        self.beat(sigma.animate.set_value(1.1),self.highlight(nums[1]))
+        self.remove(nums)
+        g=formula(r'h(x)=(2\pi)^{-1/2},\quad g(\eta)=\sqrt{-2\eta_2}\exp\!\left(\frac{\eta_1^2}{4\eta_2}\right)',(0,2.45,0),29)
+        self.beat(Transform(natural,g),AnimationGroup(mu.animate.set_value(0),sigma.animate.set_value(.8)))
 
-def normal_pdf(x: float | np.ndarray, mu: float = 0.0, sigma: float = 1.0) -> float | np.ndarray:
-    return np.exp(-0.5 * ((x - mu) / sigma) ** 2) / (math.sqrt(2.0 * math.pi) * sigma)
+    def statistics(self):
+        coins=VGroup(*[VGroup(Circle(radius=.23,color=RED if x else BLUE,fill_opacity=.5),tex(str(x),25)).move_to([-4.5+i,1.2,0]) for i,x in enumerate(COINS)])
+        eq=formula(r'N=10,\quad S=\sum_n x_n=7',(0,-.15,0),38)
+        self.add(coins)
+        self.beat(LaggedStart(*[FadeIn(c) for c in coins],lag_ratio=.15),FadeIn(eq))
+        order=np.argsort(COINS)
+        destinations={int(i):[-4.5+j,1.2,0] for j,i in enumerate(order)}
+        self.beat(AnimationGroup(*[c.animate.move_to(destinations[i]) for i,c in enumerate(coins)]),self.highlight(eq))
+        self.beat(AnimationGroup(*[c.animate.scale(.1).move_to(eq.get_center()) for c in coins]),self.highlight(eq))
+        self.remove(coins)
+        likelihood=MathTex(r'p(X|\eta)=',r'\prod_n h(x_n)',r'g(\eta)^N',r'\exp\!\left\{\eta^{\mathrm T}',r'\sum_n u(x_n)',r'\right\}',font_size=32).move_to([0,1.8,0])
+        likelihood[4].set_color(BLUE); likelihood[2].set_color(PURPLE)
+        self.beat(FadeIn(likelihood),self.highlight(likelihood[4]))
+        self.remove(eq,likelihood)
+        line=NumberLine(x_range=[-1.5,2,.5],length=9,include_numbers=True,font_size=22).move_to([0,1.0,0])
+        dots=VGroup(*[Dot(line.n2p(x),color=BLUE,radius=.07) for x in POINTS])
+        stats=formula(r'N=6,\quad\sum x_n='+f'{POINTS.sum():.2f}'+r',\quad\sum x_n^2='+f'{(POINTS**2).sum():.2f}',(0,-.25,0),34)
+        result=formula(r'\mu_{\rm ML}='+f'{POINTS.mean():.2f}'+r',\quad\sigma^2_{\rm ML}=\frac{\sum x_n^2}{N}-\mu_{\rm ML}^2='+f'{POINTS.var():.3f}',(0,-1.5,0),33)
+        self.add(line,dots)
+        self.beat(FadeIn(stats),FadeIn(result))
+        self.beat(LaggedStart(*[Indicate(d,color=YELLOW) for d in dots],lag_ratio=.2),self.highlight(VGroup(stats,result)))
 
+    def likelihood(self):
+        eta=ValueTracker(-1.5)
+        ax,labels=axes([-3,3,1],[0,1,.5],width=8,height=2.8,center=(0,-.1,0),xlabel=r'\eta',ylabel=r'\mathbb E[x]')
+        graph=curve(ax,sigmoid,-3,3,GREEN)
+        target=DashedLine(ax.c2p(-3,.7),ax.c2p(3,.7),color=BLUE)
+        dot=always_redraw(lambda:Dot(ax.c2p(eta.get_value(),sigmoid(eta.get_value())),color=YELLOW,radius=.09))
+        read=readout(r'\mu=',lambda:sigmoid(eta.get_value()),(4.8,.5,0))
+        eq=formula(r'\ell(\eta)=7\eta-10\ln(1+e^\eta)',(0,2.35,0),34)
+        self.add(ax,labels,graph,target,dot,read,eq,slider(eta,-3,3))
+        self.beat(self.highlight(eq),self.highlight(target,BLUE))
+        self.beat(eta.animate.set_value(np.log(7/3)),self.highlight(dot))
+        self.remove(graph,target,dot,labels,read)
+        # Replace the coordinate system explicitly: the new ordinate is A, not E[x].
+        self.remove(ax)
+        ax,labels=axes([-3,3,1],[0,3.2,1],width=8,height=2.8,center=(0,-.1,0),xlabel=r'\eta',ylabel='A')
+        graph=curve(ax,lambda x:np.logaddexp(0,x),-3,3,GREEN)
+        tangent=always_redraw(lambda:Line(ax.c2p(eta.get_value()-.55,np.logaddexp(0,eta.get_value())-.55*sigmoid(eta.get_value())),ax.c2p(eta.get_value()+.55,np.logaddexp(0,eta.get_value())+.55*sigmoid(eta.get_value())),color=YELLOW,stroke_width=5))
+        read=readout(r"A'(\eta)=",lambda:sigmoid(eta.get_value()),(4.8,.6,0))
+        self.add(ax,labels,graph,tangent,read)
+        self.beat(Transform(eq,formula(r'A(\eta)=-\ln g(\eta),\quad\nabla A=\mathbb E[u(x)]')),eta.animate.set_value(-1.5))
+        self.beat(eta.animate.set_value(1.5),Transform(eq,formula(r'\nabla^2 A=\operatorname{Cov}[u(x)]')))
+        optimum=formula(r'-\nabla\ln g(\eta_{\rm ML})=\frac1N\sum_n u(x_n)',(0,2.35,0),34)
+        self.beat(AnimationGroup(Transform(eq,optimum),eta.animate.set_value(np.log(7/3))),self.highlight(eq))
+        self.beat(self.highlight(eq),AnimationGroup(eta.animate.set_value(3),Transform(eq,formula(r'S=N:\quad \mu_{\rm ML}=1,\quad\eta\to+\infty'))))
 
-class PRML24ExponentialFamily(Scene):
-    """PRML 2.4 explanatory video: The Exponential Family.
+    def conjugacy(self):
+        t=ValueTracker(0.)
+        ax,labels=axes([0,1,.2],[0,3.5,1],width=8,height=2.8,center=(0,-.1,0),xlabel=r'\mu',ylabel=r'p(\mu)')
+        graph=always_redraw(lambda:curve(ax,lambda x:beta_pdf(x,2+7*t.get_value(),2+3*t.get_value()),0,1,PURPLE,True))
+        mean=always_redraw(lambda:DashedLine(ax.c2p((2+7*t.get_value())/(4+10*t.get_value()),0),ax.c2p((2+7*t.get_value())/(4+10*t.get_value()),2.6),color=YELLOW))
+        eq=formula(r'p(\mu)=\operatorname{Beta}(\mu|2,2)')
+        counts=VGroup(readout('a=',lambda:2+7*t.get_value(),(-2,-2.3,0),RED),readout('b=',lambda:2+3*t.get_value(),(2,-2.3,0),BLUE))
+        self.add(ax,labels,graph,mean,eq,counts)
+        self.beat(self.highlight(graph),self.highlight(eq))
+        self.beat(self.highlight(graph),t.animate.set_value(1))
+        self.beat(self.highlight(counts),Transform(eq,formula(r'\operatorname{Beta}(2,2)\ \longrightarrow\ \operatorname{Beta}(9,5)')))
+        self.remove(ax,labels,graph,mean,counts,eq)
+        prior=formula(r'p(\eta|\chi,\nu)=f(\chi,\nu)g(\eta)^\nu\exp\{\nu\eta^{\mathrm T}\chi\}',(0,1.8,0),33)
+        post=formula(r'p(\eta|X,\chi,\nu)\propto g(\eta)^{\nu+N}\exp\{\eta^{\mathrm T}(\nu\chi+S)\}',(0,.55,0),33)
+        self.beat(FadeIn(prior),FadeIn(post))
+        update=formula(r'\nu\to\nu+N,\quad\chi\to\frac{\nu\chi+S}{\nu+N},\qquad S=\sum_nu(x_n)',(0,-.9,0),32)
+        self.beat(self.highlight(prior),FadeIn(update))
+        jacobian=formula(r'p_\eta(\eta)=p_\mu(\mu)\left|\frac{d\mu}{d\eta}\right|',(0,-2.25,0),29)
+        self.beat(FadeIn(jacobian),self.highlight(jacobian))
 
-    Render example:
-        uv run manim --disable_caching --flush_cache -ql prml_2_4_exponential_family.py PRML24ExponentialFamily
-    """
+    def coordinates(self):
+        q=ValueTracker(1.)
+        ax,labels=axes([0,1,.25],[0,2,.5],width=8,height=3,center=(0,-.05,0),xlabel=r'\lambda\ \to\ \eta',ylabel='p')
+        colors=[BLUE,GREEN,YELLOW,PURPLE]
+        def piece(k):
+            p=q.get_value(); lo=(k/4)**(1/p); hi=((k+1)/4)**(1/p)
+            return curve(ax,lambda x:transformed_density(x,p),lo,hi,colors[k],True)
+        areas=VGroup(*[always_redraw(lambda k=k:piece(k)) for k in range(4)])
+        eq=formula(r'p_\lambda(\lambda)=1,\quad 0\leq\lambda\leq1')
+        self.add(ax,labels,areas,eq)
+        self.beat(self.highlight(eq),self.highlight(areas))
+        self.beat(self.highlight(areas),self.highlight(ax.x_axis))
+        transform=formula(r'\lambda=\eta^2,\quad 0\leq\eta\leq1')
+        self.beat(Transform(eq,transform),q.animate.set_value(1.45))
+        self.beat(q.animate.set_value(2),Transform(eq,formula(r'p_\eta(\eta)=p_\lambda(\eta^2)\left|2\eta\right|')))
+        mass=formula(r'\int_{\sqrt{k/4}}^{\sqrt{(k+1)/4}}2\eta\,d\eta=\frac14',(0,-2.35,0),31)
+        self.beat(AnimationGroup(Transform(eq,formula(r'p_\eta(\eta)=2\eta')),FadeIn(mass)),self.highlight(areas))
+        self.beat(self.highlight(eq),self.highlight(mass))
 
-    def construct(self) -> None:
-        self.camera.background_color = BG
+    def invariance(self):
+        shift=ValueTracker(-1.5)
+        ax,labels=axes([-4,4,2],[0,1.3,.5],width=9,height=2.6,center=(0,.1,0),xlabel=r'\mu',ylabel=r'p(\mu)')
+        flat=Line(ax.c2p(-4,1),ax.c2p(4,1),color=PURPLE)
+        patch=always_redraw(lambda:Polygon(ax.c2p(shift.get_value(),0),ax.c2p(shift.get_value()+1.5,0),ax.c2p(shift.get_value()+1.5,1),ax.c2p(shift.get_value(),1),color=GREEN,fill_opacity=.4))
+        eq=formula(r'p(x|\mu)=f(x-\mu),\quad p(\mu)=\mathrm{const}')
+        self.add(ax,labels,flat,patch,eq)
+        self.beat(shift.animate.set_value(.5),shift.animate.set_value(-2.5))
+        divergent=formula(r'\int_{-\infty}^{\infty}c\,d\mu=\infty\quad(c>0)',(0,-2.25,0),33)
+        self.beat(self.highlight(flat),FadeIn(divergent))
+        self.remove(ax,labels,flat,patch,divergent)
+        logax,loglabels=axes([0,3,1],[0,1.3,.5],width=9,height=2.6,center=(0,.1,0),xlabel=r'\log_{10}\sigma',ylabel=r'p_{\log_{10}\sigma}')
+        tiles=VGroup(*[Polygon(logax.c2p(i,0),logax.c2p(i+1,0),logax.c2p(i+1,1),logax.c2p(i,1),color=c,fill_opacity=.35) for i,c in enumerate([BLUE,GREEN,PURPLE])])
+        numbers=VGroup(*[tex(s,25).move_to(logax.c2p(i+.5,.5)) for i,s in enumerate([r'1\to10',r'10\to100',r'100\to1000'])])
+        self.add(logax,loglabels,tiles,numbers)
+        scale=formula(r'p(x|\sigma)=\frac1\sigma f\!\left(\frac{x}{\sigma}\right)')
+        self.beat(Transform(eq,scale),self.highlight(tiles))
+        self.beat(Transform(eq,formula(r'p(\sigma)\propto\frac1\sigma\quad\Longleftrightarrow\quad p(\ln\sigma)=\mathrm{const}')),LaggedStart(*[Indicate(n) for n in numbers],lag_ratio=.25))
+        precision=formula(r'\lambda=\sigma^{-2},\quad p(\lambda)\propto\lambda^{-1}',(0,-2.25,0),33)
+        self.beat(FadeIn(precision),self.highlight(eq))
+        warning=jp('事後分布の積分が有限か、確認する',27,YELLOW).move_to([0,2.4,0])
+        self.beat(ReplacementTransform(eq,warning),self.highlight(warning))
 
-        self.opening()
-        self.standard_form()
-        self.bernoulli_example()
-        self.gaussian_example()
-        self.sufficient_statistics()
-        self.maximum_likelihood()
-        self.conjugate_prior()
-        self.summary()
-
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
-
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
-
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
-
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size, color=WHITE)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
-
-    def clear_scene(self) -> None:
-        if self.mobjects:
-            self.play(FadeOut(Group(*self.mobjects)), run_time=0.45)
-        self.clear()
-
-    def named_box(self, title: str, subtitle: str, color: ManimColor, width: float = 3.2, height: float = 1.55) -> VGroup:
-        box = RoundedRectangle(width=width, height=height, corner_radius=0.12, color=color, stroke_width=2.5)
-        title_mob = Text(title, font_size=26, color=color).move_to(box.get_center() + UP * 0.28)
-        subtitle_mob = Text(subtitle, font_size=20, color=TEXT_GREY).move_to(box.get_center() + DOWN * 0.32)
-        return VGroup(box, title_mob, subtitle_mob)
-
-    def opening(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 2.4 The Exponential Family")
-        title = Text("指数型分布族", font_size=44, color=WHITE).to_edge(UP, buff=0.75)
-        subtitle = Text("違う分布を、同じ式の形で見る", font_size=28, color=TEXT_GREY)
-        subtitle.next_to(title, DOWN, buff=0.22)
-
-        distributions = VGroup(
-            self.named_box("Bernoulli", "二値変数", ACCENT_BLUE),
-            self.named_box("Multinomial", "カテゴリ変数", ACCENT_ORANGE),
-            self.named_box("Gaussian", "連続値", ACCENT_GREEN),
-        ).arrange(RIGHT, buff=0.35).shift(UP * 0.1)
-
-        formula = MathTex(
-            r"p(x|\eta)=h(x)g(\eta)\exp\{\eta^{\mathrm T}u(x)\}",
-            font_size=40,
-            color=WHITE,
-        ).to_edge(DOWN, buff=1.05)
-        brace = Brace(formula, UP, color=ACCENT_YELLOW)
-        brace_text = Text("共通の型", font_size=24, color=ACCENT_YELLOW).next_to(brace, UP, buff=0.12)
-
-        self.play(FadeIn(label), Write(title), FadeIn(subtitle), run_time=1.2)
-        self.play(FadeIn(distributions, lag_ratio=0.2), run_time=1.6)
-        self.play(*[box.animate.shift(DOWN * 0.45).scale(0.88) for box in distributions], run_time=1.0)
-        self.play(Write(formula), GrowFromCenter(brace), FadeIn(brace_text), run_time=1.5)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def standard_form(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("PRML 2.4 / Eq. (2.194)")
-        title = self.scene_title("標準形は、三つの部品を見る", font_size=34)
-
-        formula = MathTex(
-            r"p(x|\eta)",
-            r"=",
-            r"h(x)",
-            r"g(\eta)",
-            r"\exp",
-            r"\{",
-            r"\eta^{\mathrm T}",
-            r"u(x)",
-            r"\}",
-            font_size=46,
-        ).shift(UP * 1.1)
-
-        explanations = VGroup(
-            self.named_box("h(x)", "データだけの土台", ACCENT_BLUE, width=2.85, height=1.35),
-            self.named_box("u(x)", "十分統計量", ACCENT_GREEN, width=2.85, height=1.35),
-            self.named_box("η", "自然パラメータ", ACCENT_RED, width=2.85, height=1.35),
-            self.named_box("g(η)", "正規化係数", ACCENT_PURPLE, width=2.85, height=1.35),
-        ).arrange(RIGHT, buff=0.22).shift(DOWN * 0.75)
-
-        highlights = [
-            (SurroundingRectangle(formula[2], color=ACCENT_BLUE, buff=0.08), explanations[0]),
-            (SurroundingRectangle(formula[7], color=ACCENT_GREEN, buff=0.08), explanations[1]),
-            (SurroundingRectangle(formula[6], color=ACCENT_RED, buff=0.08), explanations[2]),
-            (SurroundingRectangle(formula[3], color=ACCENT_PURPLE, buff=0.08), explanations[3]),
-        ]
-        core = Text("指数の中: パラメータ × データの特徴量", font_size=29, color=ACCENT_YELLOW)
-        core.to_edge(DOWN, buff=0.55)
-
-        self.play(FadeIn(label), Write(title), Write(formula), run_time=1.8)
-        for rect, box in highlights:
-            self.play(Create(rect), FadeIn(box), run_time=0.9)
-            self.wait(0.25)
-            self.play(FadeOut(rect), run_time=0.35)
-        self.play(Write(core), run_time=1.0)
-        self.wait(0.9)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def make_bernoulli_bars(self, mu: float) -> VGroup:
-        base_y = -1.35
-        max_height = 2.6
-        bars = VGroup()
-        for i, prob in enumerate([1.0 - mu, mu]):
-            x = -1.0 + 2.0 * i
-            rect = Rectangle(width=0.75, height=max_height * prob, color=ACCENT_BLUE if i == 0 else ACCENT_ORANGE)
-            rect.set_fill(rect.get_color(), opacity=0.7)
-            rect.move_to(np.array([x, base_y + rect.height / 2.0, 0.0]))
-            label = MathTex(str(i), font_size=30).move_to(np.array([x, base_y - 0.32, 0.0]))
-            value = MathTex(f"{prob:.1f}", font_size=26, color=rect.get_color()).next_to(rect, UP, buff=0.12)
-            bars.add(VGroup(rect, label, value))
-        axis = Line(np.array([-1.8, base_y, 0.0]), np.array([1.8, base_y, 0.0]), color=GREY_B)
-        return VGroup(axis, bars)
-
-    def bernoulli_example(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("PRML 2.4 / Bernoulli distribution")
-        title = self.scene_title("ベルヌーイ分布は log-odds で直線化する", font_size=32)
-
-        original = MathTex(r"p(x|\mu)=\mu^x(1-\mu)^{1-x}", font_size=42)
-        rewritten = MathTex(
-            r"p(x|\mu)=(1-\mu)\exp\left\{x\ln\frac{\mu}{1-\mu}\right\}",
-            font_size=38,
-        )
-        eta = MathTex(r"\eta=\ln\frac{\mu}{1-\mu}", r",\quad u(x)=x", font_size=38, color=ACCENT_YELLOW)
-        formulas = VGroup(original, rewritten, eta).arrange(DOWN, buff=0.32, aligned_edge=LEFT)
-        formulas.to_edge(LEFT, buff=0.65).shift(UP * 0.25)
-
-        bars = self.make_bernoulli_bars(0.2).shift(RIGHT * 3.45 + UP * 0.1)
-        mu_label = MathTex(r"\mu=0.2", font_size=34, color=ACCENT_ORANGE).next_to(bars, UP, buff=0.32)
-        note = Text("μ が大きいほど x=1 が出やすい", font_size=24, color=TEXT_GREY)
-        note.to_edge(DOWN, buff=0.5)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(Write(original), run_time=1.1)
-        self.play(TransformFromCopy(original, rewritten), run_time=1.5)
-        self.play(Write(eta), run_time=1.2)
-        self.play(FadeIn(bars), Write(mu_label), Write(note), run_time=1.0)
-        current_bars = bars
-        current_label = mu_label
-        for mu in [0.5, 0.8, 0.35, 0.7]:
-            next_bars = self.make_bernoulli_bars(mu).shift(RIGHT * 3.45 + UP * 0.1)
-            next_label = MathTex(fr"\mu={mu:.2g}", font_size=34, color=ACCENT_ORANGE).move_to(current_label)
-            self.play(Transform(current_bars, next_bars), Transform(current_label, next_label), run_time=0.8)
-        self.wait(0.6)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def gaussian_example(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("PRML 2.4 / Gaussian distribution")
-        title = self.scene_title("ガウス分布では x と x² が十分統計量になる", font_size=32)
-
-        axes = Axes(
-            x_range=[-4.0, 4.0, 1.0],
-            y_range=[0.0, 0.5, 0.1],
-            x_length=5.4,
-            y_length=3.0,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(LEFT * 3.0 + DOWN * 0.15)
-        curve = axes.plot(lambda x: normal_pdf(x, mu=-1.2, sigma=1.0), x_range=[-4, 4], color=ACCENT_GREEN)
-        curve.set_stroke(width=4)
-        mu_label = MathTex(r"\mu=-1.2,\ \sigma^2=1", font_size=31, color=ACCENT_GREEN)
-        mu_label.next_to(axes, UP, buff=0.25)
-
-        original = MathTex(
-            r"\mathcal{N}(x|\mu,\sigma^2)",
-            r"=",
-            r"\frac{1}{(2\pi\sigma^2)^{1/2}}",
-            r"\exp\left\{-\frac{(x-\mu)^2}{2\sigma^2}\right\}",
-            font_size=34,
-        )
-        expanded = MathTex(
-            r"\exp\left\{",
-            r"\frac{\mu}{\sigma^2}x",
-            r"-",
-            r"\frac{1}{2\sigma^2}x^2",
-            r"-",
-            r"\frac{\mu^2}{2\sigma^2}",
-            r"\right\}",
-            font_size=34,
-        )
-        natural = MathTex(
-            r"u(x)=(x,x^2)",
-            r",\quad",
-            r"\eta=\left(\frac{\mu}{\sigma^2},-\frac{1}{2\sigma^2}\right)",
-            font_size=33,
-            color=ACCENT_YELLOW,
-        )
-        formulas = VGroup(original, expanded, natural).arrange(DOWN, buff=0.34, aligned_edge=LEFT)
-        formulas.scale(0.9).shift(RIGHT * 2.35 + UP * 0.15)
-
-        self.play(FadeIn(label), Write(title), Create(axes), Create(curve), Write(mu_label))
-        self.play(FadeIn(original, shift=UP * 0.08), run_time=0.9)
-        self.play(FadeIn(expanded, shift=UP * 0.08), run_time=0.9)
-        self.play(FadeIn(natural, shift=UP * 0.08), run_time=0.9)
-        current_curve = curve
-        current_label = mu_label
-        for mu in [-0.2, 1.0, 0.3]:
-            next_curve = axes.plot(lambda x, m=mu: normal_pdf(x, mu=m, sigma=1.0), x_range=[-4, 4], color=ACCENT_GREEN)
-            next_curve.set_stroke(width=4)
-            next_label = MathTex(fr"\mu={mu:.1f},\ \sigma^2=1", font_size=31, color=ACCENT_GREEN).move_to(current_label)
-            self.play(Transform(current_curve, next_curve), Transform(current_label, next_label), run_time=1.0)
-        self.wait(0.7)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def sufficient_statistics(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("PRML 2.4 / sufficient statistics")
-        title = self.scene_title("データは十分統計量の和として効く", font_size=34)
-
-        bern_data = [1, 0, 1, 1, 0, 1, 0, 1]
-        coins = VGroup()
-        for value in bern_data:
-            circle = Circle(radius=0.22, color=ACCENT_ORANGE if value else ACCENT_BLUE)
-            circle.set_fill(circle.get_color(), opacity=0.65)
-            text = MathTex(str(value), font_size=24).move_to(circle)
-            coins.add(VGroup(circle, text))
-        coins.arrange(RIGHT, buff=0.12).shift(UP * 1.35)
-        bern_eq = MathTex(r"\sum_n x_n=5", r"\quad \Rightarrow \quad", r"\bar{x}=5/8", font_size=38, color=ACCENT_YELLOW)
-        bern_eq.next_to(coins, DOWN, buff=0.35)
-
-        xs = [-1.4, -0.8, -0.1, 0.2, 0.7, 1.1]
-        number_line = NumberLine(x_range=[-2, 2, 1], length=5.4, color=GREY_B).shift(DOWN * 1.1 + LEFT * 2.3)
-        dots = VGroup(*[Dot(number_line.n2p(x), color=ACCENT_GREEN, radius=0.06) for x in xs])
-        gauss_stats = MathTex(
-            r"\sum_n x_n",
-            r"\quad",
-            r"\sum_n x_n^2",
-            font_size=39,
-            color=ACCENT_GREEN,
-        ).shift(DOWN * 1.1 + RIGHT * 3.0)
-        arrow = Arrow(number_line.get_right() + RIGHT * 0.2, gauss_stats.get_left() + LEFT * 0.2, buff=0.05, color=GREY_A)
-
-        caption = Text("十分統計量 = 推定に必要なデータの要約", font_size=29, color=WHITE)
-        caption.to_edge(DOWN, buff=0.45)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(coins, lag_ratio=0.12), run_time=1.2)
-        self.play(Write(bern_eq), run_time=1.1)
-        self.wait(0.5)
-        self.play(Create(number_line), FadeIn(dots, lag_ratio=0.1), GrowArrow(arrow), Write(gauss_stats), run_time=1.5)
-        self.play(Write(caption), run_time=1.0)
-        self.wait(0.7)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def maximum_likelihood(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("PRML 2.4 / maximum likelihood")
-        title = self.scene_title("最尤推定は、十分統計量の平均を合わせる", font_size=32)
-
-        condition = MathTex(
-            r"-\nabla \ln g(\eta)",
-            r"=",
-            r"\frac{1}{N}\sum_{n=1}^{N}u(x_n)",
-            font_size=44,
-        ).shift(UP * 1.55)
-        left_label = Text("モデル側の平均", font_size=24, color=ACCENT_GREEN).next_to(condition[0], DOWN, buff=0.22)
-        right_label = Text("データ側の平均", font_size=24, color=ACCENT_ORANGE).next_to(condition[2], DOWN, buff=0.22)
-
-        balance = VGroup()
-        beam = Line(LEFT * 2.7, RIGHT * 2.7, color=GREY_A, stroke_width=5)
-        pivot = Triangle(color=GREY_A).scale(0.35).rotate(PI).next_to(beam, DOWN, buff=0.0)
-        left_pan = Circle(radius=0.45, color=ACCENT_GREEN).set_fill(ACCENT_GREEN, opacity=0.2).move_to(beam.get_left() + DOWN * 0.7)
-        right_pan = Circle(radius=0.45, color=ACCENT_ORANGE).set_fill(ACCENT_ORANGE, opacity=0.2).move_to(beam.get_right() + DOWN * 0.7)
-        balance.add(beam, pivot, left_pan, right_pan)
-        balance.shift(DOWN * 0.25)
-
-        bern = MathTex(r"\text{Bernoulli:}\quad \mu_{\mathrm{ML}}=\frac{1}{N}\sum_n x_n", font_size=38, color=ACCENT_YELLOW)
-        bern.to_edge(DOWN, buff=0.65)
-        data = Text("例: 8回中5回が1なら μML = 0.625", font_size=27, color=TEXT_GREY)
-        data.next_to(bern, UP, buff=0.28)
-
-        self.play(FadeIn(label), Write(title), Write(condition), run_time=1.5)
-        self.play(FadeIn(left_label), FadeIn(right_label), run_time=0.8)
-        self.play(FadeIn(balance), run_time=1.0)
-        self.play(beam.animate.rotate(0.18), left_pan.animate.shift(UP * 0.2), right_pan.animate.shift(DOWN * 0.2), run_time=0.7)
-        self.play(beam.animate.rotate(-0.18), left_pan.animate.shift(DOWN * 0.2), right_pan.animate.shift(UP * 0.2), run_time=0.7)
-        self.play(Write(data), Write(bern), run_time=1.2)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def conjugate_prior(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("PRML 2.4 / conjugate prior")
-        title = self.scene_title("共役事前分布は、更新を足し算にする", font_size=33)
-
-        prior = MathTex(
-            r"p(\eta|\chi,\nu)",
-            r"\propto",
-            r"g(\eta)^\nu",
-            r"\exp\{\nu\eta^{\mathrm T}\chi\}",
-            font_size=41,
-        ).shift(UP * 1.55)
-
-        prior_box = self.named_box("事前", "νχ, ν", ACCENT_PURPLE, width=2.3, height=1.35)
-        data_box = self.named_box("データ", "Σu(xn), N", ACCENT_ORANGE, width=2.7, height=1.35)
-        post_box = self.named_box("事後", "νχ+Σu(xn), ν+N", ACCENT_GREEN, width=3.4, height=1.35)
-        plus = MathTex("+", font_size=46)
-        arrow = MathTex(r"\longrightarrow", font_size=46)
-        flow = VGroup(prior_box, plus, data_box, arrow, post_box).arrange(RIGHT, buff=0.25).shift(DOWN * 0.35)
-
-        update = MathTex(
-            r"\chi'=\frac{\nu\chi+\sum_n u(x_n)}{\nu+N}",
-            r",\quad",
-            r"\nu'=\nu+N",
-            font_size=36,
-            color=ACCENT_YELLOW,
-        ).to_edge(DOWN, buff=0.65)
-
-        self.play(FadeIn(label), Write(title), Write(prior), run_time=1.5)
-        self.play(FadeIn(prior_box), run_time=0.6)
-        self.play(Write(plus), FadeIn(data_box), run_time=0.8)
-        self.play(Write(arrow), FadeIn(post_box), run_time=0.9)
-        self.play(Write(update), run_time=1.2)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def summary(self) -> None:
-        narration = self.start_narration("scene08")
-        label = self.section_label("PRML 2.4 summary")
-        title = Text("2.4 指数型分布族の要点", font_size=40, color=WHITE).to_edge(UP, buff=0.65)
-
-        points = VGroup(
-            self.named_box("枠組み", "多くの分布を同じ形で扱う", ACCENT_BLUE, width=4.2, height=1.25),
-            self.named_box("三つの部品", "η, u(x), g(η)", ACCENT_YELLOW, width=4.2, height=1.25),
-            self.named_box("推定", "十分統計量の平均を合わせる", ACCENT_GREEN, width=4.2, height=1.25),
-            self.named_box("ベイズ更新", "共役事前分布で足し算になる", ACCENT_PURPLE, width=4.2, height=1.25),
-        ).arrange_in_grid(rows=2, cols=2, buff=(0.35, 0.35)).shift(UP * 0.1)
-
-        formula = MathTex(
-            r"p(x|\eta)=h(x)g(\eta)\exp\{\eta^{\mathrm T}u(x)\}",
-            font_size=38,
-            color=WHITE,
-        ).to_edge(DOWN, buff=0.65)
-
-        next_note = Text("次: 有限個のパラメータに固定しないノンパラメトリック手法へ", font_size=25, color=TEXT_GREY)
-        next_note.next_to(formula, UP, buff=0.25)
-
-        self.play(FadeIn(label), Write(title), run_time=1.0)
-        self.play(FadeIn(points, lag_ratio=0.18), run_time=1.8)
-        self.play(Write(next_note), Write(formula), run_time=1.4)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.clear_scene()
+    def summary(self):
+        ax,labels=axes([-3,3,1],[0,.8,.4],width=8,height=2.8,center=(0,-.2,0),ylabel='p(x)')
+        mu=ValueTracker(-.7)
+        graph=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),.7),-3,3,GREEN,True))
+        self.add(ax,labels,graph)
+        eq=formula(r'p(x|\eta)=h(x)g(\eta)\exp\{\eta^{\mathrm T}u(x)\}')
+        self.beat(mu.animate.set_value(.7),FadeIn(eq))
+        self.beat(mu.animate.set_value(-.7),self.highlight(eq))
+        self.remove(graph)
+        model=curve(ax,lambda x:normal(x,POINTS.mean(),np.sqrt(POINTS.var())),-3,3,GREEN,True)
+        dots=VGroup(*[Dot(ax.c2p(x,.02),color=BLUE,radius=.07) for x in POINTS])
+        self.add(dots)
+        stats=formula(r'S=\sum_nu(x_n),\qquad\mathbb E_{\eta_{\rm ML}}[u(x)]=S/N')
+        self.beat(Transform(eq,stats),Create(model))
+        post=formula(r'(\nu\chi,\nu)\longrightarrow(\nu\chi+S,\nu+N)')
+        self.beat(Transform(eq,post),self.highlight(eq))
+        mixed=curve(ax,lambda x:.5*normal(x,-1.2,.45)+.5*normal(x,1.1,.5),-3,3,PURPLE,True)
+        note=jp('一般のガウス混合は、この単純な形の外へ',26,PURPLE).move_to([0,2.4,0])
+        self.beat(self.highlight(model),AnimationGroup(Transform(model,mixed),ReplacementTransform(eq,note)))
+        next_note=jp('次へ：データから、分布の形を作る',28,BLUE).move_to([0,-2.35,0])
+        self.beat(self.highlight(model),FadeIn(next_note))
