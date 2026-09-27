@@ -62,6 +62,12 @@ class PRML35EvidenceApproximation(NarratedScene):
         # Static overlay avoids suspending live geometry updaters.
         return ShowPassingFlash(m.copy().clear_updaters().set_stroke(color,5),time_width=.6)
 
+    def explain_change(self, old, new):
+        duration=self.beat_cues()[-1]['end']
+        transition=min(1.5,duration*.22)
+        self.beat(phases=[('equation transform',transition,lambda:TransformMatchingTex(old,new)),
+                          ('explain complete equation',duration-transition,lambda:Indicate(new,scale_factor=1.015))])
+
     def question(self):
         ax,dots=self.regression();self.remove(dots)
         tr=ValueTracker(1.2);curve=always_redraw(lambda:path(ax,U,PU@at(tr.get_value())['mean']))
@@ -84,7 +90,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.beat(LaggedStart(*[Create(c) for c in curves],lag_ratio=.15))
         mean=path(ax,U,PU@s['mean'],MODEL,4);self.beat(Create(mean),self.emphasis(curves))
         full=self.formula(r'p(t_*|\mathbf t)=\iiint p(t_*|\mathbf w,\beta)p(\mathbf w|\mathbf t,\alpha,\beta)p(\alpha,\beta|\mathbf t)\,d\mathbf w\,d\alpha\,d\beta',pos=(0,-1.9,0),size=27)
-        self.beat(Write(full))
+        self.beat(Indicate(full,scale_factor=1.015))
         self.remove(ax,ax.labels,mean,*dots.get_family(),*curves.get_family())
         hax=self.axes([-3,3,1],[0,2.2,1],center=(0,.6,0),width=7,height=2.6,xlabel=r'\ln\alpha\quad(\beta\ {\rm fixed})',ylabel='',xticks=[],yticks=[])
         note=jp('精度の事後分布：集中の模式図',22,MUTED).move_to([0,2.45,0]);self.add(note)
@@ -92,9 +98,9 @@ class PRML35EvidenceApproximation(NarratedScene):
         bell=always_redraw(lambda:path(hax,np.linspace(-3,3,241),normal(np.linspace(-3,3,241),0,width.get_value()**2),PRIOR))
         self.add(bell);self.beat(width.animate.set_value(.2))
         approx=tex(r'p(t_*|\mathbf t)\approx\int p(t_*|\mathbf w,\hat\beta)p(\mathbf w|\mathbf t,\hat\alpha,\hat\beta)\,d\mathbf w',28).move_to(full)
-        self.beat(TransformMatchingTex(full,approx),Indicate(bell))
+        self.explain_change(full,approx)
         bayes=self.formula(r'p(\alpha,\beta|\mathbf t)\propto p(\mathbf t|\alpha,\beta)\,p(\alpha,\beta)',pos=(0,-2.65,0),size=29,color=EV_COLOR)
-        self.beat(Write(bayes))
+        self.beat(Indicate(bayes,scale_factor=1.015))
 
     def area(self):
         ax=self.axes([-5,5,1],[0,1.5,.5],center=(0,.1,0),width=9,height=3.3,xlabel='w',ylabel='',xticks=[-5,0,5],yticks=[0,.5,1,1.5])
@@ -126,17 +132,18 @@ class PRML35EvidenceApproximation(NarratedScene):
         bell=always_redraw(lambda:path(ax,xs,np.exp(-.5*tr.get_value()*xs**2),POST))
         self.add(bell);self.beat(Indicate(f[1]),Indicate(f[3]))
         sq=tex(r'E(\mathbf w)=E(\mathbf m_N)+\tfrac12(\mathbf w-\mathbf m_N)^TA(\mathbf w-\mathbf m_N)',30).move_to(f)
-        self.beat(TransformMatchingTex(f,sq))
+        self.explain_change(f,sq)
         af=self.formula(r'A=\alpha I+\beta\Phi^T\Phi=S_N^{-1},\qquad \mathbf m_N=\beta A^{-1}\Phi^T\mathbf t',pos=(0,-2.2,0),size=28,color=PRIOR)
         self.beat(tr.animate.set_value(5),Indicate(af,scale_factor=1.015))
         integral=self.formula(r'\int e^{-E(\mathbf w)}d\mathbf w=e^{-E(\mathbf m_N)}(2\pi)^{M/2}|A|^{-1/2}',pos=(0,-2.8,0),size=29,color=POST)
-        self.beat(tr.animate.set_value(.45),Write(integral))
+        self.beat(tr.animate.set_value(.45),Indicate(integral,scale_factor=1.015))
         self.remove(ax,ax.labels,bell,af,integral,sq,phi_label)
         # Full expression, split across two readable rows.
         log1=MathTex(r'\ln p(\mathbf t|\alpha,\beta)=',r'\frac M2\ln\alpha',r'+\frac N2\ln\beta',font_size=38).move_to([0,.65,0]);log1[1].set_color(PRIOR);log1[2].set_color(DATA)
         log2=MathTex(r'-E(\mathbf m_N)',r'-\frac12\ln|A|',r'-\frac N2\ln(2\pi)',font_size=38).move_to([.5,-.35,0]);log2[0].set_color(EV_COLOR);log2[1].set_color(POST)
         self.add(jp('山の高さ × 幅 → 対数で足し算',27).move_to([0,2.2,0]))
-        self.beat(Write(log1),Write(log2))
+        self.add(log1,log2)
+        self.beat(Indicate(log1,scale_factor=1.015),Indicate(log2,scale_factor=1.015))
         brace=SurroundingRectangle(VGroup(log1,log2),color=EV_COLOR,buff=.25)
         self.beat(Create(brace),Indicate(log1[1]),Indicate(log2[1]))
 
@@ -164,7 +171,8 @@ class PRML35EvidenceApproximation(NarratedScene):
         for i in range(4,10):
             phases.extend([('change degree',d*.75,lambda i=i:tr.animate.set_value(i)),('compute evidence',d*.25,lambda i=i:FadeIn(pts[i]))])
         self.beat(phases=phases)
-        best=int(np.argmax(evs));self.beat(tr.animate.set_value(best),Circumscribe(pts[best],color=POST))
+        best=int(np.argmax(evs));duration=self.beat_cues()[-1]['end'];arrival=self.sentence_duration(0)
+        self.beat(phases=[('select optimum',arrival,lambda:tr.animate.set_value(best)),('explain selected model',duration-arrival,lambda:Circumscribe(pts[best],color=POST))])
 
     def directions(self):
         ax=self.axes([-1,4,1],[-1,3,1],center=(-1.1,.15,0),width=7,height=3.6,xlabel=r'\widetilde w_1',ylabel=r'\widetilde w_2',xticks=[0,2,4],yticks=[0,1,2,3])
@@ -205,7 +213,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         tr.set_value(6);self.add(trails,markers)
         self.beat(tr.animate.set_value(-6));self.beat(tr.animate.set_value(6))
         f=self.formula(r'\alpha\mathbf m_N^T\mathbf m_N=\gamma\quad\Longrightarrow\quad\alpha_{\rm new}=\frac\gamma{\mathbf m_N^T\mathbf m_N}',pos=(0,-2.6,0),size=30,color=EV_COLOR)
-        self.beat(tr.animate.set_value(OPT),Write(f))
+        self.beat(tr.animate.set_value(OPT),Indicate(f,scale_factor=1.015))
 
     def crossing(self):
         tr=ValueTracker(-6)
@@ -242,7 +250,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.add(number('RSS=',lambda:state()['rss'],[4,1.6,0],EV_COLOR),number(r'\gamma=',lambda:state()['gamma'],[4,.9,0],PRIOR))
         self.beat(LaggedStart(*[self.emphasis(m) for m in residual],lag_ratio=.12))
         new=tex(r'\beta_{\rm new}^{-1}=\frac{\sum_n(t_n-\mathbf m_N^T\phi(x_n))^2}{N-\gamma}',31,EV_COLOR).move_to(f)
-        self.beat(TransformMatchingTex(f,new))
+        self.explain_change(f,new)
         free=number(r'N-\gamma=',lambda:len(T)-state()['gamma'],[4,.2,0],EV_COLOR)
         units=VGroup(*[Square(side_length=.17,fill_color=DATA,fill_opacity=1,stroke_width=0) for _ in range(18)]).arrange_in_grid(rows=3,buff=.09).move_to([4,-.8,0]);self.add(free,units)
         self.beat(LaggedStart(*[m.animate.set_opacity(1-.85*np.clip(state()['gamma']-i,0,1)) for i,m in enumerate(units)],lag_ratio=.08))
