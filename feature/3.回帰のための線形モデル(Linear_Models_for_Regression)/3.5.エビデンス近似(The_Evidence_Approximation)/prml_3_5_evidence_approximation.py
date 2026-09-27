@@ -71,21 +71,21 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.beat(tr.animate.set_value(-6))
         self.beat(tr.animate.set_value(6))
         self.beat(tr.animate.set_value(OPT))
-        basis=VGroup(*[path(ax,U,PU[:,j],COLORS[j],1.4).set_opacity(.55) for j in range(10)])
+        basis=VGroup(*[path(ax,U,PU[:,j],COLORS[j],1.4).set_stroke(opacity=.55) for j in range(10)])
         self.beat(LaggedStart(*[Create(m) for m in basis],lag_ratio=.15))
-        self.remove(basis)
+        self.remove(*basis.get_family())
         f=self.formula(r'p(\mathbf w|\alpha)=\mathcal N(\mathbf0,\alpha^{-1}I),\quad \sigma^2=\beta^{-1},\quad \lambda_{\rm reg}=\alpha/\beta',pos=(0,2.1,0),size=26)
         self.beat(Indicate(f,scale_factor=1.03),tr.animate.set_value(OPT+.5))
 
     def integrate_or_choose(self):
         ax,dots=self.regression(height=2.8,center=(0,.55,0));s=at(OPT)
         samples=np.random.default_rng(7).multivariate_normal(s['mean'],s['cov'],8)
-        curves=VGroup(*[path(ax,U,PU@w,POST,1.5).set_opacity(.45) for w in samples])
+        curves=VGroup(*[path(ax,U,PU@w,POST,1.5).set_stroke(opacity=.45) for w in samples])
         self.beat(LaggedStart(*[Create(c) for c in curves],lag_ratio=.15))
         mean=path(ax,U,PU@s['mean'],MODEL,4);self.beat(Create(mean),self.emphasis(curves))
         full=self.formula(r'p(t_*|\mathbf t)=\iiint p(t_*|\mathbf w,\beta)p(\mathbf w|\mathbf t,\alpha,\beta)p(\alpha,\beta|\mathbf t)\,d\mathbf w\,d\alpha\,d\beta',pos=(0,-1.9,0),size=27)
         self.beat(Write(full))
-        self.remove(ax,ax.labels,dots,curves,mean)
+        self.remove(ax,ax.labels,mean,*dots.get_family(),*curves.get_family())
         hax=self.axes([-3,3,1],[0,2.2,1],center=(0,.6,0),width=7,height=2.6,xlabel=r'\ln\alpha\quad(\beta\ {\rm fixed})',ylabel='',xticks=[],yticks=[])
         note=jp('精度の事後分布：集中の模式図',22,MUTED).move_to([0,2.45,0]);self.add(note)
         width=ValueTracker(.9)
@@ -120,7 +120,7 @@ class PRML35EvidenceApproximation(NarratedScene):
 
     def gaussian(self):
         f=MathTex(r'E(\mathbf w)=',r'\frac\beta2\|\mathbf t-\Phi\mathbf w\|^2','+',r'\frac\alpha2\mathbf w^T\mathbf w',font_size=34).move_to([0,2.25,0]);f[1].set_color(EV_COLOR);f[3].set_color(PRIOR)
-        self.add(f,jp('Φ：材料を各観測点で計算した表',22,MUTED).move_to([0,1.55,0]))
+        phi_label=jp('Φ：材料を各観測点で計算した表',22,MUTED).move_to([0,1.55,0]);self.add(f,phi_label)
         ax=self.axes([-3,3,1],[0,1.1,.5],center=(0,-.15,0),width=7,height=2.3,xlabel=r'w-m',ylabel='',xticks=[-3,0,3],yticks=[0,1])
         tr=ValueTracker(1);xs=np.linspace(-3,3,241)
         bell=always_redraw(lambda:path(ax,xs,np.exp(-.5*tr.get_value()*xs**2),POST))
@@ -131,7 +131,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.beat(tr.animate.set_value(5),Indicate(af,scale_factor=1.015))
         integral=self.formula(r'\int e^{-E(\mathbf w)}d\mathbf w=e^{-E(\mathbf m_N)}(2\pi)^{M/2}|A|^{-1/2}',pos=(0,-2.8,0),size=29,color=POST)
         self.beat(tr.animate.set_value(.45),Write(integral))
-        self.remove(ax,ax.labels,bell,af,integral,sq)
+        self.remove(ax,ax.labels,bell,af,integral,sq,phi_label)
         # Full expression, split across two readable rows.
         log1=MathTex(r'\ln p(\mathbf t|\alpha,\beta)=',r'\frac M2\ln\alpha',r'+\frac N2\ln\beta',font_size=38).move_to([0,.65,0]);log1[1].set_color(PRIOR);log1[2].set_color(DATA)
         log2=MathTex(r'-E(\mathbf m_N)',r'-\frac12\ln|A|',r'-\frac N2\ln(2\pi)',font_size=38).move_to([.5,-.35,0]);log2[0].set_color(EV_COLOR);log2[1].set_color(POST)
@@ -143,17 +143,27 @@ class PRML35EvidenceApproximation(NarratedScene):
     def degree(self):
         ax,dots=self.regression(center=(0,.9,0),width=8,height=2.5)
         evs=np.array([s['logev'] for s in POLY]); e=self.axes([0,9,1],[-90,-10,20],center=(0,-1.65,0),width=8,height=1.15,xlabel='d',ylabel='',xticks=[0,3,6,9],yticks=[-80,-20])
-        self.add(jp('対数エビデンス',20,EV_COLOR).move_to([-5.25,-1.15,0]))
+        self.add(jp('対数\nエビデンス',18,EV_COLOR).move_to([-5.5,-1.6,0]))
         tr=ValueTracker(0)
         def current():
             v=tr.get_value();lo=int(np.floor(v));hi=min(lo+1,9);return (1-v+lo)*POLY_CURVES[lo]+(v-lo)*POLY_CURVES[hi]
         curve=always_redraw(lambda:path(ax,U,current()))
         pts=[Dot(e.c2p(i,v),color=EV_COLOR,radius=.07) for i,v in enumerate(evs)]
-        label=number('d=',tr.get_value,[3.8,2.6,0],MODEL,1);self.add(curve,label)
+        labels=VGroup(*[tex(f'd={i}',26,MODEL).move_to([3.8,2.6,0]) for i in range(10)],jp('形の遷移',22,MUTED).move_to([3.8,2.6,0]))
+        def update_label(m):
+            v=tr.get_value();key=round(v) if abs(v-round(v))<1e-5 else 10
+            for i,c in enumerate(m):c.set_opacity(int(i==key))
+        labels.add_updater(update_label);self.add(curve,labels)
         self.formula(r'\alpha=0.005,\quad\beta=16,\quad M=d+1',pos=(-1,2.6,0),size=26)
         self.beat(FadeIn(pts[0]),Indicate(curve))
-        for i in [1,2,3]:self.beat(tr.animate.set_value(i),FadeIn(pts[i]))
-        self.beat(tr.animate.set_value(9),LaggedStart(*[FadeIn(p) for p in pts[4:]],lag_ratio=.2))
+        for i in [1,2,3]:
+            d=self.beat_cues()[-1]['end']
+            self.beat(phases=[('change degree',d*.75,lambda i=i:tr.animate.set_value(i)),('compute evidence',d*.25,lambda i=i:FadeIn(pts[i]))])
+        d=self.beat_cues()[-1]['end']/6
+        phases=[]
+        for i in range(4,10):
+            phases.extend([('change degree',d*.75,lambda i=i:tr.animate.set_value(i)),('compute evidence',d*.25,lambda i=i:FadeIn(pts[i]))])
+        self.beat(phases=phases)
         best=int(np.argmax(evs));self.beat(tr.animate.set_value(best),Circumscribe(pts[best],color=POST))
 
     def directions(self):
@@ -168,19 +178,19 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.remove(probe);tr=ValueTracker(.01)
         prior=VGroup(*[path(ax,r*np.cos(theta),r*np.sin(theta),PRIOR,1.5) for r in [.5,1.]])
         post=always_redraw(lambda:Dot(ax.c2p(*(lam/(lam+tr.get_value())*ml)),color=POST,radius=.09))
-        self.add(post,Dot(ax.c2p(*ml),color=MODEL,radius=.065),tex(r'\mathbf w_{ML}',24,MODEL).move_to(ax.c2p(*ml)+UP*.38))
+        self.add(post,Dot(ax.c2p(*ml),color=MODEL,radius=.065),tex(r'\mathbf w_{ML}',24,MODEL).move_to(ax.c2p(2.1,2.2)))
         self.beat(FadeIn(prior),tr.animate.set_value(3))
         self.formula(r'\beta\Phi^T\Phi\mathbf u_i=\lambda_i\mathbf u_i',pos=(0,-2.2,0),size=29)
         f=self.formula(r'\widetilde m_i=\frac{\lambda_i}{\alpha+\lambda_i}\widetilde w_{ML,i}',pos=(0,-2.8,0),size=29,color=POST)
         self.add(number(r'\alpha=',tr.get_value,[4.4,1,0],PRIOR),number('q_1=',lambda:lam[0]/(lam[0]+tr.get_value()),[4.4,.2,0],EV_COLOR),number('q_2=',lambda:lam[1]/(lam[1]+tr.get_value()),[4.4,-.6,0],EV_COLOR))
         self.beat(Indicate(f),self.emphasis(contours))
-        self.beat(tr.animate.set_value(.01))
+        self.beat(tr.animate.set_value(.01),FadeOut(prior))
 
     def effective(self):
         tr=ValueTracker(-6)
-        ax=self.axes([0,10,1],[0,1,1],center=(0,.65,0),width=9,height=2.4,xlabel='i',ylabel='q_i',xticks=list(range(1,11)),yticks=[0,.5,1])
+        ax=self.axes([.5,10.5,1],[0,1,1],center=(0,.65,0),width=9,height=2.4,xlabel='i',ylabel='q_i',xticks=list(range(1,11)),yticks=[0,.5,1])
         def bars():
-            return VGroup(*[Rectangle(width=.48,height=max(.006,q*2.4),stroke_width=0,fill_color=COLORS[i],fill_opacity=.85).move_to(ax.c2p(i+.5,q/2)) for i,q in enumerate(at(tr.get_value())['fractions'])])
+            return VGroup(*[Rectangle(width=.48,height=max(.006,q*2.4),stroke_width=0,fill_color=COLORS[i],fill_opacity=.85).move_to(ax.c2p(i+1,q/2)) for i,q in enumerate(at(tr.get_value())['fractions'])])
         bs=always_redraw(bars);sl=self.slider(tr,pos=(0,-2.6,0))
         self.formula(r'q_i=\frac{\lambda_i}{\alpha+\lambda_i},\quad\gamma=\sum_iq_i,\quad0\leq\gamma\leq M',pos=(0,2.45,0),size=30,color=EV_COLOR)
         count=number(r'\gamma=',lambda:at(tr.get_value())['gamma'],[0,-1.55,0],EV_COLOR);self.add(bs,count)
@@ -201,19 +211,19 @@ class PRML35EvidenceApproximation(NarratedScene):
         tr=ValueTracker(-6)
         g=np.array([at(float(z))['gamma'] for z in GRID]);r=np.array([at(float(z))['alpha']*at(float(z))['norm'] for z in GRID]);top=float(np.ceil(max(g.max(),r.max())))
         ax=self.axes([-6,6,3],[0,top,5],center=(0,1.05,0),width=8,height=1.65,xlabel=r'\ln\alpha',xticks=[-6,0,6],yticks=[0,top])
-        self.legend([('有効な個数',EV_COLOR),('精度 × 重みの二乗',PRIOR)],y=2.7)
+        legend=self.legend([('有効な個数',EV_COLOR),('精度 × 重みの二乗',PRIOR)],y=2.7)
         curves=VGroup(path(ax,GRID,g,EV_COLOR),path(ax,GRID,r,PRIOR));self.add(curves)
         lo=float(np.floor(EV.min()/10)*10);hi=float(np.ceil(EV.max()/10)*10)
         ex=self.axes([-6,6,3],[lo,hi,10],center=(0,-1.2,0),width=8,height=1.6,xlabel=r'\ln\alpha',xticks=[-6,0,6],yticks=[lo,hi])
-        self.add(jp('対数エビデンス',19,POST).move_to([-5.25,-.55,0]),path(ex,GRID,EV,POST))
+        self.add(jp('対数\nエビデンス',18,POST).move_to([-5.5,-1.2,0]),path(ex,GRID,EV,POST))
         dots=always_redraw(lambda:VGroup(Dot(ax.c2p(tr.get_value(),at(tr.get_value())['gamma']),color=EV_COLOR,radius=.065),Dot(ax.c2p(tr.get_value(),at(tr.get_value())['alpha']*at(tr.get_value())['norm']),color=PRIOR,radius=.065),Dot(ex.c2p(tr.get_value(),at(tr.get_value())['logev']),color=POST,radius=.075)))
         guide=always_redraw(lambda:DashedLine(ax.c2p(tr.get_value(),top),ex.c2p(tr.get_value(),lo),color=MUTED,stroke_opacity=.4))
         self.add(dots,guide)
         self.formula(r'\frac{\partial\ln p}{\partial\ln\alpha}=\tfrac12(\gamma-\alpha\mathbf m_N^T\mathbf m_N)',pos=(0,-2.65,0),size=29)
         self.beat(Create(curves));self.beat(tr.animate.set_value(-1));self.beat(tr.animate.set_value(OPT));self.beat(tr.animate.set_value(5))
-        self.remove(ax,ax.labels,curves,dots,guide)
+        self.remove(ax,ax.labels,curves,dots,guide,legend)
         testax=self.axes([-6,6,3],[.2,.8,.2],center=(0,1.05,0),width=8,height=1.65,xlabel=r'\ln\alpha',xticks=[-6,0,6],yticks=[.2,.5,.8])
-        self.add(jp('テスト RMS',20,DATA).move_to([-5.25,1.55,0]))
+        self.add(jp('テスト RMS',19,DATA).move_to([-5.4,1.1,0]),jp('上：答え合わせ　／　下：選択に使う量',23,MUTED).move_to([0,2.65,0]))
         testcurve=path(testax,GRID,TEST,DATA)
         marks=always_redraw(lambda:VGroup(Dot(ex.c2p(tr.get_value(),at(tr.get_value())['logev']),color=POST),Dot(testax.c2p(tr.get_value(),float(np.interp(tr.get_value(),GRID,TEST))),color=DATA)))
         self.add(marks);self.beat(Create(testcurve),tr.animate.set_value(-3));self.beat(tr.animate.set_value(OPT))
@@ -235,8 +245,8 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.beat(TransformMatchingTex(f,new))
         free=number(r'N-\gamma=',lambda:len(T)-state()['gamma'],[4,.2,0],EV_COLOR)
         units=VGroup(*[Square(side_length=.17,fill_color=DATA,fill_opacity=1,stroke_width=0) for _ in range(18)]).arrange_in_grid(rows=3,buff=.09).move_to([4,-.8,0]);self.add(free,units)
-        self.beat(LaggedStart(*[m.animate.set_opacity(.15) for m in units[:5]],lag_ratio=.2))
-        self.remove(units);self.add(number(r'\alpha=',lambda:state()['alpha'],[4,-.55,0],PRIOR),number(r'\beta=',lambda:state()['beta'],[4,-1.25,0],DATA))
+        self.beat(LaggedStart(*[m.animate.set_opacity(1-.85*np.clip(state()['gamma']-i,0,1)) for i,m in enumerate(units)],lag_ratio=.08))
+        self.remove(*units.get_family());self.add(number(r'\alpha=',lambda:state()['alpha'],[4,-.55,0],PRIOR),number(r'\beta=',lambda:state()['beta'],[4,-1.25,0],DATA))
         update=self.formula(r'\alpha_{\rm new}=\gamma/(\mathbf m_N^T\mathbf m_N)',pos=(0,2.6,0),size=29,color=PRIOR)
         self.beat(tr.animate.set_value(1));self.beat(tr.animate.set_value(15))
         self.remove(update,new)
@@ -247,7 +257,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         ax,dots=self.regression(height=3.1,center=(0,.25,0),span=2)
         s=ITER[-1];mean=PU@s['mean'];sd=np.sqrt(1/s['beta']+np.einsum('ij,jk,ik->i',PU,s['cov'],PU))
         samples=np.random.default_rng(19).multivariate_normal(s['mean'],s['cov'],8)
-        curves=VGroup(*[path(ax,U,PU@w,POST,1.3).set_opacity(.5) for w in samples]);self.add(path(ax,U,mean,MODEL))
+        curves=VGroup(*[path(ax,U,PU@w,POST,1.3).set_stroke(opacity=.5) for w in samples]);self.add(path(ax,U,mean,MODEL))
         self.beat(LaggedStart(*[Create(c) for c in curves],lag_ratio=.12))
         band=Polygon(*[ax.c2p(x,y) for x,y in zip(U,mean+2*sd)],*[ax.c2p(x,y) for x,y in zip(U[::-1],(mean-2*sd)[::-1])],stroke_width=0,fill_color=POST,fill_opacity=.18).set_z_index(-1)
         self.formula(r'\sigma_*^2=\hat\beta^{-1}+\phi(x_*)^TS_N\phi(x_*),\qquad \mu_*\pm2\sigma_*',pos=(0,-2.45,0),size=29,color=POST)
