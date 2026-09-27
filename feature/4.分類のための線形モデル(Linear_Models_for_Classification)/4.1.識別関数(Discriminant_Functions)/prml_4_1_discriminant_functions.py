@@ -63,7 +63,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
                 axis_config={'color':MUTED,'stroke_width':1.2,'include_ticks':False}).move_to(center)
         self.add(ax)
         self.add(tex(labels[0],23,MUTED).next_to(ax.c2p(xr[1],0),RIGHT,buff=.1),
-                 tex(labels[1],23,MUTED).next_to(ax.c2p(0,yr[1]),LEFT,buff=.15))
+                 tex(labels[1],23,MUTED).move_to(ax.c2p(0,yr[1])+UP*.18+LEFT*.18))
         return ax
 
     def bottom(self,formula,color=WHITE,size=31):
@@ -177,12 +177,12 @@ class PRML41DiscriminantFunctions(NarratedScene):
         ax=self.axes(xr=(-2.3,2.3,1),yr=(-1.6,1.6,1),width=5.8,height=3.9,center=(-2,.1,0))
         points=cloud(ax,BANDS);reg=regions(ax,BAND_W);self.add(reg,points)
         note=VGroup(jp('中央の橙が選ばれない',26,ORANGE_CLS),tex('y_2=0.20',31,ORANGE_CLS),tex(r'\max(y_1,y_3)\geq0.40',28)).arrange(DOWN,buff=.4).move_to([3.6,.7,0])
-        self.beat(FadeIn(note),Indicate(points[1],scale_factor=1.18))
+        self.beat(FadeIn(note),Indicate(points[1],color=ORANGE_CLS,scale_factor=1.18))
         good=VGroup(*[Line(ax.c2p(x,-1.6),ax.c2p(x,1.6),color=GREEN_CLS,stroke_width=3) for x in [-.9,.9]])
         self.beat(Create(good),FadeOut(reg),Write(jp('目標の数への近さ ≠ 分類のよさ',27).move_to([0,-2.53,0])))
 
     def fisher_display(self):
-        ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.3,0))
+        ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.2,0))
         dots=cloud(ax,FISH,.037);self.add(dots)
         theta=ValueTracker(1.1);w=lambda:direction(theta.get_value())
         axis=always_redraw(lambda:Line(ax.c2p(*(-2.5*w())),ax.c2p(*(2.5*w())),color=YELLOW_W,stroke_width=3))
@@ -215,10 +215,10 @@ class PRML41DiscriminantFunctions(NarratedScene):
 
     def relation(self):
         self.hint('同じ自作データ：青30点、橙22点、合計52点')
-        ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.3,0))
+        ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.2,0))
         dots=cloud(ax,FISH,.04);self.add(dots)
         label=tex(r'N_1=30,\ N_2=22,\ N=52',29).move_to([3.3,1.6,0])
-        self.beat(Write(label),Indicate(dots,scale_factor=1.03))
+        self.beat(Write(label),*[Indicate(g,color=COLORS[k],scale_factor=1.03) for k,g in enumerate(dots)])
         f=self.bottom(r't_{C_1}=N/N_1\qquad t_{C_2}=-N/N_2')
         vals=VGroup(tex(f't_1={CODE[0]:.3f}',32,BLUE_CLS),tex(f't_2={CODE[-1]:.3f}',32,ORANGE_CLS)).arrange(DOWN,buff=.35).move_to([3.3,.45,0])
         self.beat(Write(f),FadeIn(vals))
@@ -266,7 +266,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.add(error);self.beat(ShowPassingFlash(line.copy().clear_updaters(),time_width=.5))
         f=self.bottom(r'a=w^T\phi(x),\quad f(a)=\begin{cases}+1&a\geq0\\-1&a<0\end{cases}',size=30)
         phi=tex(r'\phi(x)=(1,x_1,x_2)^T',31).move_to([3.5,.8,0])
-        self.beat(Write(f),Write(phi),Indicate(dots[0],scale_factor=1.08))
+        self.beat(Write(f),Write(phi),Indicate(dots[0],color=BLUE_CLS,scale_factor=1.08))
         ring=Circle(radius=.18,color=YELLOW_W).move_to(ax.c2p(*P_X[P_HISTORY[0]['index']]))
         self.add(ring)
         update=tex(r'w\leftarrow w+\eta\phi_nt_n',31,YELLOW_W).move_to([3.5,-.2,0])
