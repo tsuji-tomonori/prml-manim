@@ -1,470 +1,419 @@
-from __future__ import annotations
-
-import wave
+"""PRML 1.5: probabilities, losses and actions as linked visual experiments."""
 from pathlib import Path
-
+import json
 import numpy as np
 from manim import *
+from narrated_scene import NarratedScene
+from visual_support import jp, tex
+from narration_content import SCENES
+from make_voicevox_narration import MANIFEST
+from decision_model import (joint, posterior, mistake_parts, optimal_boundary,
+                            reject_bounds, reject_fraction, corrected_posterior,
+                            combine_posteriors, gaussian, mixture, MEAN, MEDIAN,
+                            MODE, VARIANCE, regression_risk)
+
+BLUE_C1 = '#58B5ED'
+ORANGE_C2 = '#FFB45B'
+GREEN_ACTION = '#77D49A'
+YELLOW_LOSS = '#FFE079'
+PURPLE_HOLD = '#C29AFF'
+MUTED = '#A8B2C5'
+BG = '#10141F'
 
 
-BLUE_CLASS = BLUE_C
-ORANGE_CLASS = ORANGE
-GREEN_DECISION = GREEN_C
-RED_LOSS = RED_C
-YELLOW_RISK = YELLOW_C
-PURPLE_REJECT = PURPLE_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def curve(ax, f, low, high, color=BLUE_C1, n=201):
+    x = np.linspace(low, high, n)
+    y = np.asarray(f(x)) + np.zeros_like(x)
+    origin = ax.c2p(0, 0)
+    points = origin + x[:,None]*(ax.c2p(1,0)-origin) + y[:,None]*(ax.c2p(0,1)-origin)
+    return VMobject().set_points_as_corners(points).set_stroke(color, 3)
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def area(ax, f, low, high, color, opacity=.35):
+    if high <= low:
+        high = low+1e-5
+    xs = np.linspace(low,high,91)
+    ys = np.asarray(f(xs))+np.zeros_like(xs)
+    return Polygon(ax.c2p(low,0), *[ax.c2p(x,y) for x,y in zip(xs,ys)], ax.c2p(high,0),
+                   stroke_width=0, fill_color=color, fill_opacity=opacity)
 
 
-def gaussian(x: np.ndarray | float, mean: float, sigma: float) -> np.ndarray | float:
-    return np.exp(-0.5 * ((np.asarray(x) - mean) / sigma) ** 2) / (sigma * np.sqrt(2 * np.pi))
+def readout(label, getter, pos, color=WHITE, places=3, size=24):
+    prefix = tex(label, size, color)
+    number = DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
+    group = VGroup(prefix,number).arrange(RIGHT,buff=.12).move_to(pos)
+    anchor = number.get_left().copy()
+    number.add_updater(lambda m: m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return group
 
 
-def class1_joint(x: np.ndarray | float) -> np.ndarray | float:
-    return 0.52 * gaussian(x, 0.36, 0.15)
+def probability_bar(getter, pos=(0,.45,0), width=9, height=.65):
+    def bars():
+        p=float(getter())
+        a=Rectangle(width=max(.0001,width*p),height=height,stroke_width=0,fill_color=BLUE_C1,fill_opacity=1)
+        b=Rectangle(width=max(.0001,width*(1-p)),height=height,stroke_width=0,fill_color=ORANGE_C2,fill_opacity=1)
+        a.move_to(np.array(pos)+LEFT*width/2,aligned_edge=LEFT)
+        b.move_to(np.array(pos)+RIGHT*width/2,aligned_edge=RIGHT)
+        return VGroup(a,b)
+    return always_redraw(bars)
 
 
-def class2_joint(x: np.ndarray | float) -> np.ndarray | float:
-    return 0.48 * gaussian(x, 0.66, 0.14)
+class PRML15DecisionTheory(NarratedScene):
+    def construct(self):
+        self.camera.background_color=BG
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        self.timeline=[]
+        for i,method in enumerate([self.question,self.errors,self.losses,self.reject,
+                                   self.models,self.priors,self.regression,self.other_losses,self.recap]):
+            self.begin(i)
+            method()
+            if self.beat_index != len(self.story['beats']):
+                raise RuntimeError(f"Unused beats in {self.story['id']}")
+            self.timeline[-1]['end']=float(self.time)
+        out=Path(config.media_dir)/'prml15_timeline.json'
+        out.write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
+    def formula_at(self, expression, size=31, pos=(0,-2.55,0), colors=None):
+        if self.formula is not None:
+            self.remove(self.formula)
+        term_colors = {r'p(x,C_1)': BLUE_C1, r'p(x,C_2)': ORANGE_C2,
+                       r'p(C_k\mid x)': BLUE_C1, r'L_{kj}': YELLOW_LOSS,
+                       r'\mathrm{Var}[t\mid x]': PURPLE_HOLD}
+        self.formula=MathTex(expression,font_size=size,
+                             substrings_to_isolate=list(term_colors)).move_to(pos)
+        for term,color in term_colors.items():
+            self.formula.set_color_by_tex(term,color,substring=False)
+        if colors:
+            for text,color in colors.items():
+                self.formula.set_color_by_tex(text,color,substring=False)
+        if self.formula.width>12.6:
+            raise ValueError('Formula too wide: '+expression)
+        self.add(self.formula)
+        return self.formula
 
-def posterior_c1(x: np.ndarray | float) -> np.ndarray | float:
-    p1 = class1_joint(x)
-    p2 = class2_joint(x)
-    return p1 / (p1 + p2)
+    def note(self, text, pos=(0,2.43,0), color=MUTED, size=23):
+        return jp(text,size,color).move_to(pos)
 
+    def axes(self,x=(-5,5,1),y=(0,1,.5),width=10,height=2.8,center=(0,.3,0),xlabel='x',ylabel=None):
+        ax=Axes(x_range=x,y_range=y,x_length=width,y_length=height,tips=False,
+                axis_config=dict(color=MUTED,stroke_width=1.3,include_ticks=False)).move_to(center)
+        labels=VGroup()
+        for v in np.arange(x[0],x[1]+1e-6,x[2]):
+            labels.add(tex(f'{v:g}',17,MUTED).next_to(ax.c2p(v,y[0]),DOWN,buff=.12))
+        for v in np.arange(y[0],y[1]+1e-6,y[2]):
+            labels.add(tex(f'{v:g}',17,MUTED).next_to(ax.c2p(x[0],v),LEFT,buff=.12))
+        labels.add(tex(xlabel,23).next_to(ax.c2p(x[1],y[0]),RIGHT,buff=.2))
+        if ylabel:
+            labels.add(tex(ylabel,24).next_to(ax.c2p(x[0],y[1]),UP,buff=.12))
+        self.add(ax,labels)
+        return ax,VGroup(ax,labels)
 
-def posterior_c2(x: np.ndarray | float) -> np.ndarray | float:
-    return 1 - posterior_c1(x)
+    def slider(self,tracker,low,high,pos=(0,-1.95,0),label='c',width=5,ticks=None,color=YELLOW_LOSS):
+        rail=NumberLine(x_range=[low,high,1],length=width,include_ticks=False,color=MUTED).move_to(pos)
+        group=VGroup(rail,tex(label,25,color).next_to(rail,LEFT,buff=.25))
+        for value in ticks or [low,high]:
+            group.add(tex(f'{value:g}',16,MUTED).next_to(rail.n2p(value),DOWN,buff=.15))
+        knob=Dot(radius=.075,color=color)
+        knob.add_updater(lambda m:m.move_to(rail.n2p(tracker.get_value())))
+        group.add(knob)
+        self.add(group)
+        return group
 
+    def legend(self,first=r'p(x,C_1)',second=r'p(x,C_2)',y=2.25):
+        group=VGroup(tex(first,26,BLUE_C1),tex(second,26,ORANGE_C2)).arrange(RIGHT,buff=1).move_to([0,y,0])
+        self.add(group)
+        return group
 
-class PRML15DecisionTheory(Scene):
-    """PRML 1.5 decision theory overview.
+    def boundary(self,ax,getter,height,color=GREEN_ACTION):
+        return always_redraw(lambda:DashedLine(ax.c2p(getter(),0),ax.c2p(getter(),height),
+                                              color=color,dash_length=.1,stroke_width=2.5))
 
-    Render example:
-        uv run manim -pql prml_1_5_decision_theory.py PRML15DecisionTheory
-    """
+    def wipe_body(self):
+        # Retain the title and subtitle while replacing the visual experiment.
+        keep=self.mobjects[:2]
+        self.remove(*[m for m in self.mobjects if m not in keep and m is not self.subtitle])
+        self.formula=None
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.inference_to_decision()
-        self.posterior_boundary()
-        self.expected_loss()
-        self.reject_option()
-        self.inference_decision_paths()
-        self.regression_loss()
-        self.summary_bridge()
+    def question(self):
+        p=ValueTracker(.08)
+        bar=probability_bar(p.get_value)
+        self.add(bar,self.note('説明用の例：画像から行動へ',color=BLUE_C1))
+        numbers=VGroup(readout(r'p(C_1\mid x)=',p.get_value,(-2,1.3,0),BLUE_C1),
+                       readout(r'p(C_2\mid x)=',lambda:1-p.get_value,(2,1.3,0),ORANGE_C2))
+        self.add(numbers)
+        self.beat(Indicate(bar.copy(),color=BLUE_C1))
+        a=self.note('病気として対応',(-2,-.7,0),BLUE_C1,28)
+        b=self.note('健康と判断',(2,-.7,0),ORANGE_C2,28)
+        self.beat(FadeIn(a,shift=UP*.15),FadeIn(b,shift=UP*.15))
+        eq=self.formula_at(r'x\quad\longrightarrow\quad p(C_k\mid x)\quad\longrightarrow\quad a_j')
+        self.beat(Indicate(eq))
+        self.add(readout('x=',lambda:.5*np.log((1-p.get_value())/p.get_value()),(0,-1.7,0),GREEN_ACTION,2))
+        self.beat(p.animate.set_value(.85),start_sentence=1)
+        eq=self.formula_at(r'p(C_k\mid x)=\frac{p(x\mid C_k)p(C_k)}{p(x)}\qquad(1.77)',34)
+        self.beat(Indicate(eq,color=BLUE_C1))
+        inference=self.note('推論：確率を求める',(-2,-1.6,0),BLUE_C1)
+        decision=self.note('決定：行動を選ぶ',(2,-1.6,0),GREEN_ACTION)
+        self.beat(FadeIn(inference),FadeIn(decision))
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+    def errors(self):
+        ax,_=self.axes(y=(0,.23,.1),height=2.65,center=(0,.3,0))
+        self.legend()
+        c1=curve(ax,lambda x:joint(x,1),-5,5,BLUE_C1)
+        c2=curve(ax,lambda x:joint(x,2),-5,5,ORANGE_C2)
+        self.beat(Create(c1),Create(c2))
+        boundary=ValueTracker(-1.3)
+        line=self.boundary(ax,boundary.get_value,.23)
+        regions=VGroup(self.note('左：病気と判断',(-2,1.92,0),BLUE_C1,19),self.note('右：健康と判断',(2,1.92,0),ORANGE_C2,19))
+        self.beat(FadeIn(line),FadeIn(regions))
+        shades=always_redraw(lambda:VGroup(area(ax,lambda x:joint(x,2),-5,boundary.get_value(),ORANGE_C2),
+                                          area(ax,lambda x:joint(x,1),boundary.get_value(),5,BLUE_C1)))
+        self.add(shades)
+        values=VGroup(readout(r'P(\mathrm{mistake})=',lambda:sum(mistake_parts(boundary.get_value())),(0,-1.85,0),YELLOW_LOSS))
+        self.add(values)
+        self.beat(Indicate(shades.copy(),color=YELLOW_LOSS))
+        self.beat(boundary.animate.set_value(1.5))
+        self.beat(boundary.animate.set_value(0),end_sentence=1)
+        eq=self.formula_at(r'P(\mathrm{mistake})=\int_{R_1}p(x,C_2)\,dx+\int_{R_2}p(x,C_1)\,dx\quad(1.78)',29)
+        self.beat(Indicate(eq))
+        eq=self.formula_at(r'j^*(x)=\arg\max_k p(C_k\mid x)\qquad P(\mathrm{correct})=\sum_k\int_{R_k}p(x,C_k)\,dx',27)
+        self.beat(Indicate(eq,color=GREEN_ACTION))
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def risk_bars(self,cost,p=.08,center=(2.5,.2,0)):
+        # Dynamic linear vertical scale; both bars always share the same scale.
+        def bars():
+            r1,r2=1-p,cost.get_value()*p
+            top=max(1.8,r1*1.2,r2*1.2)
+            result=VGroup()
+            for x,r,col in [(center[0]-1,r1,BLUE_C1),(center[0]+1,r2,ORANGE_C2)]:
+                rect=Rectangle(width=.7,height=max(.002,2.1*r/top),stroke_width=0,fill_color=col,fill_opacity=.85)
+                rect.move_to([x,-.9,0],aligned_edge=DOWN)
+                result.add(rect)
+            return result
+        g=always_redraw(bars)
+        self.add(g,readout(r'R_1=',lambda:1-p,(center[0]-1,1.7,0),BLUE_C1,2),
+                 readout(r'R_2=',lambda:p*cost.get_value(),(center[0]+1,1.7,0),ORANGE_C2,2))
+        self.add(self.note('病気と判断',(center[0]-1,-1.3,0),BLUE_C1,19),
+                 self.note('健康と判断',(center[0]+1,-1.3,0),ORANGE_C2,19))
+        choice=always_redraw(lambda:SurroundingRectangle(g[0 if 1-p<p*cost.get_value() else 1],color=GREEN_ACTION,buff=.1))
+        self.add(choice)
+        return g
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def losses(self):
+        cost=ValueTracker(1)
+        self.add(self.note('行：本当のクラス　／　列：判断',(-2.8,2.35,0),size=21))
+        head=VGroup(self.note('病気',(-3.1,1.6,0),BLUE_C1),self.note('健康',(-1.4,1.6,0),ORANGE_C2),
+                    self.note('病気',(-4.8,.7,0),BLUE_C1),self.note('健康',(-4.8,-.2,0),ORANGE_C2))
+        cells=VGroup(tex('0',35).move_to([-3.1,.7,0]),tex('1',35).move_to([-3.1,-.2,0]),tex('0',35).move_to([-1.4,-.2,0]))
+        number=DecimalNumber(1,num_decimal_places=0,font_size=35,color=YELLOW_LOSS).move_to([-1.4,.7,0])
+        number.add_updater(lambda m:m.set_value(cost.get_value()).move_to([-1.4,.7,0]))
+        self.add(head,cells,number)
+        self.beat(Indicate(head))
+        slider=self.slider(cost,1,20,pos=(-2.9,-1.3,0),width=3.2,label='L_{12}',ticks=[1,20])
+        self.beat(Indicate(cells))
+        bars=self.risk_bars(cost)
+        eq=self.formula_at(r'R_1=0\cdot0.08+1\cdot0.92\qquad R_2=L_{12}\cdot0.08',29)
+        self.beat(Indicate(eq))
+        self.beat(cost.animate.set_value(20))
+        self.remove(slider)
+        self.add(self.note('見逃しの損失：原文例 1000',(-2.8,-1.3,0),YELLOW_LOSS,20))
+        self.beat(cost.animate.set_value(1000),end_sentence=1)
+        eq=self.formula_at(r'R_j(x)=\sum_k L_{kj}p(C_k\mid x)\quad j^*(x)=\arg\min_j R_j(x)\quad(1.81)',28)
+        global_risk=tex(r'\mathbb{E}[L]=\sum_k\sum_j\int_{R_j}L_{kj}p(x,C_k)\,dx\quad(1.80)',26).move_to([0,-1.97,0])
+        self.add(global_risk)
+        self.beat(Indicate(eq))
+        self.wipe_body()
+        ax,_=self.axes(y=(0,.23,.1),height=2.65)
+        self.legend()
+        self.add(curve(ax,lambda x:joint(x,1),-5,5,BLUE_C1),curve(ax,lambda x:joint(x,2),-5,5,ORANGE_C2))
+        cost.set_value(1)
+        line=self.boundary(ax,lambda:optimal_boundary(cost.get_value()),.23)
+        band=always_redraw(lambda:area(ax,lambda x:np.full_like(x,.23),-5,optimal_boundary(cost.get_value()),BLUE_C1,.1))
+        self.add(line,band,readout('L_{12}=',cost.get_value,(0,-1.85,0),YELLOW_LOSS,1))
+        self.formula_at(r'C_1\ \mathrm{if}\ p(C_1\mid x)>\frac{1}{1+L_{12}}',31)
+        self.beat(cost.animate.set_value(20))
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def reject(self):
+        ax,_=self.axes(y=(0,1,.5))
+        self.legend(r'p(C_1\mid x)',r'p(C_2\mid x)')
+        self.add(curve(ax,posterior,-5,5,BLUE_C1),curve(ax,lambda x:1-posterior(x),-5,5,ORANGE_C2))
+        dot=Dot(ax.c2p(0,.5),color=YELLOW_LOSS)
+        self.beat(Indicate(dot,scale_factor=2))
+        theta=ValueTracker(.6)
+        line=always_redraw(lambda:DashedLine(ax.c2p(-5,theta.get_value()),ax.c2p(5,theta.get_value()),color=PURPLE_HOLD))
+        def band():
+            a,b=reject_bounds(theta.get_value())
+            return area(ax,lambda x:np.ones_like(x),max(-5,a),min(5,b),PURPLE_HOLD,.24)
+        shade=always_redraw(band)
+        self.add(shade,line,readout(r'\theta=',theta.get_value,(-2,-1.85,0),PURPLE_HOLD,2),
+                 readout(r'P(\mathrm{reject})=',lambda:reject_fraction(theta.get_value()),(2,-1.85,0),PURPLE_HOLD,3))
+        eq=self.formula_at(r'\max_k p(C_k\mid x)\leq\theta\quad\Longrightarrow\quad\mathrm{reject}',32)
+        self.beat(Indicate(eq,color=PURPLE_HOLD))
+        self.beat(theta.animate.set_value(.9))
+        self.beat(theta.animate.set_value(.55))
+        d=self.sentence_duration(0)
+        self.beat(phases=[('theta below half',d,lambda:theta.animate.set_value(.4)),
+                          ('theta one',self.sentence_duration(1),lambda:theta.animate.set_value(1))])
+        eq=self.formula_at(r'R_{\mathrm{reject}}(x)=\sum_k L_{k,\mathrm{reject}}p(C_k\mid x)',32)
+        self.beat(Indicate(eq,color=PURPLE_HOLD))
 
-    def make_probability_axes(self, width: float = 8.2, height: float = 3.7) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.2],
-            y_range=[0, 2.1, 0.5],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
+    def models(self):
+        ax,axgroup=self.axes(y=(0,1,.5))
+        legend=self.legend()
+        factor=ValueTracker(0)
+        def density(k):
+            return lambda x: (1-factor.get_value())*joint(x,k)+factor.get_value()*(posterior(x) if k==1 else 1-posterior(x))
+        curves=always_redraw(lambda:VGroup(curve(ax,density(1),-5,5,BLUE_C1),curve(ax,density(2),-5,5,ORANGE_C2)))
+        self.add(curves)
+        eq=self.formula_at(r'p(x\mid C_k),p(C_k)\ \longrightarrow\ p(x,C_k)',33)
+        self.beat(Indicate(eq))
+        self.remove(legend)
+        self.legend(r'p(C_1\mid x)',r'p(C_2\mid x)')
+        self.formula_at(r'p(C_k\mid x)=\frac{p(x,C_k)}{\sum_j p(x,C_j)}\qquad(1.82),(1.83)',32)
+        self.beat(factor.animate.set_value(1),start_sentence=1)
+        eq=self.formula_at(r'x\ \longrightarrow\ p(C_k\mid x)\ \longrightarrow\ a_j',34)
+        self.beat(Indicate(eq,color=GREEN_ACTION))
+        labels=VGroup(Line(ax.c2p(-5,.8),ax.c2p(0,.8),color=BLUE_C1,stroke_width=8),
+                      Line(ax.c2p(0,.2),ax.c2p(5,.2),color=ORANGE_C2,stroke_width=8))
+        curves.clear_updaters()
+        self.formula_at(r'x\ \longrightarrow\ f(x)\in\{C_1,C_2\}',34)
+        self.beat(Transform(curves,labels),start_sentence=1)
+        self.remove(curves)
+        self.add(curve(ax,posterior,-5,5,BLUE_C1),curve(ax,lambda x:1-posterior(x),-5,5,ORANGE_C2))
+        probe=ValueTracker(.02)
+        point=always_redraw(lambda:Dot(ax.c2p(probe.get_value(),1-posterior(probe.get_value())),color=GREEN_ACTION))
+        self.add(point,readout(r'p(C_2\mid x)=',lambda:1-posterior(probe.get_value()),(0,-1.85,0),ORANGE_C2,2))
+        self.formula_at(r'\mathrm{label}\ C_2\qquad 0.51\ \longrightarrow\ 0.99',31)
+        self.beat(probe.animate.set_value(float(np.log(99)/2)))
+        self.wipe_body()
+        ax,_=self.axes(y=(0,.26,.1))
+        self.add(curve(ax,lambda x:joint(x,1)+joint(x,2),-5,5,GREEN_ACTION))
+        probe.set_value(1)
+        self.add(self.note('入力そのものの密度',color=GREEN_ACTION),self.boundary(ax,probe.get_value,.26),
+                 readout('p(x)=',lambda:joint(probe.get_value(),1)+joint(probe.get_value(),2),(-2,-1.85,0),GREEN_ACTION,4),
+                 readout(r'p(C_2\mid x)=',lambda:1-posterior(probe.get_value()),(2,-1.85,0),ORANGE_C2,4))
+        self.formula_at(r'p(x)=\sum_k p(x\mid C_k)p(C_k)',32)
+        self.beat(probe.animate.set_value(4.3),start_sentence=1)
 
-    def make_posterior_axes(self, width: float = 8.2, height: float = 3.4) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.2],
-            y_range=[0, 1.1, 0.25],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
+    def priors(self):
+        prior=ValueTracker(.5)
+        p=lambda:corrected_posterior(.8,.5,prior.get_value())[0]
+        bar=probability_bar(p)
+        self.add(bar,readout(r'p_{\rm new}(C_1\mid x)=',p,(0,1.35,0),BLUE_C1,4),
+                 self.note('学習時は２クラスを同じ数だけ集めた',size=23))
+        rail=self.slider(prior,.01,.5,pos=(0,-.9,0),label=r'p_{\rm new}(C_1)',ticks=[.01,.5])
+        self.beat(Indicate(bar.copy()))
+        self.beat(prior.animate.set_value(.01))
+        eq=self.formula_at(r'p_{\rm new}(C_k\mid x)\propto p_{\rm train}(C_k\mid x)\frac{p_{\rm new}(C_k)}{p_{\rm train}(C_k)}',31)
+        self.add(self.note('前提：クラスごとの入力分布は同じ',(0,-1.7,0),MUTED,21))
+        self.beat(Indicate(eq))
+        self.wipe_body()
+        image_box=VGroup(RoundedRectangle(width=3.4,height=1,color=BLUE_C1),jp('画像の情報',27,BLUE_C1)).move_to([-2.5,1.3,0])
+        blood_box=VGroup(RoundedRectangle(width=3.4,height=1,color=ORANGE_C2),jp('血液検査の情報',27,ORANGE_C2)).move_to([2.5,1.3,0])
+        self.beat(FadeIn(image_box),FadeIn(blood_box))
+        eq=self.formula_at(r'p(x_I,x_B\mid C_k)=p(x_I\mid C_k)p(x_B\mid C_k)\quad(1.84)',30)
+        condition=self.note('本当のクラスを固定したときの独立',(0,.2,0),YELLOW_LOSS)
+        self.add(condition)
+        self.beat(Indicate(eq))
+        eq=self.formula_at(r'p(C_k\mid x_I,x_B)\propto\frac{p(C_k\mid x_I)p(C_k\mid x_B)}{p(C_k)}\quad(1.85)',31)
+        self.beat(Indicate(eq,color=YELLOW_LOSS))
+        evidence=ValueTracker(0)
+        result=lambda:combine_posteriors(.5,.2+.4*evidence.get_value(),.2)[0]
+        bar=probability_bar(result,pos=(0,-.8,0),width=8,height=.55)
+        self.add(bar,readout(r'p(C_1\mid x_I,x_B)=',result,(0,-1.55,0),BLUE_C1,3),
+                 self.note('事前 0.20　画像のみ 0.50　血液のみ 0.60',(0,2.35,0),size=22))
+        self.beat(evidence.animate.set_value(1),start_sentence=1)
 
-    def inference_to_decision(self) -> None:
-        narration = self.start_narration("scene01")
-        title = Text("PRML 1.5 Decision Theory", font_size=40, color=WHITE)
-        subtitle = Text("不確かさを、具体的な行動へ変換する", font_size=29, color=TEXT_GREY)
-        VGroup(title, subtitle).arrange(DOWN, buff=0.22).to_edge(UP, buff=0.9)
+    def regression(self):
+        ax,_=self.axes(x=(-3,3,1),y=(0,.8,.4),xlabel='t',height=2.5,center=(0,.45,0))
+        mu=ValueTracker(0)
+        pred=ValueTracker(-1.7)
+        density=always_redraw(lambda:curve(ax,lambda t:gaussian(t,mu.get_value(),.6),-3,3,BLUE_C1))
+        self.add(density,self.note('入力を固定したときの分布',color=BLUE_C1))
+        self.beat(Indicate(density.copy()))
+        line=self.boundary(ax,pred.get_value,.8,YELLOW_LOSS)
+        self.add(line,readout('y=',pred.get_value,(-2,-1.65,0),YELLOW_LOSS,2),
+                 readout(r'\mathbb{E}[(y-t)^2\mid x]=',lambda:(pred.get_value()-mu.get_value())**2+.36,(2,-1.65,0),YELLOW_LOSS,3))
+        self.beat(pred.animate.set_value(1.7))
+        # Under the same horizontal t-axis, a downward density of loss contributions.
+        xs=np.arange(-2.9,3,.2)
+        def loss_rects():
+            result=VGroup()
+            for t in xs:
+                val=(pred.get_value()-t)**2*gaussian(t,mu.get_value(),.6)
+                width=np.linalg.norm(ax.c2p(.19,0)-ax.c2p(0,0))
+                rect=Rectangle(width=width,height=max(.001,.22*val),stroke_width=0,fill_color=YELLOW_LOSS,fill_opacity=.6)
+                rect.move_to(ax.c2p(t,0)+DOWN*.02,aligned_edge=UP)
+                result.add(rect)
+            return result
+        bars=always_redraw(loss_rects)
+        self.add(bars)
+        eq=self.formula_at(r'\mathbb{E}[L]=\iint (y(x)-t)^2p(x,t)\,dx\,dt\quad(1.86),(1.87)',28)
+        self.beat(Indicate(eq))
+        self.beat(pred.animate.set_value(0),end_sentence=2)
+        eq=self.formula_at(r'y^*(x)=\int t\,p(t\mid x)\,dt=\mathbb{E}[t\mid x]\qquad(1.89)',32)
+        self.beat(Indicate(eq,color=GREEN_ACTION))
+        eq=self.formula_at(r'\mathbb{E}[(y-t)^2\mid x]=(y-\mathbb{E}[t\mid x])^2+\mathrm{Var}[t\mid x]',30)
+        self.add(self.note('平均で予測しても、分散 0.36 は残る',(0,-2.03,0),GREEN_ACTION,21))
+        self.beat(pred.animate.set_value(.65))
+        pred.set_value(0)
+        self.wipe_body()
+        ax,_=self.axes(x=(-2,2,1),y=(-1.5,1.5,1),xlabel='x',ylabel='t',height=2.7)
+        x=ValueTracker(-1.5)
+        mean=lambda u:.55*np.sin(1.2*u)
+        self.add(curve(ax,mean,-2,2,GREEN_ACTION),self.note('条件付き平均をつないだ回帰曲線',color=GREEN_ACTION))
+        slice_curve=always_redraw(lambda:VMobject().set_points_as_corners([
+            ax.c2p(x.get_value()+.45*gaussian(t,mean(x.get_value()),.35),t) for t in np.linspace(-1.5,1.5,101)]).set_stroke(BLUE_C1,3))
+        dot=always_redraw(lambda:Dot(ax.c2p(x.get_value(),mean(x.get_value())),color=YELLOW_LOSS))
+        self.add(slice_curve,dot)
+        self.formula_at(r'\mathbb{E}[L]=\int(y-\mathbb{E}[t\mid x])^2p(x)\,dx+\int\mathrm{Var}[t\mid x]p(x)\,dx',26)
+        self.beat(x.animate.set_value(1.3))
 
-        input_box = self.flow_box("input x\n画像・測定値", BLUE_CLASS)
-        inference_box = self.flow_box("inference\np(Ck|x)", GREEN_DECISION)
-        loss_box = self.flow_box("loss Lkj\n判断の重さ", RED_LOSS)
-        decision_box = self.flow_box("decision\n治療・保留・分類", ORANGE_CLASS)
-        flow = VGroup(
-            input_box,
-            Arrow(RIGHT, RIGHT * 1.2, buff=0),
-            inference_box,
-            Arrow(RIGHT, RIGHT * 1.2, buff=0),
-            loss_box,
-            Arrow(RIGHT, RIGHT * 1.2, buff=0),
-            decision_box,
-        ).arrange(RIGHT, buff=0.24).scale(0.78).move_to(ORIGIN)
+    def other_losses(self):
+        ax,ag=self.axes(x=(-3,3.5,1),y=(0,.65,.3),xlabel='t',height=2.6)
+        pred=ValueTracker(MEAN)
+        dens=curve(ax,mixture,-3,3.5,BLUE_C1)
+        marker=self.boundary(ax,pred.get_value,.65,YELLOW_LOSS)
+        self.add(dens,marker,self.note('同じ条件付き分布に、二つの山',color=BLUE_C1),readout('y=',pred.get_value,(0,-1.8,0),YELLOW_LOSS,3))
+        self.beat(Indicate(marker.copy()))
+        self.wipe_body()
+        ax,_=self.axes(x=(-2,2,1),y=(0,4,2),xlabel='y-t',height=2.8)
+        q=ValueTracker(2)
+        loss=always_redraw(lambda:curve(ax,lambda z:np.abs(z)**q.get_value(),-2,2,YELLOW_LOSS))
+        self.add(loss,readout('q=',q.get_value,(0,2.35,0),YELLOW_LOSS,2))
+        eq=self.formula_at(r'\mathbb{E}[L_q]=\iint |y(x)-t|^q p(x,t)\,dx\,dt\qquad(1.91)',29)
+        self.beat(Indicate(eq))
+        self.beat(q.animate.set_value(1))
+        self.wipe_body()
+        ax,_=self.axes(x=(-3,3.5,1),y=(0,.65,.3),xlabel='t',height=2.6)
+        self.add(curve(ax,mixture,-3,3.5,BLUE_C1),self.note('平均 → 中央値：面積を半分に分ける',color=GREEN_ACTION))
+        marker=self.boundary(ax,pred.get_value,.65,YELLOW_LOSS)
+        shade=always_redraw(lambda:area(ax,mixture,-3,pred.get_value(),GREEN_ACTION,.3))
+        self.add(marker,shade,readout('y=',pred.get_value,(0,-1.8,0),YELLOW_LOSS,3))
+        self.formula_at(r'\int_{-\infty}^{y^*}p(t\mid x)\,dt=\frac12\qquad(q=1)',32)
+        self.beat(pred.animate.set_value(MEDIAN),start_sentence=1)
+        window=ValueTracker(.8)
+        self.remove(shade)
+        pred.set_value(MODE)
+        windowshade=always_redraw(lambda:area(ax,mixture,MODE-window.get_value(),MODE+window.get_value(),PURPLE_HOLD,.4))
+        self.add(windowshade)
+        self.formula_at(r'\arg\max_y P(|t-y|<\varepsilon\mid x)\ \xrightarrow[\varepsilon\to0]{}\ \mathrm{mode}',31)
+        self.beat(window.animate.set_value(.12),start_sentence=1)
+        eq=self.formula_at(r'q=2:\ \mathrm{mean}\qquad q=1:\ \mathrm{median}\qquad\varepsilon\to0:\ \mathrm{mode}',29)
+        self.beat(Indicate(eq,color=GREEN_ACTION))
 
-        equation = MathTex(
-            r"\text{probability theory} + \text{loss} \Rightarrow \text{optimal action}",
-            font_size=34,
-        ).to_edge(DOWN, buff=0.72)
-
-        self.play(Write(title), FadeIn(subtitle))
-        self.play(FadeIn(flow[0]), GrowArrow(flow[1]), FadeIn(flow[2]))
-        self.play(GrowArrow(flow[3]), FadeIn(flow[4]), GrowArrow(flow[5]), FadeIn(flow[6]))
-        self.play(Write(equation), run_time=1.0)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(title), FadeOut(subtitle), FadeOut(flow), FadeOut(equation))
-
-    def flow_box(self, text: str, color: ManimColor) -> VGroup:
-        box = RoundedRectangle(width=2.55, height=1.35, corner_radius=0.1, color=color)
-        label = Text(text, font_size=23, color=WHITE, line_spacing=0.75).move_to(box)
-        return VGroup(box, label)
-
-    def posterior_boundary(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("PRML 1.5.1 / Fig. 1.24")
-        title = self.scene_title("誤分類率を最小にするなら、最大の事後確率を選ぶ", font_size=31)
-        axes = self.make_probability_axes().shift(DOWN * 0.12)
-        x_label = MathTex("x", font_size=30).next_to(axes.x_axis.get_end(), RIGHT)
-        y_label = MathTex(r"p(x,C_k)", font_size=30).next_to(axes.y_axis.get_end(), UP)
-
-        curve1 = axes.plot(lambda u: class1_joint(u), x_range=[0.02, 0.98], color=BLUE_CLASS)
-        curve2 = axes.plot(lambda u: class2_joint(u), x_range=[0.02, 0.98], color=ORANGE_CLASS)
-        curve1.set_stroke(width=4)
-        curve2.set_stroke(width=4)
-        c1_label = MathTex(r"p(x,C_1)", font_size=30, color=BLUE_CLASS).move_to(axes.c2p(0.25, 1.65))
-        c2_label = MathTex(r"p(x,C_2)", font_size=30, color=ORANGE_CLASS).move_to(axes.c2p(0.77, 1.55))
-
-        boundary = ValueTracker(0.36)
-
-        def boundary_line() -> Line:
-            x = boundary.get_value()
-            line = DashedLine(axes.c2p(x, 0), axes.c2p(x, 1.95), dash_length=0.12, color=GREEN_DECISION)
-            return line
-
-        line = always_redraw(boundary_line)
-
-        def boundary_text() -> VGroup:
-            x = boundary.get_value()
-            marker = MathTex(r"\hat{x}", font_size=29, color=GREEN_DECISION)
-            marker.next_to(axes.c2p(x, 0), DOWN, buff=0.12)
-            return VGroup(marker)
-
-        marker = always_redraw(boundary_text)
-        rule = MathTex(
-            r"\text{choose } C_j \text{ where } p(C_j|x) \text{ is largest}",
-            font_size=33,
-        ).to_edge(DOWN, buff=0.55)
-
-        comment = Text("境界を交点へ動かす", font_size=25, color=GREEN_DECISION).next_to(rule, UP, buff=0.18)
-        crossing = 0.511
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(x_label), FadeIn(y_label))
-        self.play(Create(curve1), Create(curve2), FadeIn(c1_label), FadeIn(c2_label))
-        self.play(FadeIn(line), FadeIn(marker), Write(rule))
-        self.play(Write(comment), boundary.animate.set_value(crossing), run_time=2.2)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(
-            FadeOut(label),
-            FadeOut(title),
-            FadeOut(axes),
-            FadeOut(x_label),
-            FadeOut(y_label),
-            FadeOut(curve1),
-            FadeOut(curve2),
-            FadeOut(c1_label),
-            FadeOut(c2_label),
-            FadeOut(line),
-            FadeOut(marker),
-            FadeOut(rule),
-            FadeOut(comment),
-        )
-
-    def expected_loss(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("PRML 1.5.2 / Fig. 1.25 / 式 (1.80)-(1.81)")
-        title = self.scene_title("正解率ではなく、期待損失を最小にする", font_size=33)
-
-        matrix_title = Text("loss matrix  Lkj", font_size=26, color=TEXT_GREY)
-        headers = VGroup(
-            Text("判断: 治療", font_size=22, color=GREEN_DECISION),
-            Text("判断: 健康", font_size=22, color=ORANGE_CLASS),
-        ).arrange(RIGHT, buff=0.85)
-        row_labels = VGroup(
-            Text("真: 病気", font_size=22, color=BLUE_CLASS),
-            Text("真: 健康", font_size=22, color=BLUE_CLASS),
-        ).arrange(DOWN, buff=0.42, aligned_edge=RIGHT)
-        cells = VGroup()
-        values = [["0", "1000"], ["1", "0"]]
-        for row in values:
-            cells.add(VGroup(*[Text(value, font_size=28) for value in row]).arrange(RIGHT, buff=1.35))
-        cells.arrange(DOWN, buff=0.28)
-        table = VGroup(matrix_title, headers, row_labels, cells)
-        headers.next_to(matrix_title, DOWN, buff=0.28)
-        cells.next_to(headers, DOWN, buff=0.22)
-        row_labels.next_to(cells, LEFT, buff=0.32)
-        table = VGroup(matrix_title, headers, row_labels, cells).move_to(LEFT * 3.25 + DOWN * 0.05)
-
-        p = 0.08
-        posterior = VGroup(
-            MathTex(r"p(C_1|x)=0.08", font_size=34, color=BLUE_CLASS),
-            MathTex(r"p(C_2|x)=0.92", font_size=34, color=ORANGE_CLASS),
-        ).arrange(DOWN, buff=0.2, aligned_edge=LEFT).move_to(RIGHT * 3.0 + UP * 1.25)
-
-        risk_treat = (1 - p) * 1
-        risk_normal = p * 1000
-        risks = VGroup(
-            MathTex(r"R(a_1|x)=0\cdot0.08+1\cdot0.92=0.92", font_size=27, color=GREEN_DECISION),
-            MathTex(r"R(a_2|x)=1000\cdot0.08+0\cdot0.92=80", font_size=27, color=RED_LOSS),
-        ).arrange(DOWN, buff=0.24, aligned_edge=LEFT).move_to(RIGHT * 2.28 + DOWN * 0.35)
-        choice = Text("選ぶ: 期待損失が小さい 治療", font_size=28, color=YELLOW_RISK).to_edge(DOWN, buff=0.58)
-
-        formula = MathTex(r"\sum_k L_{kj}p(C_k|x)", font_size=38, color=YELLOW_RISK)
-        formula.next_to(risks, DOWN, buff=0.45)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(table, lag_ratio=0.18), run_time=1.2)
-        self.play(FadeIn(posterior), run_time=0.9)
-        self.play(Write(risks[0]), Write(risks[1]), run_time=1.5)
-        self.play(Write(formula), Write(choice), run_time=1.0)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(table), FadeOut(posterior), FadeOut(risks), FadeOut(formula), FadeOut(choice))
-
-    def reject_option(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("PRML 1.5.3 / Fig. 1.26")
-        title = self.scene_title("あいまいな入力は、判断を保留できる", font_size=34)
-        axes = self.make_posterior_axes().shift(DOWN * 0.1)
-        c1 = axes.plot(lambda u: posterior_c1(u), x_range=[0.02, 0.98], color=BLUE_CLASS)
-        c2 = axes.plot(lambda u: posterior_c2(u), x_range=[0.02, 0.98], color=ORANGE_CLASS)
-        c1.set_stroke(width=4)
-        c2.set_stroke(width=4)
-        c1_label = MathTex(r"p(C_1|x)", font_size=28, color=BLUE_CLASS).move_to(axes.c2p(0.23, 0.88))
-        c2_label = MathTex(r"p(C_2|x)", font_size=28, color=ORANGE_CLASS).move_to(axes.c2p(0.78, 0.88))
-        theta = ValueTracker(0.72)
-
-        threshold_line = always_redraw(
-            lambda: DashedLine(
-                axes.c2p(0.02, theta.get_value()),
-                axes.c2p(0.98, theta.get_value()),
-                color=PURPLE_REJECT,
-                dash_length=0.12,
-            )
-        )
-        theta_label = always_redraw(
-            lambda: MathTex(r"\theta", font_size=30, color=PURPLE_REJECT).next_to(
-                axes.c2p(0.02, theta.get_value()), LEFT, buff=0.12
-            )
-        )
-        reject_band = Rectangle(width=1.45, height=3.15, color=PURPLE_REJECT, fill_opacity=0.18, stroke_opacity=0.0)
-        reject_band.move_to(axes.c2p(0.511, 0.52))
-        reject_text = Text("reject region\n専門家へ", font_size=25, color=PURPLE_REJECT, line_spacing=0.8)
-        reject_text.move_to(reject_band.get_center() + DOWN * 0.35)
-        rule = MathTex(r"\max_k p(C_k|x) \leq \theta \Rightarrow \text{reject}", font_size=34)
-        rule.to_edge(DOWN, buff=0.55)
-
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(Create(c1), Create(c2), FadeIn(c1_label), FadeIn(c2_label))
-        self.play(FadeIn(threshold_line), FadeIn(theta_label), FadeIn(reject_band), Write(reject_text), Write(rule))
-        self.play(theta.animate.set_value(0.62), reject_band.animate.set_width(0.9), run_time=1.3)
-        self.play(theta.animate.set_value(0.82), reject_band.animate.set_width(2.0), run_time=1.3)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(
-            FadeOut(label),
-            FadeOut(title),
-            FadeOut(axes),
-            FadeOut(c1),
-            FadeOut(c2),
-            FadeOut(c1_label),
-            FadeOut(c2_label),
-            FadeOut(threshold_line),
-            FadeOut(theta_label),
-            FadeOut(reject_band),
-            FadeOut(reject_text),
-            FadeOut(rule),
-        )
-
-    def inference_decision_paths(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("PRML 1.5.4 / 式 (1.82)-(1.85)")
-        title = self.scene_title("分類器の作り方: 確率をどこまで求めるか", font_size=33)
-
-        panels = VGroup(
-            self.path_panel(
-                "generative",
-                [r"p(x|C_k)", r"p(C_k)", r"\Downarrow", r"p(C_k|x)", r"\Downarrow", "decision"],
-                BLUE_CLASS,
-            ),
-            self.path_panel(
-                "discriminative",
-                [r"p(C_k|x)", r"\Downarrow", "decision"],
-                GREEN_DECISION,
-            ),
-            self.path_panel(
-                "discriminant",
-                [r"f(x)", r"\Downarrow", "class label"],
-                ORANGE_CLASS,
-            ),
-        ).arrange(RIGHT, buff=0.32).scale(0.93).shift(DOWN * 0.15)
-
-        note = Text("事後確率があると、損失変更・棄却・モデル結合に使いやすい", font_size=27, color=YELLOW_RISK)
-        note.to_edge(DOWN, buff=0.55)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(panels[0], shift=UP * 0.2), run_time=0.9)
-        self.play(FadeIn(panels[1], shift=UP * 0.2), run_time=0.9)
-        self.play(FadeIn(panels[2], shift=UP * 0.2), run_time=0.9)
-        self.play(Write(note))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(panels), FadeOut(note))
-
-    def path_panel(self, heading: str, lines: list[str], color: ManimColor) -> VGroup:
-        box = RoundedRectangle(width=3.7, height=4.2, corner_radius=0.1, color=color)
-        head = Text(heading, font_size=27, color=color).move_to(box.get_top() + DOWN * 0.42)
-        body = VGroup()
-        for item in lines:
-            if item in {"decision", "class label"}:
-                body.add(Text(item, font_size=24, color=WHITE))
-            else:
-                body.add(MathTex(item, font_size=29, color=WHITE))
-        body.arrange(DOWN, buff=0.13).move_to(box.get_center() + DOWN * 0.25)
-        return VGroup(box, head, body)
-
-    def regression_loss(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("PRML 1.5.5 / Fig. 1.28 / 式 (1.86)-(1.90)")
-        title = self.scene_title("二乗損失では、条件付き平均が最適な予測", font_size=32)
-        axes = Axes(
-            x_range=[0, 1, 0.2],
-            y_range=[-1.4, 1.6, 0.5],
-            x_length=6.3,
-            y_length=3.7,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(LEFT * 2.0 + DOWN * 0.15)
-        mean_curve = axes.plot(lambda u: 0.95 * np.sin(2 * np.pi * u) + 0.15, x_range=[0, 1], color=GREEN_DECISION)
-        mean_curve.set_stroke(width=4)
-        mean_label = MathTex(r"E[t|x]", font_size=30, color=GREEN_DECISION).move_to(axes.c2p(0.83, -0.65))
-        x0 = 0.32
-        mean0 = 0.95 * np.sin(2 * np.pi * x0) + 0.15
-        vertical = DashedLine(axes.c2p(x0, -1.25), axes.c2p(x0, 1.35), dash_length=0.1, color=TEXT_GREY)
-        x0_label = MathTex(r"x_0", font_size=28).next_to(axes.c2p(x0, -1.4), DOWN, buff=0.08)
-
-        side_axes = Axes(
-            x_range=[0, 1.1, 0.5],
-            y_range=[-1.4, 1.6, 0.5],
-            x_length=2.15,
-            y_length=3.7,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(RIGHT * 3.25 + DOWN * 0.15)
-        density = ParametricFunction(
-            lambda u: side_axes.c2p(0.26 * gaussian(u, mean0, 0.34), u),
-            t_range=[-1.15, 1.45],
-            color=BLUE_CLASS,
-        )
-        mean_marker = Line(side_axes.c2p(0.0, mean0), side_axes.c2p(1.0, mean0), color=GREEN_DECISION, stroke_width=4)
-        dist_label = MathTex(r"p(t|x_0)", font_size=30, color=BLUE_CLASS).next_to(side_axes, UP, buff=0.12)
-
-        predictor = ValueTracker(mean0 - 0.75)
-
-        def y_line() -> VGroup:
-            y = predictor.get_value()
-            line = Line(side_axes.c2p(0.0, y), side_axes.c2p(1.0, y), color=RED_LOSS, stroke_width=4)
-            text = MathTex(r"y(x_0)", font_size=27, color=RED_LOSS).next_to(line, RIGHT, buff=0.12)
-            return VGroup(line, text)
-
-        pred_line = always_redraw(y_line)
-        formula = MathTex(r"y(x)=E_t[t|x]", font_size=38, color=GREEN_DECISION)
-        formula.to_edge(DOWN, buff=0.6)
-        loss = MathTex(r"E[L]=\iint \{y(x)-t\}^2 p(x,t)\,dx\,dt", font_size=31)
-        loss.next_to(formula, UP, buff=0.22)
-
-        self.play(FadeIn(label), Write(title), Create(axes), Create(side_axes))
-        self.play(Create(mean_curve), FadeIn(mean_label), FadeIn(vertical), FadeIn(x0_label))
-        self.play(Create(density), FadeIn(dist_label), FadeIn(mean_marker), FadeIn(pred_line))
-        self.play(predictor.animate.set_value(mean0 + 0.65), run_time=1.3)
-        self.play(predictor.animate.set_value(mean0), run_time=1.2)
-        self.play(Write(loss), Write(formula), run_time=1.1)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(
-            FadeOut(label),
-            FadeOut(title),
-            FadeOut(axes),
-            FadeOut(side_axes),
-            FadeOut(mean_curve),
-            FadeOut(mean_label),
-            FadeOut(vertical),
-            FadeOut(x0_label),
-            FadeOut(density),
-            FadeOut(dist_label),
-            FadeOut(mean_marker),
-            FadeOut(pred_line),
-            FadeOut(loss),
-            FadeOut(formula),
-        )
-
-    def summary_bridge(self) -> None:
-        narration = self.start_narration("scene07")
-        title = Text("1.5 Decision Theory の要点", font_size=38)
-        title.to_edge(UP, buff=0.75)
-        items = VGroup(
-            self.summary_item("posterior", "p(Ck|x) が分類判断の材料になる", BLUE_CLASS),
-            self.summary_item("loss", "Lkj が変わると最適な行動も変わる", RED_LOSS),
-            self.summary_item("reject", "不確かな入力は保留できる", PURPLE_REJECT),
-            self.summary_item("regression", "二乗損失では条件付き平均を選ぶ", GREEN_DECISION),
-        ).arrange(DOWN, buff=0.28, aligned_edge=LEFT).move_to(ORIGIN)
-        next_section = Text("次: 1.6 Information Theory", font_size=30, color=YELLOW_RISK)
-        next_section.to_edge(DOWN, buff=0.65)
-
-        self.play(Write(title))
-        for item in items:
-            self.play(FadeIn(item, shift=RIGHT * 0.25), run_time=0.45)
-        self.play(Write(next_section), run_time=0.8)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(title), FadeOut(items), FadeOut(next_section))
-
-    def summary_item(self, key: str, description: str, color: ManimColor) -> VGroup:
-        tag_box = RoundedRectangle(width=2.2, height=0.58, corner_radius=0.08, color=color)
-        tag = Text(key, font_size=22, color=color).move_to(tag_box)
-        desc = Text(description, font_size=27, color=WHITE).next_to(tag_box, RIGHT, buff=0.28)
-        return VGroup(tag_box, tag, desc)
+    def recap(self):
+        cost=ValueTracker(1)
+        self.add(probability_bar(lambda:.08,pos=(0,1.1,0),width=9,height=.45),self.note('病気の確率は、ずっと 8%',color=BLUE_C1))
+        # Static first risk and dynamic second risk, with a moving choice marker.
+        self.add(tex(r'R_1=0.92',34,BLUE_C1).move_to([-2,-.2,0]),
+                 readout(r'R_2=',lambda:.08*cost.get_value(),(2,-.2,0),ORANGE_C2,2,34))
+        choice=always_redraw(lambda:SurroundingRectangle(jp('病気と判断' if .92<.08*cost.get_value() else '健康と判断',27),color=GREEN_ACTION).move_to([0,-1.25,0]))
+        label=always_redraw(lambda:jp('病気と判断' if .92<.08*cost.get_value() else '健康と判断',27,GREEN_ACTION).move_to([0,-1.25,0]))
+        self.add(choice,label)
+        self.formula_at(r'j^*(x)=\arg\min_j\sum_k L_{kj}p(C_k\mid x)',34)
+        self.beat(Indicate(label.copy()))
+        self.beat(cost.animate.set_value(20),end_sentence=1)
+        self.beat(Indicate(self.formula,color=GREEN_ACTION))
+        self.remove(choice,label)
+        next_topic=self.note('次へ：不確かさを、情報量で測る',(0,-1.25,0),PURPLE_HOLD,27)
+        self.beat(FadeIn(next_topic))
