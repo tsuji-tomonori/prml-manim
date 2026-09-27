@@ -50,7 +50,7 @@ def slider(tracker, low, high, pos=(0,-2.3,0), label=r'\eta', width=7, color=YEL
 def axes(xrange, yrange, center=(0,.05,0), width=8, height=3.35, xlabel='x', ylabel='p'):
     ax=Axes(x_range=xrange,y_range=yrange,x_length=width,y_length=height,tips=False,
             axis_config=dict(color=MUTED,include_numbers=True,font_size=19,
-                             decimal_number_config=dict(num_decimal_places=1)))
+                             decimal_number_config=dict(num_decimal_places=2 if xrange[2]==.25 else 1)))
     ax.move_to(center)
     labels=VGroup(tex(xlabel,24).next_to(ax.x_axis.get_right(),RIGHT,buff=.18),
                   tex(ylabel,24).next_to(ax.y_axis.get_top(),UP,buff=.15))
@@ -98,10 +98,26 @@ class NarratedScene(Scene):
         end=self.start+sum(self.entry['beat_durations'][:self.bi+1])
         frames=round((end-self.time)*config.frame_rate)
         if frames:
-            self.wait((frames-1e-5)/config.frame_rate)
+            self.wait(frames/config.frame_rate+1e-8, frozen_frame=True)
         record['end']=float(self.time)
         self.timeline[-1]['beats'].append(record)
         self.bi+=1
 
     def highlight(self,m,color=YELLOW):
         return lambda: ShowPassingFlash(SurroundingRectangle(m,buff=.12,color=color),time_width=.7)
+
+    def change(self, current, target):
+        """Finish symbol changes early, then trace the readable completed formula."""
+        return AnimationGroup(
+            Transform(current, target, rate_func=lambda a:smooth(min(1,10*a))),
+            ShowPassingFlash(SurroundingRectangle(target,buff=.1,color=YELLOW),time_width=.5))
+
+    def match(self, current, target):
+        return AnimationGroup(
+            TransformMatchingTex(current,target,rate_func=lambda a:smooth(min(1,10*a))),
+            ShowPassingFlash(SurroundingRectangle(target,buff=.1,color=YELLOW),time_width=.5))
+
+    def replace(self, current, target):
+        return AnimationGroup(
+            ReplacementTransform(current,target,rate_func=lambda a:smooth(min(1,10*a))),
+            ShowPassingFlash(SurroundingRectangle(target,buff=.1,color=YELLOW),time_width=.5))

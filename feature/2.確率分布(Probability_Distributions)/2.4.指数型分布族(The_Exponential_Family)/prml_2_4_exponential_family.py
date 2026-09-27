@@ -17,6 +17,7 @@ class PRML24ExponentialFamily(NarratedScene):
                 tips=False,axis_config=dict(color=MUTED),
                 y_axis_config=dict(include_numbers=True,font_size=22))
         ax.move_to([0,.05,0])
+        ax.y_axis.shift(ax.c2p(-.7,0)-ax.c2p(0,0))
         group=VGroup()
         for k,color in enumerate(colors):
             bar=always_redraw(lambda k=k,color=color: Rectangle(width=.85,height=max(.001,3*getter()[k]/ymax),
@@ -51,7 +52,7 @@ class PRML24ExponentialFamily(NarratedScene):
         self.beat(self.highlight(eq),eta.animate.set_value(-1.5))
         self.beat(norm.animate.set_value(1.),eta.animate.set_value(np.log(2.)))
         final=formula(r'p(0)=\frac{1}{1+e^\eta},\quad p(1)=\frac{e^\eta}{1+e^\eta}',(0,2.4,0))
-        self.beat(Transform(eq,final),eta.animate.set_value(0.))
+        self.beat(self.change(eq,final),eta.animate.set_value(0.))
 
     def family(self):
         eta=ValueTracker(-2.)
@@ -62,12 +63,12 @@ class PRML24ExponentialFamily(NarratedScene):
         self.add(eq,ax,labels,graph,dot,slider(eta,-3,3))
         self.beat(self.highlight(eq),self.highlight(graph))
         logit=formula(r'\eta=\ln\frac{\mu}{1-\mu},\qquad \mu=\frac{1}{1+e^{-\eta}}')
-        self.beat(TransformMatchingTex(eq,logit),eta.animate.set_value(2.))
+        self.beat(self.match(eq,logit),eta.animate.set_value(2.))
         self.beat(eta.animate.set_value(-1.),eta.animate.set_value(0.))
         self.remove(ax,labels,graph,dot)
         full=MathTex(r'p(x|\eta)=',r'h(x)',r'g(\eta)',r'\exp\{',r'\eta^{\mathrm T}',r'u(x)',r'\}',font_size=43).move_to([0,.65,0])
         for i,c in [(1,MUTED),(2,PURPLE),(4,YELLOW),(5,BLUE)]: full[i].set_color(c)
-        self.beat(TransformMatchingTex(logit,full),self.highlight(VGroup(full[4],full[5])))
+        self.beat(self.match(logit,full),self.highlight(VGroup(full[4],full[5])))
         meanings=VGroup(jp('特徴量：データから作る材料',24,BLUE),jp('自然パラメータ：材料の重み',24,YELLOW),jp('土台 × 正規化係数',24,PURPLE)).arrange(DOWN,buff=.22).move_to([0,-.8,0])
         self.beat(FadeIn(meanings[:2]),FadeIn(meanings[2]))
         sub=formula(r'u(x)=x,\quad h(x)=1,\quad g(\eta)=\frac{1}{1+e^\eta}',(0,2.35,0),31)
@@ -82,13 +83,13 @@ class PRML24ExponentialFamily(NarratedScene):
                         slider(b,-2,2,(2.8,-2.35,0),r'\eta_2',width=3.0,color=BLUE))
         self.add(bars,eq,controls)
         self.beat(self.highlight(bars),self.highlight(eq))
-        self.beat(Transform(eq,formula(r'w=(e^{\eta_1},e^{\eta_2},1)',(0,2.45,0))),a.animate.set_value(1.7))
+        self.beat(self.change(eq,formula(r'w=(e^{\eta_1},e^{\eta_2},1)',(0,2.45,0))),a.animate.set_value(1.7))
         self.beat(b.animate.set_value(1.3),a.animate.set_value(-.7))
         soft=formula(r'\mu_k=\frac{e^{\eta_k}}{1+e^{\eta_1}+e^{\eta_2}},\quad\mu_3=\frac{1}{1+e^{\eta_1}+e^{\eta_2}}',(0,2.45,0),29)
-        self.beat(Transform(eq,soft),self.highlight(eq))
+        self.beat(self.change(eq,soft),self.highlight(eq))
         self.beat(AnimationGroup(a.animate.set_value(.8),b.animate.set_value(-1.2)),self.highlight(bars))
         reduced=formula(r'p(x|\eta)=\frac{\exp(\eta_1 x_1+\eta_2 x_2)}{1+e^{\eta_1}+e^{\eta_2}}',(0,2.45,0),31)
-        self.beat(Transform(eq,reduced),AnimationGroup(a.animate.set_value(0),b.animate.set_value(0)))
+        self.beat(self.change(eq,reduced),AnimationGroup(a.animate.set_value(0),b.animate.set_value(0)))
 
     def gaussian(self):
         mu,sigma=ValueTracker(-.8),ValueTracker(1.)
@@ -102,7 +103,7 @@ class PRML24ExponentialFamily(NarratedScene):
         self.beat(sigma.animate.set_value(.55),sigma.animate.set_value(1.))
         expansion=MathTex(r'-\frac{(x-\mu)^2}{2\sigma^2}=',r'\frac{\mu}{\sigma^2}x',r'-\frac{1}{2\sigma^2}x^2',r'-\frac{\mu^2}{2\sigma^2}',font_size=31).move_to([0,2.4,0])
         expansion[1].set_color(YELLOW); expansion[2].set_color(PURPLE)
-        self.beat(TransformMatchingTex(eq,expansion),self.highlight(expansion[1:3]))
+        self.beat(self.match(eq,expansion),self.highlight(expansion[1:3]))
         natural=formula(r'\eta_1=\mu/\sigma^2,\quad\eta_2=-1/(2\sigma^2),\quad u(x)=(x,x^2)^{\mathrm T}',(0,2.5,0),28)
         self.remove(expansion);self.add(natural)
         nums=VGroup(readout(r'\eta_1=',lambda:gaussian_natural(mu.get_value(),sigma.get_value())[0],(-3,1.7,0)),
@@ -112,7 +113,7 @@ class PRML24ExponentialFamily(NarratedScene):
         self.beat(sigma.animate.set_value(1.1),self.highlight(nums[1]))
         self.remove(nums)
         g=formula(r'h(x)=(2\pi)^{-1/2},\quad g(\eta)=\sqrt{-2\eta_2}\exp\!\left(\frac{\eta_1^2}{4\eta_2}\right)',(0,2.45,0),29)
-        self.beat(Transform(natural,g),AnimationGroup(mu.animate.set_value(0),sigma.animate.set_value(.8)))
+        self.beat(self.change(natural,g),AnimationGroup(mu.animate.set_value(0),sigma.animate.set_value(.8)))
 
     def statistics(self):
         coins=VGroup(*[VGroup(Circle(radius=.23,color=RED if x else BLUE,fill_opacity=.5),tex(str(x),25)).move_to([-4.5+i,1.2,0]) for i,x in enumerate(COINS)])
@@ -123,17 +124,23 @@ class PRML24ExponentialFamily(NarratedScene):
         destinations={int(i):[-4.5+j,1.2,0] for j,i in enumerate(order)}
         self.beat(AnimationGroup(*[c.animate.move_to(destinations[i]) for i,c in enumerate(coins)]),self.highlight(eq))
         self.beat(AnimationGroup(*[c.animate.scale(.1).move_to(eq.get_center()) for c in coins]),self.highlight(eq))
-        self.remove(coins)
+        self.remove(coins,*coins)
         likelihood=MathTex(r'p(X|\eta)=',r'\prod_n h(x_n)',r'g(\eta)^N',r'\exp\!\left\{\eta^{\mathrm T}',r'\sum_n u(x_n)',r'\right\}',font_size=32).move_to([0,1.8,0])
         likelihood[4].set_color(BLUE); likelihood[2].set_color(PURPLE)
         self.beat(FadeIn(likelihood),self.highlight(likelihood[4]))
         self.remove(eq,likelihood)
         line=NumberLine(x_range=[-1.5,2,.5],length=9,include_numbers=True,font_size=22).move_to([0,1.0,0])
         dots=VGroup(*[Dot(line.n2p(x),color=BLUE,radius=.07) for x in POINTS])
-        stats=formula(r'N=6,\quad\sum x_n='+f'{POINTS.sum():.2f}'+r',\quad\sum x_n^2='+f'{(POINTS**2).sum():.2f}',(0,-.25,0),34)
+        count=ValueTracker(0)
+        n=lambda:min(6,int(count.get_value()+1e-6))
+        stats=VGroup(readout('N=',n,(-4,-.25,0),YELLOW,0),
+                     readout(r'\sum x_n=',lambda:POINTS[:n()].sum(),(0,-.25,0),BLUE),
+                     readout(r'\sum x_n^2=',lambda:(POINTS[:n()]**2).sum(),(4,-.25,0),PURPLE))
+        for i,d in enumerate(dots):
+            d.add_updater(lambda m,i=i:m.set_color(BLUE if i<n() else MUTED).set_opacity(1 if i<n() else .35))
         result=formula(r'\mu_{\rm ML}='+f'{POINTS.mean():.2f}'+r',\quad\sigma^2_{\rm ML}=\frac{\sum x_n^2}{N}-\mu_{\rm ML}^2='+f'{POINTS.var():.3f}',(0,-1.5,0),33)
-        self.add(line,dots)
-        self.beat(FadeIn(stats),FadeIn(result))
+        self.add(line,dots,stats)
+        self.beat(count.animate.set_value(6),FadeIn(result))
         self.beat(LaggedStart(*[Indicate(d,color=YELLOW) for d in dots],lag_ratio=.2),self.highlight(VGroup(stats,result)))
 
     def likelihood(self):
@@ -155,11 +162,11 @@ class PRML24ExponentialFamily(NarratedScene):
         tangent=always_redraw(lambda:Line(ax.c2p(eta.get_value()-.55,np.logaddexp(0,eta.get_value())-.55*sigmoid(eta.get_value())),ax.c2p(eta.get_value()+.55,np.logaddexp(0,eta.get_value())+.55*sigmoid(eta.get_value())),color=YELLOW,stroke_width=5))
         read=readout(r"A'(\eta)=",lambda:sigmoid(eta.get_value()),(4.8,.6,0))
         self.add(ax,labels,graph,tangent,read)
-        self.beat(Transform(eq,formula(r'A(\eta)=-\ln g(\eta),\quad\nabla A=\mathbb E[u(x)]')),eta.animate.set_value(-1.5))
-        self.beat(eta.animate.set_value(1.5),Transform(eq,formula(r'\nabla^2 A=\operatorname{Cov}[u(x)]')))
+        self.beat(self.change(eq,formula(r'A(\eta)=-\ln g(\eta),\quad\nabla A=\mathbb E[u(x)]')),eta.animate.set_value(-1.5))
+        self.beat(eta.animate.set_value(1.5),self.change(eq,formula(r'\nabla^2 A=\operatorname{Cov}[u(x)]')))
         optimum=formula(r'-\nabla\ln g(\eta_{\rm ML})=\frac1N\sum_n u(x_n)',(0,2.35,0),34)
-        self.beat(AnimationGroup(Transform(eq,optimum),eta.animate.set_value(np.log(7/3))),self.highlight(eq))
-        self.beat(self.highlight(eq),AnimationGroup(eta.animate.set_value(3),Transform(eq,formula(r'S=N:\quad \mu_{\rm ML}=1,\quad\eta\to+\infty'))))
+        self.beat(AnimationGroup(self.change(eq,optimum),eta.animate.set_value(np.log(7/3))),self.highlight(eq))
+        self.beat(self.highlight(eq),AnimationGroup(eta.animate.set_value(3),self.change(eq,formula(r'S=N:\quad \mu_{\rm ML}=1,\quad\eta\to+\infty'))))
 
     def conjugacy(self):
         t=ValueTracker(0.)
@@ -170,8 +177,8 @@ class PRML24ExponentialFamily(NarratedScene):
         counts=VGroup(readout('a=',lambda:2+7*t.get_value(),(-2,-2.3,0),RED),readout('b=',lambda:2+3*t.get_value(),(2,-2.3,0),BLUE))
         self.add(ax,labels,graph,mean,eq,counts)
         self.beat(self.highlight(graph),self.highlight(eq))
-        self.beat(self.highlight(graph),t.animate.set_value(1))
-        self.beat(self.highlight(counts),Transform(eq,formula(r'\operatorname{Beta}(2,2)\ \longrightarrow\ \operatorname{Beta}(9,5)')))
+        self.beat(self.change(eq,formula(r'p(\mu)=\operatorname{Beta}(\mu|a,b)')),t.animate.set_value(1))
+        self.beat(self.highlight(counts),self.change(eq,formula(r'\operatorname{Beta}(2,2)\ \longrightarrow\ \operatorname{Beta}(9,5)')))
         self.remove(ax,labels,graph,mean,counts,eq)
         prior=formula(r'p(\eta|\chi,\nu)=f(\chi,\nu)g(\eta)^\nu\exp\{\nu\eta^{\mathrm T}\chi\}',(0,1.8,0),33)
         post=formula(r'p(\eta|X,\chi,\nu)\propto g(\eta)^{\nu+N}\exp\{\eta^{\mathrm T}(\nu\chi+S)\}',(0,.55,0),33)
@@ -193,11 +200,11 @@ class PRML24ExponentialFamily(NarratedScene):
         self.add(ax,labels,areas,eq)
         self.beat(self.highlight(eq),self.highlight(areas))
         self.beat(self.highlight(areas),self.highlight(ax.x_axis))
-        transform=formula(r'\lambda=\eta^2,\quad 0\leq\eta\leq1')
-        self.beat(Transform(eq,transform),q.animate.set_value(1.45))
-        self.beat(q.animate.set_value(2),Transform(eq,formula(r'p_\eta(\eta)=p_\lambda(\eta^2)\left|2\eta\right|')))
-        mass=formula(r'\int_{\sqrt{k/4}}^{\sqrt{(k+1)/4}}2\eta\,d\eta=\frac14',(0,-2.35,0),31)
-        self.beat(AnimationGroup(Transform(eq,formula(r'p_\eta(\eta)=2\eta')),FadeIn(mass)),self.highlight(areas))
+        transform=formula(r'\lambda=\eta^q,\quad q:1\to2,\quad 0\leq\eta\leq1')
+        self.beat(self.change(eq,transform),q.animate.set_value(1.45))
+        self.beat(q.animate.set_value(2),self.change(eq,formula(r'p_\eta(\eta)=p_\lambda(\eta^2)\left|2\eta\right|')))
+        mass=formula(r'\int_{\sqrt{k/4}}^{\sqrt{(k+1)/4}}2\eta\,d\eta=\frac14',(0,-2.15,0),29)
+        self.beat(AnimationGroup(self.change(eq,formula(r'p_\eta(\eta)=2\eta')),FadeIn(mass)),self.highlight(areas))
         self.beat(self.highlight(eq),self.highlight(mass))
 
     def invariance(self):
@@ -216,12 +223,12 @@ class PRML24ExponentialFamily(NarratedScene):
         numbers=VGroup(*[tex(s,25).move_to(logax.c2p(i+.5,.5)) for i,s in enumerate([r'1\to10',r'10\to100',r'100\to1000'])])
         self.add(logax,loglabels,tiles,numbers)
         scale=formula(r'p(x|\sigma)=\frac1\sigma f\!\left(\frac{x}{\sigma}\right)')
-        self.beat(Transform(eq,scale),self.highlight(tiles))
-        self.beat(Transform(eq,formula(r'p(\sigma)\propto\frac1\sigma\quad\Longleftrightarrow\quad p(\ln\sigma)=\mathrm{const}')),LaggedStart(*[Indicate(n) for n in numbers],lag_ratio=.25))
+        self.beat(self.change(eq,scale),self.highlight(tiles))
+        self.beat(self.change(eq,formula(r'p(\sigma)\propto\frac1\sigma\quad\Longleftrightarrow\quad p(\ln\sigma)=\mathrm{const}')),LaggedStart(*[Indicate(n) for n in numbers],lag_ratio=.25))
         precision=formula(r'\lambda=\sigma^{-2},\quad p(\lambda)\propto\lambda^{-1}',(0,-2.25,0),33)
         self.beat(FadeIn(precision),self.highlight(eq))
         warning=jp('事後分布の積分が有限か、確認する',27,YELLOW).move_to([0,2.4,0])
-        self.beat(ReplacementTransform(eq,warning),self.highlight(warning))
+        self.beat(self.replace(eq,warning),self.highlight(warning))
 
     def summary(self):
         ax,labels=axes([-3,3,1],[0,.8,.4],width=8,height=2.8,center=(0,-.2,0),ylabel='p(x)')
@@ -236,11 +243,11 @@ class PRML24ExponentialFamily(NarratedScene):
         dots=VGroup(*[Dot(ax.c2p(x,.02),color=BLUE,radius=.07) for x in POINTS])
         self.add(dots)
         stats=formula(r'S=\sum_nu(x_n),\qquad\mathbb E_{\eta_{\rm ML}}[u(x)]=S/N')
-        self.beat(Transform(eq,stats),Create(model))
+        self.beat(self.change(eq,stats),FadeIn(model))
         post=formula(r'(\nu\chi,\nu)\longrightarrow(\nu\chi+S,\nu+N)')
-        self.beat(Transform(eq,post),self.highlight(eq))
+        self.beat(self.change(eq,post),self.highlight(eq))
         mixed=curve(ax,lambda x:.5*normal(x,-1.2,.45)+.5*normal(x,1.1,.5),-3,3,PURPLE,True)
         note=jp('一般のガウス混合は、この単純な形の外へ',26,PURPLE).move_to([0,2.4,0])
-        self.beat(self.highlight(model),AnimationGroup(Transform(model,mixed),ReplacementTransform(eq,note)))
+        self.beat(self.highlight(model),AnimationGroup(Transform(model,mixed),self.replace(eq,note)))
         next_note=jp('次へ：データから、分布の形を作る',28,BLUE).move_to([0,-2.35,0])
         self.beat(self.highlight(model),FadeIn(next_note))
