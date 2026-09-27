@@ -1,0 +1,27 @@
+{
+  "distance_rescaling": "passed",
+  "argmax_regions": "passed (21 states)",
+  "least_squares_normal_residual": 5.30530462177335e-14,
+  "least_squares_score_range": [
+    -0.6620869053178431,
+    1.6620869053178435
+  ],
+  "middle_class_selected": 0,
+  "fisher_J": [
+    0.06779718700474145,
+    0.30534754196843206
+  ],
+  "ls_fisher_absolute_cosine": 0.9999999999999999,
+  "scatter_decomposition_error": 1.7763568394002505e-14,
+  "multiclass_eigenvalues": [
+    41.133822262636755,
+    23.136530663986353,
+    -3.154969213565038e-16,
+    -2.280087526213741e-15
+  ],
+  "perceptron_updates": 3,
+  "audio_scenes": 10,
+  "sentences": 114,
+  "audio_seconds": 545.2,
+  "checks_passed": 8
+}
