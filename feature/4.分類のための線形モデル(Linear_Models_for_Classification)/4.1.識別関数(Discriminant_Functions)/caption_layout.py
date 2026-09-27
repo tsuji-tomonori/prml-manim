@@ -35,8 +35,13 @@ def caption_mobject(display):
                if t.startswith('$') else (.55 if t.isascii() else 1) for t in tokens]
     if sum(weights) > 32:
         cumulative = np.cumsum(weights)
-        split = min(range(1, len(tokens)), key=lambda i:
-                    abs(cumulative[i-1] - sum(weights)/2) + (0 if tokens[i-1] in '、。' else 5))
+        def break_cost(i):
+            # Keep loanwords and Latin names together across Japanese line wraps.
+            in_word = bool(re.fullmatch(r'[ァ-ヶーA-Za-z]', tokens[i-1])
+                           and re.fullmatch(r'[ァ-ヶーA-Za-z]', tokens[i]))
+            return (abs(cumulative[i-1] - sum(weights)/2)
+                    + (0 if tokens[i-1] in '、。' else 5) + (20 if in_word else 0))
+        split = min(range(1, len(tokens)), key=break_cost)
         lines = [tokens[:split], tokens[split:]]
     else:
         lines = [tokens]

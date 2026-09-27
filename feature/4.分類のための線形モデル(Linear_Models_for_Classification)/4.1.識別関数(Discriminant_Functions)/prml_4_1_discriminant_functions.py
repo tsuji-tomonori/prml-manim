@@ -63,7 +63,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
                 axis_config={'color':MUTED,'stroke_width':1.2,'include_ticks':False}).move_to(center)
         self.add(ax)
         self.add(tex(labels[0],23,MUTED).next_to(ax.c2p(xr[1],0),RIGHT,buff=.1),
-                 tex(labels[1],23,MUTED).next_to(ax.c2p(0,yr[1]),UP,buff=.12))
+                 tex(labels[1],23,MUTED).next_to(ax.c2p(0,yr[1]),LEFT,buff=.15))
         return ax
 
     def bottom(self,formula,color=WHITE,size=31):
@@ -179,7 +179,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         note=VGroup(jp('中央の橙が選ばれない',26,ORANGE_CLS),tex('y_2=0.20',31,ORANGE_CLS),tex(r'\max(y_1,y_3)\geq0.40',28)).arrange(DOWN,buff=.4).move_to([3.6,.7,0])
         self.beat(FadeIn(note),Indicate(points[1],scale_factor=1.18))
         good=VGroup(*[Line(ax.c2p(x,-1.6),ax.c2p(x,1.6),color=GREEN_CLS,stroke_width=3) for x in [-.9,.9]])
-        self.beat(Create(good),FadeOut(reg),Write(self.bottom(r'\text{target fit}\ \neq\ \text{good classification}',size=30)))
+        self.beat(Create(good),FadeOut(reg),Write(jp('目標の数への近さ ≠ 分類のよさ',27).move_to([0,-2.53,0])))
 
     def fisher_display(self):
         ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.3,0))
@@ -258,7 +258,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
 
     def perceptron_scene(self):
         self.hint('青：+1　橙：−1　黄色の輪：今回更新する点')
-        ax=self.axes(xr=(-1.65,1.65,.5),yr=(-1.45,1.45,.5),width=5.15,height=4.52,center=(-2.7,.05,0))
+        ax=self.axes(xr=(-1.65,1.65,.5),yr=(-1.45,1.45,.5),width=4.78,height=4.2,center=(-2.7,.15,0))
         groups=[P_X[P_T==1],P_X[P_T==-1]];dots=cloud(ax,groups,.07)
         step=ValueTracker(0);w=lambda:interpolate_history(step.get_value())
         line=always_redraw(lambda:boundary(ax,w()));self.add(dots,line)
@@ -283,10 +283,10 @@ class PRML41DiscriminantFunctions(NarratedScene):
 
     def limits(self):
         self.hint('収束の条件は「使う特徴空間で分離できること」')
-        ax=self.axes(xr=(-1.65,1.65,.5),yr=(-1.45,1.45,.5),width=5.15,height=4.52,center=(-2.7,.05,0))
+        ax=self.axes(xr=(-1.65,1.65,.5),yr=(-1.45,1.45,.5),width=4.78,height=4.2,center=(-2.7,.15,0))
         dots=cloud(ax,[P_X[P_T==1],P_X[P_T==-1]],.07);self.add(dots)
         offset=ValueTracker(P_FINAL[0]);line=always_redraw(lambda:boundary(ax,np.r_[offset.get_value(),P_FINAL[1:]]));self.add(line)
-        f=self.bottom(r'\text{linear separability}\ \Rightarrow\ \text{finite updates}',size=30)
+        f=jp('線形分離できる → 有限回の更新で解へ',27).move_to([0,-2.53,0])
         self.beat(Write(f),Circumscribe(dots,color=GREEN_CLS))
         self.beat(offset.animate.set_value(-.05))
         self.remove(dots,line,f)
@@ -295,7 +295,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         angle=ValueTracker(.15);bad=always_redraw(lambda:boundary(ax,np.r_[0,direction(angle.get_value())]));self.add(bad)
         self.beat(angle.animate.set_value(2.8),Write(tex('XOR',36,YELLOW_W).move_to([3.5,1.6,0])))
         self.remove(bad)
-        arrow=Arrow([-0.4,.1,0],[1.2,.1,0],color=MUTED)
+        arrow=Arrow([.25,.1,0],[1.4,.1,0],color=MUTED)
         strip=NumberLine(x_range=[-1.5,1.5,1],length=3.8,include_numbers=False,color=MUTED).move_to([3.7,.1,0])
         target=VGroup(*[Dot(strip.n2p(p[0]*p[1])+UP*(.12 if i<2 else -.12),color=COLORS[0 if i<2 else 1],radius=.09) for i,p in enumerate(X)])
         source=VGroup(*[Dot(ax.c2p(*p),color=COLORS[0 if i<2 else 1],radius=.09) for i,p in enumerate(X)])
@@ -308,23 +308,24 @@ class PRML41DiscriminantFunctions(NarratedScene):
     def summary(self):
         self.hint('同じ境界でも、学習で動かす理由が違う')
         ax=self.axes();amount=ValueTracker(0)
-        dots=cloud(ax,BASE);self.add(dots)
-        W=lambda:least_squares(ls_data(amount.get_value()))
+        dots=always_redraw(lambda:cloud(ax,ls_data(.35*amount.get_value())));self.add(dots)
+        W=lambda:least_squares(ls_data(.35*amount.get_value()))
         line=always_redraw(lambda:boundary(ax,W()[:,0]-W()[:,1]));self.add(line)
         tag=jp('最小二乗：目標の数へ近づける',27,RED_LINE).move_to([2.8,1.6,0])
         self.add(tag);self.beat(amount.animate.set_value(1))
         self.remove(line,tag)
+        summary_groups=ls_data(.35)
         theta=ValueTracker(.7);u=lambda:direction(theta.get_value())
         arrow=always_redraw(lambda:Arrow(ax.c2p(*(-1.5*u())),ax.c2p(*(1.5*u())),buff=0,color=YELLOW_W))
-        proj=always_redraw(lambda:VGroup(*[Dot(ax.c2p(*(u()*(p@u()))),color=COLORS[k],radius=.035) for k,g in enumerate(BASE) for p in g]))
+        proj=always_redraw(lambda:VGroup(*[Dot(ax.c2p(*(u()*(p@u()))),color=COLORS[k],radius=.035) for k,g in enumerate(summary_groups) for p in g]))
         tag=jp('Fisher：影の分離をよくする',27,YELLOW_W).move_to([3.1,1.6,0]);self.add(arrow,proj,tag)
-        sw,sb=scatter(BASE);v=unit(np.linalg.solve(sw,BASE[0].mean(0)-BASE[1].mean(0)))
+        sw,sb=scatter(summary_groups);v=unit(np.linalg.solve(sw,summary_groups[0].mean(0)-summary_groups[1].mean(0)))
         self.beat(theta.animate.set_value(np.arctan2(v[1],v[0])))
         self.remove(arrow,proj,tag,dots)
         pdots=cloud(ax,[P_X[P_T==1],P_X[P_T==-1]]);step=ValueTracker(0)
         line=always_redraw(lambda:boundary(ax,interpolate_history(step.get_value())))
         self.add(pdots,line);tag=jp('パーセプトロン：誤りで更新する',25,GREEN_CLS).move_to([3,1.6,0]);self.add(tag)
         self.beat(step.animate.set_value(3))
-        question=jp('どれくらい確かな判定？',30,YELLOW_W).move_to([3.2,.3,0])
+        question=jp('どれくらい確かな判定？',28,YELLOW_W).move_to([3.7,.4,0])
         nextf=self.bottom(r'p(x\mid C_k)\quad\longrightarrow\quad p(C_k\mid x)',size=35)
         self.beat(FadeIn(question),Write(nextf),ShowPassingFlash(line.copy().clear_updaters(),time_width=.4))
