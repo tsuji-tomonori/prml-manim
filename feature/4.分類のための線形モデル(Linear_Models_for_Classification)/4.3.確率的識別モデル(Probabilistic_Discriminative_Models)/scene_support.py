@@ -29,7 +29,7 @@ class NarratedScene(Scene):
         self.timeline.append(dict(id=self.story['id'],start=self.start,reference=self.story['reference'],beats=[]))
 
     def equation(self,*parts,size=31):
-        if self.formula is not None: self.remove(self.formula)
+        if self.formula is not None: self.remove(*self.formula.get_family())
         self.formula=MathTex(*parts,font_size=size).move_to([0,2.48,0])
         if self.formula.width>12.5: self.formula.scale_to_fit_width(12.5)
         self.add(self.formula)
@@ -70,7 +70,7 @@ class NarratedScene(Scene):
         ax=Axes(x_range=x,y_range=y,x_length=width,y_length=height,tips=False,
                 axis_config=dict(color=MUTED,stroke_width=1.5,include_numbers=True,font_size=19))
         ax.move_to(center)
-        names=VGroup(tex(labels[0],25).next_to(ax.x_axis,RIGHT,buff=.12),tex(labels[1],25).next_to(ax.y_axis,UP,buff=.12))
+        names=VGroup(tex(labels[0],25).next_to(ax.x_axis,RIGHT,buff=.12),tex(labels[1],25).move_to(ax.get_corner(UL)+UP*.15+RIGHT*.35))
         self.add(ax,names)
         return ax
 

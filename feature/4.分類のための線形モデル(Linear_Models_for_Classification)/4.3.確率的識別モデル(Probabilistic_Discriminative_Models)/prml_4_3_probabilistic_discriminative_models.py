@@ -35,14 +35,17 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(q.animate.set_value(2.4))
         self.equation(r'a=w_0+w_1x',r'\qquad \sigma(a)=\frac{1}{1+e^{-a}}')
         self.beat(q.animate.set_value(-1.8))
-        sliders=VGroup(knob('w_1=',k,.5,4,at=(-2,-2.5,0)),knob('w_0=',b,-2,2,at=(-2,-1.9,0)))
+        sliders=VGroup(knob('w_1=',k,.5,4,at=(-2,-2.5,0)),knob('w_0=',b,-2,2,at=(-2,-2.5,0)))
         # Place sliders below the graph, using only one at a time.
         self.remove(*[m for m in self.mobjects if isinstance(m,Text) and m.get_center()[1]<-2])
         self.add(sliders[0])
-        self.beat(actions=[lambda:k.animate.set_value(3.5),lambda:AnimationGroup(FadeOut(sliders[0]),FadeIn(sliders[1].shift(DOWN*.6)),b.animate.set_value(1.7))])
+        def bias_action():
+            self.remove(*sliders[0].get_family());self.add(sliders[1])
+            return b.animate.set_value(1.7)
+        self.beat(actions=[lambda:k.animate.set_value(3.5),bias_action])
         route=VGroup(tex(r'p(x|C_k),\ p(C_k)\ \longrightarrow\ p(C_k|x)',25),
                      tex(r'w\ \longrightarrow\ p(C_k|x)',29,YELLOW_ACC)).arrange(DOWN,buff=.12).move_to([0,-2.4,0])
-        self.remove(sliders[1])
+        self.remove(*sliders[1].get_family())
         self.add(route)
         self.beat(Indicate(route,color=YELLOW_ACC,scale_factor=1.03))
         f=self.equation(r'p(C_1|\phi)=',r'\sigma(w^T\phi)',r'\qquad p(C_2|\phi)=1-y')
@@ -50,9 +53,9 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(q.animate.set_value(.6))
 
     def features(self):
-        ax=Axes(x_range=(-1.5,1.5,.75),y_range=(-1.5,1.5,.75),x_length=5.2,y_length=3.8,tips=False,
+        ax=Axes(x_range=(-1.5,1.5,.75),y_range=(-1.5,1.5,.75),x_length=4,y_length=4,tips=False,
                 axis_config=dict(color=MUTED,include_numbers=True,font_size=19)).move_to([-1.6,-.25,0])
-        fa=Axes(x_range=(0,1.8,.6),y_range=(0,1.8,.6),x_length=5.2,y_length=3.8,tips=False,
+        fa=Axes(x_range=(0,1.8,.6),y_range=(0,1.8,.6),x_length=4,y_length=4,tips=False,
                 axis_config=dict(color=MUTED,include_numbers=True,font_size=19)).move_to([-1.6,-.25,0])
         names=VGroup(tex('x_1',25).next_to(ax.x_axis,RIGHT),tex('x_2',25).next_to(ax.y_axis,UP))
         fnames=VGroup(tex(r'\phi_1',25).next_to(fa.x_axis,RIGHT),tex(r'\phi_2',25).next_to(fa.y_axis,UP))
@@ -94,9 +97,13 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(p.animate.set_value(.1))
         self.beat(p.animate.set_value(.025))
         self.equation(r't=0:\quad E_n=-\ln(1-y)',size=36)
-        self.beat(target.animate.set_value(0),p.animate.set_value(.85))
+        target.set_value(0)
+        self.beat(p.animate.set_value(.85))
         self.equation(r'p(t|w)=\prod_n y_n^{t_n}(1-y_n)^{1-t_n}',size=29)
-        self.beat(actions=[lambda:Indicate(self.formula,color=YELLOW_ACC),lambda:Transform(self.formula,tex(r'E=-\sum_n[t_n\ln y_n+(1-t_n)\ln(1-y_n)]',31).move_to([0,2.48,0]))])
+        def show_cross_entropy():
+            self.equation(r'E=-\sum_n[t_n\ln y_n+(1-t_n)\ln(1-y_n)]',size=31)
+            return Indicate(self.formula,color=YELLOW_ACC,scale_factor=1.02)
+        self.beat(actions=[lambda:Indicate(self.formula,color=YELLOW_ACC),show_cross_entropy])
         self.remove(graph,dot)
         # Replace the loss graph by prediction-to-target arrows on the same stage.
         self.remove(ax,*[m for m in self.mobjects if m is not self.formula and m is not self.subtitle and m.get_center()[1]<2.2])
@@ -249,7 +256,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.equation(r'P(t_{\rm obs}=1|a)=',r'\epsilon+(1-2\epsilon)\sigma(a)',size=34);self.formula[1].set_color(PURPLE_ACC)
         bounds=always_redraw(lambda:VGroup(*[DashedLine(ax.c2p(-6,y),ax.c2p(6,y),color=PURPLE_ACC) for y in [eps.get_value(),1-eps.get_value()]]))
         self.add(bounds)
-        self.beat(eps.animate.set_value(.1))
+        self.beat(actions=[lambda:eps.animate.set_value(.1),lambda:Indicate(bounds.copy(),color=PURPLE_ACC,scale_factor=1.01)])
         self.beat(eps.animate.set_value(.22))
 
     def canonical(self):
@@ -257,7 +264,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         equations=VGroup(*[tex(f,32,c) for f,c in zip(forms,[BLUE_CLASS,YELLOW_ACC,GREEN_CLASS])]).arrange(DOWN,buff=.55).move_to([0,.2,0])
         self.add(equations)
         self.beat(LaggedStart(*[Indicate(m,scale_factor=1.05) for m in equations],lag_ratio=.3))
-        self.remove(equations)
+        self.remove(*equations.get_family())
         self.equation(r'p(t|\eta,s)=\frac1s h(t/s)g(\eta)e^{\eta t/s}',size=34)
         mean=tex(r'y=\mathbb E[t|\eta]',38,RED_CLASS).move_to([-3,.3,0]);natural=tex(r'\eta=\psi(y)',38,GREEN_CLASS).move_to([3,.3,0])
         arrows=VGroup(Arrow([-1.2,.55,0],[1.2,.55,0],color=GREEN_CLASS),Arrow([1.2,-.15,0],[-1.2,-.15,0],color=RED_CLASS))
