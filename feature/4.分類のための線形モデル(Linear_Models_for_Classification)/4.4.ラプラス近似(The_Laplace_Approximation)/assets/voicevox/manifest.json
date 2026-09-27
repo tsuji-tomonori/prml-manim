@@ -676,7 +676,7 @@
       "title": "BIC は、どこを簡略化する？",
       "status": "generated",
       "path": "assets/voicevox/scene08.wav",
-      "script_sha256": "0a96f5711d26af595c69f2a529d18b29e9fb94620ca0dee80cb11983571f9691",
+      "script_sha256": "dce9eb11f2fdc1473cd78d1cd5e7adbe5b699ba9499893c73d4d719c1aa52cc7",
       "wav_sha256": "d72e98e34971a64791a89e4a3d351857f0e5f22c86a622e6ddb5ea2d5302388d",
       "duration": 62.93333333333333,
       "beat_durations": [
@@ -719,7 +719,7 @@
         {
           "beat_index": 2,
           "id": "scene08-03-01",
-          "display": "対数を取ると、補正は$\\frac{M}{2}\\ln N$です。データ数とパラメータ数から計算できます。",
+          "display": "対数を取ると、補正は$M\\ln N/2$です。データ数とパラメータ数から計算できます。",
           "speech": "対数を取ると、補正は、二分のエム、かける、ログエヌです。データ数とパラメータ数から計算できます。",
           "start": 14.933333333333334,
           "end": 23.061333333333334

@@ -35,8 +35,8 @@ class PRML44LaplaceApproximation(NarratedScene):
 
     def mode_and_log(self):
         self.legend(('関数と対数',BLUE),('頂上・接線',GOLD),('二次近似',RED))
-        ax=self.axes(x=(-1,2.5,.5),y=(-4,1,1),height=3.35,center=(0,.5,0))
         x=ValueTracker(-.6);scale=ValueTracker(1);morph=ValueTracker(0)
+        ax=self.changing_axes((-1,2.5,.5),lambda:(-4*morph.get_value(),1),(-4,1,1))
         fn=lambda z:(1-morph.get_value())*scale.get_value()*f(z)+morph.get_value()*logf(z)
         c=always_redraw(lambda:self.curve(ax,fn))
         dot=always_redraw(lambda:Dot(ax.c2p(x.get_value(),fn(x.get_value())),color=GOLD))
@@ -61,9 +61,10 @@ class PRML44LaplaceApproximation(NarratedScene):
 
     def curvature(self):
         legend=self.legend(('元の負の対数（谷底を0に）',BLUE),('二次の形',RED))
-        ax=self.axes(x=(-1.5,2.5,1),y=(0,5,1),height=3.2,center=(0,.5,0))
+        m=ValueTracker(0)
+        ax=self.changing_axes((-1.5,2.5,1),lambda:(0,5-4*m.get_value()),(0,5,1),height=3.2)
         original=self.curve(ax,bowl);self.beat(Create(original),self.equation(r'h(z)=\ln f(z_0)-\ln f(z)'))
-        a=ValueTracker(A);m=ValueTracker(0)
+        a=ValueTracker(A)
         fn=lambda z:(1-m.get_value())*.5*a.get_value()*(z-Z0)**2+m.get_value()*np.exp(-.5*a.get_value()*(z-Z0)**2)
         curve=always_redraw(lambda:self.curve(ax,fn,RED));self.add(curve)
         self.beat(self.equation(r'h(z)\simeq\frac A2(z-z_0)^2',colors={0:RED}),Create(Dot(ax.c2p(Z0,0),color=GOLD)))
@@ -139,9 +140,10 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(a.animate.set_value(2),self.equation(r'q(z)=\frac{|A|^{1/2}}{(2\pi)^{M/2}}e^{-\frac12(z-z_0)^TA(z-z_0)}',r',\quad\Sigma=A^{-1}',colors={0:RED,1:GOLD},size=27))
         # Show a flat direction explicitly, not an ill-defined Gaussian ellipse.
         self.remove(ell,vec)
+        a.set_value(0)
         flat=VGroup(*[Line(ax.c2p(-2.3,y),ax.c2p(2.3,y),color=RED) for y in [-1.4,-.7,.7,1.4]])
         self.beat(Create(flat),self.equation(r'A=\begin{pmatrix}0&0\\0&1\end{pmatrix}\quad\Rightarrow\quad |A|=0',colors={0:GOLD}))
-        self.remove(flat);self.add(ell,vec)
+        self.remove(flat);a.set_value(2);self.add(ell,vec)
         self.beat(a.animate.set_value(5),self.equation(r'A\succ0\quad\Longleftrightarrow\quad\lambda_i>0\ (\forall i)',colors={0:GOLD}))
 
     def integral(self):

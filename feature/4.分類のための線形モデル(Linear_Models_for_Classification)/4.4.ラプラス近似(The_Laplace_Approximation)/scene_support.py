@@ -40,7 +40,7 @@ class NarratedScene(Scene):
         # Every beat is frame-aligned in the generated PCM. No accumulated drift.
         prepared=[]
         for animation in animations:
-            if getattr(animation,'quick_formula',False):
+            if getattr(animation,'quick_formula',False) or (isinstance(animation,ReplacementTransform) and isinstance(animation.mobject,Text)):
                 animation.set_run_time(.85)
                 if len(animations)==1:
                     rest=ShowPassingFlash(SurroundingRectangle(self.formula,color=GOLD,buff=.13),time_width=.7,run_time=duration-.85)
@@ -85,6 +85,26 @@ class NarratedScene(Scene):
         labels.add(tex(xlabel,24).move_to([0,-1.85,0]) if len(xlabel)>15 else tex(xlabel,24).next_to(ax.c2p(x[1],y[0]),RIGHT,buff=.2))
         if ylabel:labels.add(tex(ylabel,23).next_to(ax.c2p(x[0],y[1]),UP,buff=.1))
         self.add(ax,labels);return ax
+
+    def changing_axes(self,x,limits,clip,height=3.35,center=(0,.5,0)):
+        """Animate the labelled y window with the curve, retaining screen bounds."""
+        ax=VGroup();ax.x_range=x;ax.y_range=clip
+        left=center[0]-4.5;bottom=center[1]-height/2
+        def point(xx,yy):
+            lo,hi=limits()
+            return np.array([left+9*(xx-x[0])/(x[1]-x[0]),bottom+height*(yy-lo)/(hi-lo),0.])
+        ax.c2p=point
+        rails=always_redraw(lambda:VGroup(Line(point(x[0],0),point(x[1],0),color=MUTED,stroke_width=1.4),Line(point(0,limits()[0]),point(0,limits()[1]),color=MUTED,stroke_width=1.4)))
+        labels=VGroup()
+        for v in np.arange(x[0],x[1]+.01,x[2]):
+            labels.add(tex(f'{v:g}',18,MUTED).move_to([point(v,limits()[0])[0],bottom-.22,0]))
+        for fraction in np.linspace(0,1,6):
+            label=DecimalNumber(0,num_decimal_places=1,font_size=18,color=MUTED)
+            label.add_updater(lambda mob,f=fraction:mob.set_value(limits()[0]+f*(limits()[1]-limits()[0])).move_to([left-.32,bottom+f*height,0]))
+            label.update(0);labels.add(label)
+        labels.add(tex('z',24).move_to([left+9.25,bottom,0]))
+        ax.add(rails,labels);self.add(ax)
+        return ax
 
     def curve(self,ax,fn,color=BLUE,lo=None,hi=None,width=3):
         x=np.linspace(ax.x_range[0] if lo is None else lo,ax.x_range[1] if hi is None else hi,301)
