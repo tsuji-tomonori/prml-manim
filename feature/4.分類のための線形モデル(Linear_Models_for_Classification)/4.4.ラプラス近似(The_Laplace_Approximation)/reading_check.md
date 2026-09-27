@@ -1,6 +1,6 @@
 # 全文の読み確認
 
-VOICEVOX Engine 0.25.2 / WhiteCUL ノーマル（23）。全72文。
+VOICEVOX Engine 0.25.2 / WhiteCUL ノーマル（23）。全72区切り。
 `audio_query` の `accent_phrases[].moras[].text` を順に連結。句読点・アクセント位置は省略し、長母音は Engine の表記（ケエスウ等）を保つ。
 元の speech と修正前の読みを保存し、再実行時にも上書きしない。kana のアクセント情報は `reading_check.json` に保存。
 以下は API の結果であり、聴取済みを意味しない。全文の目視確認結果は今回の作業レポートを参照。

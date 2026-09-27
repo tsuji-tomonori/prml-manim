@@ -39,7 +39,7 @@ def main():
         rows = list(pool.map(query, segments))
     destination.write_text(json.dumps(dict(engine=version, speaker=23, sentences=rows), ensure_ascii=False, indent=2) + '\n')
     lines = ['# 全文の読み確認', '',
-             f'VOICEVOX Engine {version} / WhiteCUL ノーマル（23）。全{len(rows)}文。',
+             f'VOICEVOX Engine {version} / WhiteCUL ノーマル（23）。全{len(rows)}区切り。',
              '`audio_query` の `accent_phrases[].moras[].text` を順に連結。句読点・アクセント位置は省略し、長母音は Engine の表記（ケエスウ等）を保つ。',
              '元の speech と修正前の読みを保存し、再実行時にも上書きしない。kana のアクセント情報は `reading_check.json` に保存。',
              '以下は API の結果であり、聴取済みを意味しない。全文の目視確認結果は今回の作業レポートを参照。', '',
