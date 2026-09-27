@@ -575,7 +575,7 @@
       "title": "薄い表面が、ほとんど全部？",
       "status": "generated",
       "path": "assets/voicevox/scene05.wav",
-      "script_sha256": "13a3420c7a074c0cb2905a1941916d2a8512682a5f017db8884eb857f64d9e3a",
+      "script_sha256": "1866156be1957becdb1d06c6519720d64f4c4acba4d8952fff96cad3daba14ec",
       "wav_sha256": "a99b338f0c385f6bf5b50f456527868aa831e5ca15e21e8b52137573b600a315",
       "duration": 69.6,
       "beat_durations": [
@@ -716,7 +716,7 @@
       "title": "中心が一番高いのに、中心にはいない？",
       "status": "generated",
       "path": "assets/voicevox/scene06.wav",
-      "script_sha256": "7345df63917f140684550005927750b89ea97a224b269a611be70602208b07df",
+      "script_sha256": "7461a392f1c9f70519e34939188fa518b370d86647da5ec0f57765f98f8522d9",
       "wav_sha256": "f6a5f093f156320ebc3c43004d8562386a93b223ff6750df5777838db2af1df0",
       "duration": 85.0,
       "beat_durations": [

@@ -534,7 +534,7 @@ SCENES = [
             },
             {
                 "seconds": 9,
-                "visual_note": "同じ曲線をD=2へ戻す",
+                "visual_note": "同じ曲線をD=50から20へ戻す",
                 "segments": [
                     {
                         "id": "scene05-04-01",
@@ -582,7 +582,7 @@ SCENES = [
             },
             {
                 "seconds": 9,
-                "visual_note": "一様分布の点の半径",
+                "visual_note": "一様分布の解釈からガウス分布への問い",
                 "segments": [
                     {
                         "id": "scene05-07-01",
@@ -621,7 +621,7 @@ SCENES = [
             },
             {
                 "seconds": 9,
-                "visual_note": "中心密度の断面曲線",
+                "visual_note": "中心密度が最大になる場所を強調",
                 "segments": [
                     {
                         "id": "scene06-02-01",
