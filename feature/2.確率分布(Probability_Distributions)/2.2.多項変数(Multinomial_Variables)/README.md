@@ -1,53 +1,81 @@
-# 2.2 多項変数
+# PRML 2.2 多項変数
 
-PRML Chapter 2 の 2.2 節を、高校数学向けに翻訳した Manim アニメーションと台本です。
+三色の玉から始めて、1回の観測、回数の組、確率そのものの不確かさをつなぐ、約11分13秒の日本語解説です。問いを出し、数値を動かし、式で確かめます。Manim CommunityとVOICEVOX:WhiteCUL（ノーマル、speaker 23）を使います。
 
-## ファイル
+[動画（480p15、音声付き）](media/videos/prml_2_2_multinomial_variables/480p15/PRML22MultinomialVariables.mp4) ／ [台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
 
-- `prml_2_2_multinomial_variables.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## 構成
 
-## レンダリング
+| シーン | 秒 | 視覚的な実験 | 原文の印刷ページ・式・図 |
+|---|---:|---|---|
+| 次の一個は、何色？ | 68.333 | 十個の玉を色ごとに集め、選択をone-hotへ写す | pp.74–75、(2.25) |
+| 長い積が、一つの確率を選ぶ | 71.467 | 確率のつまみ、連動する三本の棒、指数による選択 | p.75、(2.26)–(2.28) |
+| 順番を忘れても、推定できる？ | 68.933 | 同じ色の因子を集め、順番を変えても回数を保つ | p.75、(2.29)–(2.30) |
+| 確率のつまみを、どこに合わせる？ | 75.133 | 尤度の山の上で点を往復させ、制約付き微分へつなぐ | pp.75–76、(2.31)–(2.33) |
+| 一つの並びと、回数の確率 | 79.667 | 4観測を12通りへ展開し、同じ確率を足す | p.76、(2.34)–(2.36) |
+| 三つの確率が、三角形の一点になる | 75.533 | 三角形の点と確率バーを同じ状態から動かす | pp.76–77、図2.4 |
+| 同じ平均でも、自信は違う | 75.333 | 同じ三角形でαを0.3→1→8、さらに非対称へ変える | pp.76–78、(2.37)–(2.39)、図2.5 |
+| 観測一個で、地図はどう変わる？ | 78.600 | 赤の観測で密度を更新し、回数の加算へ広げる | p.77、(2.40)–(2.41) |
+| まだ出ていない色を、どう予測する？ | 80.467 | 未観測色の予測を保ち、データ量を4→40へ増やす | pp.77–78、(2.41)の帰結、K=2 |
 
-Manim は `pangocairo` などの system dependency を必要とします。`uv sync` が `No package 'pangocairo' found` で失敗する場合は、OS 側で Cairo/Pango/pkg-config 関連パッケージを入れてから再実行してください。
-`MathTex` の数式描画には LaTeX と `dvisvgm` も必要です。
+## 原文と数値例
 
-ナレーション入りで再生成する場合は、VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、先に音声を生成します。
+Bishop (2006), *Pattern Recognition and Machine Learning*, §2.2の印刷pp.74–78（PDF pp.94–98）をテキスト抽出し、図2.4・2.5は画像も確認しました。対象の式は(2.25)–(2.41)。この節に表はありません。PRMLの図を複製せず、独自の三色データと密度の地図を使います。
+
+- 観測列は `(赤,青,赤,黄,赤,青,赤,赤,青,赤)`、回数は `(6,3,1)`。独立かつ共通の確率という条件で尤度を計算します。
+- 尤度の一変数実験は `μ=(t,3(1−t)/4,(1−t)/4)`。最大尤度との比を縦軸にし、`t=0.2→0.6→0.85→0.6` と動かします。一般の最尤解は別途、制約付き微分で示します。ゼロ回の成分は境界解です。
+- 回数 `(2,1,1)` の4観測は12通り。確率 `(0.5,0.3,0.2)` なら一列が0.015、回数の組が0.18です。
+- 三角形の位置は確率で重み付けした頂点の和です。図2.4の平面を正面から見た独自の配置で、三次元の軸は描きません。
+- 密度はガンマ関数を含む正規化式からNumPy/SciPyで計算。色は `log(1+density)/log(21)` の固定尺度で、20以上は同色です。境界で発散する密度は内部の画素中心で評価します。色の飽和は確率密度が有限という意味ではありません。
+- 密度の単位は式(2.38)の `dμ₁ dμ₂` に対するものです。三角形への写像の面積倍率は一定なので、同じ小面積同士の比較に使えます。画面の面積について積分して1になるという表示ではありません。
+- 図2.5の0.1・1・10を転写せず、0.3・1・8を使用。対称な場合の平均は常に中心ですが、集中の形は変わります。αは正の実数です。
+- 事前 `(2,2,2)` に `(6,3,1)` を足し、事後は `(8,5,3)`。追加の青一個で `(8,6,3)` になります。途中の非整数カウントは状態をつなぐ連続変形で、実際の観測回数ではありません。
+- シーン9は式(2.41)から導く補足。予測は事後平均 `(α_k+m_k)/(α₀+N)` です。事後最頻値とは異なります。未観測色の予測は `1/7→1/43` となります。
+- K=2ではディリクレとベータ、回数の多項分布と二項分布が対応します。Γの積分による導出や歴史記事は扱いません。
+
+## 字幕・読み・同期
+
+`narration_content.py` に54 beat・108文の `display` と `speech` を分けて保持します。数式字幕はMathTexで描き、1.1と同じ、かなの実測文字高、数式本体の中心線、左右の余白に合わせます。空白の空の字形は寸法計算から除きます。
+
+全108文を `audio_query`（speaker 23）へ送り、読みを全文照合しました。23文のspeechを修正し、再取得した読みを確認しています。「黄色→オオショク」「何色→ナンショク」「辺→アタリ」「一組→イックミ」「百分→ヒャップン」「七分→ナナフン」「付けます→ズケマス」を修正しました。字幕は漢字・数式のままです。`ガンマ関数` は関数の名称として表記しています。
+
+文単位のWAVの実測時間で字幕と動作を同期し、各beatの末尾に約0.35〜0.42秒だけ息継ぎを加えます。音声と台本のSHA-256、文ID・display・speechが一致しなければ描画を停止します。最終タイムラインは `media/prml22_timeline.json` に出力します。
+
+## ファイルと再生成
+
+- `prml_2_2_multinomial_variables.py`：公開クラス `PRML22MultinomialVariables`、9シーン。
+- `multinomial_model.py` / `verify_numerics.py` / `numerical_results.json`：数値モデル、独立な列挙・積分・最適化による検証。
+- `caption_layout.py` / `narrated_scene.py`：節内に置いた字幕配置と音声同期。
+- `narration_content.py` / `narration_script.md`：原文対応・視覚操作・字幕と音声。
+- `check_narration_readings.py` / `reading_check.md` / `reading_check.json`：全speechの初回と修正後の読み。
+- `make_voicevox_narration.py` / `assets/voicevox/`：9 WAVとmanifest。旧構成の8 WAVはすべて置換。
+- `review_video.py`：全beat、全記号字幕、3シーンの同期前後画像の抽出。
+
+このディレクトリで実行します。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_2_2_multinomial_variables.py PRML22MultinomialVariables
+/home/t-tsuji/project/prml-manim/.venv/bin/python narration_content.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_2_2_multinomial_variables.py PRML22MultinomialVariables
+/home/t-tsuji/project/prml-manim/.venv/bin/python review_video.py
 ```
 
-生成済み動画:
+VOICEVOX Engineは `http://127.0.0.1:50021` を使用し、接続できない場合は停止します。コンテナは操作しません。音声生成は `--from-scene scene05` のように再開できます。
 
-```text
-media/videos/prml_2_2_multinomial_variables/480p15/PRML22MultinomialVariables.mp4
-```
+## 3Blue1Brownの参照
 
-高品質で出力する場合:
+[3b1b/videos](https://github.com/3b1b/videos) の `_2020/beta/beta3.py`（`RemindOfWeightedCoin`、`ShowBayesianUpdating`）から、同じ座標系の密度を観測ごとに動かし、尤度の積を形の変化へ結び付ける手法を参考にしました。
+[3b1b/manim](https://github.com/3b1b/manim) の `manimlib/mobject/probability.py`（`BarChart`）と `value_tracker.py` から、固定した棒の基準と、一つの状態から複数の表示を連動させる考え方を取り入れています。ManimGLのコードは持ち込まず、Manim CEで実装しました。
 
-```bash
-uv run manim -pqh prml_2_2_multinomial_variables.py PRML22MultinomialVariables
-```
+参照commit：videos `ae2b911326b8255dfae790b6e8764a8a400c5875`、manim `fafa083a4fb274bba9cabde0b6e2f50ba6da0622`。
 
-## 原文参照
+## 検証範囲とクレジット
 
-主に PRML Chapter 2 Section 2.2 Multinomial Variables の以下を参照しています。
+数値・音声の検証結果は [numerical_results.json](numerical_results.json)、映像の最終検証は [validation_results.json](validation_results.json) と作業レポートを参照してください。API読みの全文照合は、全編の通し聴取を意味しません。全編の通し聴取、音素の強制アラインメント、全フレームの目視、高品質版レンダリングは実施していません。
 
-- 1-of-K 表現とカテゴリ分布
-- データ集合のカウント `m_k` と十分統計量
-- 多項分布と最尤推定 `mu_k^ML=m_k/N`
-- Dirichlet 分布と共役事前分布
+ナレーション：**VOICEVOX:WhiteCUL**（ノーマル、speaker 23）。Engine 0.25.2、話速1.08、抑揚0.95。
 
-## 制作方針
-
-- PRML の図を直接複製せず、同じ構造を自作データと自作レイアウトで再構成する。
-- 式だけでなく、状態カード、one-hot ベクトル、カウント棒グラフ、単体の点群で意味を見せる。
-- 2.1 の beta-Bernoulli の更新から 2.2 の Dirichlet-multinomial 更新へ自然に接続し、2.3 のガウス分布へ橋渡しする。
-
-## 音声クレジット
-
-- ナレーション: VOICEVOX:WhiteCUL
+制作レポート：[原文照合・修正・最終検証](../../../reports/working/20260927-1526-prml-2-2-3b1b-remake.md)。
