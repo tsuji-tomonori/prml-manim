@@ -82,7 +82,7 @@ class PRML34BayesianModelComparison(Scene):
         ax=self.ax([-1,1,.5],[0,1.8,.5])
         dots=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=BLUE) for x,t in zip(bm.X,bm.T)])
         labels=self.legend([('観測',BLUE),('最小二乗の曲線',GREEN)])
-        self.add(ax,labels,tex('x',25).next_to(ax.x_axis,RIGHT,buff=.2),tex('t',25).next_to(ax.y_axis,UP,buff=.1))
+        self.add(ax,labels,tex('x',25).next_to(ax.x_axis,RIGHT,buff=.2),tex('t',25).move_to(ax.c2p(0,1.8)+LEFT*.28))
         self.beat(LaggedStart(*[FadeIn(d) for d in dots],lag_ratio=.12))
         degree=ValueTracker(1)
         fit=always_redraw(lambda:curve(ax,bm.GRID,bm.interpolate_rows(bm.ML_CURVES,degree.get_value()),GREEN))
@@ -93,7 +93,7 @@ class PRML34BayesianModelComparison(Scene):
                                                 for x,t in zip(bm.X,bm.T)]))
         self.add(residual)
         self.beat(degree.animate.set_value(7))
-        alternatives=VGroup(*[curve(ax,bm.GRID,.4+.2*bm.GRID+a*bm.GRID**2,PURPLE,2).set_opacity(.5) for a in [.2,.45,.7,1.]])
+        alternatives=VGroup(*[curve(ax,bm.GRID,.4+.2*bm.GRID+a*bm.GRID**2,PURPLE,2).set_stroke(opacity=.5) for a in [.2,.45,.7,1.]])
         self.beat(FadeOut(residual),LaggedStart(*[Create(c) for c in alternatives],lag_ratio=.15),start_sentence=1)
         f=self.formula(r'M_i:\quad p(D\mid\mathbf w,M_i)',r'p(\mathbf w\mid M_i)',colors=[BLUE,PURPLE])
         self.beat(Write(f))
@@ -123,12 +123,15 @@ class PRML34BayesianModelComparison(Scene):
         self.beat(Create(p),sweep.animate.set_value(2),Write(f))
         rects=VGroup(*[Rectangle(width=(ax.c2p(-2+.1,0)-ax.c2p(-2,0))[0]*.96,height=max(.001,(ax.c2p(w,product(w))-ax.c2p(w,0))[1]),fill_color=GOLD,fill_opacity=.5,stroke_color=GOLD,stroke_width=.4).move_to((ax.c2p(w,0)+ax.c2p(w,product(w)))/2) for w in np.arange(-1.95,2,.1)])
         self.beat(LaggedStart(*[FadeIn(r) for r in rects],lag_ratio=.03),pulse(f[1]))
-        self.remove(shade,rects,dot,v)
+        self.remove(shade,rects,*rects,dot,v)
         z=bm.uniform_evidence(4)
         posterior=graph(ax,lambda w:product(w)/z,-2,2,GREEN)
         f2=self.formula(r'p(w\mid D,M_i)=',r'\frac{p(D\mid w,M_i)p(w\mid M_i)}{p(D\mid M_i)}',colors=[GREEN,GOLD],size=31)
-        self.beat(Transform(p,posterior),ReplacementTransform(f,f2),l.animate.set_opacity(.2))
-        flow=jp('事前から係数を選ぶ → 観測を生成する',24,GREEN).move_to([0,-1.98,0])
+        posterior_legend=self.legend([('尤度',BLUE),('事前',PURPLE),('事後',GREEN)])
+        self.beat(Transform(p,posterior),ReplacementTransform(f,f2),l.animate.set_stroke(opacity=.2),
+                  ReplacementTransform(legend,posterior_legend))
+        flow=jp('事前から係数を選ぶ → 観測を生成する',24,GREEN).move_to([0,2.25,0])
+        self.remove(legend,*legend,posterior_legend,*posterior_legend)
         self.beat(Write(flow),pulse(f2))
 
     def models(self):
@@ -182,13 +185,15 @@ class PRML34BayesianModelComparison(Scene):
         effective=np.sqrt(2*np.pi)*.35
         rect=Polygon(ax.c2p(1-effective/2,0),ax.c2p(1-effective/2,bm.normal(1,1,.35)/8),ax.c2p(1+effective/2,bm.normal(1,1,.35)/8),ax.c2p(1+effective/2,0),fill_color=GREEN,fill_opacity=.35,stroke_color=GREEN)
         label=tex(r'w_{\rm MAP}=1',27,GREEN).move_to([-2,1.5,0])
-        self.beat(Create(rect),Write(label))
+        width_label=tex(r'\Delta w_{\rm posterior}',26,GREEN).move_to([-2,.5,0])
+        pointer=Arrow(width_label.get_right(),rect.get_top(),color=GREEN,buff=.15,stroke_width=2,tip_length=.15)
+        self.beat(Create(rect),Write(label),Write(width_label),Create(pointer))
         f=self.formula(r'p(D)\approx',r'p(D\mid w_{\rm MAP})',r'\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],size=31)
         self.beat(Write(f),pulse(rect))
-        f2=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+\ln r',colors=[GOLD,BLUE,PURPLE],size=30)
+        f2=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+\ln\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],size=30)
         self.beat(ReplacementTransform(f,f2))
         # Same probability budget, now in two parameter directions.
-        self.remove(*visual,visual,rect,label)
+        self.remove(*visual,visual,rect,label,width_label,pointer)
         for mob in list(self.mobjects):
             if mob not in [f2,self.subtitle] and mob.get_center()[1]<2.65:self.remove(mob)
         square=Square(side_length=3.2,color=PURPLE,fill_opacity=.08).move_to([-2.4,.1,0])
@@ -197,7 +202,7 @@ class PRML34BayesianModelComparison(Scene):
         ratio=tex(r'\frac12\times\frac12=\frac14',37,GREEN).move_to([2.4,.25,0])
         self.add(square,strip)
         self.beat(Transform(strip,small),Write(ratio))
-        f3=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+M\ln r',colors=[GOLD,BLUE,PURPLE],size=29)
+        f3=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+M\ln\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],size=29)
         note=jp('M：係数の個数   ／   同じ幅比 r の近似',24).move_to([0,2.2,0])
         self.beat(ReplacementTransform(f2,f3),Write(note),pulse(strip))
 
@@ -270,26 +275,40 @@ class PRML34BayesianModelComparison(Scene):
         self.beat(Write(f),p.animate.set_value(.5))
 
     def expected(self):
-        ax=self.ax([0,6,1],[-4,4,2],width=8.4,height=3.2)
+        ax=self.ax([-.65,6.5,1],[-4,4,2],width=8.4,height=3.2)
+        ax.x_axis.numbers.set_opacity(0)
+        ax.y_axis.set_opacity(0)
+        def ticks(axis,ys):
+            bottom=axis.y_range[0]
+            return VGroup(Line(axis.c2p(-.6,bottom),axis.c2p(-.6,axis.y_range[1]),color=MUTED,stroke_width=1.2),
+                *[tex(str(k),20,MUTED).move_to(axis.c2p(k,bottom)+DOWN*.18) for k in bm.K],
+                *[tex(f'{y:g}',19,MUTED).next_to(axis.c2p(-.6,y),LEFT,buff=.1) for y in ys])
+        ticks0=ticks(ax,[-4,-2,0,2,4])
         labels=self.legend([('真：表の確率 0.65',BLUE),('候補：表の確率 0.35',PURPLE)])
-        def signed_bars(values):
+        def signed_bars(values,axis=ax):
             out=VGroup()
             for k,value in zip(bm.K,values):
-                zero=ax.c2p(k,0);top=ax.c2p(k,value)
+                zero=axis.c2p(k,0);top=axis.c2p(k,value)
                 out.add(Rectangle(width=.65,height=max(.005,abs(top[1]-zero[1])),stroke_width=0,fill_color=GREEN if value>=0 else RED,fill_opacity=.85).move_to((zero+top)/2))
             return out
         bars=signed_bars(bm.LOG_BF)
-        self.add(ax,labels,tex('k',26).next_to(ax.x_axis,RIGHT,buff=.15))
+        self.add(ax,labels,ticks0,tex('k',26).next_to(ax.x_axis,RIGHT,buff=.15))
         self.beat(FadeIn(bars))
         self.beat(pulse(bars[:3],RED))
         f=self.formula(r'\ell(k)=\ln\frac{p(k\mid M_1)}{p(k\mid M_2)}',size=31)
         self.beat(Write(f),pulse(bars[4:],GREEN))
-        weighted=signed_bars(bm.COUNT_PROBS*bm.LOG_BF)
+        weighted_ax=self.ax([-.65,6.5,1],[-.2,.8,.2],width=8.4,height=3.2)
+        weighted_ax.x_axis.numbers.set_opacity(0)
+        weighted_ax.y_axis.set_opacity(0)
+        weighted=signed_bars(bm.COUNT_PROBS*bm.LOG_BF,weighted_ax)
+        ticks1=ticks(weighted_ax,[-.2,0,.2,.4,.6,.8])
         average=readout(r'\mathbb E[\ell]=',lambda:bm.EXPECTED_LOG_BF,[3,1.45,0],GREEN)
-        self.beat(Transform(bars,weighted),FadeIn(average))
+        self.remove(ticks0,*ticks0)
+        self.beat(Transform(bars,weighted),Transform(ax,weighted_ax),FadeIn(ticks1),FadeIn(average))
         kl=self.formula(r'\int',r'p(D\mid M_1)',r'\ln\frac{p(D\mid M_1)}{p(D\mid M_2)}',r'\,dD=D_{\rm KL}(p_1\Vert p_2)\geq0',colors=[WHITE,BLUE,GOLD,GREEN],size=28)
         self.beat(ReplacementTransform(f,kl),pulse(average))
-        note=jp('真の分布が候補に含まれるときの、対数比の平均',24).move_to([0,-1.98,0])
+        note=jp('真の分布が候補に含まれるときの、対数比の平均',24).move_to([0,2.25,0])
+        self.remove(labels)
         self.beat(Write(note),pulse(kl))
 
     def caution(self):
