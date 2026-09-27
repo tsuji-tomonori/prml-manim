@@ -18,4 +18,4 @@ for s in SCENES:
    lines += [f"- `{c['id']}` 字幕：{c['display']}",f"  読み上げ：{c['speech']}"]
   lines.append('')
  start+=duration
-Path('narration_script.md').write_text('\n'.join(lines)+'\n')
+Path('narration_script.md').write_text('\n'.join(lines).rstrip()+'\n')

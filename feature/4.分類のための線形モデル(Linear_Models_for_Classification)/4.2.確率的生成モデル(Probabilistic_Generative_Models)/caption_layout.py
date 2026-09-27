@@ -62,5 +62,3 @@ def caption_mobject(display):
     if caption.width > 12.9 or caption.height > .9:
         raise ValueError(f'Caption outside safe area ({caption.width}, {caption.height}): {display}')
     return caption
-
-
