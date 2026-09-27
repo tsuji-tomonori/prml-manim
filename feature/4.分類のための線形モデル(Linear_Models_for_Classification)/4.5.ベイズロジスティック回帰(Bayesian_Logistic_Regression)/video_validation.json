@@ -1,0 +1,473 @@
+{
+  "ffprobe": {
+    "programs": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "481.000000"
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "481.024000"
+      }
+    ],
+    "format": {
+      "duration": "481.024000",
+      "size": "10507398"
+    }
+  },
+  "stream_duration_difference": 0.02400000000000091,
+  "long_silence_count": 0,
+  "mean_volume_db": -26.6,
+  "max_volume_db": -6.8,
+  "video_sha256": "20197fcb4f018fde6bdb6a81e783944ffa360daa2854bbdfd245d946d15d4c93",
+  "frames": [
+    {
+      "id": "scene01-beat1",
+      "time": 5.904,
+      "display": "この少ない観測から、新しい点のクラスをどこまで予測できるでしょう。",
+      "image_sha256": "dabddc86764eeb3a425b5836eab7d77755452514bfcb4c4be7e60cab54cca59e"
+    },
+    {
+      "id": "scene01-beat2",
+      "time": 14.757333333333321,
+      "display": "この曲線は、入力をゼロから一の確率へ変える、シグモイド関数です。",
+      "image_sha256": "dd5164c872203387a4b81ecd0c4c27e934dab754f20b506c93c87899ffb4a1df"
+    },
+    {
+      "id": "scene01-beat3",
+      "time": 23.48533333333329,
+      "display": "重みとは、予測の形を調整する係数のことです。",
+      "image_sha256": "35f0ccadf6d8f46562dabecddd68254ad31e477cc782a2d58ca1f00eec65052e"
+    },
+    {
+      "id": "scene01-03-01",
+      "time": 19.719999999999956,
+      "display": "$w_0$を動かすと、曲線の位置が変わります。",
+      "image_sha256": "a327e63e808d520e57e3fb07b2a81e4a93bf61ac2f3a0fb91ced9ed6b2d47d42"
+    },
+    {
+      "id": "scene01-beat4",
+      "time": 32.01599999999993,
+      "display": "横軸の$x$と二つの重みから、曲線全体が決まります。",
+      "image_sha256": "3aded477d7e07a67990f1b8d0ecfa091737c9b997bed28d3c901a375f38d2a1c"
+    },
+    {
+      "id": "scene01-04-01",
+      "time": 27.83999999999993,
+      "display": "$w_1$を動かすと、確率の変化が急になります。",
+      "image_sha256": "e29b8c2b88620524e67333aac58567234013ef7da3788365bbd584886f284e93"
+    },
+    {
+      "id": "scene01-04-02",
+      "time": 32.01599999999993,
+      "display": "横軸の$x$と二つの重みから、曲線全体が決まります。",
+      "image_sha256": "3aded477d7e07a67990f1b8d0ecfa091737c9b997bed28d3c901a375f38d2a1c"
+    },
+    {
+      "id": "scene01-beat5",
+      "time": 41.042666666666705,
+      "display": "一本だけ選ぶと、この候補の広がりが見えなくなります。",
+      "image_sha256": "f12d68f5d1bf4bf34b419ba5dbeca31786033a230be12a857a9759844113afdb"
+    },
+    {
+      "id": "scene01-beat6",
+      "time": 50.680000000000476,
+      "display": "そして、候補ごとの予測を平均して、新しい点の確率を求めます。",
+      "image_sha256": "c9e5736c1511ef356d253245a8c5b4dde23607b1a6869f7f22f20719dac207d5"
+    },
+    {
+      "id": "scene02-beat1",
+      "time": 59.75733333333433,
+      "display": "横軸の$w$は傾きで、縦軸はその確率密度です。",
+      "image_sha256": "b8ac626a4dd0a6e949085c28a1c9fdf4aa8ed776642485f7b4dc2293bb4f6278"
+    },
+    {
+      "id": "scene02-01-02",
+      "time": 59.75733333333433,
+      "display": "横軸の$w$は傾きで、縦軸はその確率密度です。",
+      "image_sha256": "b8ac626a4dd0a6e949085c28a1c9fdf4aa8ed776642485f7b4dc2293bb4f6278"
+    },
+    {
+      "id": "scene02-beat2",
+      "time": 68.49866666666809,
+      "display": "ここでは、ゼロを中心とするガウス分布を置き、大きすぎる重みを控えめにします。",
+      "image_sha256": "25b3c5043200d9d1a3689b10cb37a6addfa9cd8702dd05ae9958791854efb01d"
+    },
+    {
+      "id": "scene02-beat3",
+      "time": 77.99466666666771,
+      "display": "各候補の説明しやすさを、尤度と呼びます。",
+      "image_sha256": "06d0ce52a333bb0e6089f5e3ce2f9a2f915a89b17452f2da45131cd907b475ef"
+    },
+    {
+      "id": "scene02-beat4",
+      "time": 86.40266666666724,
+      "display": "観測を受け取った後の重みの分布が、事後分布です。",
+      "image_sha256": "428cf0ed05be1e2c7303f666e6d391df232040da9a3e4b8e215857c93b63d3d0"
+    },
+    {
+      "id": "scene02-beat5",
+      "time": 94.95200000000008,
+      "display": "対数を取ると、掛け算が足し算になり、二つの寄与を分けて見られます。",
+      "image_sha256": "7761e140b118640c6bb68e5e143d1922992357422be5140f93bd091be3fb2f32"
+    },
+    {
+      "id": "scene02-beat6",
+      "time": 105.57066666666623,
+      "display": "図は数値積分で描けますが、多数の重みを持つ場合には近似が必要になります。",
+      "image_sha256": "79d79dd079777d39f81648ca90a82c21b4a076308fa439293dc6104a0d0ce5c6"
+    },
+    {
+      "id": "scene03-beat1",
+      "time": 115.66133333333228,
+      "display": "いまは最小値を引き、谷底の高さをゼロにそろえています。",
+      "image_sha256": "1ba73e5643c2331e7caa34786427f36c160925a364c98732997467b9e9cc929d"
+    },
+    {
+      "id": "scene03-beat2",
+      "time": 125.63466666666508,
+      "display": "この求め方を、最大事後確率推定、略してマップ推定と呼びます。",
+      "image_sha256": "a6f831b0d5875763274a098737e79bb7bccba1a8034ee7b88ff141faca252ded"
+    },
+    {
+      "id": "scene03-02-01",
+      "time": 120.50933333333174,
+      "display": "谷底に着いた重みが、事後分布を最大にする$w_{\\mathrm{MAP}}$です。",
+      "image_sha256": "18fd3f1be37ed8c8b9e4d6ee20685cb593d64f11808ad0760fc4b688047210f1"
+    },
+    {
+      "id": "scene03-beat3",
+      "time": 135.84266666666448,
+      "display": "この局所的な二次近似から、ガウス分布を作るのがラプラス近似です。",
+      "image_sha256": "07d235f57737c05cec1e562909bca1fd33a53f7b49787e8d3ac7b7742b624389"
+    },
+    {
+      "id": "scene03-beat4",
+      "time": 143.71199999999726,
+      "display": "谷が急なら重みの許容範囲は狭く、なだらかなら広くなります。",
+      "image_sha256": "ed9d1627f7b2e7aaaa86bb7cb2f7c3ca2a2d78f1d1d81b9d5f50696c2aefe17c"
+    },
+    {
+      "id": "scene03-beat5",
+      "time": 154.05066666666346,
+      "display": "中心と局所的な曲がり方を合わせても、裾の形までは一致しません。",
+      "image_sha256": "8f3629b62f7c5d84fd1cf397498a348823d5b82b03e79a9191d4f09ec6ee4e9e"
+    },
+    {
+      "id": "scene03-beat6",
+      "time": 165.0506666666629,
+      "display": "分散は曲率の逆数です。これが、予測へ持ち運ぶ不確かさになります。",
+      "image_sha256": "2052954343eb394a7c4ff6143d03b7575312d58ebd84fd87a2194a3cafc71985"
+    },
+    {
+      "id": "scene03-06-01",
+      "time": 159.6319999999962,
+      "display": "近似分布$q(w)$の平均には、マップ推定の重みを使います。",
+      "image_sha256": "5bc0b14c8a5b6b21612bf713dce9f29fbb27742731c2a5bbafc01e223d50fcb7"
+    },
+    {
+      "id": "scene04-beat1",
+      "time": 175.8933333333289,
+      "display": "横軸が$w_0$、縦軸が$w_1$で、一つの点が一本の予測曲線に対応します。",
+      "image_sha256": "c81bebd6a54cd283b1391cd39355629cf299d3ed71b3aadc53bef5589da2401f"
+    },
+    {
+      "id": "scene04-01-02",
+      "time": 175.8933333333289,
+      "display": "横軸が$w_0$、縦軸が$w_1$で、一つの点が一本の予測曲線に対応します。",
+      "image_sha256": "c81bebd6a54cd283b1391cd39355629cf299d3ed71b3aadc53bef5589da2401f"
+    },
+    {
+      "id": "scene04-beat2",
+      "time": 187.67999999999495,
+      "display": "これから見せる楕円は、入力の点の散らばりではなく、重みの候補の広がりです。",
+      "image_sha256": "38942012f56ccad76bbed6466c00ba29acae5285f37949507993779f7d5f00d7"
+    },
+    {
+      "id": "scene04-beat3",
+      "time": 197.38666666666097,
+      "display": "楕円の中心は、二つの重みについて計算したマップ推定の位置です。",
+      "image_sha256": "1786ffacb6a5557686a3f3e72c43a1b50f95183d9fb20d79dabd0142306baeb0"
+    },
+    {
+      "id": "scene04-beat4",
+      "time": 208.71466666666043,
+      "display": "方向ごとの広がりと重み同士の関係をまとめたものが、共分散行列です。",
+      "image_sha256": "810c8b07d1b6ea1d538c15bf52d9d2444cbf70a5fbe0cb2cdfd3030b16f66b6d"
+    },
+    {
+      "id": "scene04-beat5",
+      "time": 218.42933333332644,
+      "display": "事前分布の曲率に、それぞれの観測が与える曲率を足したものです。",
+      "image_sha256": "04c2789c2e593de9787d73be5a820a79948989e398da06a7c8c274b58362426b"
+    },
+    {
+      "id": "scene04-beat6",
+      "time": 232.07999999999254,
+      "display": "この行列の逆を取ると、楕円の広がりを決める共分散が得られます。",
+      "image_sha256": "b5377546d5c08278096de350f4f15f3c8942f56f45efb806ad6de65459b82807"
+    },
+    {
+      "id": "scene04-06-01",
+      "time": 225.48799999999255,
+      "display": "各観測の係数は$y_n(1-y_n)$で、予測確率が半分のとき最大です。",
+      "image_sha256": "c17e454aa25fdbf125f96c4e62182d432e61dd0086cb3ab7ed03181bf9dbf099"
+    },
+    {
+      "id": "scene05-beat1",
+      "time": 244.3733333333251,
+      "display": "この例で特徴ベクトルと呼ぶものは、一と入力を並べた二つの数です。",
+      "image_sha256": "bf315a533dbe09b3ed935fe27dfba33aad0abeae7cf525a54ffa8ea33b65e7c6"
+    },
+    {
+      "id": "scene05-01-01",
+      "time": 238.4373333333251,
+      "display": "新しい入力を一つ固定すると、必要な量は$a=w^{\\mathsf T}\\phi$だけです。",
+      "image_sha256": "c4556c2fdafed054bab5cbef835f522d797f43fa7b8e0787eefa0aad8497a482"
+    },
+    {
+      "id": "scene05-beat2",
+      "time": 253.7013333333244,
+      "display": "シグモイドへ入れるこの数を、ロジットと呼びます。",
+      "image_sha256": "be5abc6d2d6c3c910c7cd5f1d2a9f5f0b830dca9a73c5da5107b394923032980"
+    },
+    {
+      "id": "scene05-beat3",
+      "time": 262.2826666666573,
+      "display": "重みの数が多くても、予測に使う積分は一次元へ減らせます。",
+      "image_sha256": "f4c40ae7e5c1883cdfe12c61a8fef95ffeb56f1cd0ee4160cb09b74f81b143ce"
+    },
+    {
+      "id": "scene05-beat4",
+      "time": 272.59733333332343,
+      "display": "入力を動かすと、射影する向きが変わり、山の中心も移動します。",
+      "image_sha256": "3d8cee6c8216a21390ef74175ee65e7893d2382b2337e7b010fef02e6e1f7e8d"
+    },
+    {
+      "id": "scene05-04-01",
+      "time": 267.5039999999901,
+      "display": "ロジットの平均$\\mu_a$は、マップ推定の重みで計算したロジットです。",
+      "image_sha256": "f25ee06e3f2f802629b46112e98d7775c03593d54e47a9f783b0a669f9142355"
+    },
+    {
+      "id": "scene05-beat5",
+      "time": 284.2373333333228,
+      "display": "楕円の長い方向が強く効く入力では、写した山も広がります。",
+      "image_sha256": "775d01b1f62bb0f4cd6bfcb326b5b3fdb06b9086e21d5654d9e04e2f7d268133"
+    },
+    {
+      "id": "scene05-05-01",
+      "time": 278.73333333332283,
+      "display": "ロジットの分散$\\sigma_a^2$は、特徴ベクトルと共分散行列から計算します。",
+      "image_sha256": "ccfc2a21b2df1efc118988034a11bc677cc6ab214067d948990aa422f0ba0c01"
+    },
+    {
+      "id": "scene05-beat6",
+      "time": 293.39199999998885,
+      "display": "いまの式を使えば、入力と学習した共分散の両方を反映できます。",
+      "image_sha256": "c9394b52e43d3dc4d7077af216a2e9609ad28073dc53afc8b721e90283c18376"
+    },
+    {
+      "id": "scene06-beat1",
+      "time": 303.02133333332165,
+      "display": "これで、中心の位置と不確かさの効果を分けて見ることができます。",
+      "image_sha256": "916e827c03bc3107b7231f912330f811fac89491b557e1e625695a86fddc6da1"
+    },
+    {
+      "id": "scene06-beat2",
+      "time": 311.7573333333211,
+      "display": "これは、重みを一つに固定したときの予測です。",
+      "image_sha256": "8fb4283fb9276128a5eb20b8922c885b70329023703f47c24aac2977bd85f0b3"
+    },
+    {
+      "id": "scene06-beat3",
+      "time": 322.234666666654,
+      "display": "黄色の面積を全部足したものが、分布全体で平均した予測確率です。",
+      "image_sha256": "1b96e55ea1a8a62cd09ae9ae110851363fcd3aa995c2a3f354d8e974d0e72160"
+    },
+    {
+      "id": "scene06-beat4",
+      "time": 332.1786666666533,
+      "display": "この例では、緑の平均確率が、赤い点より半分に近づきます。",
+      "image_sha256": "ae9b749bbfc610dba4cb916a25bb38ad42167eb88425cb8a0c45177d9acb1eed"
+    },
+    {
+      "id": "scene06-beat5",
+      "time": 343.35466666665275,
+      "display": "平均した数を曲げることと、曲げた数を平均することは、一般には違います。",
+      "image_sha256": "762033d1e0c00ca137c30b0520961c554495acadf662a4df43847fbeb99077f7"
+    },
+    {
+      "id": "scene06-beat6",
+      "time": 354.3893333333188,
+      "display": "緑の数値は数値積分で求めました。次は、この積分を簡単な式で近似します。",
+      "image_sha256": "d7e8be1b69fe102a9cf878e612f0e66c5eb1cf8cce4c8484804d265bdc0d7dc0"
+    },
+    {
+      "id": "scene07-beat1",
+      "time": 364.55199999998484,
+      "display": "横軸を調整すると、赤いシグモイドと、とてもよく似た形になります。",
+      "image_sha256": "afdfa2606f14a034bb677541d43451e9314cdc3fc19e17d6d5b810054b00487a"
+    },
+    {
+      "id": "scene07-beat2",
+      "time": 377.06133333331763,
+      "display": "形が似ているので、扱いやすい青い関数を計算の橋渡しに使います。",
+      "image_sha256": "c37eeb43dd5931b7fa5ff6e9ba0318936c5f0a968fe0620da0c56928e55b5e11"
+    },
+    {
+      "id": "scene07-02-01",
+      "time": 370.9813333333176,
+      "display": "原点での傾きを合わせると、調整係数は$\\lambda=\\sqrt{\\pi/8}$です。",
+      "image_sha256": "aea3d2befdbdc4413c4843061f4a0f809b0e921abe723f744d41eb88bc75a010"
+    },
+    {
+      "id": "scene07-beat3",
+      "time": 387.2159999999835,
+      "display": "画面の等式は、この置き換えた関数について厳密に成り立ちます。",
+      "image_sha256": "55ae1a7a62382ac23f5513e0ebc6138401089ab33d73f5dad7cc9962cddb3982"
+    },
+    {
+      "id": "scene07-beat4",
+      "time": 397.015999999983,
+      "display": "平均ロジットを少し縮めてから、シグモイドへ入れるだけです。",
+      "image_sha256": "b629edb66913f0a0a3b3d7ee2f35a951dd27ad5db29bafb27c4262354806c746"
+    },
+    {
+      "id": "scene07-beat5",
+      "time": 405.83733333331577,
+      "display": "平均を固定すると、出力確率は半分へ近づきます。",
+      "image_sha256": "39b5177e0ed823bb288bf51bea2ba9617b2b0318e2653263743a6d2ce4132ce7"
+    },
+    {
+      "id": "scene07-05-01",
+      "time": 401.6186666666491,
+      "display": "縮める係数$\\kappa$は、分散が大きいほど小さくなります。",
+      "image_sha256": "93bd7f341ba4816ff23383a66fff9917efba15a9d492286bec5881b72ce35b2c"
+    },
+    {
+      "id": "scene07-beat6",
+      "time": 415.9493333333153,
+      "display": "よく近づきますが完全には一致しません。事後分布と積分の二段階で近似しています。",
+      "image_sha256": "70e4a173939b83eb277ce3dad1577ecbb2a8b7240337da9a5d6085b92aae14d0"
+    },
+    {
+      "id": "scene08-beat1",
+      "time": 426.882666666648,
+      "display": "重みの広がりを反映すると、同じ座標の上で緑の曲線へ変わります。",
+      "image_sha256": "b7cba93ce587f4d55ab7d6aec737ae1254bbf3cf26a03eb189e15d7992d28463"
+    },
+    {
+      "id": "scene08-beat2",
+      "time": 436.6773333333141,
+      "display": "縮める係数は正なので、この境界はマップ推定と一致します。",
+      "image_sha256": "582bfaa1a8316d080b5b932bad68d08f719e762583176031a6eacfb3a6d8ccff"
+    },
+    {
+      "id": "scene08-02-01",
+      "time": 432.0906666666474,
+      "display": "確率が$0.5$になる場所は、平均ロジットがゼロの場所です。",
+      "image_sha256": "7145b0d865ead4dd5d7fb4178537ad3b0c47abe0926bce93ff2cdc316dad8865"
+    },
+    {
+      "id": "scene08-beat3",
+      "time": 446.89333333331354,
+      "display": "高い確信が必要な判断では、予測確率の違いが結果に影響します。",
+      "image_sha256": "19bebc300822cac01eda1a7dc7583ca832b49b222634bdf2cc9ef4ac25b9fbde"
+    },
+    {
+      "id": "scene08-03-01",
+      "time": 441.7893333333135,
+      "display": "ところが、判断の基準を$0.8$にすると、交点が変わります。",
+      "image_sha256": "46d1d170068367261034824feb0d54e9b27ff00c26431890e5dc74c581bb2762"
+    },
+    {
+      "id": "scene08-beat4",
+      "time": 456.86933333331297,
+      "display": "クラスの結果の不確かさと、重みの推定の不確かさを分けて考えましょう。",
+      "image_sha256": "18b6aa3466c1e70d34f8868faebe41faf95df5d03e83771bdddf0eaed852a10e"
+    },
+    {
+      "id": "scene08-beat5",
+      "time": 468.11199999997905,
+      "display": "次に、新しい入力へ射影し、候補ごとのクラス確率を平均します。",
+      "image_sha256": "7aed9145548020c1fc35a7a98fb8428f406e6d00d167821003ccd6e22682d1a5"
+    },
+    {
+      "id": "scene08-beat6",
+      "time": 478.1013333333117,
+      "display": "その広がりを予測に持ち込むことが、ベイズロジスティック回帰の要点です。",
+      "image_sha256": "1d8dc2dabe284e9c653a93f05ee6a4c994e090006ce8f1e697bb66a0dcb8da04"
+    },
+    {
+      "id": "scene01-03-01-early",
+      "time": 18.36213333333329,
+      "display": "$w_0$を動かすと、曲線の位置が変わります。",
+      "image_sha256": "d18bf48d2b1410da224b01e640acb0e7e9326480f7cccc0dd7a185468a39b9ab"
+    },
+    {
+      "id": "scene01-03-01-late",
+      "time": 20.970666666666624,
+      "display": "$w_0$を動かすと、曲線の位置が変わります。",
+      "image_sha256": "fdc4c153cda9dbf3fbf8f1f36884dfd9818a1635148e59d0afb40795143fcc4e"
+    },
+    {
+      "id": "scene05-04-02-early",
+      "time": 270.57877333332345,
+      "display": "入力を動かすと、射影する向きが変わり、山の中心も移動します。",
+      "image_sha256": "7e23254fe9c633e7cb636f9c1efa066c7ee3efe3bcc3b0121a1d794773205685"
+    },
+    {
+      "id": "scene05-04-02-late",
+      "time": 274.4565333333234,
+      "display": "入力を動かすと、射影する向きが変わり、山の中心も移動します。",
+      "image_sha256": "e1cf0bbeb22f3f8ba6f2fb0438ddba3ca9156300b262d34ae074a2c167041523"
+    },
+    {
+      "id": "scene08-01-02-early",
+      "time": 424.900586666648,
+      "display": "重みの広がりを反映すると、同じ座標の上で緑の曲線へ変わります。",
+      "image_sha256": "8955be14d61835d7575552d9636d192d4b437f5081afe23b9844e266f47d1dd8"
+    },
+    {
+      "id": "scene08-01-02-late",
+      "time": 428.708266666648,
+      "display": "重みの広がりを反映すると、同じ座標の上で緑の曲線へ変わります。",
+      "image_sha256": "2d9b664c15dd40038a11a8edcb20861eafd6a52c722b84b738044bd1e87c9cd3"
+    }
+  ],
+  "sync": [
+    {
+      "id": "scene01-03-01",
+      "sentence_start": 17.93333333333329,
+      "pcm_onset": 18.0255,
+      "action_start": 17.93333333333329,
+      "action_end": 21.506666666666625
+    },
+    {
+      "id": "scene05-04-02",
+      "sentence_start": 269.9413333333234,
+      "pcm_onset": 270.01333333332514,
+      "action_start": 269.9413333333234,
+      "action_end": 275.25333333332344
+    },
+    {
+      "id": "scene08-01-02",
+      "sentence_start": 424.274666666648,
+      "pcm_onset": 424.33862499998133,
+      "action_start": 424.274666666648,
+      "action_end": 429.490666666648
+    }
+  ],
+  "manual_review": "Frame extraction only; see the work report for actual review.",
+  "full_audio_listening": false
+}
