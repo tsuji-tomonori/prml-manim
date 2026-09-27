@@ -50,7 +50,7 @@ def caption_mobject(display):
             else:
                 # Reference kana keep standalone punctuation in its natural place.
                 reference = jp('あ' + run.strip() + 'あ', 22)
-                mob = VGroup(*reference[1:-1])
+                mob = VGroup(*[glyph for glyph in reference[1:-1] if glyph.has_points()])
                 mob.shift(DOWN * reference[0].get_center()[1])
             # Horizontal placement must not recenter superscripts/subscripts.
             mob.shift(RIGHT * (cursor - mob.get_left()[0]))
