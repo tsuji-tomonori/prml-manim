@@ -275,7 +275,7 @@
       "title": "見逃しの重さを変えたら？",
       "status": "generated",
       "path": "assets/voicevox/scene03.wav",
-      "script_sha256": "45e060e9c3ac48ac6cc2bf41336a3378312c40643951b88ae89cbba0981919bf",
+      "script_sha256": "2901b0fe2e5a46779dd3188beff5252604fd9af8872025a218bc21e2b8f40a88",
       "wav_sha256": "e536ca1455f53234186ffe2bbabd6e5a84b75582226f7e7fb5a98d0f6bf13b34",
       "duration": 74.8,
       "beat_durations": [
@@ -380,7 +380,7 @@
         {
           "beat_index": 5,
           "id": "scene03-06-01",
-          "display": "各判断$j$について、$\\sum_k L_{kj}p(C_k\\mid x)$を比べます。",
+          "display": "各判断$j$の期待損失$R_j(x)$を比べます。",
           "speech": "各判断ジェーについて、損失と事後確率の積を、すべてのクラスで足して比べます。",
           "start": 51.06666666666667,
           "end": 57.413333333333334
