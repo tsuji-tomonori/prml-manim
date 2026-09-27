@@ -1,0 +1,327 @@
+{
+  "duration": "536.896000",
+  "size": 12444241,
+  "sha256": "6935d2d98452d62601fd56b441a8c20faebd3beaa025a556f9cf1328245d78e7",
+  "frames": 46,
+  "math_frames": 10,
+  "max_timing_error": 1.7990942069445737e-11,
+  "sync": [
+    {
+      "scene": "scene01",
+      "beat": 2,
+      "cue": "曲線を自由にすると、点の近くへ曲がっていきます。",
+      "action_start": 8.19999999999999,
+      "action_end": 15.282666666666659,
+      "speech_onset": 8.298166666666665,
+      "early": 9.31999999999999,
+      "late": 14.173333333333325
+    },
+    {
+      "scene": "scene03",
+      "beat": 4,
+      "cue": "事前分布をゼロの近くへ狭めてみます。",
+      "action_start": 129.59999999999778,
+      "action_end": 137.3759999999978,
+      "speech_onset": 129.68304166666593,
+      "early": 130.81999999999778,
+      "late": 136.10666666666444
+    },
+    {
+      "scene": "scene08",
+      "beat": 2,
+      "cue": "黄色が紫より上なら、対数エビデンスの傾きは正です。",
+      "action_start": 383.7333333333167,
+      "action_end": 391.5199999999834,
+      "speech_onset": 383.8275416666505,
+      "early": 384.9633333333167,
+      "late": 390.2933333333167
+    }
+  ],
+  "ffprobe": {
+    "programs": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "536.866667"
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "536.896000"
+      }
+    ],
+    "format": {
+      "duration": "536.896000",
+      "size": "12444241"
+    }
+  },
+  "captions": {
+    "count": 121,
+    "max_width": 9.37421875,
+    "max_height": 0.6995312500000006,
+    "math_cues": 10
+  },
+  "frame_samples": [
+    {
+      "id": "scene01-beat2",
+      "time": 14.173333333333325,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene01-beat5",
+      "time": 38.359999999999914,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene01-beat6",
+      "time": 48.49333333333364,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene01-05-02",
+      "time": 37.847999999999914,
+      "reason": "math caption",
+      "display": "材料を混ぜる十個の係数が、重み $\\mathbf w$ です。"
+    },
+    {
+      "id": "scene01-06-01",
+      "time": 41.38400000000031,
+      "reason": "math caption",
+      "display": "$\\alpha$ は重みの事前分布の精度です。"
+    },
+    {
+      "id": "scene01-06-02",
+      "time": 44.64800000000031,
+      "reason": "math caption",
+      "display": "$\\beta$ は観測ノイズの精度で、逆数が分散です。"
+    },
+    {
+      "id": "scene01-06-03",
+      "time": 48.408000000000314,
+      "reason": "math caption",
+      "display": "比 $\\alpha/\\beta$ が正則化の強さになります。"
+    },
+    {
+      "id": "scene02-beat2",
+      "time": 64.88000000000122,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene02-beat5",
+      "time": 91.6400000000003,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene02-beat6",
+      "time": 101.37333333333316,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene03-beat2",
+      "time": 120.13333333333205,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene03-beat5",
+      "time": 145.146666666664,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene03-beat6",
+      "time": 155.74666666666346,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene04-beat2",
+      "time": 174.62666666666235,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene04-beat5",
+      "time": 201.42666666666082,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene04-beat6",
+      "time": 211.1333333333269,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene04-02-02",
+      "time": 174.43999999999568,
+      "reason": "math caption",
+      "display": "中心 $\\mathbf m_N$ は、重みの事後平均です。"
+    },
+    {
+      "id": "scene04-03-02",
+      "time": 181.83733333332844,
+      "reason": "math caption",
+      "display": "行列 $A$ は、その曲がり方をまとめたヘッセ行列です。"
+    },
+    {
+      "id": "scene05-beat2",
+      "time": 229.01333333332585,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene05-beat5",
+      "time": 255.71999999999105,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene05-beat6",
+      "time": 265.0133333333238,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene05-01-02",
+      "time": 219.20533333332637,
+      "reason": "math caption",
+      "display": "ここでは次数を $d$、重みの個数を $M=d+1$ と書き分けます。"
+    },
+    {
+      "id": "scene06-beat2",
+      "time": 281.71999999998945,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene06-beat5",
+      "time": 307.79999999998813,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene06-beat6",
+      "time": 317.1599999999876,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene06-05-02",
+      "time": 306.9359999999881,
+      "reason": "math caption",
+      "display": "$\\lambda_i/(\\alpha+\\lambda_i)$ が、各方向に残る割合です。"
+    },
+    {
+      "id": "scene07-beat2",
+      "time": 334.1733333333198,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene07-beat5",
+      "time": 362.879999999985,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene07-beat6",
+      "time": 372.5599999999844,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene07-03-01",
+      "time": 337.95999999998605,
+      "reason": "math caption",
+      "display": "棒の高さを全部足した量を、有効パラメータ数 $\\gamma$ と呼びます。"
+    },
+    {
+      "id": "scene08-beat2",
+      "time": 390.2933333333167,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene08-beat5",
+      "time": 414.7733333333154,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene08-beat6",
+      "time": 423.98666666664815,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene09-beat2",
+      "time": 440.2933333333139,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene09-beat5",
+      "time": 468.3866666666456,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene09-beat6",
+      "time": 479.17333333331175,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene09-03-02",
+      "time": 447.9226666666467,
+      "reason": "math caption",
+      "display": "$N-\\gamma$ は、その調整に使った自由度を考慮する形です。"
+    },
+    {
+      "id": "scene10-beat2",
+      "time": 497.01333333331064,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene10-beat5",
+      "time": 524.9199999999805,
+      "reason": "scene sample"
+    },
+    {
+      "id": "scene10-beat6",
+      "time": 534.8399999999878,
+      "reason": "scene sample"
+    },
+    {
+      "id": "sync-scene01-early",
+      "time": 9.31999999999999,
+      "reason": "sync"
+    },
+    {
+      "id": "sync-scene01-late",
+      "time": 14.173333333333325,
+      "reason": "sync"
+    },
+    {
+      "id": "sync-scene03-early",
+      "time": 130.81999999999778,
+      "reason": "sync"
+    },
+    {
+      "id": "sync-scene03-late",
+      "time": 136.10666666666444,
+      "reason": "sync"
+    },
+    {
+      "id": "sync-scene08-early",
+      "time": 384.9633333333167,
+      "reason": "sync"
+    },
+    {
+      "id": "sync-scene08-late",
+      "time": 390.2933333333167,
+      "reason": "sync"
+    }
+  ],
+  "long_silences": 0,
+  "mean_volume_db": -26.3,
+  "max_volume_db": -6.4,
+  "render_animations": 86,
+  "visual_review": "46 frames viewed; all 10 symbolic captions; 3 scene synchronization comparisons",
+  "listened_in_full": false,
+  "numeric_checks": [
+    "Evidence / predictive covariance / square completion / derivative: PASS; max error 4.760636329592671e-12",
+    "Scalar integral quadrature: PASS; max error 2.7755575615628914e-17",
+    "30 iterations: PASS {'alpha': 3.678367661141862, 'beta': 10.58176866158709, 'gamma': 5.288678190897074, 'logev': -11.925703415001731}",
+    "Plot range: PASS; mean max 1.3033190882518657 RMS range 0.2412147268279772 0.5275274822287828",
+    "Polynomial optimum d=3: -17.82335067500967",
+    "10 WAV, hashes, 121 readings / captions: PASS; total seconds 536.8666666666667"
+  ]
+}
