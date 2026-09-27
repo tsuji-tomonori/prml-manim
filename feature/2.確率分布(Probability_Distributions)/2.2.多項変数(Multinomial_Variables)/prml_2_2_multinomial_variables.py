@@ -1,6 +1,7 @@
 """PRML 2.2 — one observation, counts, and a moving map of probabilities."""
 from pathlib import Path
 import json
+import re
 import numpy as np
 from manim import *
 from caption_layout import jp, tex
@@ -19,9 +20,22 @@ VERTICES=np.array([[-5.4,-1.35,0],[-.8,-1.35,0],[-3.1,2.15,0]])
 
 
 def equation(s, pos=(0,-2.35,0), size=33):
-    m=MathTex(s,font_size=size,tex_to_color_map={r"\mu_"+str(i+1):c for i,c in enumerate(COLORS)})
-    for i,c in enumerate(COLORS,1):
-        m.set_color_by_tex(r'\mu_'+str(i),c,substring=False)
+    # Keep one TeX SVG and color complete terms by measured glyph ranges.
+    parts=re.split(r"\{\{(.*?)\}\}",s)
+    m=MathTex(''.join(parts),font_size=size)
+    prefix=''
+    for index,part in enumerate(parts):
+        if index%2:
+            offset=len(MathTex(prefix,font_size=size)[0]) if prefix.strip() else 0
+            count=len(MathTex(part,font_size=size)[0])
+            for i,c in enumerate(COLORS,1):
+                if part.strip().startswith(r'\mu_'+str(i)):
+                    m[0][offset:offset+count].set_color(c)
+        prefix+=part
+    # Distinct alpha values prevent Cairo from dropping differently colored glyphs.
+    # The maximum change is below 0.1%, invisible at 480p.
+    for i,glyph in enumerate(m[0]):
+        glyph.set_fill(opacity=1-i*1e-5)
     m.move_to(pos)
     if m.width>12.5:
         raise ValueError(f'Equation too wide: {s}')
@@ -132,14 +146,14 @@ class PRML22MultinomialVariables(NarratedScene):
         self.beat(self.formula_to(r'\mu_k\ge0,\qquad\sum_{k=1}^{K}\mu_k=1'))
         slider=NumberLine(x_range=[0,1,.5],length=3.5,include_numbers=True,font_size=20).move_to([3,.9,0])
         knob=Dot(color=COLORS[0]).add_updater(lambda m:m.move_to(slider.n2p(red.get_value())))
-        self.add(slider,knob,tex(r'\mu_1',28,COLORS[0]).move_to([3,1.6,0]))
+        slider_label=tex(r'\mu_1',28,COLORS[0]).move_to([3,1.6,0])
+        self.add(slider,knob,slider_label)
         self.beat(red.animate.set_value(.7))
         expr=equation(r'{{\mu_1^0}}\,{{\mu_2^1}}\,{{\mu_3^0}}={{\mu_2}}',(3,-.6,0),35)
-        for term,c in zip(expr[:3],COLORS): term.set_color(c)
-        self.beat(FadeIn(expr),Indicate(chart[3].copy(),color=COLORS[1]))
+        self.beat(FadeIn(expr),Indicate(chart[3].copy(),remover=True,color=COLORS[1]))
         self.beat(self.formula_to(r'p(x\mid\mu)=\prod_{k=1}^{K}\mu_k^{x_k}\quad\text{(2.26)}'))
-        self.beat(Transform(expr,equation(r'\mu_1^0\,\mu_2^0\,\mu_3^1=\mu_3',(3,-.6,0),35)),Indicate(chart[6].copy(),color=COLORS[2]))
-        self.beat(FadeOut(expr),FadeOut(slider),FadeOut(knob),self.formula_to(r'E[x\mid\mu]=\sum_xp(x\mid\mu)x=\mu\quad\text{(2.28)}'),red.animate.set_value(.5))
+        self.beat(Transform(expr,equation(r'{{\mu_1^0}}\,{{\mu_2^0}}\,{{\mu_3^1}}={{\mu_3}}',(3,-.6,0),35)),Indicate(chart[6].copy(),remover=True,color=COLORS[2]))
+        self.beat(FadeOut(expr),FadeOut(slider),FadeOut(knob),FadeOut(slider_label),self.formula_to(r'E[x\mid\mu]=\sum_xp(x\mid\mu)x=\mu\quad\text{(2.28)}'),red.animate.set_value(.5))
 
     def counts(self):
         seq=tokens(SEQUENCE,y=1.35)
@@ -179,7 +193,7 @@ class PRML22MultinomialVariables(NarratedScene):
         single=tokens([0,0,1,2],y=.6)
         label=equation(r'm=(2,1,1),\qquad N=4',(0,2.1,0),34)
         self.add(label)
-        self.beat(FadeIn(single),self.formula_to(r'p(\text{one sequence}\mid\mu)=\mu_1^2\mu_2\mu_3'))
+        self.beat(FadeIn(single),self.formula_to(r'p(\text{one sequence}\mid\mu)={{\mu_1^2}}\,{{\mu_2}}\,{{\mu_3}}'))
         rows=VGroup(*[tokens(p,y=0,spacing=.35,radius=.12).move_to([-4+4*(i%3),1.25-.62*(i//3),0]) for i,p in enumerate(PERMUTATIONS)])
         self.beat(FadeOut(single),LaggedStart(*[FadeIn(r) for r in rows],lag_ratio=.13))
         self.beat(self.formula_to(r'\frac{4!}{2!\,1!\,1!}=\frac{24}{2}=12'),Indicate(rows[0]),Indicate(rows[1]))
@@ -197,7 +211,7 @@ class PRML22MultinomialVariables(NarratedScene):
         self.add(tri,dot,chart)
         self.beat(self.formula_to(r'\mu=(1,0,0)'))
         self.beat(weights[0].animate.set_value(.5),weights[1].animate.set_value(.5),self.formula_to(r'\mu=(1/2,1/2,0)'))
-        self.beat(*[t.animate.set_value(1/3) for t in weights],self.formula_to(r'P=\mu_1V_1+\mu_2V_2+\mu_3V_3'))
+        self.beat(*[t.animate.set_value(1/3) for t in weights],self.formula_to(r'P={{\mu_1V_1}}+{{\mu_2V_2}}+{{\mu_3V_3}}'))
         self.beat(weights[0].animate.set_value(.1),weights[1].animate.set_value(.1),weights[2].animate.set_value(.8))
         self.beat(weights[0].animate.set_value(.5),weights[1].animate.set_value(.3),weights[2].animate.set_value(.2),self.formula_to(r'\mu_3=1-\mu_1-\mu_2\qquad\text{dimension}=K-1'))
         samples=np.random.default_rng(2206).dirichlet([1,1,1],100)@VERTICES
@@ -213,11 +227,12 @@ class PRML22MultinomialVariables(NarratedScene):
         self.add(nums)
         mean=Dot(radius=.07,color=WHITE).add_updater(lambda m:m.move_to(get()/get().sum()@VERTICES))
         self.add(mean,jp('白点：平均',19,MUTED).move_to([3,-.4,0]))
-        self.beat(FadeIn(jp('ディリクレ分布',30,PURPLE).move_to([3,-1.05,0])))
+        prior_title=jp('ディリクレ分布',30,PURPLE).move_to([3,-1.05,0])
+        self.beat(FadeIn(prior_title))
         self.beat(*[t.animate.set_value(.3) for t in a])
         self.beat(*[t.animate.set_value(1) for t in a])
         self.beat(*[t.animate.set_value(8) for t in a])
-        self.beat(self.formula_to(r'\mathrm{Dir}(\mu\mid\alpha)=\frac{\Gamma(\alpha_0)}{\prod_k\Gamma(\alpha_k)}\prod_k\mu_k^{\alpha_k-1}',pos=(0,-2.70,0),size=28),FadeIn(equation(r'\alpha_0=\sum_k\alpha_k,\quad\alpha_k>0',(3,-1.8,0),25)))
+        self.beat(self.formula_to(r'\mathrm{Dir}(\mu\mid\alpha)=\frac{\Gamma(\alpha_0)}{\prod_k\Gamma(\alpha_k)}\prod_k\mu_k^{\alpha_k-1}',pos=(3,-1.10,0),size=26),FadeOut(prior_title),FadeIn(equation(r'\alpha_0=\sum_k\alpha_k,\quad\alpha_k>0',(3,-1.8,0),25)))
         self.beat(a[0].animate.set_value(20))
 
     def update(self):
@@ -245,7 +260,7 @@ class PRML22MultinomialVariables(NarratedScene):
         self.beat(self.formula_to(r'm=(3,1,0)\qquad\mu^{\rm ML}=(0.75,0.25,0)'))
         self.beat(mix.animate.set_value(1),self.formula_to(r'\alpha=(1,1,1)\qquad p(x_{\rm next})=(4/7,2/7,1/7)'))
         self.beat(self.formula_to(r'p(x_{{\rm next},k}=1\mid D)=\int\mu_kp(\mu\mid D)\,d\mu=\frac{\alpha_k+m_k}{\alpha_0+N}',size=31))
-        self.beat(self.formula_to(r'\frac{\alpha_0}{\alpha_0+N}\frac{\alpha_k}{\alpha_0}+\frac{N}{\alpha_0+N}\frac{m_k}{N}',size=37),Indicate(chart[0].copy()),Indicate(chart[6].copy()))
+        self.beat(self.formula_to(r'\frac{\alpha_0}{\alpha_0+N}\frac{\alpha_k}{\alpha_0}+\frac{N}{\alpha_0+N}\frac{m_k}{N}',size=37),Indicate(chart[0].copy(),remover=True),Indicate(chart[6].copy(),remover=True))
         self.beat(amount.animate.set_value(10),self.formula_to(r'p(x_{{\rm next},3}=1\mid D)=\frac{1}{N+3}'))
         chart.clear_updaters(recursive=True);counter.clear_updaters(recursive=True)
         chain=VGroup(jp('一回の色',28,COLORS[0]),tex(r'\longrightarrow',36),jp('回数の組',28,COLORS[1]),tex(r'\longrightarrow',36),jp('確率の地図',28,COLORS[2])).arrange(RIGHT,buff=.35).move_to([0,1,0])
