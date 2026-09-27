@@ -1,0 +1,324 @@
+{
+  "video_sha256": "8b4d0ba5cb35acebca3f7a24e5381e37ad7406e3993414df487eab599fbe0b43",
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "607.066011"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "607.104000"
+      }
+    ],
+    "format": {
+      "duration": "607.104000"
+    }
+  },
+  "duration_difference": 0.037989000000038686,
+  "silence_intervals_ge_3s": 0,
+  "mean_volume": -26.5,
+  "max_volume": -5.6,
+  "timeline_max_error": 7.315748007385992e-11,
+  "scenes": [
+    {
+      "id": "scene01",
+      "title": "曲線を曲げられるのに、何が限界？",
+      "start": 0.0,
+      "duration": 86.13333333333334,
+      "reference": "§3.6 pp.172–173; 復習: p.138 Eq.(3.3), p.142 Eq.(3.15)"
+    },
+    {
+      "id": "scene02",
+      "title": "入力が増えると、山はいくつ必要？",
+      "start": 86.13333333333357,
+      "duration": 82.6,
+      "reference": "§3.6 p.173 第2段落; 関連: §1.4 p.35 Fig.1.21（独自の5分割例）"
+    },
+    {
+      "id": "scene03",
+      "title": "二つの座標。でも、動く自由は一つ？",
+      "start": 168.7333333333289,
+      "duration": 86.06666666666666,
+      "reference": "§3.6 p.173 第3段落前半（データ多様体と内在次元）"
+    },
+    {
+      "id": "scene04",
+      "title": "山を置く場所を、データから選ぶ",
+      "start": 254.79999999999066,
+      "duration": 87.13333333333334,
+      "reference": "§3.6 p.173 第3段落（局所基底・RBF network・SVM・RVM）"
+    },
+    {
+      "id": "scene05",
+      "title": "点が広がっていても、予測に効く方向は？",
+      "start": 341.93333333331907,
+      "duration": 88.0,
+      "reference": "§3.6 p.173 最終2文（多様体内の少数の関連方向）"
+    },
+    {
+      "id": "scene06",
+      "title": "基底そのものに、向きを選ばせる",
+      "start": 429.93333333331407,
+      "duration": 85.2,
+      "reference": "§3.6 p.173 第3段落後半; 関連: §3.1 p.139 Eq.(3.6)（多変量への説明用拡張）"
+    },
+    {
+      "id": "scene07",
+      "title": "学ぶのは、重みか、見る場所か",
+      "start": 515.1333333333118,
+      "duration": 91.93333333333334,
+      "reference": "§3.6 pp.172–173 全体; 次章への接続: p.173 冒頭"
+    }
+  ],
+  "sync": [
+    {
+      "scene": "scene01",
+      "beat": 2,
+      "action": "weight raises local bump",
+      "start": 10.333333333333316,
+      "end": 19.49599999999998,
+      "first_voice": 10.423041666666668,
+      "phases": []
+    },
+    {
+      "scene": "scene03",
+      "beat": 5,
+      "action": "straighten manifold",
+      "start": 211.59999999999312,
+      "end": 220.82666666665978,
+      "first_voice": 211.7002083333289,
+      "phases": []
+    },
+    {
+      "scene": "scene05",
+      "beat": 3,
+      "action": "rotate relevant direction",
+      "start": 362.26666666665125,
+      "end": 372.42133333331793,
+      "first_voice": 362.33962499998574,
+      "phases": []
+    },
+    {
+      "scene": "scene06",
+      "beat": 3,
+      "action": "shift then sharpen sigmoid",
+      "start": 450.06666666664626,
+      "end": 458.89866666664625,
+      "first_voice": 450.15570833331407,
+      "phases": [
+        {
+          "name": "shift band",
+          "start": 450.06666666664626,
+          "end": 454.1333333333127
+        },
+        {
+          "name": "sharpen band",
+          "start": 454.1333333333127,
+          "end": 458.86666666664576
+        },
+        {
+          "name": "breath",
+          "start": 458.86666666664576,
+          "end": 459.26666666664573
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "label": "scene01-beat2",
+      "time": 17.197333333333315,
+      "file": "frame-00.png"
+    },
+    {
+      "label": "scene01-beat5",
+      "time": 48.35733333333366,
+      "file": "frame-01.png"
+    },
+    {
+      "label": "scene01-beat8",
+      "time": 82.90400000000089,
+      "file": "frame-02.png"
+    },
+    {
+      "label": "scene01-03-02-math",
+      "time": 27.16799999999995,
+      "file": "frame-03.png"
+    },
+    {
+      "label": "scene01-04-01-math",
+      "time": 32.20799999999991,
+      "file": "frame-04.png"
+    },
+    {
+      "label": "scene02-beat2",
+      "time": 102.66399999999969,
+      "file": "frame-05.png"
+    },
+    {
+      "label": "scene02-beat5",
+      "time": 133.68266666666457,
+      "file": "frame-06.png"
+    },
+    {
+      "label": "scene02-beat8",
+      "time": 165.42933333332957,
+      "file": "frame-07.png"
+    },
+    {
+      "label": "scene02-04-01-math",
+      "time": 119.08266666666518,
+      "file": "frame-08.png"
+    },
+    {
+      "label": "scene03-beat2",
+      "time": 187.1546666666616,
+      "file": "frame-09.png"
+    },
+    {
+      "label": "scene03-beat5",
+      "time": 218.51199999999312,
+      "file": "frame-10.png"
+    },
+    {
+      "label": "scene03-beat8",
+      "time": 251.62666666665797,
+      "file": "frame-11.png"
+    },
+    {
+      "label": "scene03-06-01-math",
+      "time": 223.50399999999257,
+      "file": "frame-12.png"
+    },
+    {
+      "label": "scene04-beat2",
+      "time": 271.99199999999007,
+      "file": "frame-13.png"
+    },
+    {
+      "label": "scene04-beat5",
+      "time": 303.31199999998836,
+      "file": "frame-14.png"
+    },
+    {
+      "label": "scene04-beat8",
+      "time": 338.4426666666531,
+      "file": "frame-15.png"
+    },
+    {
+      "label": "scene04-06-02-math",
+      "time": 314.3706666666544,
+      "file": "frame-16.png"
+    },
+    {
+      "label": "scene05-beat2",
+      "time": 359.55999999998517,
+      "file": "frame-17.png"
+    },
+    {
+      "label": "scene05-beat5",
+      "time": 394.2426666666498,
+      "file": "frame-18.png"
+    },
+    {
+      "label": "scene05-beat8",
+      "time": 426.722666666648,
+      "file": "frame-19.png"
+    },
+    {
+      "label": "scene05-04-01-math",
+      "time": 377.1093333333173,
+      "file": "frame-20.png"
+    },
+    {
+      "label": "scene06-beat2",
+      "time": 447.1359999999802,
+      "file": "frame-21.png"
+    },
+    {
+      "label": "scene06-beat5",
+      "time": 477.4239999999785,
+      "file": "frame-22.png"
+    },
+    {
+      "label": "scene06-beat8",
+      "time": 511.6239999999766,
+      "file": "frame-23.png"
+    },
+    {
+      "label": "scene06-04-01-math",
+      "time": 461.84266666664575,
+      "file": "frame-24.png"
+    },
+    {
+      "label": "scene06-05-02-math",
+      "time": 476.4959999999785,
+      "file": "frame-25.png"
+    },
+    {
+      "label": "scene07-beat2",
+      "time": 534.3493333333207,
+      "file": "frame-26.png"
+    },
+    {
+      "label": "scene07-beat5",
+      "time": 569.4853333333484,
+      "file": "frame-27.png"
+    },
+    {
+      "label": "scene07-beat8",
+      "time": 604.2666666667104,
+      "file": "frame-28.png"
+    },
+    {
+      "label": "scene01-sync-0.12",
+      "time": 11.432853333333316,
+      "file": "frame-29.png"
+    },
+    {
+      "label": "scene01-sync-0.82",
+      "time": 17.84671999999998,
+      "file": "frame-30.png"
+    },
+    {
+      "label": "scene03-sync-0.12",
+      "time": 212.70719999999312,
+      "file": "frame-31.png"
+    },
+    {
+      "label": "scene03-sync-0.82",
+      "time": 219.16586666665978,
+      "file": "frame-32.png"
+    },
+    {
+      "label": "scene05-sync-0.12",
+      "time": 363.4852266666513,
+      "file": "frame-33.png"
+    },
+    {
+      "label": "scene05-sync-0.82",
+      "time": 370.59349333331795,
+      "file": "frame-34.png"
+    },
+    {
+      "label": "scene06-sync-0.12",
+      "time": 451.12650666664626,
+      "file": "frame-35.png"
+    },
+    {
+      "label": "scene06-sync-0.82",
+      "time": 457.30890666664624,
+      "file": "frame-36.png"
+    }
+  ],
+  "visual_review": "37 extracted frames inspected: 3 per scene, all 8 math captions, 8 frames comparing 4 synchronized actions; no unresolved overlap or overflow found",
+  "full_listening": false
+}
