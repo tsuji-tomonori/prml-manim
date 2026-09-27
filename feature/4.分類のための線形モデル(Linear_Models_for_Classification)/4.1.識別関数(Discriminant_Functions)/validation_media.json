@@ -1,0 +1,32 @@
+{
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "545.199344"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "545.237333"
+      }
+    ],
+    "format": {
+      "duration": "545.238000",
+      "size": "12442111"
+    }
+  },
+  "stream_duration_difference": 0.037989000000038686,
+  "long_silence_count": 0,
+  "mean_volume": -26.3,
+  "max_volume": -6.1,
+  "max_scene_wav_drift": 2.5977442419389263e-11,
+  "sha256": "76e064da1bfd787b1c2362b76ebfb2b4d9a87a236cb813aa8a794194d7f19a60",
+  "full_listening": false
+}
