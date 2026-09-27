@@ -1,5 +1,6 @@
 """Verify derivatives, actual IRLS updates, source corrections and audio integrity."""
 import json
+import argparse
 import re
 from pathlib import Path
 import numpy as np
@@ -10,6 +11,9 @@ from make_voicevox_narration import MANIFEST, valid_entry
 ROOT=Path(__file__).resolve().parent
 
 def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--captions', action='store_true')
+    args=parser.parse_args()
     result={}
     w=np.array([.2,-.7]); h=1e-5
     g,H=derivatives(w)
@@ -48,8 +52,8 @@ def main():
     assert np.linalg.norm(J@np.ones(3))<1e-14
     result['softmax_hessian_error']=float(np.max(abs(J-fdJ)))
     result['softmax_common_shift_null_norm']=float(np.linalg.norm(J@np.ones(3)))
-    xx=np.linspace(-8,8,100001)
-    integral=np.trapezoid(normal_pdf(xx[xx<=1.6]),xx[xx<=1.6])
+    xx=np.linspace(-8,1.6,100001)
+    integral=np.trapezoid(normal_pdf(xx),xx)
     assert abs(integral-normal_cdf(1.6))<2e-5
     result['cdf_area_error']=float(abs(integral-normal_cdf(1.6)))
     result['outlier_loss_at_minus5']=dict(logistic=float(np.logaddexp(0,8.5)),probit=float(-np.log(normal_cdf(-5))))
@@ -71,5 +75,13 @@ def main():
     result['checks']='8 groups passed: derivatives, IRLS, basis, separation/ridge, softmax, CDF/noise, canonical, audio/display'
     (ROOT/'numerical_results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(result,ensure_ascii=False,indent=2))
+    if args.captions:
+        from manim import tempconfig
+        from video_support import caption_mobject
+        with tempconfig({'media_dir':str(ROOT/'media/caption_check')}):
+            mobs=[caption_mobject(s['display']) for c in SCENES for b in c['beats'] for s in b['segments']]
+        dimensions=dict(sentences=len(mobs),max_width=max(m.width for m in mobs),max_height=max(m.height for m in mobs),safe_width=12.9,safe_height=.9)
+        (ROOT/'caption_results.json').write_text(json.dumps(dimensions,indent=2)+'\n')
+        print(dimensions)
 
 if __name__=='__main__':main()

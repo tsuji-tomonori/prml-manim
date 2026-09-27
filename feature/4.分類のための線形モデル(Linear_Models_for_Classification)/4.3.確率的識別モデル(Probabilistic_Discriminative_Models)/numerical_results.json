@@ -25,7 +25,7 @@
   ],
   "softmax_hessian_error": 3.2183977705102507e-12,
   "softmax_common_shift_null_norm": 1.5515838457795457e-17,
-  "cdf_area_error": 1.774998399473038e-05,
+  "cdf_area_error": 1.3630008233178614e-10,
   "outlier_loss_at_minus5": {
     "logistic": 8.50020344767213,
     "probit": 15.064998393988724
