@@ -1,5 +1,7 @@
 """Local caption metrics and PCM-synchronised beats, following PRML 1.1."""
 import json
+import os
+from pathlib import Path
 import re
 import numpy as np
 from manim import *
@@ -161,6 +163,7 @@ class NarratedScene(Scene):
                 record['actions'].append({'name': name, 'start': phase_start, 'end': float(self.time)})
                 elapsed_frames = end_frame
             self.beat_index += 1
+            self.review_frame()
             return
         visual = []
         if animations:
@@ -173,4 +176,14 @@ class NarratedScene(Scene):
         self.play(Succession(*visual), UpdateFromAlphaFunc(captions, caption_at, rate_func=linear),
                   run_time=(frames - 1e-5) / fps, rate_func=linear)
         self.beat_index += 1
+        self.review_frame()
 
+
+    def review_frame(self):
+        """Optional endpoint contact sheets; final validation uses MP4 frames."""
+        folder = os.environ.get('PRML_REVIEW_STILLS')
+        if folder:
+            path = Path(folder)
+            path.mkdir(parents=True, exist_ok=True)
+            self.renderer.update_frame(self, ignore_skipping=True)
+            self.renderer.camera.get_image().save(path / f"{self.story['id']}-{self.beat_index:02}.png")

@@ -1,5 +1,6 @@
 """PRML 2.3 — linked numerical experiments in Manim Community."""
 import json
+import re
 from pathlib import Path
 import numpy as np
 from manim import *
@@ -57,11 +58,16 @@ class PRML23GaussianDistribution(NarratedScene):
         Path(config.media_dir,'prml23_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
     def equation(self,s,bottom=False,size=29):
-        m=tex(s,size).move_to([0,-2.55 if bottom else 2.55,0])
+        s=s.replace(r'\hat\sigma',r'\hat{\sigma}').replace(r'\frac\lambda',r'\frac{\lambda}').replace(r'\frac\nu',r'\frac{\nu}')
+        colors={r'\mu':YELLOW,r'\sigma':PURPLE,r'\Sigma':GREEN,r'\lambda':GREEN,r'\pi_k':BLUE,r'\gamma_k':YELLOW}
+        parts=[p for p in re.split('('+'|'.join(re.escape(k) for k in colors)+')',s) if p]
+        m=MathTex(*parts,font_size=size,color=WHITE).move_to([0,-2.55 if bottom else 2.55,0])
+        for part,mob in zip(parts,m):
+            if part in colors: mob.set_color(colors[part])
         if m.width>12.6: raise ValueError(f'Equation too wide: {s}')
         attr='bottom' if bottom else 'top'; old=getattr(self,attr)
         setattr(self,attr,m)
-        return ReplacementTransform(old,m) if old is not None else FadeIn(m)
+        return ReplacementTransform(old,m,run_time=.08) if old is not None else FadeIn(m,run_time=.08)
 
     def note(self,s,pos=(0,-2.5,0),color=MUTED,size=23):
         return jp(s,size,color).move_to(pos)
@@ -70,9 +76,9 @@ class PRML23GaussianDistribution(NarratedScene):
         ax=Axes(x_range=x,y_range=y,x_length=w,y_length=h,tips=False,
                 axis_config={'color':MUTED,'stroke_width':1.2,'include_ticks':False}).move_to(pos)
         labs=VGroup()
-        for v in np.arange(x[0],x[1]+1e-6,x[2]):
+        for v in np.arange(np.ceil(x[0]/x[2])*x[2],x[1]+1e-6,x[2]):
             labs.add(tex(f'{v:g}',17,MUTED).move_to(ax.c2p(v,y[0])+DOWN*.22))
-        for v in np.arange(y[0],y[1]+1e-6,y[2]):
+        for v in np.arange(np.ceil(y[0]/y[2])*y[2],y[1]+1e-6,y[2]):
             if abs(v)>1e-8: labs.add(tex(f'{v:g}',17,MUTED).next_to(ax.c2p(x[0],v),LEFT,buff=.1))
         labs.add(tex(xlabel,22).next_to(ax.c2p(x[1],y[0]),RIGHT,buff=.2))
         labs.add(tex(ylabel,22).next_to(ax.c2p(x[0],y[1]),UP,buff=.12))
@@ -132,14 +138,14 @@ class PRML23GaussianDistribution(NarratedScene):
         self.beat(mu.animate.set_value(0),sd.animate.set_value(.8))
 
     def clt(self):
-        ax=self.ax(x=(0,1,.25),y=(0,4.6,1),xlabel=r'\bar x',h=3.2)
+        ax=self.ax(x=(0,1,.25),y=(0,4.6,1),xlabel=r'\bar x',ylabel=r'p(\bar x)',h=3.2)
         bars=self.histogram(ax,CLT_MEANS[1],np.linspace(0,1,31))
         self.beat(FadeIn(bars),self.equation(r'\bar x=(x_1+\cdots+x_N)/N\qquad N=1'))
         self.beat(Transform(bars,self.histogram(ax,CLT_MEANS[2],np.linspace(0,1,31))),self.equation(r'N=2\qquad \mathbb E[\bar x]=1/2'))
         gauss=curve(ax,lambda x:normal(x,.5,np.sqrt(1/120)),color=YELLOW)
         self.beat(Transform(bars,self.histogram(ax,CLT_MEANS[10],np.linspace(0,1,31))),Create(gauss),self.equation(r'N=10\qquad \mathrm{var}[\bar x]=1/(12N)'))
         self.remove(ax,ax.labels,bars,gauss)
-        ax=self.ax(x=(-4,4,2),y=(0,.48,.2),xlabel='z',h=3.2)
+        ax=self.ax(x=(-4,4,2),y=(0,.48,.2),xlabel='z',ylabel='p(z)',h=3.2)
         std=lambda n:(CLT_MEANS[n]-.5)/np.sqrt(1/(12*n))
         bars=self.histogram(ax,std(10),np.linspace(-4,4,41))
         self.beat(FadeIn(bars),self.equation(r'z=\frac{\bar x-1/2}{\sqrt{1/(12N)}}'))
@@ -204,7 +210,8 @@ class PRML23GaussianDistribution(NarratedScene):
         # Integrate joint density from -infinity to the moving scan height.
         from scipy.special import ndtr
         partial=always_redraw(lambda:curve(dens,lambda x:normal(x,0,np.sqrt(1.4))*ndtr((sweep.get_value()-.85/1.4*x)/np.sqrt(1-.85**2/1.4)),color=BLUE))
-        self.beat(sweep.animate.set_value(2.4),Create(partial),self.equation(r'p(x_a)=\int p(x_a,x_b)\,dx_b'))
+        self.add(partial)
+        self.beat(sweep.animate.set_value(2.4),self.equation(r'p(x_a)=\int p(x_a,x_b)\,dx_b'))
         self.remove(scan,partial)
         marginal=curve(dens,lambda x:normal(x,0,np.sqrt(1.4)),color=BLUE)
         self.add(marginal)
@@ -247,14 +254,14 @@ class PRML23GaussianDistribution(NarratedScene):
         self.beat(sd.animate.set_value(DATA.std()),self.equation(r'\Sigma_{ML}=\frac1N\sum_n(x_n-\mu_{ML})(x_n-\mu_{ML})^T',bottom=True,size=27))
         self.remove(g,residuals,dots,ax,ax.labels)
         bx=self.ax(x=(0,6000,2000),y=(0,1.2,.3),xlabel='M',ylabel=r'\overline{\hat\sigma^2}',w=8.8,h=3.1)
-        count=ValueTracker(20)
+        count=ValueTracker(21)
         means=np.cumsum(BIAS)/np.arange(1,len(BIAS)+1)
-        progress=always_redraw(lambda:line(coords(bx,np.c_[np.arange(1,int(count.get_value())+1),means[:int(count.get_value())]]),BLUE,2))
+        progress=always_redraw(lambda:line(coords(bx,np.c_[np.arange(20,int(count.get_value())+1),means[19:int(count.get_value())]]),BLUE,2))
         true=Line(bx.c2p(0,1),bx.c2p(6000,1),color=MUTED)
         expect=DashedLine(bx.c2p(0,.75),bx.c2p(6000,.75),color=YELLOW)
         self.add(progress,true,expect)
         self.beat(count.animate.set_value(6000),self.equation(r'N=4\qquad \mathbb E[\hat\sigma^2_{ML}]=\frac{N-1}{N}\sigma^2'),self.equation(r'\sigma^2=1\qquad M=6000',bottom=True))
-        corrected=line(coords(bx,np.c_[np.arange(1,6001),means*4/3]),GREEN,2)
+        corrected=line(coords(bx,np.c_[np.arange(20,6001),means[19:]*4/3]),GREEN,2)
         progress.clear_updaters()
         self.beat(Transform(progress,corrected),self.equation(r'\hat\sigma^2=\frac1{N-1}\sum_n(x_n-\bar x)^2',bottom=True))
         # Do not let the running-estimate updater overwrite the corrected curve.
@@ -269,7 +276,7 @@ class PRML23GaussianDistribution(NarratedScene):
         ax=self.ax(x=(-2,2.5,1),y=(0,2.3,.5),xlabel=r'\mu',ylabel=r'p(\mu\mid X)',h=3.2)
         mean=ValueTracker(0);variance=ValueTracker(1)
         post=always_redraw(lambda:curve(ax,lambda x:normal(x,mean.get_value(),np.sqrt(variance.get_value())),color=PURPLE))
-        prior=curve(ax,normal,color=MUTED).set_opacity(.45)
+        prior=curve(ax,normal,color=MUTED).set_stroke(opacity=.45)
         self.add(prior)
         self.beat(Create(post),self.equation(r'p(\mu)=\mathcal N(\mu\mid0,1)\qquad N=0'))
         m,v=posterior(1)
@@ -279,11 +286,11 @@ class PRML23GaussianDistribution(NarratedScene):
         self.beat(mean.animate.set_value(m),variance.animate.set_value(v),FadeIn(marks),self.equation(r'N=10\qquad p(\mu\mid X)\propto p(X\mid\mu)p(\mu)'))
         self.beat(Indicate(post,color=PURPLE),self.equation(r'\frac1{\sigma_N^2}=\frac1{\sigma_0^2}+\frac N{\sigma^2}',bottom=True),self.equation(r'\mu_N=\sigma_N^2\left(\frac{\mu_0}{\sigma_0^2}+\frac{\sum_n x_n}{\sigma^2}\right)'))
         self.remove(ax,ax.labels,post,prior,marks)
-        ax=self.ax(x=(0,12,3),y=(0,.48,.2),xlabel=r'\lambda',ylabel=r'p(\lambda\mid X)',h=3.2)
+        ax=self.ax(x=(0,8,2),y=(0,.65,.2),xlabel=r'\lambda',ylabel=r'p(\lambda\mid X)',h=3.2)
         gamma_prior=curve(ax,lambda x:gamma_posterior(x,0),color=MUTED)
         gamma_post=curve(ax,lambda x:gamma_posterior(x,10),color=PURPLE)
         self.add(gamma_prior)
-        self.beat(Transform(gamma_prior,gamma_post),self.equation(r'\lambda=1/\sigma^2,\quad p(\lambda\mid X)=\mathrm{Gam}(\lambda\mid a_N,b_N)',size=27),self.equation(r'a_N=a_0+N/2,\qquad b_N=b_0+\tfrac12\sum_n(x_n-\mu)^2',bottom=True,size=27))
+        self.beat(Transform(gamma_prior,gamma_post),self.equation(r'\mu=0.8,\quad\lambda=1/\sigma^2,\quad p(\lambda\mid X)=\mathrm{Gam}(\lambda\mid a_N,b_N)',size=27),self.equation(r'a_N=a_0+N/2,\qquad b_N=b_0+\tfrac12\sum_n(x_n-\mu)^2',bottom=True,size=27))
         self.beat(Indicate(gamma_prior,color=PURPLE),self.equation(r'p(\mu,\lambda)=\mathcal N(\mu\mid\mu_0,(\beta\lambda)^{-1})\,\mathrm{Gam}(\lambda\mid a,b)',size=27),self.equation(r'p(\mu,\Lambda)=\mathcal N(\mu\mid\mu_0,(\beta\Lambda)^{-1})\,\mathcal W(\Lambda\mid W,\nu)',bottom=True,size=27))
 
     def robust(self):
@@ -300,16 +307,20 @@ class PRML23GaussianDistribution(NarratedScene):
         self.remove(dots,od,gc,tc)
         for mob in list(self.mobjects):
             if isinstance(mob,Text) and mob.get_center()[0]>2: self.remove(mob)
-        components=VGroup(*[curve(ax,lambda x,s=s:normal(x,0,s),color=MUTED).set_opacity(.38) for s in [.5,.8,1.3,2.2]])
+        fit_ax=ax
+        self.remove(ax,ax.labels)
+        ax=self.ax(x=(-5,5,2),y=(0,.85,.2),w=9,h=3.2)
+        components=VGroup(*[curve(ax,lambda x,s=s:normal(x,0,s),color=MUTED).set_stroke(opacity=.38) for s in [.5,.8,1.3,2.2]])
         tcurve=curve(ax,lambda x:student(x,0,1,3),color=PURPLE)
         self.beat(Create(components),Create(tcurve),self.equation(r'p(x)=\int_0^\infty\mathcal N(x\mid\mu,\tau^{-1})\,\mathrm{Gam}(\tau\mid a,b)\,d\tau',size=25),self.equation(r'\nu=2a,\quad\lambda=a/b',bottom=True))
         self.remove(components,tcurve)
         nu=ValueTracker(3)
         dynamic=always_redraw(lambda:curve(ax,lambda x:student(x,0,1,nu.get_value()),color=PURPLE));self.add(dynamic)
-        target=curve(ax,normal,color=GREEN).set_opacity(.5)
+        target=curve(ax,normal,color=GREEN).set_stroke(opacity=.5)
         self.beat(nu.animate.set_value(40),Create(target),self.equation(r'\mathrm{St}(x\mid\mu,\lambda,\nu)=\frac{\Gamma((\nu+1)/2)}{\Gamma(\nu/2)}\sqrt{\frac\lambda{\pi\nu}}\left[1+\frac{\lambda(x-\mu)^2}{\nu}\right]^{-(\nu+1)/2}',size=25),self.equation(r'\nu\to\infty:\quad\mathcal N(\mu,\lambda^{-1})',bottom=True))
         self.beat(nu.animate.set_value(3),self.equation(r'\mathrm{var}[x]=\frac\nu{\nu-2}\lambda^{-1}\quad(\nu>2)',bottom=True))
-        self.remove(dynamic,target);outlier.set_value(7);self.add(dots,od,gc,tc)
+        self.remove(dynamic,target,ax,ax.labels);ax=fit_ax;self.add(ax,ax.labels)
+        outlier.set_value(7);self.add(dots,od,gc,tc)
         self.beat(outlier.animate.set_value(0),self.equation(r'\nu=3\qquad\text{Gaussian / Student }t',bottom=True))
 
     def periodic(self):
@@ -325,7 +336,7 @@ class PRML23GaussianDistribution(NarratedScene):
         good=Arrow(center,(d1.get_center()+d2.get_center())/2,buff=0,color=GREEN)
         self.beat(FadeOut(wrong),GrowArrow(vectors[0]),GrowArrow(vectors[1]),GrowArrow(good),self.equation(r'\bar v=\frac1N\sum_n(\cos\theta_n,\sin\theta_n)'))
         self.beat(Indicate(good,color=GREEN),self.equation(r'\bar\theta=\mathrm{atan2}\left(\sum_n\sin\theta_n,\sum_n\cos\theta_n\right)=0',bottom=True,size=27))
-        self.remove(vectors,good,d1,d2)
+        self.remove(vectors,*vectors,good,d1,d2)
         concentration=ValueTracker(0);direction=ValueTracker(0)
         def polar():
             t=np.linspace(0,2*np.pi,241);r=radius+.6*von_mises(t,direction.get_value(),concentration.get_value())
