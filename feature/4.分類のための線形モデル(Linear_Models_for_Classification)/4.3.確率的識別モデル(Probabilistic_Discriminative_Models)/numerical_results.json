@@ -1,0 +1,48 @@
+{
+  "gradient_max_error": 1.4902062916988257e-10,
+  "hessian_max_error": 5.5292215250801746e-11,
+  "irls_weighted_ls_error": 8.881784197001252e-16,
+  "irls_losses": [
+    8.317766166719343,
+    5.264495221843887,
+    5.0115137493674,
+    4.9962538775410845,
+    4.996158617757807,
+    4.996158613270367,
+    4.996158613270367,
+    4.996158613270367
+  ],
+  "irls_final_weights": [
+    -0.02473582017604193,
+    1.297907954651733
+  ],
+  "hessian_min_eigenvalue": 1.5839718094183894,
+  "basis_boundary_error": 2.220446049250313e-16,
+  "separable_losses": [
+    3.3018654942219654,
+    0.6409691341059344,
+    0.024868368643747522
+  ],
+  "softmax_hessian_error": 3.2183977705102507e-12,
+  "softmax_common_shift_null_norm": 1.5515838457795457e-17,
+  "cdf_area_error": 1.3630008233178614e-10,
+  "outlier_loss_at_minus5": {
+    "logistic": 8.50020344767213,
+    "probit": 15.064998393988724
+  },
+  "scene_durations": {
+    "scene01": 57.46666666666667,
+    "scene02": 60.333333333333336,
+    "scene03": 60.06666666666667,
+    "scene04": 50.8,
+    "scene05": 65.06666666666666,
+    "scene06": 49.93333333333333,
+    "scene07": 45.86666666666667,
+    "scene08": 51.666666666666664,
+    "scene09": 63.2
+  },
+  "sentences": 101,
+  "beats": 50,
+  "wav_seconds": 504.4,
+  "checks": "8 groups passed: derivatives, IRLS, basis, separation/ridge, softmax, CDF/noise, canonical, audio/display"
+}

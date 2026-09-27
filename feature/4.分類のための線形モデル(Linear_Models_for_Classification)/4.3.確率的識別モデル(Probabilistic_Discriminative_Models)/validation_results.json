@@ -1,0 +1,428 @@
+{
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "504.399344"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "504.426667"
+      }
+    ],
+    "format": {
+      "duration": "504.427000"
+    }
+  },
+  "silence_intervals": 0,
+  "volume": [
+    "[Parsed_volumedetect_0 @ 0x5db13b300280] mean_volume: -26.6 dB",
+    "[Parsed_volumedetect_0 @ 0x5db13b300280] max_volume: -5.6 dB"
+  ],
+  "frames": [
+    {
+      "id": "scene01-beat01",
+      "time": 5.757333333333333,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat02",
+      "time": 14.450666666666658,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat03",
+      "time": 24.157333333333295,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-03-01-math",
+      "time": 19.72,
+      "kind": "math",
+      "display": "入力から計算する点数を、スコア $a$ と呼びます。"
+    },
+    {
+      "id": "scene01-beat04",
+      "time": 33.24799999999992,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat05",
+      "time": 43.66133333333344,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat06",
+      "time": 54.202666666667334,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-06-01-math",
+      "time": 49.81066666666666,
+      "kind": "math",
+      "display": "特徴を $\\phi$、調整する重みを $w$ と書きます。"
+    },
+    {
+      "id": "scene01-sync-0.15",
+      "time": 28.689999999999923,
+      "kind": "sync"
+    },
+    {
+      "id": "scene01-sync-0.85",
+      "time": 34.70999999999992,
+      "kind": "sync"
+    },
+    {
+      "id": "scene02-beat01",
+      "time": 63.72266666666784,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat02",
+      "time": 73.24000000000134,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat03",
+      "time": 82.49866666666746,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat04",
+      "time": 92.29066666666695,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat05",
+      "time": 103.33066666666637,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat06",
+      "time": 114.34399999999904,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-06-01-math",
+      "time": 109.96000000000117,
+      "kind": "math",
+      "display": "常に一を返す基底 $\\phi_0=1$ も加えておきます。"
+    },
+    {
+      "id": "scene03-beat01",
+      "time": 124.23733333333178,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat02",
+      "time": 133.34133333333122,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat03",
+      "time": 143.49866666666406,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-03-01-math",
+      "time": 138.68533333333176,
+      "kind": "math",
+      "display": "目標 $t$ は、赤なら一、青ならゼロです。"
+    },
+    {
+      "id": "scene03-beat04",
+      "time": 153.6879999999968,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat05",
+      "time": 164.70933333332957,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-05-02-math",
+      "time": 164.76533333333177,
+      "kind": "math",
+      "display": "微分すると、各点の寄与は $(y-t)\\phi$ という簡単な形です。"
+    },
+    {
+      "id": "scene03-beat06",
+      "time": 174.8373333333289,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat01",
+      "time": 184.71199999999504,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat02",
+      "time": 195.09599999999446,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat03",
+      "time": 205.17599999999388,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat04",
+      "time": 214.99733333332665,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat05",
+      "time": 225.29599999999274,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat01",
+      "time": 235.28533333332547,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat02",
+      "time": 245.3359999999916,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-02-01-math",
+      "time": 240.60799999999216,
+      "kind": "math",
+      "display": "その行き先を、有効目標 $z$ と呼びます。"
+    },
+    {
+      "id": "scene05-beat03",
+      "time": 256.39733333332435,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-03-01-math",
+      "time": 251.9066666666588,
+      "kind": "math",
+      "display": "接線の傾きは $y(1-y)$ で、ベルヌーイ分布の分散でもあります。"
+    },
+    {
+      "id": "scene05-beat04",
+      "time": 267.81866666665707,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat05",
+      "time": 278.5386666666564,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-05-01-math",
+      "time": 274.19199999999216,
+      "kind": "math",
+      "display": "この反復再重み付き最小二乗法を、$\\mathrm{IRLS}$ と呼びます。"
+    },
+    {
+      "id": "scene05-beat06",
+      "time": 289.9359999999892,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-sync-0.15",
+      "time": 261.77666666665704,
+      "kind": "sync"
+    },
+    {
+      "id": "scene05-sync-0.85",
+      "time": 269.75666666665705,
+      "kind": "sync"
+    },
+    {
+      "id": "scene06-beat01",
+      "time": 299.7173333333218,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat02",
+      "time": 308.9706666666546,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat03",
+      "time": 318.9813333333208,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat04",
+      "time": 329.11199999998684,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat05",
+      "time": 340.03999999998626,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat01",
+      "time": 349.6506666666523,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat02",
+      "time": 358.6319999999851,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat03",
+      "time": 367.8799999999846,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-03-01-math",
+      "time": 363.9066666666523,
+      "kind": "math",
+      "display": "点数 $a$ を右へ動かすと、面積が増えていきます。"
+    },
+    {
+      "id": "scene07-beat04",
+      "time": 376.9413333333174,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat05",
+      "time": 386.41866666665027,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-sync-0.15",
+      "time": 362.93333333331793,
+      "kind": "sync"
+    },
+    {
+      "id": "scene07-sync-0.85",
+      "time": 369.4666666666513,
+      "kind": "sync"
+    },
+    {
+      "id": "scene08-beat01",
+      "time": 395.65333333331637,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat02",
+      "time": 405.2426666666492,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat03",
+      "time": 415.607999999982,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-03-01-math",
+      "time": 411.07199999998306,
+      "kind": "math",
+      "display": "そこで、ラベルが確率 $\\epsilon$ で反転すると仮定します。"
+    },
+    {
+      "id": "scene08-beat04",
+      "time": 426.2079999999814,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat05",
+      "time": 437.4879999999808,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat01",
+      "time": 448.36266666664676,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat02",
+      "time": 458.85066666664613,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat03",
+      "time": 468.9999999999789,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat04",
+      "time": 479.498666666645,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat05",
+      "time": 489.189333333311,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-05-01-math",
+      "time": 485.38666666664676,
+      "kind": "math",
+      "display": "一般の式には、分布の尺度 $s$ の逆数が残ります。"
+    },
+    {
+      "id": "scene09-beat06",
+      "time": 500.4746666666439,
+      "kind": "beat"
+    }
+  ],
+  "sync": [
+    {
+      "scene": "scene01",
+      "note": "傾きと位置のつまみ",
+      "sentence": "scene01-04-01",
+      "pcm_onset": 27.49625,
+      "actions": [
+        {
+          "sentence": "scene01-04-01",
+          "start": 27.399999999999924,
+          "end": 31.86666666666659
+        },
+        {
+          "sentence": "scene01-04-02",
+          "start": 31.86666666666659,
+          "end": 35.99999999999992
+        }
+      ]
+    },
+    {
+      "scene": "scene05",
+      "note": "IRLSの実反復を進める",
+      "sentence": "scene05-04-01",
+      "pcm_onset": 260.14179166665883,
+      "actions": [
+        {
+          "sentence": "beat",
+          "start": 260.06666666665706,
+          "end": 271.46666666665703
+        }
+      ]
+    },
+    {
+      "scene": "scene07",
+      "note": "面積とCDFの点を連動",
+      "sentence": "scene07-03-01",
+      "pcm_onset": 361.6311249999856,
+      "actions": [
+        {
+          "sentence": "beat",
+          "start": 361.53333333331796,
+          "end": 370.86666666665127
+        }
+      ]
+    }
+  ],
+  "max_caption_clock_error": 2.842170943040401e-14,
+  "mp4_sha256": "e4ff0acbf3834bc12914d0266f6076290456ebec03d5f1af23c39b100df8ce60",
+  "visual_review": "Final MP4: all 67 extracted frames inspected visually (50 beats across all 9 scenes, all 11 mathematical captions, 6 before/after frames for synchronization in scenes 01, 05, 07). No remaining overlaps or clipping observed in these frames.",
+  "full_listening": false,
+  "visually_reviewed_frames": 67
+}
