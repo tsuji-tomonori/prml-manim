@@ -1,0 +1,590 @@
+{
+  "video": {
+    "path": "media/videos/prml_2_5_nonparametric_methods/480p15/PRML25NonparametricMethods.mp4",
+    "sha256": "22b3585c6f95f6c053355dbe50cb842185843227fe75b6abc3cd98186f470425",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 854,
+          "height": 480,
+          "r_frame_rate": "15/1",
+          "duration": "545.266011"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0",
+          "duration": "545.301333"
+        }
+      ],
+      "format": {
+        "duration": "545.302000",
+        "size": "12469261"
+      }
+    },
+    "audio_video_difference_seconds": 0.035321999999951004
+  },
+  "numerics": {
+    "normalization": {
+      "kde_areas": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "histogram_configurations": 150
+    },
+    "box_window_equal": 303,
+    "knn": {
+      "membership_cases": 1403,
+      "peaks": {
+        "3": 38.625120829721894,
+        "7": 9.062167414049423,
+        "25": 3.4292412677678827
+      },
+      "tail_ratios": [
+        1.0007364029962296,
+        1.0000073586652087,
+        1.000000073586116
+      ]
+    },
+    "binomial_variance": {
+      "20": 0.011375,
+      "200": 0.0011374999999999998
+    },
+    "classification": {
+      "initial_posterior": [
+        0.6,
+        0.4
+      ],
+      "grid": [
+        192,
+        320
+      ],
+      "adjacent_label_changes": {
+        "1": 841,
+        "5": 602,
+        "11": 552
+      }
+    },
+    "audio": {
+      "scenes": 9,
+      "sentences": 118,
+      "total_seconds": 545.2666666666667
+    }
+  },
+  "captions": {
+    "captions": 118,
+    "math_captions": 19,
+    "max_width": 9.34296875,
+    "max_height": 0.7010937500000001,
+    "phonetic_symbol_matches": 0
+  },
+  "formula_geometry_checks": 24,
+  "reading_review": {
+    "sentences": 118,
+    "corrected_sentences": 8,
+    "method": "audio_query mora text; no full listening"
+  },
+  "image_review": {
+    "reviewed_frames": 84,
+    "math_frames": 19,
+    "beat_frames": 59,
+    "sync_frames": 6,
+    "samples": [
+      {
+        "name": "scene01-beat01",
+        "time": 4.0,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat02",
+        "time": 12.033333333333324,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat03",
+        "time": 19.76666666666663,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat04",
+        "time": 28.43333333333327,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat05",
+        "time": 37.39999999999998,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat06",
+        "time": 46.03333333333371,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat01",
+        "time": 54.5666666666675,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat02",
+        "time": 62.633333333334555,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-02-01-math",
+        "time": 60.093333333334556,
+        "kind": "math",
+        "display": "全体が$N$個、そのビンの点が$n_i$個です。"
+      },
+      {
+        "name": "scene02-beat03",
+        "time": 71.20000000000132,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-03-01-math",
+        "time": 69.034666666668,
+        "kind": "math",
+        "display": "幅を$\\Delta_i$とすると、高さは割合を幅で割った値です。"
+      },
+      {
+        "name": "scene02-beat04",
+        "time": 79.40000000000083,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat05",
+        "time": 86.86666666666707,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat06",
+        "time": 94.1,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat07",
+        "time": 102.46666666666624,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-beat01",
+        "time": 111.33333333333238,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-01-01-math",
+        "time": 109.22399999999902,
+        "kind": "math",
+        "display": "調べたい位置$x$のまわりに、領域$R$を置きます。"
+      },
+      {
+        "name": "scene03-beat02",
+        "time": 119.06666666666524,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-02-01-math",
+        "time": 116.6373333333319,
+        "kind": "math",
+        "display": "領域の中の個数を$K$と呼びます。"
+      },
+      {
+        "name": "scene03-beat03",
+        "time": 127.09999999999815,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-03-02-math",
+        "time": 129.14399999999816,
+        "kind": "math",
+        "display": "$P\\simeq K/N$という近似です。"
+      },
+      {
+        "name": "scene03-beat04",
+        "time": 136.633333333331,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-04-01-math",
+        "time": 133.5999999999977,
+        "kind": "math",
+        "display": "領域の体積を$V$とします。一次元なら窓の幅です。"
+      },
+      {
+        "name": "scene03-beat05",
+        "time": 146.66666666666373,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-05-01-math",
+        "time": 144.15733333333043,
+        "kind": "math",
+        "display": "したがって、密度の推定値は$K/(NV)$です。"
+      },
+      {
+        "name": "scene03-beat06",
+        "time": 156.8666666666632,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-beat07",
+        "time": 168.9666666666626,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-sync-0.15",
+        "time": 116.44639999999858,
+        "kind": "sync"
+      },
+      {
+        "name": "scene03-sync-0.85",
+        "time": 121.32959999999856,
+        "kind": "sync"
+      },
+      {
+        "name": "scene04-beat01",
+        "time": 179.9333333333285,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat02",
+        "time": 188.09999999999468,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat03",
+        "time": 196.63333333332756,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat04",
+        "time": 205.66666666666038,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat05",
+        "time": 215.73333333332653,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-05-01-math",
+        "time": 212.60799999999318,
+        "kind": "math",
+        "display": "$D$次元では、一辺が$h$の箱の体積は$h^D$です。"
+      },
+      {
+        "name": "scene04-beat06",
+        "time": 225.79999999999256,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat01",
+        "time": 234.16666666665873,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat02",
+        "time": 241.93333333332492,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat03",
+        "time": 250.56666666665785,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-03-01-math",
+        "time": 247.5493333333245,
+        "kind": "math",
+        "display": "各山の標準偏差が、幅のつまみ$h$です。"
+      },
+      {
+        "name": "scene05-beat04",
+        "time": 259.83333333332394,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-04-01-math",
+        "time": 257.5466666666573,
+        "kind": "math",
+        "display": "$h$を小さくすると、一つ一つの点の影響が狭くなります。"
+      },
+      {
+        "name": "scene05-beat05",
+        "time": 268.73333333332346,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat06",
+        "time": 277.5999999999897,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat07",
+        "time": 287.0333333333225,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-sync-0.15",
+        "time": 256.629333333324,
+        "kind": "sync"
+      },
+      {
+        "name": "scene05-sync-0.85",
+        "time": 262.677333333324,
+        "kind": "sync"
+      },
+      {
+        "name": "scene06-beat01",
+        "time": 295.8999999999886,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-01-01-math",
+        "time": 293.6213333333219,
+        "kind": "math",
+        "display": "今度は個数$K$を、七に固定してみましょう。"
+      },
+      {
+        "name": "scene06-beat02",
+        "time": 304.1666666666548,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-beat03",
+        "time": 313.333333333321,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-beat04",
+        "time": 322.96666666665374,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-beat05",
+        "time": 330.93333333331987,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-05-01-math",
+        "time": 328.7813333333199,
+        "kind": "math",
+        "display": "今度は$K$を小さくします。"
+      },
+      {
+        "name": "scene06-beat06",
+        "time": 339.1999999999862,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-06-01-math",
+        "time": 335.8319999999862,
+        "kind": "math",
+        "display": "$K$を増やすと、広い範囲の点が必要になります。"
+      },
+      {
+        "name": "scene06-beat07",
+        "time": 349.79999999998563,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat01",
+        "time": 359.8333333333183,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat02",
+        "time": 368.66666666665117,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-02-01-math",
+        "time": 366.61333333331777,
+        "kind": "math",
+        "display": "色を区別せず、近い$K=5$個の点を集めます。"
+      },
+      {
+        "name": "scene07-beat03",
+        "time": 376.96666666665067,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat04",
+        "time": 385.2999999999835,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-04-02-math",
+        "time": 387.03733333331684,
+        "kind": "math",
+        "display": "$N_k$はクラス全体の個数、$K_k$は円の中の個数です。"
+      },
+      {
+        "name": "scene07-beat05",
+        "time": 394.8333333333163,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat06",
+        "time": 404.7333333333157,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-06-01-math",
+        "time": 402.76533333331577,
+        "kind": "math",
+        "display": "共通の体積と個数が消えて、$K_k/K$だけが残ります。"
+      },
+      {
+        "name": "scene07-beat07",
+        "time": 413.9333333333152,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-sync-0.15",
+        "time": 410.6975999999819,
+        "kind": "sync"
+      },
+      {
+        "name": "scene07-sync-0.85",
+        "time": 416.7530666666486,
+        "kind": "sync"
+      },
+      {
+        "name": "scene08-beat01",
+        "time": 422.8999999999814,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-01-01-math",
+        "time": 420.32266666664805,
+        "kind": "math",
+        "display": "$K=1$なら、一番近い点の色で決まります。"
+      },
+      {
+        "name": "scene08-beat02",
+        "time": 433.0333333333142,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-beat03",
+        "time": 443.8666666666469,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-03-01-math",
+        "time": 440.89333333331354,
+        "kind": "math",
+        "display": "$K=5$へ増やすと、周りの点の多数決に変わります。"
+      },
+      {
+        "name": "scene08-beat04",
+        "time": 453.833333333313,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-beat05",
+        "time": 463.4999999999791,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-beat06",
+        "time": 475.0333333333119,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat01",
+        "time": 486.49999999997783,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat02",
+        "time": 496.3333333333106,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat03",
+        "time": 506.6999999999767,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat04",
+        "time": 517.0333333333094,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-04-01-math",
+        "time": 514.4213333333093,
+        "kind": "math",
+        "display": "各軸を$M$分割すると、$D$次元のビン数は$M^D$です。"
+      },
+      {
+        "name": "scene09-beat05",
+        "time": 527.099999999984,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat06",
+        "time": 538.6999999999921,
+        "kind": "beat"
+      }
+    ],
+    "method": "21 contact sheets, each source frame at original 854x480 size"
+  },
+  "sync": [
+    {
+      "scene": "scene03",
+      "beat": 2,
+      "sentence": "scene03-02-01",
+      "speech_onset": 115.48412499999904,
+      "action_start": 115.39999999999857,
+      "action_end": 122.37599999999857
+    },
+    {
+      "scene": "scene05",
+      "beat": 4,
+      "sentence": "scene05-04-01",
+      "speech_onset": 255.39191666665872,
+      "action_start": 255.33333333332396,
+      "action_end": 263.973333333324
+    },
+    {
+      "scene": "scene07",
+      "beat": 7,
+      "sentence": "scene07-07-01",
+      "speech_onset": 409.48745833331833,
+      "action_start": 409.3999999999819,
+      "action_end": 418.05066666664857
+    }
+  ],
+  "scene_duration_max_delta": 2.4698465495021082e-11,
+  "audio": {
+    "silence_filter": "silencedetect=noise=-45dB:d=3",
+    "long_silence_count": 0,
+    "mean_volume_db": -26.5,
+    "max_volume_db": -6.0
+  },
+  "scene_durations": {
+    "scene01": 50.666666666666664,
+    "scene02": 56.6,
+    "scene03": 68.46666666666667,
+    "scene04": 54.53333333333333,
+    "scene05": 61.733333333333334,
+    "scene06": 63.266666666666666,
+    "scene07": 63.2,
+    "scene08": 63.266666666666666,
+    "scene09": 63.53333333333333
+  },
+  "limitations": [
+    "全編の通し聴取は未実施",
+    "全フレームの個別目視は未実施",
+    "480p15のみ生成"
+  ]
+}
