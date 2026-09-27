@@ -60,23 +60,32 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         out=Path(config.media_dir)/'prml31_timeline.json'
         out.write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-    def axes(self,center=(-1.7,.05,0),width=7.1,height=3.3,span=1.65):
-        ax=Axes(x_range=[0,1,.25],y_range=[-span,span,1],x_length=width,y_length=height,
+    def axes(self,center=(-1.7,.05,0),width=7.1,height=3.3,span=1.65,positive=False):
+        low=0 if positive else -span
+        ax=Axes(x_range=[0,1,.25],y_range=[low,span,1],x_length=width,y_length=height,
                 tips=False,axis_config={'color':MUTED,'stroke_width':1.3,'include_ticks':False}).move_to(center)
         labels=VGroup()
-        for x in [0,.5,1]:labels.add(tex(str(x),18,MUTED).next_to(ax.c2p(x,-span),DOWN,buff=.12))
-        for y in [-1,0,1]:labels.add(tex(str(y),18,MUTED).next_to(ax.c2p(0,y),LEFT,buff=.12))
-        labels.add(tex('x',22,MUTED).next_to(ax.c2p(1,-span),RIGHT,buff=.13))
+        for x in [0,.5,1]:labels.add(tex(str(x),18,MUTED).next_to(ax.c2p(x,low),DOWN,buff=.12))
+        for y in ([0,1] if positive else [-1,0,1]):labels.add(tex(str(y),18,MUTED).next_to(ax.c2p(0,y),LEFT,buff=.12))
+        labels.add(tex('x',22,MUTED).next_to(ax.c2p(1,low),RIGHT,buff=.13))
         self.add(ax,labels)
         return ax
 
     def equation(self,formula,color=WHITE,size=31,y=-2.55):
-        new=tex(formula,size,color).move_to([0,y,0])
+        new=tex(formula.replace('{{', ' {{'),size,color).move_to([0,y,0])
+        for term, c in [(r'w_1\phi_1(x)',GOLD),(r'w_2\phi_2(x)',PURPLE),
+                        (r'E_D(\mathbf w)',GOLD),(r'\frac\lambda2\mathbf w^T\mathbf w',PURPLE),
+                        (r'(t_n-\mathbf w^T\boldsymbol\phi_n)',GOLD),(r'\boldsymbol\phi_n',BASIS)]:
+            new.set_color_by_tex(term,c)
         if new.width>12.4: raise ValueError('Formula too wide: '+formula)
         old=self.formula
         self.formula=new
-        if old is None:return FadeIn(new)
-        return ReplacementTransform(old,new)
+        if old is not None:
+            self.remove(old)
+        # Keep complete equations legible throughout the narration. Morphing all
+        # glyphs for the full PCM beat leaves symbols scrambled for many seconds.
+        self.add(new)
+        return ShowPassingFlash(Underline(new,color=MUTED,buff=.13),time_width=.35)
 
     def note(self,text,pos=(3.6,1.55,0),color=MUTED,size=22):
         return jp(text,size,color).move_to(pos)
@@ -120,7 +129,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
                   self.equation(r'y(\mathbf{x},\mathbf{w})=\sum_{j=0}^{M-1}w_j\phi_j(\mathbf{x})=\mathbf{w}^T\boldsymbol\phi(\mathbf{x})'))
 
     def bases(self):
-        ax=self.axes(center=(-1.7,.15,0),span=1.2)
+        ax=self.axes(center=(-1.7,.15,0),span=1.15,positive=True)
         amp=ValueTracker(.4)
         polys=VGroup(curve(ax,U,DATA),curve(ax,U**2,PURPLE),curve(ax,U**3,ORANGE))
         active=always_redraw(lambda:curve(ax,amp.get_value()*U**2,GOLD))
@@ -176,7 +185,8 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
     def matrix(self):
         ax=self.axes(center=(-4,.1,0),width=4,height=2.7,span=1.2)
         xx=np.array([.2,.5,.8]);centers=np.array([.25,.75]);small=design(xx,centers,.18)
-        for j,c in enumerate([GOLD,PURPLE]):self.add(curve(ax,gaussian(U,centers,.18)[:,j],c))
+        basislines=VGroup(*[curve(ax,gaussian(U,centers,.18)[:,j],c) for j,c in enumerate([GOLD,PURPLE])])
+        self.add(basislines)
         cursor=ValueTracker(.2)
         guide=always_redraw(lambda:DashedLine(ax.c2p(cursor.get_value(),-1),ax.c2p(cursor.get_value(),1),color=DATA))
         self.add(guide)
@@ -194,13 +204,18 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.beat(self.equation(r'\Phi^T(\Phi\mathbf w-\mathbf t)=0\quad\Longrightarrow\quad\Phi^T\Phi\mathbf w=\Phi^T\mathbf t'),Indicate(cols[1],color=GOLD))
         self.beat(self.equation(r'\mathbf w_{\rm ML}=(\Phi^T\Phi)^{-1}\Phi^T\mathbf t=\Phi^\dagger\mathbf t'),FadeIn(self.note('逆行列の式：列が独立',(1.5,1.95,0),MUTED,22)))
         # Explicitly label the temporary degeneracy experiment, without changing the stored data.
-        duplicate=cols[1].copy().move_to(cols[2])
-        self.beat(Transform(cols[2],duplicate),FadeIn(self.note('重なる列 → SVD で扱う',(1.5,-1.2,0),GOLD,22)))
+        duplicate=cols[1].copy().set_color(PURPLE).move_to(cols[2])
+        duplicate_y=.2+.2*small[:,1]
+        duplicate_ym=DecimalMatrix(duplicate_y[:,None],element_to_mobject_config={'num_decimal_places':2,'font_size':27},v_buff=.7).move_to(ym)
+        self.beat(Transform(cols[2],duplicate),Transform(ym,duplicate_ym),
+                  Transform(basislines[1],basislines[0].copy().set_color(PURPLE)),
+                  self.equation(r'\mathbf w=\Phi^\dagger\mathbf t\qquad(\mathrm{SVD})'),
+                  FadeIn(self.note('別の例：同じ基底を2回使う',(1.5,-1.2,0),GOLD,22)))
         self.beat(self.equation(r'w_0=\bar t-\sum_{j=1}^{M-1}w_j\bar\phi_j'),Indicate(cols[0],color=DATA))
 
     def projection(self):
-        ax=Axes(x_range=[0,3.5,1],y_range=[0,3.5,1],x_length=4.1,y_length=4.1,tips=False,
-                axis_config={'color':MUTED,'include_numbers':True,'font_size':20}).move_to([-2.6,.1,0])
+        ax=Axes(x_range=[0,3.5,1],y_range=[0,3.5,1],x_length=3.8,y_length=3.8,tips=False,
+                axis_config={'color':MUTED,'include_numbers':True,'font_size':20}).move_to([-2.6,.2,0])
         self.add(ax,tex(r't_1,\ y_1',23).next_to(ax,DOWN,buff=.15),tex(r't_2,\ y_2',23).next_to(ax,LEFT,buff=.1))
         target=Arrow(ax.c2p(0,0),ax.c2p(1,3),buff=0,color=DATA)
         self.beat(GrowArrow(target),self.equation(r'\mathbf t=(1,3)^T',DATA))
@@ -263,8 +278,10 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.add(dots(ax),always_redraw(lambda:curve(ax,GRID@weights())))
         self.add(self.slider(loglam,-6,2,(0,2.2,0),r'\log_{10}\lambda=',PURPLE,width=5))
         self.beat(loglam.animate.set_value(-5),self.equation(r'y(x)=\mathbf w^T\boldsymbol\phi(x)'))
-        bars=self.bars(weights,scale=.12)
-        self.add(self.note('重み：共通の線形縮尺',(3.8,1.55,0),PURPLE,19),readout(r'\|\mathbf w\|=',lambda:np.linalg.norm(weights()),(3.7,.95,0),PURPLE))
+        bars=self.bars(weights,pos=(3.8,-.3,0),scale=.09)
+        self.add(self.note('重み：共通の線形縮尺',(3.8,1.55,0),PURPLE,19),readout(r'\|\mathbf w\|=',lambda:np.linalg.norm(weights()),(3.7,1.1,0),PURPLE))
+        self.add(Line([2.5,-.3,0],[5.1,-.3,0],color=MUTED,stroke_width=1))
+        self.add(VGroup(*[tex(str(i),16,MUTED).move_to([3.8+(i-4)*.29,-1.7,0]) for i in range(9)]))
         self.beat(FadeIn(bars))
         self.beat(self.equation(r'{{E_D(\mathbf w)}}+{{\frac\lambda2\mathbf w^T\mathbf w}}'))
         self.formula.set_color_by_tex('E_D',GOLD).set_color_by_tex('lambda',PURPLE)
@@ -291,7 +308,9 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.beat(FadeIn(opt),self.equation(r'\mathbf w^*='+r'('+f'{L2_POINT[0]:.3f},{L2_POINT[1]:.3f}'+r')^T',MODEL))
         self.beat(q.animate.set_value(1),radius.animate.set_value(np.linalg.norm(center-L1_POINT)),opt.animate.move_to(ax.c2p(*L1_POINT)),self.equation(r'|w_1|+|w_2|\le1',PURPLE))
         self.beat(Indicate(opt,color=GOLD),self.equation(r'\mathbf w^*=(1,0)^T\quad\Longrightarrow\quad w_2\phi_2(x)=0',MODEL))
-        self.remove(level,opt)
+        self.remove(level,opt,self.formula)
+        self.formula=tex(r'\sum_j|w_j|^q\le1',31,PURPLE).move_to([0,-2.55,0])
+        self.add(self.formula)
         self.beat(phases=[('q2',self.sentence_duration(0)/2,lambda:q.animate.set_value(2)),
                           ('q1',self.sentence_duration(0)/2,lambda:q.animate.set_value(1)),
                           ('q4',self.sentence_duration(1)/2,lambda:q.animate.set_value(4)),
@@ -305,7 +324,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         tmat=np.column_stack([T,T2]);wm=fit(t=tmat)
         first=lambda:GRID@wm[:,0]+change.get_value()
         self.beat(FadeIn(dots(ax)),FadeIn(dots(ax,t=T2,color=ORANGE)),self.equation(r'\mathbf t_n=(t_{n1},t_{n2})^T'))
-        basis_curves=VGroup(*[curve(ax,GRID[:,j],COLORS[j%5]).set_opacity(.5) for j in range(1,9)])
+        basis_curves=VGroup(*[curve(ax,GRID[:,j],COLORS[j%5]).set_stroke(opacity=.5) for j in range(1,9)])
         self.beat(Create(basis_curves),self.equation(r'\mathbf x\longrightarrow\boldsymbol\phi(\mathbf x)',BASIS))
         self.remove(basis_curves)
         c1=always_redraw(lambda:curve(ax,p.get_value()*first(),DATA));c2=always_redraw(lambda:curve(ax,p.get_value()*(GRID@wm[:,1]),ORANGE))
