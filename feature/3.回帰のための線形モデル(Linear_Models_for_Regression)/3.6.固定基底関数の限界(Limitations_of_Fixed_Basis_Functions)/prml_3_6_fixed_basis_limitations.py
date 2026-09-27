@@ -103,11 +103,11 @@ class PRML36FixedBasisLimitations(NarratedScene):
         dots=grid(1); label=tex(r'D=1\qquad B=5',36).move_to([0,-2.2,0])
         self.add(label);self.beat(LaggedStart(*[FadeIn(d) for d in dots],lag_ratio=.1))
         nxt=grid(2);lab2=tex(r'D=2\qquad B=25',36).move_to(label)
-        self.beat(ReplacementTransform(dots,nxt),ReplacementTransform(label,lab2));dots=nxt;label=lab2
+        self.beat(ReplacementTransform(dots,nxt,run_time=5),ReplacementTransform(label,lab2,run_time=.7));dots=nxt;label=lab2
         nxt=grid(3);lab3=tex(r'D=3\qquad B=125',36).move_to(label)
-        self.beat(ReplacementTransform(dots,nxt),ReplacementTransform(label,lab3));dots=nxt;label=lab3
+        self.beat(ReplacementTransform(dots,nxt,run_time=5),ReplacementTransform(label,lab3,run_time=.7));dots=nxt;label=lab3
         formula=MathTex('B=', 'K^D',font_size=44).move_to([0,-2.2,0]);formula[1].set_color(YELLOW_BASIS)
-        self.beat(ReplacementTransform(label,formula),Indicate(dots,scale_factor=1.03))
+        self.beat(ReplacementTransform(label,formula,run_time=.7),Indicate(dots,scale_factor=1.03,run_time=5))
         self.remove(dots)
         ax=self.axes((1,10,1),(0,7,1),center=(-.6,.15,0),width=7.8,height=3.35,labels=('D',r'\log_{10}B'))
         for y in range(1,7):
@@ -156,9 +156,9 @@ class PRML36FixedBasisLimitations(NarratedScene):
         self.beat(LaggedStart(*[FadeIn(d) for d in centers],lag_ratio=.008))
         self.beat(*[d.animate.set_opacity(1 if n else .1) for d,n in zip(centers,NEAR)])
         selected=jp(f'距離 < 0.18：{int(NEAR.sum())} 個',26,GREEN_BASIS).move_to([3,.2,0]);self.add(selected)
-        self.beat(Indicate(VGroup(*[d for d,n in zip(centers,NEAR) if not n]),color=ORANGE,scale_factor=1.07))
+        self.beat(Indicate(VGroup(*[d for d,n in zip(centers,NEAR) if n]),color=GREEN_BASIS,scale_factor=1.12))
         initial=GRID[np.round(np.linspace(0,80,12)).astype(int)]
-        movers=VGroup(*[Dot(ax.c2p(*v),color=ORANGE,radius=.07) for v in initial]);self.remove(centers);self.add(movers)
+        movers=VGroup(*[Dot(ax.c2p(*v),color=ORANGE,radius=.07) for v in initial]);self.remove(centers,*centers);self.add(movers)
         twelve=jp('データから選ぶ：12 個',28,GREEN_BASIS).move_to(count)
         self.beat(*[d.animate.move_to(ax.c2p(*v)) for d,v in zip(movers,LOCAL)],ReplacementTransform(count,twelve),FadeOut(selected))
         s=ValueTracker(-.92);h=ValueTracker(.22)
@@ -217,7 +217,7 @@ class PRML36FixedBasisLimitations(NarratedScene):
         mode.set_value(1);progress.set_value(-.8)
         self.beat(progress.animate.set_value(.8))
         text=jp('広がり：2 次元\n目標に効く方向：1',25,GREEN_BASIS).move_to([3.2,.1,0])
-        self.remove(value);self.beat(FadeIn(text),Indicate(dots,scale_factor=1.02))
+        self.remove(value);self.beat(FadeIn(text),Circumscribe(dots,color=GREEN_BASIS))
         self.beat(angle.animate.set_value(.15))
 
     def adaptive(self):
@@ -265,7 +265,7 @@ class PRML36FixedBasisLimitations(NarratedScene):
         heat,arrow=self.heatmap(ax,angle,slope,bias)
         self.beat(angle.animate.set_value(PI/4))
         reminder=VGroup(jp('データがある場所',28,GREEN_BASIS),jp('目標に効く方向',28,YELLOW_BASIS)).arrange(DOWN,buff=.45).move_to([3,-.2,0])
-        self.beat(Write(reminder),Indicate(colored,scale_factor=1.02))
+        self.beat(Write(reminder),Circumscribe(colored,color=GREEN_BASIS))
         models=jp('基底を選ぶ・基底を調整する',25).move_to([0,-2.55,0])
         self.beat(Write(models),angle.animate.set_value(.4))
         cues=self.beat_cues()
