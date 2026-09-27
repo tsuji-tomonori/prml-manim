@@ -116,7 +116,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         prob=lambda:np.array([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])/sum([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])
         heights=always_redraw(lambda:VGroup(*[Dot(ax.c2p(x.get_value(),.5*normal1(x.get_value(),m)),radius=.07,color=c) for m,c in [(-1.1,RED_CLS),(1.1,BLUE_CLS)]]))
         self.add(heights);bars=self.probability_bars(prob)
-        self.beat(TransformFromCopy(heights,bars[1].copy(),remover=True),Indicate(heights))
+        self.beat(Indicate(heights[0],color=RED_CLS,scale_factor=1),Indicate(heights[1],color=BLUE_CLS,scale_factor=1),Circumscribe(bars,color=GOLD))
         self.beat(x.animate.set_value(1.1))
         f=self.equation(f,r'p(C_1\mid x)=',r'\frac{q_1}{q_1+q_2}',r'=\frac{p(x\mid C_1)p(C_1)}{\sum_jp(x\mid C_j)p(C_j)}',colors={1:GOLD})
         self.beat(x.animate.set_value(0),Circumscribe(f,color=MUTED,buff=.1))
@@ -132,12 +132,13 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.beat(Indicate(dot))
         self.remove(f);f=self.formula(r'a=\ln\frac{q_1}{q_2}',r'\qquad q_1/q_2=3\Rightarrow p=3/4');f[0].set_color(GOLD)
         self.beat(a.animate.set_value(np.log(3)))
+        self.remove(f);f=self.formula(r'a=\ln\frac{q_1}{q_2}');f.set_color(GOLD)
         self.beat(Create(curve),a.animate.set_value(0))
         num=readout('a=',a.get_value,[4.55,2.55,0],GOLD);self.add(num)
         self.beat(a.animate.set_value(4))
         self.beat(a.animate.set_value(-4))
         self.remove(f);f=self.formula(r'\sigma(a)=\frac{1}{1+e^{-a}}',r'\qquad\sigma(-a)=1-\sigma(a)');f[0].set_color(GOLD)
-        self.beat(a.animate.set_value(0),Circumscribe(f,color=MUTED,buff=.1))
+        self.beat(a.animate.set_value(4),Circumscribe(f,color=MUTED,buff=.1))
         self.equation(f,r'a=\ln\frac{p}{1-p}',r'\qquad p=\sigma(a)',colors={0:GOLD})
 
     def shared(self):
@@ -199,8 +200,8 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         boundary=self.boundary(ax,means,covs,lambda:[1/3]*3);self.beat(Create(boundary))
         self.remove(note);self.note('緑の共分散：共有の形から、別の形へ').move_to([-1.5,2.55,0])
         slider=self.slider(t,0,1,[4.65,2.35,0],r'\tau',GREEN_CLS,width=2.2)
+        self.remove(f);f=self.formula(r'a_i-a_j=-\tfrac12x^T',r'(\Sigma_i^{-1}-\Sigma_j^{-1})',r'x+b_{ij}^Tx+c_{ij}',size=30);f[1].set_color(GREEN_CLS)
         self.beat(t.animate.set_value(1))
-        self.remove(f);f=self.formula(r'a_i-a_j=-\tfrac12x^T',r'(\Sigma_i^{-1}-\Sigma_j^{-1})',r'x+\text{linear terms}',size=30);f[1].set_color(GREEN_CLS)
         self.beat(Circumscribe(f[1],color=GREEN_CLS),x.animate.set_value(-.5))
         self.beat(t.animate.set_value(0))
 
