@@ -15,8 +15,9 @@ class NarratedScene(Scene):
         self.subtitle = None
         self.formula = None
         self.next_section(self.story['id'])
-        self.add(jp(self.story['title'], 33).move_to([0, 3.48, 0]))
-        self.add(jp('PRML 1.5  /  ' + str(index+1) + '  /  9', 15, '#A8B2C5').move_to([0, 3.03, 0]))
+        self.header=VGroup(jp(self.story['title'], 33).move_to([0, 3.48, 0]),
+                           jp('PRML 1.5  /  ' + str(index+1) + '  /  9', 15, '#A8B2C5').move_to([0, 3.03, 0]))
+        self.add(self.header)
         entry = self.manifest[self.story['id']]
         if not valid_entry(self.story, entry):
             raise RuntimeError('Missing or stale narration: ' + self.story['id'])

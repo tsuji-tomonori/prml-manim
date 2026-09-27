@@ -79,10 +79,14 @@ class PRML15DecisionTheory(NarratedScene):
         term_colors = {r'p(x,C_1)': BLUE_C1, r'p(x,C_2)': ORANGE_C2,
                        r'p(C_k\mid x)': BLUE_C1, r'L_{kj}': YELLOW_LOSS,
                        r'\mathrm{Var}[t\mid x]': PURPLE_HOLD}
-        self.formula=MathTex(expression,font_size=size,
-                             substrings_to_isolate=list(term_colors)).move_to(pos)
+        # TeX colors keep one complete SVG group. Nested substring isolation in
+        # this CE version drops glyphs following an isolated term in fractions.
+        template=TexTemplate()
+        template.add_to_preamble(r'\usepackage{xcolor}')
+        colored=expression
         for term,color in term_colors.items():
-            self.formula.set_color_by_tex(term,color,substring=False)
+            colored=colored.replace(term, r'{\color[HTML]{'+color[1:]+'}'+term+'}')
+        self.formula=MathTex(colored,font_size=size,tex_template=template).move_to(pos)
         if colors:
             for text,color in colors.items():
                 self.formula.set_color_by_tex(text,color,substring=False)
@@ -130,8 +134,8 @@ class PRML15DecisionTheory(NarratedScene):
 
     def wipe_body(self):
         # Retain the title and subtitle while replacing the visual experiment.
-        keep=self.mobjects[:2]
-        self.remove(*[m for m in self.mobjects if m not in keep and m is not self.subtitle])
+        self.remove(*[m for m in self.mobjects if m is not self.header and m is not self.subtitle])
+        self.add(self.header)
         self.formula=None
 
     def question(self):
@@ -139,18 +143,20 @@ class PRML15DecisionTheory(NarratedScene):
         bar=probability_bar(p.get_value)
         self.add(bar,self.note('説明用の例：画像から行動へ',color=BLUE_C1))
         numbers=VGroup(readout(r'p(C_1\mid x)=',p.get_value,(-2,1.3,0),BLUE_C1),
-                       readout(r'p(C_2\mid x)=',lambda:1-p.get_value,(2,1.3,0),ORANGE_C2))
+                       readout(r'p(C_2\mid x)=',lambda:1-p.get_value(),(2,1.3,0),ORANGE_C2))
         self.add(numbers)
-        self.beat(Indicate(bar.copy(),color=BLUE_C1))
+        self.beat(Indicate(bar.copy(),remover=True,color=BLUE_C1))
         a=self.note('病気として対応',(-2,-.7,0),BLUE_C1,28)
         b=self.note('健康と判断',(2,-.7,0),ORANGE_C2,28)
         self.beat(FadeIn(a,shift=UP*.15),FadeIn(b,shift=UP*.15))
         eq=self.formula_at(r'x\quad\longrightarrow\quad p(C_k\mid x)\quad\longrightarrow\quad a_j')
         self.beat(Indicate(eq))
-        self.add(readout('x=',lambda:.5*np.log((1-p.get_value())/p.get_value()),(0,-1.7,0),GREEN_ACTION,2))
+        self.input_value=readout('x=',lambda:.5*np.log((1-p.get_value())/p.get_value()),(0,-1.7,0),GREEN_ACTION,2)
+        self.add(self.input_value)
         self.beat(p.animate.set_value(.85),start_sentence=1)
         eq=self.formula_at(r'p(C_k\mid x)=\frac{p(x\mid C_k)p(C_k)}{p(x)}\qquad(1.77)',34)
         self.beat(Indicate(eq,color=BLUE_C1))
+        self.remove(self.input_value)
         inference=self.note('推論：確率を求める',(-2,-1.6,0),BLUE_C1)
         decision=self.note('決定：行動を選ぶ',(2,-1.6,0),GREEN_ACTION)
         self.beat(FadeIn(inference),FadeIn(decision))
@@ -170,7 +176,7 @@ class PRML15DecisionTheory(NarratedScene):
         self.add(shades)
         values=VGroup(readout(r'P(\mathrm{mistake})=',lambda:sum(mistake_parts(boundary.get_value())),(0,-1.85,0),YELLOW_LOSS))
         self.add(values)
-        self.beat(Indicate(shades.copy(),color=YELLOW_LOSS))
+        self.beat(Indicate(shades.copy(),remover=True,color=YELLOW_LOSS))
         self.beat(boundary.animate.set_value(1.5))
         self.beat(boundary.animate.set_value(0),end_sentence=1)
         eq=self.formula_at(r'P(\mathrm{mistake})=\int_{R_1}p(x,C_2)\,dx+\int_{R_2}p(x,C_1)\,dx\quad(1.78)',29)
@@ -218,7 +224,7 @@ class PRML15DecisionTheory(NarratedScene):
         self.add(self.note('見逃しの損失：原文例 1000',(-2.8,-1.3,0),YELLOW_LOSS,20))
         self.beat(cost.animate.set_value(1000),end_sentence=1)
         eq=self.formula_at(r'R_j(x)=\sum_k L_{kj}p(C_k\mid x)\quad j^*(x)=\arg\min_j R_j(x)\quad(1.81)',28)
-        global_risk=tex(r'\mathbb{E}[L]=\sum_k\sum_j\int_{R_j}L_{kj}p(x,C_k)\,dx\quad(1.80)',26).move_to([0,-1.97,0])
+        global_risk=tex(r'\mathbb{E}[L]=\sum_k\sum_j\int_{R_j}L_{kj}p(x,C_k)\,dx\quad(1.80)',26).move_to([0,-1.84,0])
         self.add(global_risk)
         self.beat(Indicate(eq))
         self.wipe_body()
@@ -260,8 +266,19 @@ class PRML15DecisionTheory(NarratedScene):
         ax,axgroup=self.axes(y=(0,1,.5))
         legend=self.legend()
         factor=ValueTracker(0)
+        # The vertical unit expands continuously from 0.25 to 1 as densities
+        # become posterior probabilities, avoiding a nearly empty initial plot.
+        scale=lambda:.25+.75*factor.get_value()
+        for tick,value in zip(list(axgroup[1][11:14]),[0,.5,1]):
+            number=DecimalNumber(value*scale(),num_decimal_places=2,font_size=17,color=MUTED)
+            position=tick.get_center().copy()
+            number.move_to(position)
+            number.add_updater(lambda m,value=value,position=position:m.set_value(value*scale()).move_to(position))
+            self.remove(tick)
+            axgroup[1].remove(tick)
+            self.add(number)
         def density(k):
-            return lambda x: (1-factor.get_value())*joint(x,k)+factor.get_value()*(posterior(x) if k==1 else 1-posterior(x))
+            return lambda x: ((1-factor.get_value())*joint(x,k)+factor.get_value()*(posterior(x) if k==1 else 1-posterior(x)))/scale()
         curves=always_redraw(lambda:VGroup(curve(ax,density(1),-5,5,BLUE_C1),curve(ax,density(2),-5,5,ORANGE_C2)))
         self.add(curves)
         eq=self.formula_at(r'p(x\mid C_k),p(C_k)\ \longrightarrow\ p(x,C_k)',33)
@@ -301,7 +318,7 @@ class PRML15DecisionTheory(NarratedScene):
         self.add(bar,readout(r'p_{\rm new}(C_1\mid x)=',p,(0,1.35,0),BLUE_C1,4),
                  self.note('学習時は２クラスを同じ数だけ集めた',size=23))
         rail=self.slider(prior,.01,.5,pos=(0,-.9,0),label=r'p_{\rm new}(C_1)',ticks=[.01,.5])
-        self.beat(Indicate(bar.copy()))
+        self.beat(Indicate(bar.copy(),remover=True))
         self.beat(prior.animate.set_value(.01))
         eq=self.formula_at(r'p_{\rm new}(C_k\mid x)\propto p_{\rm train}(C_k\mid x)\frac{p_{\rm new}(C_k)}{p_{\rm train}(C_k)}',31)
         self.add(self.note('前提：クラスごとの入力分布は同じ',(0,-1.7,0),MUTED,21))
@@ -324,12 +341,14 @@ class PRML15DecisionTheory(NarratedScene):
         self.beat(evidence.animate.set_value(1),start_sentence=1)
 
     def regression(self):
-        ax,_=self.axes(x=(-3,3,1),y=(0,.8,.4),xlabel='t',height=2.5,center=(0,.45,0))
+        ax,ag=self.axes(x=(-3,3,1),y=(0,.8,.4),xlabel='t',height=2.25,center=(0,.75,0))
+        for tick in ag[1][:7]:
+            tick.shift(UP*.4)
         mu=ValueTracker(0)
         pred=ValueTracker(-1.7)
         density=always_redraw(lambda:curve(ax,lambda t:gaussian(t,mu.get_value(),.6),-3,3,BLUE_C1))
         self.add(density,self.note('入力を固定したときの分布',color=BLUE_C1))
-        self.beat(Indicate(density.copy()))
+        self.beat(Indicate(density.copy(),remover=True))
         line=self.boundary(ax,pred.get_value,.8,YELLOW_LOSS)
         self.add(line,readout('y=',pred.get_value,(-2,-1.65,0),YELLOW_LOSS,2),
                  readout(r'\mathbb{E}[(y-t)^2\mid x]=',lambda:(pred.get_value()-mu.get_value())**2+.36,(2,-1.65,0),YELLOW_LOSS,3))
@@ -341,7 +360,7 @@ class PRML15DecisionTheory(NarratedScene):
             for t in xs:
                 val=(pred.get_value()-t)**2*gaussian(t,mu.get_value(),.6)
                 width=np.linalg.norm(ax.c2p(.19,0)-ax.c2p(0,0))
-                rect=Rectangle(width=width,height=max(.001,.22*val),stroke_width=0,fill_color=YELLOW_LOSS,fill_opacity=.6)
+                rect=Rectangle(width=width,height=max(.001,.35*val),stroke_width=0,fill_color=YELLOW_LOSS,fill_opacity=.6)
                 rect.move_to(ax.c2p(t,0)+DOWN*.02,aligned_edge=UP)
                 result.add(rect)
             return result
@@ -354,7 +373,8 @@ class PRML15DecisionTheory(NarratedScene):
         self.beat(Indicate(eq,color=GREEN_ACTION))
         eq=self.formula_at(r'\mathbb{E}[(y-t)^2\mid x]=(y-\mathbb{E}[t\mid x])^2+\mathrm{Var}[t\mid x]',30)
         self.add(self.note('平均で予測しても、分散 0.36 は残る',(0,-2.03,0),GREEN_ACTION,21))
-        self.beat(pred.animate.set_value(.65))
+        self.beat(phases=[('move away from mean',self.sentence_duration(0),lambda:pred.animate.set_value(.65)),
+                          ('return to mean',self.sentence_duration(1),lambda:pred.animate.set_value(0))])
         pred.set_value(0)
         self.wipe_body()
         ax,_=self.axes(x=(-2,2,1),y=(-1.5,1.5,1),xlabel='x',ylabel='t',height=2.7)
@@ -374,7 +394,7 @@ class PRML15DecisionTheory(NarratedScene):
         dens=curve(ax,mixture,-3,3.5,BLUE_C1)
         marker=self.boundary(ax,pred.get_value,.65,YELLOW_LOSS)
         self.add(dens,marker,self.note('同じ条件付き分布に、二つの山',color=BLUE_C1),readout('y=',pred.get_value,(0,-1.8,0),YELLOW_LOSS,3))
-        self.beat(Indicate(marker.copy()))
+        self.beat(Indicate(marker.copy(),remover=True))
         self.wipe_body()
         ax,_=self.axes(x=(-2,2,1),y=(0,4,2),xlabel='y-t',height=2.8)
         q=ValueTracker(2)
@@ -385,12 +405,15 @@ class PRML15DecisionTheory(NarratedScene):
         self.beat(q.animate.set_value(1))
         self.wipe_body()
         ax,_=self.axes(x=(-3,3.5,1),y=(0,.65,.3),xlabel='t',height=2.6)
-        self.add(curve(ax,mixture,-3,3.5,BLUE_C1),self.note('平均 → 中央値：面積を半分に分ける',color=GREEN_ACTION))
+        median_note=self.note('平均 → 中央値：面積を半分に分ける',color=GREEN_ACTION)
+        self.add(curve(ax,mixture,-3,3.5,BLUE_C1),median_note)
         marker=self.boundary(ax,pred.get_value,.65,YELLOW_LOSS)
         shade=always_redraw(lambda:area(ax,mixture,-3,pred.get_value(),GREEN_ACTION,.3))
         self.add(marker,shade,readout('y=',pred.get_value,(0,-1.8,0),YELLOW_LOSS,3))
         self.formula_at(r'\int_{-\infty}^{y^*}p(t\mid x)\,dt=\frac12\qquad(q=1)',32)
         self.beat(pred.animate.set_value(MEDIAN),start_sentence=1)
+        self.remove(median_note)
+        self.add(self.note('最頻値：狭い許容幅に入る確率',color=PURPLE_HOLD))
         window=ValueTracker(.8)
         self.remove(shade)
         pred.set_value(MODE)
@@ -411,7 +434,7 @@ class PRML15DecisionTheory(NarratedScene):
         label=always_redraw(lambda:jp('病気と判断' if .92<.08*cost.get_value() else '健康と判断',27,GREEN_ACTION).move_to([0,-1.25,0]))
         self.add(choice,label)
         self.formula_at(r'j^*(x)=\arg\min_j\sum_k L_{kj}p(C_k\mid x)',34)
-        self.beat(Indicate(label.copy()))
+        self.beat(Indicate(label.copy(),remover=True))
         self.beat(cost.animate.set_value(20),end_sentence=1)
         self.beat(Indicate(self.formula,color=GREEN_ACTION))
         self.remove(choice,label)
