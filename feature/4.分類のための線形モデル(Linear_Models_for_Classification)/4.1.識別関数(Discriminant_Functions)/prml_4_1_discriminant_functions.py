@@ -106,7 +106,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         footdot=Dot(ax.c2p(*foot),color=MUTED)
         perp=always_redraw(lambda:DashedLine(ax.c2p(*foot),ax.c2p(*point())+UP*1e-6,color=YELLOW_W,stroke_width=3))
         self.add(dot,footdot);self.beat(Create(perp))
-        arrow=Arrow(ax.c2p(0,0),ax.c2p(*(u*1.2)),buff=0,color=YELLOW_W)
+        arrow=always_redraw(lambda:Arrow(ax.c2p(0,0),ax.c2p(*(u*scale.get_value())),buff=0,color=YELLOW_W))
         self.add(arrow,readout('y(x)=',lambda:scale.get_value()*r.get_value(),[3.7,1.5,0],YELLOW_W),
                  readout(r'\|w\|=',scale.get_value,[3.7,.65,0],PURPLE_B))
         self.beat(phases=[('positive distance',self.sentence_duration(0),lambda:r.animate.set_value(1.8)),
@@ -141,10 +141,10 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.add(ring);self.beat(px.animate.set_value(0),py.animate.set_value(-1.4))
         f2=self.bottom(r'(w_k-w_j)^Tx+(w_{k0}-w_{j0})=0')
         self.beat(ReplacementTransform(f,f2),py.animate.set_value(1.8))
-        a=np.array([.6,.7]);b=np.array([2.4,1.4]);t=ValueTracker(0)
-        self.remove(dot,ring);path=Line(ax.c2p(*a),ax.c2p(*b),color=YELLOW_W)
-        pt=always_redraw(lambda:Dot(ax.c2p(*((1-t.get_value())*a+t.get_value()*b)),color=WHITE))
-        self.add(path,pt);self.beat(t.animate.set_value(1),Write(tex(r'\widehat{x}=\lambda x_A+(1-\lambda)x_B',25).move_to([3.7,-1.4,0])))
+        a=np.array([.6,.7]);b=np.array([2.4,1.4])
+        px.set_value(a[0]);py.set_value(a[1])
+        path=Line(ax.c2p(*a),ax.c2p(*b),color=YELLOW_W)
+        self.add(path);self.beat(px.animate.set_value(b[0]),py.animate.set_value(b[1]),Write(tex(r'\widehat{x}=\lambda x_A+(1-\lambda)x_B',25).move_to([3.7,-1.4,0])))
         self.add(slider(bias,0,2,[3.7,-.8,0],'w_{30}',GREEN_CLS));self.beat(bias.animate.set_value(2))
 
     def least_squares_scene(self):
