@@ -1,0 +1,40 @@
+{
+  "least_squares": {
+    "normal_residual": 8.025463725450834e-14,
+    "noise_variance_ml": 0.008904525602347195
+  },
+  "gaussian_likelihood": true,
+  "ridge": {
+    "max_curve_abs": 1.015409287625038,
+    "norm_at_1e_minus6": 24.904535837409856,
+    "norm_at_100": 0.05667805530069605
+  },
+  "lms": {
+    "overshoot_prediction": 1.5450425653798414,
+    "target": 1.0775838657034398
+  },
+  "constraints": {
+    "tested_q": [
+      1,
+      1.1,
+      1.25,
+      1.5,
+      1.75,
+      2
+    ],
+    "l1": [
+      1.0,
+      0.0
+    ],
+    "l2": [
+      0.9635179096299405,
+      0.2676438637860946
+    ]
+  },
+  "multiple_outputs": true,
+  "audio": {
+    "scenes": 9,
+    "sentences": 133,
+    "duration": 615.4
+  }
+}
