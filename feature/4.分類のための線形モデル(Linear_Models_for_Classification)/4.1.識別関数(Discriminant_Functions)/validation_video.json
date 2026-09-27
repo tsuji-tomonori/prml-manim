@@ -1,0 +1,453 @@
+{
+  "frames": [
+    {
+      "label": "scene01 beat 1",
+      "time": 5.328,
+      "path": "frame-000.png"
+    },
+    {
+      "label": "scene01 beat 2",
+      "time": 13.495999999999993,
+      "path": "frame-001.png"
+    },
+    {
+      "label": "scene01 beat 3",
+      "time": 22.15466666666663,
+      "path": "frame-002.png"
+    },
+    {
+      "label": "scene01 beat 4",
+      "time": 32.18399999999993,
+      "path": "frame-003.png"
+    },
+    {
+      "label": "scene01-04-01 math",
+      "time": 27.32533333333327,
+      "path": "frame-004.png"
+    },
+    {
+      "label": "scene01 beat 5",
+      "time": 41.277333333333395,
+      "path": "frame-005.png"
+    },
+    {
+      "label": "scene01-05-01 math",
+      "time": 37.33600000000006,
+      "path": "frame-006.png"
+    },
+    {
+      "label": "scene01 beat 6",
+      "time": 49.81066666666715,
+      "path": "frame-007.png"
+    },
+    {
+      "label": "scene02 beat 1",
+      "time": 58.20000000000091,
+      "path": "frame-008.png"
+    },
+    {
+      "label": "scene02 beat 2",
+      "time": 66.72533333333466,
+      "path": "frame-009.png"
+    },
+    {
+      "label": "scene02 beat 3",
+      "time": 75.18133333333454,
+      "path": "frame-010.png"
+    },
+    {
+      "label": "scene02 beat 4",
+      "time": 83.82133333333405,
+      "path": "frame-011.png"
+    },
+    {
+      "label": "scene02-04-02 math",
+      "time": 83.32533333333404,
+      "path": "frame-012.png"
+    },
+    {
+      "label": "scene02 beat 5",
+      "time": 93.1306666666669,
+      "path": "frame-013.png"
+    },
+    {
+      "label": "scene03 beat 1",
+      "time": 103.67199999999968,
+      "path": "frame-014.png"
+    },
+    {
+      "label": "scene03 beat 2",
+      "time": 113.35733333333239,
+      "path": "frame-015.png"
+    },
+    {
+      "label": "scene03 beat 3",
+      "time": 122.79733333333188,
+      "path": "frame-016.png"
+    },
+    {
+      "label": "scene03 beat 4",
+      "time": 131.51466666666465,
+      "path": "frame-017.png"
+    },
+    {
+      "label": "scene03 beat 5",
+      "time": 140.2986666666642,
+      "path": "frame-018.png"
+    },
+    {
+      "label": "scene03 beat 6",
+      "time": 149.42399999999702,
+      "path": "frame-019.png"
+    },
+    {
+      "label": "scene04 beat 1",
+      "time": 159.15199999999652,
+      "path": "frame-020.png"
+    },
+    {
+      "label": "scene04 beat 2",
+      "time": 169.8053333333293,
+      "path": "frame-021.png"
+    },
+    {
+      "label": "scene04 beat 3",
+      "time": 179.922666666662,
+      "path": "frame-022.png"
+    },
+    {
+      "label": "scene04 beat 4",
+      "time": 189.81866666666144,
+      "path": "frame-023.png"
+    },
+    {
+      "label": "scene04 beat 5",
+      "time": 199.4159999999942,
+      "path": "frame-024.png"
+    },
+    {
+      "label": "scene04 beat 6",
+      "time": 208.93066666666033,
+      "path": "frame-025.png"
+    },
+    {
+      "label": "scene04 beat 7",
+      "time": 218.8479999999931,
+      "path": "frame-026.png"
+    },
+    {
+      "label": "scene05 beat 1",
+      "time": 227.76266666665921,
+      "path": "frame-027.png"
+    },
+    {
+      "label": "scene05 beat 2",
+      "time": 236.9973333333254,
+      "path": "frame-028.png"
+    },
+    {
+      "label": "scene05 beat 3",
+      "time": 247.1546666666582,
+      "path": "frame-029.png"
+    },
+    {
+      "label": "scene05 beat 4",
+      "time": 257.9386666666576,
+      "path": "frame-030.png"
+    },
+    {
+      "label": "scene05-04-02 math",
+      "time": 257.55466666665757,
+      "path": "frame-031.png"
+    },
+    {
+      "label": "scene05 beat 5",
+      "time": 267.19199999999034,
+      "path": "frame-032.png"
+    },
+    {
+      "label": "scene05 beat 6",
+      "time": 276.99199999998984,
+      "path": "frame-033.png"
+    },
+    {
+      "label": "scene05 beat 7",
+      "time": 286.44266666665595,
+      "path": "frame-034.png"
+    },
+    {
+      "label": "scene06 beat 1",
+      "time": 295.23999999998875,
+      "path": "frame-035.png"
+    },
+    {
+      "label": "scene06 beat 2",
+      "time": 306.5946666666549,
+      "path": "frame-036.png"
+    },
+    {
+      "label": "scene06-02-01 math",
+      "time": 301.25599999998826,
+      "path": "frame-037.png"
+    },
+    {
+      "label": "scene06 beat 3",
+      "time": 316.6906666666542,
+      "path": "frame-038.png"
+    },
+    {
+      "label": "scene06 beat 4",
+      "time": 326.3226666666537,
+      "path": "frame-039.png"
+    },
+    {
+      "label": "scene06 beat 5",
+      "time": 336.2666666666531,
+      "path": "frame-040.png"
+    },
+    {
+      "label": "scene07 beat 1",
+      "time": 345.78666666665254,
+      "path": "frame-041.png"
+    },
+    {
+      "label": "scene07 beat 2",
+      "time": 355.50399999998535,
+      "path": "frame-042.png"
+    },
+    {
+      "label": "scene07 beat 3",
+      "time": 364.93866666665144,
+      "path": "frame-043.png"
+    },
+    {
+      "label": "scene07 beat 4",
+      "time": 375.88533333331765,
+      "path": "frame-044.png"
+    },
+    {
+      "label": "scene07 beat 5",
+      "time": 387.86933333331694,
+      "path": "frame-045.png"
+    },
+    {
+      "label": "scene07-05-02 math",
+      "time": 386.83466666665026,
+      "path": "frame-046.png"
+    },
+    {
+      "label": "scene08 beat 1",
+      "time": 398.03466666664957,
+      "path": "frame-047.png"
+    },
+    {
+      "label": "scene08 beat 2",
+      "time": 409.1146666666491,
+      "path": "frame-048.png"
+    },
+    {
+      "label": "scene08-02-02 math",
+      "time": 408.2773333333157,
+      "path": "frame-049.png"
+    },
+    {
+      "label": "scene08 beat 3",
+      "time": 418.54399999998174,
+      "path": "frame-050.png"
+    },
+    {
+      "label": "scene08 beat 4",
+      "time": 427.3173333333146,
+      "path": "frame-051.png"
+    },
+    {
+      "label": "scene08 beat 5",
+      "time": 437.09599999998073,
+      "path": "frame-052.png"
+    },
+    {
+      "label": "scene08 beat 6",
+      "time": 447.6133333333135,
+      "path": "frame-053.png"
+    },
+    {
+      "label": "scene08 beat 7",
+      "time": 457.2719999999795,
+      "path": "frame-054.png"
+    },
+    {
+      "label": "scene09 beat 1",
+      "time": 466.2986666666457,
+      "path": "frame-055.png"
+    },
+    {
+      "label": "scene09 beat 2",
+      "time": 474.8479999999785,
+      "path": "frame-056.png"
+    },
+    {
+      "label": "scene09 beat 3",
+      "time": 483.48799999997806,
+      "path": "frame-057.png"
+    },
+    {
+      "label": "scene09 beat 4",
+      "time": 492.3173333333109,
+      "path": "frame-058.png"
+    },
+    {
+      "label": "scene09 beat 5",
+      "time": 502.28799999997705,
+      "path": "frame-059.png"
+    },
+    {
+      "label": "scene10 beat 1",
+      "time": 512.3999999999764,
+      "path": "frame-060.png"
+    },
+    {
+      "label": "scene10 beat 2",
+      "time": 522.3999999999786,
+      "path": "frame-061.png"
+    },
+    {
+      "label": "scene10 beat 3",
+      "time": 532.0159999999865,
+      "path": "frame-062.png"
+    },
+    {
+      "label": "scene10 beat 4",
+      "time": 542.2506666666607,
+      "path": "frame-063.png"
+    },
+    {
+      "label": "scene01 sync 0.05",
+      "time": 25.107199999999935,
+      "path": "frame-064.png"
+    },
+    {
+      "label": "scene01 sync 0.5",
+      "time": 29.671999999999933,
+      "path": "frame-065.png"
+    },
+    {
+      "label": "scene01 sync 0.95",
+      "time": 34.23679999999993,
+      "path": "frame-066.png"
+    },
+    {
+      "label": "scene05 sync 0.05",
+      "time": 261.4117333333237,
+      "path": "frame-067.png"
+    },
+    {
+      "label": "scene05 sync 0.5",
+      "time": 265.1173333333237,
+      "path": "frame-068.png"
+    },
+    {
+      "label": "scene05 sync 0.95",
+      "time": 268.82293333332365,
+      "path": "frame-069.png"
+    },
+    {
+      "label": "scene08 sync 0.05",
+      "time": 416.4666666666484,
+      "path": "frame-070.png"
+    },
+    {
+      "label": "scene08 sync 0.5",
+      "time": 418.41066666664835,
+      "path": "frame-071.png"
+    },
+    {
+      "label": "scene08 sync 0.95",
+      "time": 420.35466666664837,
+      "path": "frame-072.png"
+    }
+  ],
+  "sync": [
+    {
+      "scene": "scene01",
+      "beat": 4,
+      "action_start": 24.599999999999934,
+      "action_end": 34.74399999999993,
+      "speech_onsets": [
+        24.68925,
+        30.12425
+      ]
+    },
+    {
+      "scene": "scene05",
+      "beat": 5,
+      "action_start": 260.99999999999034,
+      "action_end": 269.234666666657,
+      "speech_onsets": [
+        261.0959583333259,
+        265.49029166665923
+      ]
+    },
+    {
+      "scene": "scene08",
+      "beat": 3,
+      "action_start": 416.2506666666484,
+      "action_end": 420.5706666666484,
+      "speech_onsets": [
+        412.4916666666496,
+        416.3467916666496
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene01",
+      "start": 0.0,
+      "duration": 52.20000000000091
+    },
+    {
+      "id": "scene02",
+      "start": 52.20000000000091,
+      "duration": 43.59999999999877
+    },
+    {
+      "id": "scene03",
+      "start": 95.79999999999968,
+      "duration": 56.19999999999682
+    },
+    {
+      "id": "scene04",
+      "start": 151.9999999999965,
+      "duration": 69.6666666666627
+    },
+    {
+      "id": "scene05",
+      "start": 221.6666666666592,
+      "duration": 67.33333333332953
+    },
+    {
+      "id": "scene06",
+      "start": 288.99999999998875,
+      "duration": 50.06666666666382
+    },
+    {
+      "id": "scene07",
+      "start": 339.06666666665257,
+      "duration": 52.19999999999703
+    },
+    {
+      "id": "scene08",
+      "start": 391.2666666666496,
+      "duration": 68.5999999999961
+    },
+    {
+      "id": "scene09",
+      "start": 459.8666666666457,
+      "duration": 45.333333333330756
+    },
+    {
+      "id": "scene10",
+      "start": 505.19999999997646,
+      "duration": 40.00000000002598
+    }
+  ]
+}

@@ -1,594 +1,331 @@
-from __future__ import annotations
-
-import math
-import wave
-from pathlib import Path
-
+"""PRML 4.1 — linked geometric experiments, implemented in Manim Community."""
 import numpy as np
 from manim import *
-
-
-BLUE_CLASS = BLUE_C
-ORANGE_CLASS = ORANGE
-GREEN_CLASS = GREEN_C
-RED_BOUNDARY = RED_C
-FISHER_YELLOW = YELLOW
-MODEL_PURPLE = PURPLE_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
-
-
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
-
-
-def sigmoid(value: float) -> float:
-    return 1.0 / (1.0 + math.exp(-value))
-
-
-def make_two_class_data(seed: int = 41) -> tuple[np.ndarray, np.ndarray]:
-    rng = np.random.default_rng(seed)
-    class_one = rng.multivariate_normal(
-        mean=[1.1, 0.85],
-        cov=[[0.13, 0.03], [0.03, 0.15]],
-        size=16,
-    )
-    class_two = rng.multivariate_normal(
-        mean=[-1.0, -0.55],
-        cov=[[0.16, -0.02], [-0.02, 0.13]],
-        size=16,
-    )
-    return class_one, class_two
-
-
-def make_multiclass_data(seed: int = 42) -> list[tuple[np.ndarray, ManimColor, str]]:
-    rng = np.random.default_rng(seed)
-    specs = [
-        ([1.15, 0.95], [[0.11, 0.02], [0.02, 0.11]], BLUE_CLASS, "C1"),
-        ([-1.25, 0.65], [[0.13, -0.01], [-0.01, 0.12]], ORANGE_CLASS, "C2"),
-        ([0.05, -1.25], [[0.13, 0.0], [0.0, 0.12]], GREEN_CLASS, "C3"),
-    ]
-    return [(rng.multivariate_normal(mean, cov, size=12), color, label) for mean, cov, color, label in specs]
-
-
-def fit_least_squares_boundary(class_one: np.ndarray, class_two: np.ndarray) -> np.ndarray:
-    points = np.vstack([class_one, class_two])
-    targets = np.r_[np.ones(len(class_one)), -np.ones(len(class_two))]
-    design = np.c_[np.ones(len(points)), points]
-    return np.linalg.lstsq(design, targets, rcond=None)[0]
-
-
-def fisher_direction(class_one: np.ndarray, class_two: np.ndarray) -> np.ndarray:
-    mean_one = class_one.mean(axis=0)
-    mean_two = class_two.mean(axis=0)
-    centered_one = class_one - mean_one
-    centered_two = class_two - mean_two
-    sw = centered_one.T @ centered_one + centered_two.T @ centered_two
-    direction = np.linalg.solve(sw + 0.02 * np.eye(2), mean_two - mean_one)
-    return direction / np.linalg.norm(direction)
-
-
-class PRML41DiscriminantFunctions(Scene):
-    """PRML 4.1 discriminant functions overview.
-
-    Render example:
-        uv run manim -pql prml_4_1_discriminant_functions.py PRML41DiscriminantFunctions
-    """
-
-    x_range = (-3.0, 3.0)
-    y_range = (-2.5, 2.5)
-
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.opening_direct_decision()
-        self.two_class_geometry()
-        self.multiclass_argmax()
-        self.least_squares_classifier()
-        self.fisher_projection()
-        self.fisher_threshold_and_multiclass()
-        self.perceptron_learning()
-        self.summary_limitations()
-
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
-
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
-
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
-
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.34)
-        return title
-
-    def make_axes(self, width: float = 6.2, height: float = 4.6) -> Axes:
-        return Axes(
-            x_range=[self.x_range[0], self.x_range[1], 1],
-            y_range=[self.y_range[0], self.y_range[1], 1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def make_points(self, axes: Axes, points: np.ndarray, color: ManimColor, radius: float = 0.055) -> VGroup:
-        return VGroup(*[Dot(axes.c2p(float(x), float(y)), color=color, radius=radius) for x, y in points])
-
-    def boundary_line(
-        self,
-        axes: Axes,
-        coef: np.ndarray,
-        color: ManimColor = RED_BOUNDARY,
-        stroke_width: float = 4.0,
-        opacity: float = 1.0,
-    ) -> Line:
-        b, w1, w2 = [float(v) for v in coef]
-        xmin, xmax = self.x_range
-        ymin, ymax = self.y_range
-        points: list[tuple[float, float]] = []
-        if abs(w2) > 1e-8:
-            for x in (xmin, xmax):
-                y = -(b + w1 * x) / w2
-                if ymin - 1e-6 <= y <= ymax + 1e-6:
-                    points.append((x, y))
-        if abs(w1) > 1e-8:
-            for y in (ymin, ymax):
-                x = -(b + w2 * y) / w1
-                if xmin - 1e-6 <= x <= xmax + 1e-6:
-                    points.append((x, y))
-        unique: list[tuple[float, float]] = []
-        for point in points:
-            if not any(np.linalg.norm(np.array(point) - np.array(existing)) < 1e-5 for existing in unique):
-                unique.append(point)
-        if len(unique) < 2:
-            unique = [(xmin, 0.0), (xmax, 0.0)]
-        line = Line(
-            axes.c2p(unique[0][0], unique[0][1]),
-            axes.c2p(unique[1][0], unique[1][1]),
-            color=color,
-            stroke_width=stroke_width,
-        )
-        line.set_opacity(opacity)
-        return line
-
-    def make_score_box(self, label: str, expression: str, color: ManimColor) -> VGroup:
-        tag = Text(label, font_size=26, color=color)
-        formula = MathTex(expression, font_size=34, color=WHITE)
-        group = VGroup(tag, formula).arrange(DOWN, buff=0.18)
-        box = SurroundingRectangle(group, color=color, buff=0.16, corner_radius=0.04)
-        return VGroup(box, group)
-
-    def opening_direct_decision(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 4.1 Discriminant Functions")
-        title = self.scene_title("識別関数は、入力から直接クラスを選ぶ")
-
-        axes = self.make_axes(width=5.9, height=4.1).shift(LEFT * 2.4 + DOWN * 0.25)
-        data = make_multiclass_data()
-        clouds = VGroup(*[self.make_points(axes, points, color) for points, color, _ in data])
-        boundaries = VGroup(
-            self.boundary_line(axes, np.array([0.0, 1.0, -0.78]), RED_BOUNDARY, 3.2, 0.9),
-            self.boundary_line(axes, np.array([0.15, -1.0, -0.95]), RED_BOUNDARY, 3.2, 0.9),
-            self.boundary_line(axes, np.array([-0.1, 0.2, 1.0]), RED_BOUNDARY, 3.2, 0.9),
-        )
-        region_labels = VGroup(
-            Text("R1", font_size=26, color=BLUE_CLASS).move_to(axes.c2p(1.95, 1.45)),
-            Text("R2", font_size=26, color=ORANGE_CLASS).move_to(axes.c2p(-2.15, 1.15)),
-            Text("R3", font_size=26, color=GREEN_CLASS).move_to(axes.c2p(-0.2, -1.9)),
-        )
-
-        arrow_one = Arrow(LEFT * 0.9, RIGHT * 0.9, color=TEXT_GREY, buff=0.05)
-        input_text = Text("入力 x", font_size=27)
-        scores = VGroup(
-            self.make_score_box("C1", r"y_1(x)", BLUE_CLASS),
-            self.make_score_box("C2", r"y_2(x)", ORANGE_CLASS),
-            self.make_score_box("C3", r"y_3(x)", GREEN_CLASS),
-        ).arrange(DOWN, buff=0.25)
-        decision = MathTex(r"k^*=\operatorname*{arg\,max}_k\, y_k(x)", font_size=36)
-        class_text = Text("最大スコアのクラス", font_size=27, color=FISHER_YELLOW)
-        flow = VGroup(input_text, arrow_one, scores, decision, class_text).arrange(RIGHT, buff=0.42)
-        flow.scale(0.72).to_edge(RIGHT).shift(LEFT * 0.05 + DOWN * 0.1)
-        decision.next_to(scores, RIGHT, buff=0.42)
-        class_text.next_to(decision, DOWN, buff=0.28)
-
-        approaches = VGroup(
-            Text("直接: 識別関数", font_size=24, color=FISHER_YELLOW),
-            Text("確率: p(C_k | x)", font_size=22, color=TEXT_GREY),
-            Text("生成: p(x | C_k)p(C_k)", font_size=22, color=TEXT_GREY),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-        approaches.to_corner(DR).shift(UP * 0.35 + LEFT * 0.15)
-
-        self.play(FadeIn(label), Write(title), run_time=1.5)
-        self.play(Create(axes), FadeIn(clouds, lag_ratio=0.05), run_time=1.7)
-        self.play(Create(boundaries), FadeIn(region_labels), run_time=1.8)
-        self.play(FadeIn(flow), run_time=1.5)
-        self.play(Indicate(scores[0], color=BLUE_CLASS), Indicate(decision, color=FISHER_YELLOW), run_time=1.5)
-        self.play(FadeIn(approaches), run_time=1.4)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def two_class_geometry(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("4.1.1 Two classes")
-        title = self.scene_title("w は向き、w0 は境界の位置を決める")
-        axes = self.make_axes(width=6.6, height=4.7).shift(LEFT * 1.9 + DOWN * 0.2)
-        class_one, class_two = make_two_class_data()
-        points_one = self.make_points(axes, class_one, BLUE_CLASS)
-        points_two = self.make_points(axes, class_two, ORANGE_CLASS)
-        coef = np.array([-0.18, 1.0, 0.82])
-        boundary = self.boundary_line(axes, coef, RED_BOUNDARY)
-        boundary_label = MathTex(r"y(x)=0", font_size=30, color=RED_BOUNDARY).next_to(boundary, UP, buff=0.12)
-
-        b, w1, w2 = coef
-        normal = np.array([w1, w2]) / np.linalg.norm([w1, w2])
-        base = np.array([0.15, -(b + w1 * 0.15) / w2])
-        w_arrow = Arrow(
-            axes.c2p(base[0], base[1]),
-            axes.c2p(base[0] + 0.75 * normal[0], base[1] + 0.75 * normal[1]),
-            color=FISHER_YELLOW,
-            buff=0.0,
-            stroke_width=6,
-        )
-        w_label = MathTex(r"w", font_size=34, color=FISHER_YELLOW).next_to(w_arrow, RIGHT, buff=0.1)
-
-        x_point = np.array([1.35, 1.35])
-        signed_distance = (b + np.dot(np.array([w1, w2]), x_point)) / np.linalg.norm([w1, w2])
-        projection = x_point - signed_distance * normal
-        point = Dot(axes.c2p(x_point[0], x_point[1]), color=WHITE, radius=0.07)
-        projection_dot = Dot(axes.c2p(projection[0], projection[1]), color=TEXT_GREY, radius=0.05)
-        distance_line = DashedLine(
-            axes.c2p(x_point[0], x_point[1]),
-            axes.c2p(projection[0], projection[1]),
-            color=FISHER_YELLOW,
-            stroke_width=3,
-        )
-        distance_label = MathTex(r"r=\frac{y(x)}{\|w\|}", font_size=30, color=FISHER_YELLOW)
-        distance_label.next_to(distance_line, RIGHT, buff=0.15)
-
-        shifted_plus = self.boundary_line(axes, np.array([0.62, 1.0, 0.82]), GREY_B, 2.4, 0.55)
-        shifted_minus = self.boundary_line(axes, np.array([-0.95, 1.0, 0.82]), GREY_B, 2.4, 0.55)
-        bias_label = MathTex(r"-\frac{w_0}{\|w\|}", font_size=30, color=TEXT_GREY).to_corner(DR).shift(UP * 1.0 + LEFT * 0.35)
-
-        formula = VGroup(
-            MathTex(r"y(x)=w^Tx+w_0", font_size=38),
-            MathTex(r"y(x)\ge 0 \Rightarrow C_1,\quad y(x)<0 \Rightarrow C_2", font_size=32),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
-        formula.to_edge(RIGHT).shift(LEFT * 0.25 + UP * 0.75)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(points_one), FadeIn(points_two), run_time=2.0)
-        self.play(Create(boundary), Write(boundary_label), Write(formula[0]), run_time=1.6)
-        self.play(Create(w_arrow), Write(w_label), Write(formula[1]), run_time=1.5)
-        self.play(Create(shifted_plus), Create(shifted_minus), Write(bias_label), run_time=1.5)
-        self.play(FadeIn(point), FadeIn(projection_dot), Create(distance_line), Write(distance_label), run_time=1.6)
-        self.play(Indicate(point, color=FISHER_YELLOW), Indicate(distance_label, color=FISHER_YELLOW), run_time=1.3)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def multiclass_argmax(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("4.1.2 Multiple classes")
-        title = self.scene_title("多クラスは、K 本のスコアを同時に比べる")
-
-        left_box = RoundedRectangle(width=4.9, height=3.9, corner_radius=0.06, color=GREY_B, stroke_width=2)
-        left_box.shift(LEFT * 3.25 + DOWN * 0.15)
-        left_title = Text("二値識別器を貼り合わせる", font_size=24, color=TEXT_GREY).next_to(left_box, UP, buff=0.12)
-        left_lines = VGroup(
-            Line(LEFT * 1.6, RIGHT * 1.6, color=RED_BOUNDARY, stroke_width=3).rotate(0.25),
-            Line(LEFT * 1.6, RIGHT * 1.6, color=RED_BOUNDARY, stroke_width=3).rotate(2.05),
-            Line(LEFT * 1.6, RIGHT * 1.6, color=RED_BOUNDARY, stroke_width=3).rotate(-1.0),
-        ).move_to(left_box.get_center())
-        question_region = VGroup(
-            RegularPolygon(n=6, radius=0.48, color=GREEN_B, fill_color=GREEN_E, fill_opacity=0.35),
-            Text("?", font_size=36, color=FISHER_YELLOW),
-        ).move_to(left_box.get_center())
-        ambiguous = Text("あいまい領域", font_size=23, color=FISHER_YELLOW).next_to(question_region, DOWN, buff=0.25)
-
-        axes = self.make_axes(width=5.35, height=3.9).shift(RIGHT * 2.85 + DOWN * 0.15)
-        data = make_multiclass_data(seed=45)
-        clouds = VGroup(*[self.make_points(axes, points, color, radius=0.047) for points, color, _ in data])
-        boundaries = VGroup(
-            self.boundary_line(axes, np.array([0.1, 1.0, -0.85]), RED_BOUNDARY, 3.0),
-            self.boundary_line(axes, np.array([0.2, -1.0, -0.9]), RED_BOUNDARY, 3.0),
-            self.boundary_line(axes, np.array([-0.15, 0.08, 1.0]), RED_BOUNDARY, 3.0),
-        )
-        argmax_title = Text("単一の K クラス識別器", font_size=24, color=FISHER_YELLOW).next_to(axes, UP, buff=0.2)
-        equations = VGroup(
-            MathTex(r"y_k(x)=w_k^Tx+w_{k0}", font_size=32),
-            MathTex(r"C_k:\ y_k(x)>y_j(x)\quad(j\ne k)", font_size=30),
-            MathTex(r"y_k(x)=y_j(x)\Rightarrow\text{linear boundary}", font_size=28),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-        equations.to_edge(DOWN).shift(UP * 0.2)
-
-        self.play(FadeIn(label), Write(title), run_time=1.4)
-        self.play(FadeIn(left_box), Write(left_title), Create(left_lines), run_time=1.5)
-        self.play(FadeIn(question_region), Write(ambiguous), run_time=1.2)
-        self.play(Create(axes), FadeIn(clouds), Write(argmax_title), run_time=1.7)
-        self.play(Create(boundaries), Write(equations[0]), run_time=1.5)
-        self.play(Write(equations[1]), Write(equations[2]), run_time=1.4)
-        self.play(Indicate(boundaries, color=FISHER_YELLOW), run_time=1.3)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def least_squares_classifier(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("4.1.3 Least squares for classification")
-        title = self.scene_title("最小二乗は閉形式で解けるが、分類には弱い")
-        axes = self.make_axes(width=6.2, height=4.45).shift(LEFT * 2.1 + DOWN * 0.2)
-        class_one, class_two = make_two_class_data(seed=53)
-        extra = np.array([[-2.35, -1.75], [-2.2, -1.95], [-2.55, -1.35], [-2.05, -2.05], [-2.7, -1.6]])
-        coef_base = fit_least_squares_boundary(class_one, class_two)
-        coef_extra = fit_least_squares_boundary(class_one, np.vstack([class_two, extra]))
-
-        points_one = self.make_points(axes, class_one, BLUE_CLASS)
-        points_two = self.make_points(axes, class_two, ORANGE_CLASS)
-        extra_points = self.make_points(axes, extra, ORANGE_CLASS, radius=0.065)
-        base_line = self.boundary_line(axes, coef_base, MODEL_PURPLE, 3.4)
-        extra_line = self.boundary_line(axes, coef_extra, RED_BOUNDARY, 4.2)
-        base_label = Text("外れ値なし", font_size=21, color=MODEL_PURPLE).next_to(base_line, UP, buff=0.1)
-        extra_label = Text("正しく分類されても境界を引っぱる", font_size=21, color=RED_BOUNDARY).to_edge(DOWN).shift(LEFT * 2.1 + UP * 0.15)
-
-        formula = VGroup(
-            MathTex(r"E_D(W)=\frac12\operatorname{Tr}\{(\widetilde XW-T)^T(\widetilde XW-T)\}", font_size=28),
-            MathTex(r"W=\widetilde X^\dagger T", font_size=34, color=FISHER_YELLOW),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-        formula.to_edge(RIGHT).shift(LEFT * 0.2 + UP * 1.05)
-
-        probability_note = VGroup(
-            Text("1-of-K なら出力の和は 1", font_size=24),
-            Text("でも各値は 0 から 1 に収まらない", font_size=24, color=FISHER_YELLOW),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-        probability_note.next_to(formula, DOWN, buff=0.5).align_to(formula, LEFT)
-        output_axis = Line(LEFT * 1.35, RIGHT * 1.35, color=GREY_B, stroke_width=4)
-        tick_zero = Line(DOWN * 0.08, UP * 0.08, color=GREY_B, stroke_width=3).move_to(output_axis.point_from_proportion(0.2))
-        tick_one = Line(DOWN * 0.08, UP * 0.08, color=GREY_B, stroke_width=3).move_to(output_axis.point_from_proportion(0.72))
-        low_dot = Dot(output_axis.point_from_proportion(0.05), color=RED_BOUNDARY, radius=0.07)
-        high_dot = Dot(output_axis.point_from_proportion(0.92), color=RED_BOUNDARY, radius=0.07)
-        range_labels = VGroup(
-            Text("0", font_size=18, color=TEXT_GREY).next_to(tick_zero, DOWN, buff=0.08),
-            Text("1", font_size=18, color=TEXT_GREY).next_to(tick_one, DOWN, buff=0.08),
-            Text("-0.3", font_size=18, color=RED_BOUNDARY).next_to(low_dot, UP, buff=0.08),
-            Text("1.2", font_size=18, color=RED_BOUNDARY).next_to(high_dot, UP, buff=0.08),
-        )
-        score_bar = VGroup(output_axis, tick_zero, tick_one, low_dot, high_dot, range_labels)
-        score_bar.next_to(probability_note, DOWN, buff=0.35).align_to(probability_note, LEFT)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(points_one), FadeIn(points_two), run_time=2.0)
-        self.play(Create(base_line), Write(base_label), Write(formula), run_time=1.8)
-        self.play(FadeIn(extra_points, lag_ratio=0.12), run_time=1.2)
-        self.play(ReplacementTransform(base_line.copy(), extra_line), FadeIn(extra_label), run_time=1.6)
-        self.play(Write(probability_note), FadeIn(score_bar), run_time=1.7)
-        self.play(Indicate(extra_points, color=FISHER_YELLOW), Indicate(extra_line, color=FISHER_YELLOW), run_time=1.4)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def make_fisher_data(self) -> tuple[np.ndarray, np.ndarray]:
-        rng = np.random.default_rng(61)
-        cov = np.array([[0.9, -0.72], [-0.72, 0.82]])
-        class_one = rng.multivariate_normal([-1.0, -0.55], cov, size=28)
-        class_two = rng.multivariate_normal([1.05, 0.6], cov, size=28)
-        return class_one, class_two
-
-    def projection_strip(self, class_one: np.ndarray, class_two: np.ndarray, direction: np.ndarray, color: ManimColor) -> VGroup:
-        direction = direction / np.linalg.norm(direction)
-        values_one = class_one @ direction
-        values_two = class_two @ direction
-        all_values = np.r_[values_one, values_two]
-        min_value, max_value = float(all_values.min()), float(all_values.max())
-        width = 3.7
-
-        def map_x(value: float) -> float:
-            return -width / 2 + width * (value - min_value) / max(max_value - min_value, 1e-6)
-
-        line = Line(LEFT * width / 2, RIGHT * width / 2, color=GREY_B, stroke_width=3)
-        dots_one = VGroup(*[Dot([map_x(float(v)), 0.14, 0], color=BLUE_CLASS, radius=0.035) for v in values_one])
-        dots_two = VGroup(*[Dot([map_x(float(v)), -0.14, 0], color=ORANGE_CLASS, radius=0.035) for v in values_two])
-        marker = Triangle(color=color, fill_color=color, fill_opacity=0.9).scale(0.12).rotate(PI).next_to(line, UP, buff=0.08)
-        return VGroup(line, dots_one, dots_two, marker)
-
-    def fisher_projection(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("4.1.4 Fisher's linear discriminant")
-        title = self.scene_title("平均の差だけでなく、クラス内の広がりも見る")
-        axes = self.make_axes(width=5.9, height=4.4).shift(LEFT * 2.55 + DOWN * 0.1)
-        class_one, class_two = self.make_fisher_data()
-        points_one = self.make_points(axes, class_one, BLUE_CLASS, radius=0.045)
-        points_two = self.make_points(axes, class_two, ORANGE_CLASS, radius=0.045)
-        mean_one = class_one.mean(axis=0)
-        mean_two = class_two.mean(axis=0)
-        mean_direction = (mean_two - mean_one) / np.linalg.norm(mean_two - mean_one)
-        fisher = fisher_direction(class_one, class_two)
-
-        mean_arrow = Arrow(
-            axes.c2p(-1.0 * mean_direction[0], -1.0 * mean_direction[1]),
-            axes.c2p(1.25 * mean_direction[0], 1.25 * mean_direction[1]),
-            color=TEXT_GREY,
-            buff=0.0,
-            stroke_width=5,
-        )
-        fisher_arrow = Arrow(
-            axes.c2p(-1.2 * fisher[0], -1.2 * fisher[1]),
-            axes.c2p(1.45 * fisher[0], 1.45 * fisher[1]),
-            color=FISHER_YELLOW,
-            buff=0.0,
-            stroke_width=6,
-        )
-        mean_label = Text("平均差だけ", font_size=22, color=TEXT_GREY).next_to(mean_arrow, UP, buff=0.12)
-        fisher_label = Text("Fisher 方向", font_size=23, color=FISHER_YELLOW).next_to(fisher_arrow, RIGHT, buff=0.12)
-
-        strip_mean = self.projection_strip(class_one, class_two, mean_direction, TEXT_GREY)
-        strip_fisher = self.projection_strip(class_one, class_two, fisher, FISHER_YELLOW)
-        strip_mean.to_edge(RIGHT).shift(LEFT * 0.85 + UP * 0.85)
-        strip_fisher.to_edge(RIGHT).shift(LEFT * 0.85 + DOWN * 0.65)
-        strip_labels = VGroup(
-            Text("射影後: 重なりが残る", font_size=22, color=TEXT_GREY).next_to(strip_mean, UP, buff=0.15),
-            Text("射影後: 重なりを小さくする", font_size=22, color=FISHER_YELLOW).next_to(strip_fisher, UP, buff=0.15),
-        )
-        formula = VGroup(
-            MathTex(r"J(w)=\frac{(m_2-m_1)^2}{s_1^2+s_2^2}", font_size=32),
-            MathTex(r"=\frac{w^TS_Bw}{w^TS_Ww}", font_size=32, color=FISHER_YELLOW),
-        ).arrange(RIGHT, buff=0.22)
-        formula.to_edge(DOWN).shift(UP * 0.2)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(points_one), FadeIn(points_two), run_time=2.0)
-        self.play(Create(mean_arrow), Write(mean_label), FadeIn(strip_mean), Write(strip_labels[0]), run_time=1.8)
-        self.play(Write(formula[0]), run_time=1.1)
-        self.play(ReplacementTransform(mean_arrow.copy(), fisher_arrow), Write(fisher_label), FadeIn(strip_fisher), Write(strip_labels[1]), Write(formula[1]), run_time=2.0)
-        self.play(Indicate(strip_fisher, color=FISHER_YELLOW), run_time=1.3)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def fisher_threshold_and_multiclass(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("4.1.5-4.1.6 Fisher and least squares")
-        title = self.scene_title("Fisher は射影方向、判定にはしきい値を置く")
-        class_one, class_two = self.make_fisher_data()
-        fisher = fisher_direction(class_one, class_two)
-        values_one = class_one @ fisher
-        values_two = class_two @ fisher
-        threshold = 0.5 * (values_one.mean() + values_two.mean())
-        strip = self.projection_strip(class_one, class_two, fisher, FISHER_YELLOW).scale(1.35)
-        strip.to_edge(LEFT).shift(RIGHT * 2.55 + UP * 0.75)
-        thresh_x = strip[0].point_from_proportion(
-            float((threshold - min(values_one.min(), values_two.min())) / (max(values_one.max(), values_two.max()) - min(values_one.min(), values_two.min())))
-        )
-        threshold_line = DashedLine(thresh_x + DOWN * 0.65, thresh_x + UP * 0.65, color=RED_BOUNDARY, stroke_width=4)
-        threshold_label = MathTex(r"y_0", font_size=32, color=RED_BOUNDARY).next_to(threshold_line, UP, buff=0.1)
-        classify_text = VGroup(
-            MathTex(r"y=w^Tx", font_size=34),
-            MathTex(r"y\ge y_0\Rightarrow C_2,\quad y<y_0\Rightarrow C_1", font_size=30),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
-        classify_text.next_to(strip, DOWN, buff=0.35)
-
-        relation = VGroup(
-            Text("target coding 最小二乗", font_size=22, color=TEXT_GREY),
-            MathTex(r"t_{C_1}=N/N_1,\quad t_{C_2}=-N/N_2", font_size=29),
-            Text("Fisher と同じ向きが出る", font_size=22, color=FISHER_YELLOW),
-            MathTex(r"w\propto S_W^{-1}(m_2-m_1)", font_size=33, color=FISHER_YELLOW),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.34)
-        relation.to_edge(RIGHT).shift(LEFT * 0.45 + UP * 1.45)
-
-        multiclass = VGroup(
-            Text("K クラス Fisher", font_size=27, color=GREEN_CLASS),
-            MathTex(r"y=W^Tx", font_size=32),
-            VGroup(
-                Text("有効な軸は最大", font_size=23, color=GREEN_CLASS),
-                MathTex(r"K-1", font_size=31, color=GREEN_CLASS),
-            ).arrange(RIGHT, buff=0.12),
-        ).arrange(DOWN, buff=0.16)
-        box = SurroundingRectangle(multiclass, color=GREEN_CLASS, buff=0.2, corner_radius=0.05)
-        multiclass_box = VGroup(box, multiclass).to_edge(DOWN).shift(UP * 0.25 + RIGHT * 2.5)
-
-        self.play(FadeIn(label), Write(title), FadeIn(strip), run_time=1.7)
-        self.play(Create(threshold_line), Write(threshold_label), Write(classify_text), run_time=1.6)
-        self.play(FadeIn(relation[0]), Write(relation[1]), run_time=1.4)
-        self.play(Write(relation[2]), Write(relation[3]), run_time=1.4)
-        self.play(FadeIn(multiclass_box), run_time=1.4)
-        self.play(Indicate(relation[3], color=FISHER_YELLOW), Indicate(multiclass_box, color=GREEN_CLASS), run_time=1.3)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def perceptron_boundary(self, axes: Axes, weights: np.ndarray, color: ManimColor = RED_BOUNDARY) -> Line:
-        return self.boundary_line(axes, weights, color=color, stroke_width=4.0)
-
-    def perceptron_learning(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("4.1.7 The perceptron algorithm")
-        title = self.scene_title("間違えた点だけで、境界を更新する")
-        axes = self.make_axes(width=6.3, height=4.55).shift(LEFT * 2.15 + DOWN * 0.15)
-        positives = np.array([[1.05, 1.15], [1.55, 0.55], [0.65, 1.55], [1.75, 1.25]])
-        negatives = np.array([[-1.2, -0.65], [-1.65, -0.15], [-0.55, -1.45], [-1.75, -1.1]])
-        pos_points = self.make_points(axes, positives, BLUE_CLASS, radius=0.06)
-        neg_points = self.make_points(axes, negatives, ORANGE_CLASS, radius=0.06)
-
-        weights = np.array([-0.12, -0.45, 0.68])
-        line_one = self.perceptron_boundary(axes, weights, TEXT_GREY)
-        step_one = positives[0]
-        weights_two = weights + np.r_[1.0, step_one]
-        line_two = self.perceptron_boundary(axes, weights_two, MODEL_PURPLE)
-        step_two = negatives[1]
-        weights_three = weights_two - np.r_[1.0, step_two]
-        line_three = self.perceptron_boundary(axes, weights_three, RED_BOUNDARY)
-
-        circle_one = Circle(radius=0.18, color=FISHER_YELLOW, stroke_width=4).move_to(axes.c2p(step_one[0], step_one[1]))
-        circle_two = Circle(radius=0.18, color=FISHER_YELLOW, stroke_width=4).move_to(axes.c2p(step_two[0], step_two[1]))
-        update_formula = VGroup(
-            MathTex(r"f(a)=\begin{cases}+1,&a\ge0\\-1,&a<0\end{cases}", font_size=31),
-            MathTex(r"a=w^T\phi(x)", font_size=32),
-            MathTex(r"\text{misclassified: } w\leftarrow w+\phi(x_n)t_n", font_size=31, color=FISHER_YELLOW),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
-        update_formula.to_edge(RIGHT).shift(LEFT * 0.25 + UP * 0.65)
-
-        rule_notes = VGroup(
-            Text("正解なら変更しない", font_size=23, color=TEXT_GREY),
-            Text("線形分離なら有限回で解を見つける", font_size=23, color=GREEN_CLASS),
-            Text("分離不能なら収束しない", font_size=23, color=ORANGE_CLASS),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-        rule_notes.next_to(update_formula, DOWN, buff=0.55).align_to(update_formula, LEFT)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(pos_points), FadeIn(neg_points), run_time=2.0)
-        self.play(Create(line_one), Write(update_formula), run_time=1.7)
-        self.play(Create(circle_one), Indicate(pos_points[0], color=FISHER_YELLOW), run_time=1.0)
-        self.play(ReplacementTransform(line_one, line_two), FadeOut(circle_one), run_time=1.4)
-        self.play(Create(circle_two), Indicate(neg_points[1], color=FISHER_YELLOW), run_time=1.0)
-        self.play(ReplacementTransform(line_two, line_three), FadeOut(circle_two), run_time=1.4)
-        self.play(Write(rule_notes), Indicate(line_three, color=FISHER_YELLOW), run_time=1.7)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
-
-    def summary_limitations(self) -> None:
-        narration = self.start_narration("scene08")
-        label = self.section_label("PRML 4.1 Summary")
-        title = self.scene_title("識別関数は速い。ただし確率はまだ出てこない")
-
-        columns = VGroup()
-        items = [
-            ("最小二乗", "閉形式で速い", "外れ値と確率解釈に弱い", MODEL_PURPLE),
-            ("Fisher", "重なりの少ない射影", "しきい値は別に決める", FISHER_YELLOW),
-            ("Perceptron", "誤分類だけで更新", "分離不能では収束しない", RED_BOUNDARY),
-        ]
-        for heading, strength, caution, color in items:
-            heading_text = Text(heading, font_size=29, color=color)
-            strength_text = Text(strength, font_size=23)
-            caution_text = Text(caution, font_size=22, color=TEXT_GREY)
-            formula_hint = Line(LEFT * 0.9, RIGHT * 0.9, color=color, stroke_width=5)
-            col = VGroup(heading_text, formula_hint, strength_text, caution_text).arrange(DOWN, buff=0.22)
-            box = SurroundingRectangle(col, color=color, buff=0.22, corner_radius=0.06)
-            columns.add(VGroup(box, col))
-        columns.arrange(RIGHT, buff=0.5).shift(UP * 0.35)
-
-        bottom = VGroup(
-            MathTex(r"\text{decision: } x\mapsto C_k", font_size=36, color=FISHER_YELLOW),
-            Text("次は p(x|Ck) と p(Ck|x) を使う確率的な線形分類へ", font_size=26, color=GREEN_CLASS),
-        ).arrange(DOWN, buff=0.25)
-        bottom.to_edge(DOWN).shift(UP * 0.45)
-
-        self.play(FadeIn(label), Write(title), run_time=1.4)
-        self.play(FadeIn(columns, lag_ratio=0.12), run_time=1.8)
-        self.play(Write(bottom[0]), run_time=1.2)
-        self.play(Write(bottom[1]), run_time=1.2)
-        self.play(Indicate(bottom, color=FISHER_YELLOW), run_time=1.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
+from caption_layout import jp, tex
+from scene_support import NarratedScene
+from discriminant_model import *
+
+BLUE_CLS=ManimColor('#58B5ED'); ORANGE_CLS=ManimColor('#FFB45B')
+GREEN_CLS=ManimColor('#77D49A'); YELLOW_W=ManimColor('#FFE079')
+PURPLE_B=ManimColor('#C29AFF'); RED_LINE=ManimColor('#FF6B77')
+MUTED=ManimColor('#A8B2C5'); COLORS=[BLUE_CLS,ORANGE_CLS,GREEN_CLS]
+
+def readout(label,getter,pos,color=WHITE,places=2,size=27):
+    number=DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
+    group=VGroup(tex(label,size,color),number).arrange(RIGHT,buff=.15).move_to(pos)
+    anchor=number.get_left().copy()
+    number.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return group
+
+def slider(tracker,lo,hi,pos,label,color=YELLOW_W,width=2.6):
+    rail=Line(LEFT*width/2,RIGHT*width/2,color=MUTED,stroke_width=2).move_to(pos)
+    dot=Dot(radius=.065,color=color)
+    dot.add_updater(lambda m:m.move_to(rail.get_start()+(tracker.get_value()-lo)/(hi-lo)*rail.get_vector()))
+    return VGroup(rail,dot,tex(label,25,color).next_to(rail,LEFT,buff=.2))
+
+def boundary(ax,c,color=RED_LINE,width=3):
+    b,w1,w2=c; xmin,xmax=ax.x_range[:2];ymin,ymax=ax.y_range[:2]
+    pts=[]
+    if abs(w2)>1e-10:
+        for x in [xmin,xmax]:
+            y=-(b+w1*x)/w2
+            if ymin-1e-8<=y<=ymax+1e-8:pts.append([x,y])
+    if abs(w1)>1e-10:
+        for y in [ymin,ymax]:
+            x=-(b+w2*y)/w1
+            if xmin-1e-8<=x<=xmax+1e-8:pts.append([x,y])
+    if len(pts)<2:return Line(ax.c2p(0,0),ax.c2p(0,0)+RIGHT*1e-6,stroke_opacity=0)
+    # Pick the farthest pair to handle a line through a rectangle corner.
+    a,c=max(((a,c) for a in pts for c in pts),key=lambda p:np.linalg.norm(np.array(p[0])-p[1]))
+    return Line(ax.c2p(*a),ax.c2p(*c),color=color,stroke_width=width)
+
+def cloud(ax,groups,radius=.05):
+    return VGroup(*[VGroup(*[Dot(ax.c2p(*p),radius=radius,color=COLORS[k]) for p in g]) for k,g in enumerate(groups)])
+
+def regions(ax,W,opacity=.15):
+    bounds=(*ax.x_range[:2],*ax.y_range[:2]);out=VGroup()
+    for k in range(W.shape[1]):
+        p=region(W,k,bounds)
+        if len(p)>2:out.add(Polygon(*[ax.c2p(*v) for v in p],fill_color=COLORS[k],fill_opacity=opacity,stroke_width=1.3,stroke_color=COLORS[k]))
+    return out
+
+class PRML41DiscriminantFunctions(NarratedScene):
+    def scenes(self):
+        return [self.geometry,self.distance,self.multiclass,self.least_squares_scene,
+                self.fisher,self.relation,self.multi_fisher,self.perceptron_scene,
+                self.limits,self.summary]
+
+    def hint(self,text,color=MUTED):
+        mob=jp(text,20,color).move_to([0,2.75,0]);self.add(mob);return mob
+
+    def axes(self,xr=(-3.1,3.1,1),yr=(-2.1,2.1,1),center=(-2,.1,0),width=6.2,height=4.2,labels=('x_1','x_2')):
+        ax=Axes(x_range=xr,y_range=yr,x_length=width,y_length=height,tips=False,
+                axis_config={'color':MUTED,'stroke_width':1.2,'include_ticks':False}).move_to(center)
+        self.add(ax)
+        self.add(tex(labels[0],23,MUTED).next_to(ax.c2p(xr[1],0),RIGHT,buff=.1),
+                 tex(labels[1],23,MUTED).move_to(ax.c2p(0,yr[1])+UP*.18+LEFT*.18))
+        return ax
+
+    def bottom(self,formula,color=WHITE,size=31):
+        m=tex(formula,size,color).move_to([0,-2.53,0]);return m
+
+    def formula(self,parts,pos=(3.7,1.5,0),size=32):
+        m=MathTex(*parts,font_size=size).move_to(pos);return m
+
+    def geometry(self):
+        self.hint('青：クラス1　橙：クラス2　白：調べる入力')
+        ax=self.axes();dots=cloud(ax,BASE)
+        theta=ValueTracker(.45);bias=ValueTracker(0);px=ValueTracker(.6)
+        w=lambda:direction(theta.get_value());coef=lambda:np.r_[bias.get_value(),w()]
+        probe=always_redraw(lambda:Dot(ax.c2p(px.get_value(),.1),color=WHITE,radius=.085))
+        self.add(probe);self.beat(FadeIn(dots))
+        line=always_redraw(lambda:boundary(ax,coef()))
+        self.add(line);self.beat(px.animate.set_value(-.8))
+        formula=self.formula(['y(x)=',r'w^Tx','+',r'w_0'])
+        formula[1].set_color(YELLOW_W);formula[3].set_color(PURPLE_B)
+        expanded=tex(r'=w_1x_1+w_2x_2+w_0',27).next_to(formula,DOWN,buff=.24)
+        self.beat(Write(formula),Write(expanded),px.animate.set_value(.8))
+        arrow=always_redraw(lambda:Arrow(ax.c2p(*(-bias.get_value()*w())),ax.c2p(*((1.25-bias.get_value())*w())),buff=0,color=YELLOW_W,stroke_width=5))
+        knob=slider(theta,-.8,1.3,[3.7,.05,0],r'\theta')
+        self.add(arrow,knob);self.beat(theta.animate.set_value(1.1))
+        bk=slider(bias,-1,1,[3.7,-.7,0],'w_0',PURPLE_B)
+        self.add(bk);self.beat(bias.animate.set_value(.9))
+        val=readout('y(x)=',lambda:w()@np.array([px.get_value(),.1])+bias.get_value(),[3.7,-1.5,0])
+        rule=self.bottom(r'y(x)\geq0\Rightarrow C_1\qquad y(x)<0\Rightarrow C_2')
+        probe.add_updater(lambda m:m.set_color(BLUE_CLS if w()@np.array([px.get_value(),.1])+bias.get_value()>=0 else ORANGE_CLS))
+        self.add(val);self.beat(Write(rule),px.animate.set_value(-2.8),bias.animate.set_value(-.3))
+
+    def distance(self):
+        self.hint('同じ境界でも、スコアの倍率は変えられる')
+        ax=self.axes();theta=.65;u=direction(theta);b=-.4
+        r=ValueTracker(1.25);scale=ValueTracker(1)
+        foot=-b*u+.3*np.array([-u[1],u[0]])
+        point=lambda:foot+r.get_value()*u
+        line=boundary(ax,np.r_[b,u]);self.add(line)
+        dot=always_redraw(lambda:Dot(ax.c2p(*point()),radius=.08,color=WHITE))
+        footdot=Dot(ax.c2p(*foot),color=MUTED)
+        perp=always_redraw(lambda:DashedLine(ax.c2p(*foot),ax.c2p(*point())+UP*1e-6,color=YELLOW_W,stroke_width=3))
+        self.add(dot,footdot);self.beat(Create(perp))
+        arrow=always_redraw(lambda:Arrow(ax.c2p(0,0),ax.c2p(*(u*scale.get_value())),buff=0,color=YELLOW_W))
+        self.add(arrow,readout('y(x)=',lambda:scale.get_value()*r.get_value(),[3.7,1.5,0],YELLOW_W),
+                 readout(r'\|w\|=',scale.get_value,[3.7,.65,0],PURPLE_B))
+        self.beat(phases=[('positive distance',self.sentence_duration(0),lambda:r.animate.set_value(1.8)),
+                          ('cross boundary',self.sentence_duration(1),lambda:r.animate.set_value(-1.1))])
+        sk=slider(scale,1,2,[3.7,-.25,0],'c',PURPLE_B);self.add(sk)
+        self.beat(scale.animate.set_value(2),Write(self.bottom(r'(w,w_0)\mapsto(2w,2w_0)')))
+        # The new equation replaces the previous footer, without a second layer.
+        for m in list(self.mobjects):
+            if isinstance(m,MathTex) and m.get_center()[1]<-2:self.remove(m)
+        eq=self.bottom(r'r=\frac{y(x)}{\|w\|}\qquad x=x_{\perp}+r\frac{w}{\|w\|}')
+        self.add(readout('r=',r.get_value,[3.7,-1.2,0],GREEN_CLS))
+        self.beat(Write(eq),scale.animate.set_value(1))
+        new=self.bottom(r'\widetilde{x}=(1,x^T)^T\qquad y=\widetilde{w}^{T}\widetilde{x}')
+        self.beat(ReplacementTransform(eq,new),r.animate.set_value(.9))
+
+    def multiclass(self):
+        self.hint('一つの座標上で、二値の判定から最大スコアへ')
+        ax=self.axes();q=Dot(ax.c2p(.5,.6),color=WHITE,radius=.085)
+        ambiguous=Polygon(*[ax.c2p(*p) for p in [[0,0],[3.1,0],[3.1,2.1],[0,2.1]]],fill_color=YELLOW_W,fill_opacity=.2,stroke_width=0)
+        note=VGroup(jp('青：右側なら正',24,BLUE_CLS),jp('橙：上側なら正',24,ORANGE_CLS),tex(r'C_1>C_2>C_3>C_1',28,YELLOW_W),jp('票が 1：1：1',23)).arrange(DOWN,buff=.32).move_to([3.7,.7,0])
+        self.add(ambiguous,q);self.beat(FadeIn(note),Circumscribe(q,color=YELLOW_W))
+        self.remove(ambiguous,note,q)
+        bias=ValueTracker(0);W=lambda:MULTI_W+np.array([[0,0,bias.get_value()],[0,0,0],[0,0,0]])
+        regs=always_redraw(lambda:regions(ax,W()));self.add(regs)
+        px=ValueTracker(-1.8);py=ValueTracker(.8)
+        probe=lambda:np.array([px.get_value(),py.get_value()])
+        dot=always_redraw(lambda:Dot(ax.c2p(*probe()),color=WHITE,radius=.085))
+        bars=VGroup(*[readout(f'y_{k+1}=',lambda k=k:scores(probe(),W())[0,k],[3.7,1.35-.65*k,0],COLORS[k]) for k in range(3)])
+        self.add(dot,bars);f=self.bottom(r'y_k=w_k^Tx+w_{k0}\qquad k^*=\arg\max_k y_k')
+        self.beat(Write(f),px.animate.set_value(1.8))
+        ring=always_redraw(lambda:Circle(radius=.13,color=COLORS[int(np.argmax(scores(probe(),W())))]).move_to(dot))
+        self.add(ring);self.beat(px.animate.set_value(0),py.animate.set_value(-1.4))
+        f2=self.bottom(r'(w_k-w_j)^Tx+(w_{k0}-w_{j0})=0')
+        self.beat(ReplacementTransform(f,f2),py.animate.set_value(1.8))
+        a=np.array([.6,.7]);b=np.array([2.4,1.4])
+        px.set_value(a[0]);py.set_value(a[1])
+        path=Line(ax.c2p(*a),ax.c2p(*b),color=YELLOW_W)
+        self.add(path);self.beat(px.animate.set_value(b[0]),py.animate.set_value(b[1]),Write(tex(r'\widehat{x}=\lambda x_A+(1-\lambda)x_B',25).move_to([3.7,-1.4,0])))
+        self.add(slider(bias,0,2,[3.7,-.8,0],'w_{30}',GREEN_CLS));self.beat(bias.animate.set_value(2))
+
+    def least_squares_scene(self):
+        self.hint('独自データを毎フレーム再学習する')
+        ax=self.axes(xr=(-2.6,2.4,1),yr=(-4.2,1.8,1),width=3.5,height=4.2,center=(-2.6,.1,0))
+        amount=ValueTracker(0);W=lambda:least_squares(ls_data(amount.get_value()))
+        dots=always_redraw(lambda:cloud(ax,ls_data(amount.get_value())))
+        line=always_redraw(lambda:boundary(ax,W()[:,0]-W()[:,1]))
+        self.add(dots,line)
+        f=self.bottom(r'E_D=\frac12\sum_n\|W^T\widetilde{x}_n-t_n\|^2')
+        labels=VGroup(tex(r'C_1:\ (1,0)',30,BLUE_CLS),tex(r'C_2:\ (0,1)',30,ORANGE_CLS)).arrange(DOWN,buff=.3).move_to([3.5,1.5,0])
+        self.beat(Write(f),FadeIn(labels),ShowPassingFlash(line.copy().clear_updaters(),time_width=.5))
+        fit=tex(r'W=\widetilde{X}^{\dagger}T',36,YELLOW_W).move_to([3.5,.35,0])
+        self.beat(Write(fit),Circumscribe(labels,color=YELLOW_W))
+        self.add(slider(amount,0,1,[3.5,-.5,0],'s',PURPLE_B));self.beat(amount.animate.set_value(1))
+        lossax=Axes(x_range=[-.5,2.2,1],y_range=[0,2.6,1],x_length=2.8,y_length=1.4,tips=False,axis_config={'include_ticks':False,'color':MUTED}).move_to([3.5,-1.45,0])
+        z=ValueTracker(1);curve=lossax.plot(lambda x:(x-1)**2,color=ORANGE_CLS)
+        marker=always_redraw(lambda:Dot(lossax.c2p(z.get_value(),(z.get_value()-1)**2),color=YELLOW_W))
+        self.add(lossax,curve,marker,tex('(y-1)^2',21).next_to(lossax,RIGHT,buff=.08))
+        self.beat(z.animate.set_value(2.1))
+        self.remove(lossax,curve,marker)
+        for m in list(self.mobjects):
+            if isinstance(m,MathTex) and m.tex_string=='(y-1)^2':self.remove(m)
+        px=ValueTracker(-2.2);sample=lambda:np.array([px.get_value(),-2.5])
+        probe=always_redraw(lambda:Dot(ax.c2p(*sample()),color=WHITE,radius=.085))
+        outputs=VGroup(*[readout(f'y_{k+1}=',lambda k=k:scores(sample(),W())[0,k],[3+.95*k,-1.35-.45*k,0],COLORS[k],2,25) for k in range(2)])
+        self.add(probe,outputs);self.beat(px.animate.set_value(2.2))
+        # Same screen, new dataset: the middle band loses everywhere.
+        self.remove(*[m for m in self.mobjects if m is not self.subtitle and m.get_center()[1]<2.5])
+        ax=self.axes(xr=(-2.3,2.3,1),yr=(-1.6,1.6,1),width=5.8,height=3.9,center=(-2,.1,0))
+        points=cloud(ax,BANDS);reg=regions(ax,BAND_W);self.add(reg,points)
+        note=VGroup(jp('中央の橙が選ばれない',26,ORANGE_CLS),tex('y_2=0.20',31,ORANGE_CLS),tex(r'\max(y_1,y_3)\geq0.40',28)).arrange(DOWN,buff=.4).move_to([3.6,.7,0])
+        self.beat(FadeIn(note),Indicate(points[1],color=ORANGE_CLS,scale_factor=1.18))
+        good=VGroup(*[Line(ax.c2p(x,-1.6),ax.c2p(x,1.6),color=GREEN_CLS,stroke_width=3) for x in [-.9,.9]])
+        self.beat(Create(good),FadeOut(reg),Write(jp('目標の数への近さ ≠ 分類のよさ',27).move_to([0,-2.53,0])))
+
+    def fisher_display(self):
+        ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.2,0))
+        dots=cloud(ax,FISH,.037);self.add(dots)
+        theta=ValueTracker(1.1);w=lambda:direction(theta.get_value())
+        axis=always_redraw(lambda:Line(ax.c2p(*(-2.5*w())),ax.c2p(*(2.5*w())),color=YELLOW_W,stroke_width=3))
+        projected=always_redraw(lambda:VGroup(*[VGroup(*[Dot(ax.c2p(*(w()*(p@w()))),radius=.035,color=COLORS[k]) for p in g]) for k,g in enumerate(FISH)]))
+        # Show a few perpendicular guide lines, then all projected dots.
+        guides=always_redraw(lambda:VGroup(*[Line(ax.c2p(*p),ax.c2p(*(w()*(p@w()))),color=COLORS[k],stroke_width=1,stroke_opacity=.45) for k,g in enumerate(FISH) for p in g[::4]]))
+        strip=NumberLine(x_range=[-4,4,2],length=4.3,include_numbers=False,include_ticks=True,color=MUTED).move_to([3.55,-.45,0])
+        shadow=VGroup(*[Dot(radius=.032,color=COLORS[k]).add_updater(lambda m,p=p,k=k:m.move_to(strip.n2p(p@w())+UP*(.12 if k==0 else -.12))) for k,g in enumerate(FISH) for p in g])
+        means=always_redraw(lambda:VGroup(*[Line(strip.n2p(m@w())+DOWN*.35,strip.n2p(m@w())+UP*.35,color=COLORS[k],stroke_width=3) for k,m in enumerate(MEANS)]))
+        self.add(strip,shadow,means,tex('y=w^Tx',30).move_to([3.55,.5,0]),
+                 slider(theta,-1.1,1.2,[3.55,-1.35,0],r'\theta'))
+        return ax,dots,theta,axis,projected,guides,strip,shadow
+
+    def fisher(self):
+        self.hint('青・橙：元の点　淡い線：垂線　右の点列：同じ射影値')
+        ax,dots,theta,axis,projected,guides,strip,shadow=self.fisher_display()
+        self.beat(Create(axis),FadeIn(guides),FadeIn(projected))
+        self.beat(theta.animate.set_value(THETA_MEAN))
+        self.beat(theta.animate.set_value(.75))
+        f=self.bottom(r'J(w)=\frac{(m_2-m_1)^2}{s_1^2+s_2^2}',size=35)
+        val=readout('J=',lambda:criterion(direction(theta.get_value())),[3.55,1.5,0],YELLOW_W,3)
+        self.add(val);self.beat(Write(f),theta.animate.set_value(THETA_MEAN))
+        self.beat(theta.animate.set_value(THETA_FISHER))
+        f2=self.bottom(r'J=\frac{w^TS_Bw}{w^TS_Ww}\qquad w\propto S_W^{-1}(m_2-m_1)',size=30)
+        f2.set_color(YELLOW_W)
+        self.beat(ReplacementTransform(f,f2),Circumscribe(val,color=YELLOW_W))
+        threshold=ValueTracker(-.6)
+        cut=always_redraw(lambda:Line(strip.n2p(threshold.get_value())+UP*.55,strip.n2p(threshold.get_value())+DOWN*.55,color=RED_LINE,stroke_width=3))
+        self.add(cut);self.beat(threshold.animate.set_value(.6))
+
+    def relation(self):
+        self.hint('同じ自作データ：青30点、橙22点、合計52点')
+        ax=self.axes(xr=(-3.4,3.4,1),yr=(-2,3.2,1),width=5.3,height=4.05,center=(-2.75,.2,0))
+        dots=cloud(ax,FISH,.04);self.add(dots)
+        label=tex(r'N_1=30,\ N_2=22,\ N=52',29).move_to([3.3,1.6,0])
+        self.beat(Write(label),*[Indicate(g,color=COLORS[k],scale_factor=1.03) for k,g in enumerate(dots)])
+        f=self.bottom(r't_{C_1}=N/N_1\qquad t_{C_2}=-N/N_2')
+        vals=VGroup(tex(f't_1={CODE[0]:.3f}',32,BLUE_CLS),tex(f't_2={CODE[-1]:.3f}',32,ORANGE_CLS)).arrange(DOWN,buff=.35).move_to([3.3,.45,0])
+        self.beat(Write(f),FadeIn(vals))
+        mean=Dot(ax.c2p(*FISH_MEAN),radius=.085,color=WHITE)
+        bline=boundary(ax,CODE_W)
+        f2=self.bottom(r'\sum_n t_n=0\qquad w_0=-w^Tm')
+        self.beat(ReplacementTransform(f,f2),Create(bline),FadeIn(mean))
+        angle=ValueTracker(.65)
+        arrow=always_redraw(lambda:Arrow(ax.c2p(*FISH_MEAN),ax.c2p(*(FISH_MEAN+1.5*direction(angle.get_value()))),buff=0,color=YELLOW_W))
+        # Opposite orientations, same line of projection.
+        lsarrow=Arrow(ax.c2p(*FISH_MEAN),ax.c2p(*(FISH_MEAN+unit(CODE_W[1:])*1.2)),buff=0,color=PURPLE_B)
+        self.add(arrow,lsarrow)
+        self.beat(angle.animate.set_value(THETA_FISHER),Write(tex(r'|\cos\angle(w_{LS},w_F)|=1',27).move_to([3.3,-.9,0])))
+        f3=self.bottom(r'w_{LS}\propto S_W^{-1}(m_1-m_2)\qquad y=w^T(x-m)',size=29)
+        self.beat(ReplacementTransform(f2,f3),Circumscribe(mean,color=GREEN_CLS),ShowPassingFlash(bline.copy(),time_width=.4))
+
+    def multi_fisher(self):
+        self.hint('4次元の自作データ → クラス平均の張る平面を模式表示')
+        ax=self.axes(xr=(-2,2,1),yr=(-1.5,1.5,1),width=5.4,height=4.05,center=(-2.5,.2,0),labels=('u','v'))
+        pts=CENTERS[:,:2];m=pts.mean(0);dots=VGroup(*[Dot(ax.c2p(*p),color=COLORS[k],radius=.13) for k,p in enumerate(pts)])
+        triangle=Polygon(*[ax.c2p(*p) for p in pts],color=YELLOW_W,fill_opacity=.1)
+        self.add(dots);self.beat(Create(triangle))
+        arrows=VGroup(*[Arrow(ax.c2p(*m),ax.c2p(*p),buff=.1,color=COLORS[k]) for k,p in enumerate(pts)])
+        f=self.bottom(r'\sum_kN_k(m_k-m)=0')
+        self.beat(Create(arrows),Write(f))
+        f2=self.bottom(r'S_T=S_W+S_B\qquad S_B=\sum_kN_k(m_k-m)(m_k-m)^T',size=28)
+        pieces=VGroup(jp('集団内の広がり',24,PURPLE_B),jp('集団間の隔たり',24,YELLOW_W),tex('y=W^Tx',32)).arrange(DOWN,buff=.4).move_to([3.6,1,0])
+        self.beat(ReplacementTransform(f,f2),FadeIn(pieces),Indicate(triangle,scale_factor=1.05))
+        criterion_eq=tex(r'J(W)=\mathrm{Tr}[(W^TS_WW)^{-1}(W^TS_BW)]',29).move_to([0,-2.52,0])
+        self.remove(f2)
+        eigax=Axes(x_range=[0,5,1],y_range=[0,45,10],x_length=3.7,y_length=1.5,tips=False,axis_config={'include_ticks':False,'color':MUTED}).move_to([3.5,-1.15,0])
+        bars=VGroup(*[Rectangle(width=.45,height=max(.015,float(e)/45*1.5),fill_color=GREEN_CLS,fill_opacity=.8,stroke_width=0).move_to(eigax.c2p(i+1,0),aligned_edge=DOWN) for i,e in enumerate(EIG)])
+        eiglabels=VGroup(*[tex(f'{max(0,e):.1f}',19).next_to(bar,UP,buff=.1) for e,bar in zip(EIG,bars)])
+        self.add(eigax);self.beat(Write(criterion_eq),GrowFromEdge(bars,DOWN),FadeIn(eiglabels))
+        count=tex(r'\operatorname{rank}(S_B)\leq K-1=2',31,YELLOW_W).move_to([0,-2.52,0])
+        self.beat(ReplacementTransform(criterion_eq,count),Circumscribe(VGroup(bars[0],bars[1]),color=YELLOW_W))
+
+    def perceptron_scene(self):
+        self.hint('青：+1　橙：−1　黄色の輪：今回更新する点')
+        ax=self.axes(xr=(-1.65,1.65,.5),yr=(-1.45,1.45,.5),width=4.78,height=4.2,center=(-2.7,.15,0))
+        groups=[P_X[P_T==1],P_X[P_T==-1]];dots=cloud(ax,groups,.07)
+        step=ValueTracker(0);w=lambda:interpolate_history(step.get_value())
+        line=always_redraw(lambda:boundary(ax,w()));self.add(dots,line)
+        error=readout(r'N_{\rm error}=',lambda:np.sum(np.where(augment(P_X)@w()>=0,1,-1)!=P_T),[3.5,1.7,0],RED_LINE,0)
+        self.add(error);self.beat(ShowPassingFlash(line.copy().clear_updaters(),time_width=.5))
+        f=self.bottom(r'a=w^T\phi(x),\quad f(a)=\begin{cases}+1&a\geq0\\-1&a<0\end{cases}',size=30)
+        phi=tex(r'\phi(x)=(1,x_1,x_2)^T',31).move_to([3.5,.8,0])
+        self.beat(Write(f),Write(phi),Indicate(dots[0],color=BLUE_CLS,scale_factor=1.08))
+        ring=Circle(radius=.18,color=YELLOW_W).move_to(ax.c2p(*P_X[P_HISTORY[0]['index']]))
+        self.add(ring)
+        update=tex(r'w\leftarrow w+\eta\phi_nt_n',31,YELLOW_W).move_to([3.5,-.2,0])
+        self.add(update,tex(r'\eta=1',25,MUTED).move_to([3.5,-.85,0]))
+        self.beat(step.animate.set_value(1),start_sentence=1)
+        ring.move_to(ax.c2p(*P_X[P_HISTORY[1]['index']]))
+        self.beat(step.animate.set_value(2),start_sentence=1)
+        ep=self.bottom(r'E_P(w)=-\sum_{n\in\mathcal{M}}w^T\phi_nt_n',size=33)
+        self.beat(ReplacementTransform(f,ep),Circumscribe(error,color=RED_LINE))
+        gain=tex(r'\Delta(t_na_n)=\eta\|\phi_n\|^2>0',30,GREEN_CLS).move_to([3.5,-1.55,0])
+        self.beat(Write(gain),Indicate(ring,scale_factor=1.15))
+        ring.move_to(ax.c2p(*P_X[P_HISTORY[2]['index']]))
+        self.beat(step.animate.set_value(len(P_HISTORY)))
+
+    def limits(self):
+        self.hint('収束の条件は「使う特徴空間で分離できること」')
+        ax=self.axes(xr=(-1.65,1.65,.5),yr=(-1.45,1.45,.5),width=4.78,height=4.2,center=(-2.7,.15,0))
+        dots=cloud(ax,[P_X[P_T==1],P_X[P_T==-1]],.07);self.add(dots)
+        offset=ValueTracker(P_FINAL[0]);line=always_redraw(lambda:boundary(ax,np.r_[offset.get_value(),P_FINAL[1:]]));self.add(line)
+        f=jp('線形分離できる → 有限回の更新で解へ',27).move_to([0,-2.53,0])
+        self.beat(Write(f),Circumscribe(dots,color=GREEN_CLS))
+        self.beat(offset.animate.set_value(-.05))
+        self.remove(dots,line,f)
+        X=np.array([[-1,-1],[1,1],[-1,1],[1,-1]])
+        xordots=cloud(ax,[X[:2],X[2:]],.1);self.add(xordots)
+        angle=ValueTracker(.15);bad=always_redraw(lambda:boundary(ax,np.r_[0,direction(angle.get_value())]));self.add(bad)
+        self.beat(angle.animate.set_value(2.8),Write(tex('XOR',36,YELLOW_W).move_to([3.5,1.6,0])))
+        self.remove(bad)
+        arrow=Arrow([.25,.1,0],[1.4,.1,0],color=MUTED)
+        strip=NumberLine(x_range=[-1.5,1.5,1],length=3.8,include_numbers=False,color=MUTED).move_to([3.7,.1,0])
+        target=VGroup(*[Dot(strip.n2p(p[0]*p[1])+UP*(.12 if i<2 else -.12),color=COLORS[0 if i<2 else 1],radius=.09) for i,p in enumerate(X)])
+        source=VGroup(*[Dot(ax.c2p(*p),color=COLORS[0 if i<2 else 1],radius=.09) for i,p in enumerate(X)])
+        self.add(strip,arrow,source,tex(r'z=x_1x_2',32).move_to([3.7,.9,0]),tex('-1',24).next_to(strip.n2p(-1),DOWN,buff=.4),tex('+1',24).next_to(strip.n2p(1),DOWN,buff=.4))
+        self.beat(ReplacementTransform(source,target))
+        cut=Line(strip.n2p(0)+UP*.65,strip.n2p(0)+DOWN*.65,color=RED_LINE)
+        f2=self.bottom(r'\phi(x)=(1,x_1,x_2,x_1x_2)^T\qquad a=x_1x_2',size=30)
+        self.beat(Create(cut),Write(f2),Circumscribe(target,color=GREEN_CLS))
+
+    def summary(self):
+        self.hint('同じ境界でも、学習で動かす理由が違う')
+        ax=self.axes();amount=ValueTracker(0)
+        dots=always_redraw(lambda:cloud(ax,ls_data(.35*amount.get_value())));self.add(dots)
+        W=lambda:least_squares(ls_data(.35*amount.get_value()))
+        line=always_redraw(lambda:boundary(ax,W()[:,0]-W()[:,1]));self.add(line)
+        tag=jp('最小二乗：目標の数へ近づける',27,RED_LINE).move_to([2.8,1.6,0])
+        self.add(tag);self.beat(amount.animate.set_value(1))
+        self.remove(line,tag)
+        summary_groups=ls_data(.35)
+        theta=ValueTracker(.7);u=lambda:direction(theta.get_value())
+        arrow=always_redraw(lambda:Arrow(ax.c2p(*(-1.5*u())),ax.c2p(*(1.5*u())),buff=0,color=YELLOW_W))
+        proj=always_redraw(lambda:VGroup(*[Dot(ax.c2p(*(u()*(p@u()))),color=COLORS[k],radius=.035) for k,g in enumerate(summary_groups) for p in g]))
+        tag=jp('Fisher：影の分離をよくする',27,YELLOW_W).move_to([3.1,1.6,0]);self.add(arrow,proj,tag)
+        sw,sb=scatter(summary_groups);v=unit(np.linalg.solve(sw,summary_groups[0].mean(0)-summary_groups[1].mean(0)))
+        self.beat(theta.animate.set_value(np.arctan2(v[1],v[0])))
+        self.remove(arrow,proj,tag,dots)
+        pdots=cloud(ax,[P_X[P_T==1],P_X[P_T==-1]]);step=ValueTracker(0)
+        line=always_redraw(lambda:boundary(ax,interpolate_history(step.get_value())))
+        self.add(pdots,line);tag=jp('パーセプトロン：誤りで更新する',25,GREEN_CLS).move_to([3,1.6,0]);self.add(tag)
+        self.beat(step.animate.set_value(3))
+        question=jp('どれくらい確かな判定？',28,YELLOW_W).move_to([3.7,.4,0])
+        nextf=self.bottom(r'p(x\mid C_k)\quad\longrightarrow\quad p(C_k\mid x)',size=35)
+        self.beat(FadeIn(question),Write(nextf),ShowPassingFlash(line.copy().clear_updaters(),time_width=.4))
