@@ -23,4 +23,4 @@ for s in SCENES:
   for seg in b['segments']:
    lines += [f"- `{seg['id']}`", f"  - display: {seg['display']}", f"  - speech: {seg['speech']}"]
   lines += ['']
-(root/'narration_script.md').write_text('\n'.join(lines)+'\n')
+(root/'narration_script.md').write_text('\n'.join(lines).rstrip()+'\n')
