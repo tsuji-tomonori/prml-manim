@@ -1,501 +1,256 @@
-from __future__ import annotations
-
-import math
-import wave
-from pathlib import Path
-
-import numpy as np
+"""PRML 4.4 — continuous local geometry, implemented with Manim CE."""
 from manim import *
-
-
-BLUE_DATA = BLUE_C
-GREEN_TRUE = GREEN_C
-RED_LAPLACE = RED_C
-ORANGE_CURVE = ORANGE
-YELLOW_NOTE = YELLOW_C
-PURPLE_EVIDENCE = PURPLE_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
-
-
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
-
-
-def sigmoid(x: np.ndarray | float) -> np.ndarray | float:
-    return 1.0 / (1.0 + np.exp(-np.asarray(x)))
-
-
-def log_sigmoid(x: np.ndarray | float) -> np.ndarray | float:
-    return -np.logaddexp(0.0, -np.asarray(x))
-
-
-def log_unnormalized(z: np.ndarray | float) -> np.ndarray | float:
-    z_array = np.asarray(z)
-    return -0.5 * z_array**2 + log_sigmoid(20.0 * z_array + 4.0)
-
-
-def unnormalized_density(z: np.ndarray | float) -> np.ndarray | float:
-    return np.exp(log_unnormalized(z))
-
-
-GRID = np.linspace(-2.0, 4.0, 1400)
-NORMALIZER = float(np.trapezoid(unnormalized_density(GRID), GRID))
-MODE_Z = float(GRID[np.argmax(unnormalized_density(GRID))])
-MODE_SIGMOID = float(sigmoid(20.0 * MODE_Z + 4.0))
-CURVATURE_A = 1.0 + 400.0 * MODE_SIGMOID * (1.0 - MODE_SIGMOID)
-MODE_LOG_VALUE = float(log_unnormalized(MODE_Z))
-
-
-def target_pdf(z: np.ndarray | float) -> np.ndarray | float:
-    return unnormalized_density(z) / NORMALIZER
-
-
-def laplace_pdf(z: np.ndarray | float, scale: float = 1.0) -> np.ndarray | float:
-    precision = CURVATURE_A * scale
-    z_array = np.asarray(z)
-    return np.sqrt(precision / (2.0 * np.pi)) * np.exp(-0.5 * precision * (z_array - MODE_Z) ** 2)
-
-
-def negative_log_density(z: np.ndarray | float) -> np.ndarray | float:
-    return -(log_unnormalized(z) - MODE_LOG_VALUE)
-
-
-def quadratic_bowl(z: np.ndarray | float, scale: float = 1.0) -> np.ndarray | float:
-    z_array = np.asarray(z)
-    return 0.5 * CURVATURE_A * scale * (z_array - MODE_Z) ** 2
-
-
-class PRML44LaplaceApproximation(Scene):
-    """PRML 4.4 Laplace approximation overview.
-
-    Render example:
-        uv run manim -pql prml_4_4_laplace_approximation.py PRML44LaplaceApproximation
-    """
-
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.why_laplace()
-        self.one_dimensional_laplace()
-        self.curvature_as_uncertainty()
-        self.multivariate_extension()
-        self.evidence_and_occam()
-        self.bic_bridge()
-        self.strengths_and_limits()
-
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
-
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.25) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
-
-    def clear_scene(self, *mobjects: Mobject) -> None:
-        group = VGroup(*[m for m in mobjects if m is not None])
-        if len(group) > 0:
-            self.play(FadeOut(group), run_time=0.8)
-        self.clear()
-
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
-
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
-
-    def density_axes(self, width: float = 7.4, height: float = 3.7, y_max: float = 0.9) -> Axes:
-        return Axes(
-            x_range=[-2, 4, 1],
-            y_range=[0, y_max, 0.2],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def negative_log_axes(self, width: float = 7.2, height: float = 3.7) -> Axes:
-        return Axes(
-            x_range=[-2, 4, 1],
-            y_range=[0, 7, 1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def make_curve_from_values(
-        self,
-        axes: Axes,
-        x_values: np.ndarray,
-        y_values: np.ndarray,
-        color: ManimColor,
-        width: float = 4.0,
-        opacity: float = 1.0,
-    ) -> VMobject:
-        points = [axes.c2p(float(x), float(y)) for x, y in zip(x_values, y_values)]
-        curve = VMobject(color=color)
-        curve.set_points_smoothly(points)
-        curve.set_stroke(width=width, opacity=opacity)
-        return curve
-
-    def formula_box(self, tex: str, color: ManimColor = WHITE, font_size: int = 34) -> VGroup:
-        formula = MathTex(tex, font_size=font_size, color=color)
-        box = SurroundingRectangle(formula, color=color, buff=0.18)
-        box.set_stroke(width=1.5, opacity=0.7)
-        return VGroup(box, formula)
-
-    def why_laplace(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 4.4 / bridge to Bayesian logistic regression")
-        title = self.scene_title("難しい事後分布を、モード周りのガウスで読む", font_size=32)
-
-        axes = self.density_axes(width=7.0, height=3.55, y_max=0.86).shift(LEFT * 1.55 + DOWN * 0.15)
-        true_curve = axes.plot(lambda z: target_pdf(z), x_range=[-2, 4], color=GREEN_TRUE)
-        approx_curve = axes.plot(lambda z: laplace_pdf(z), x_range=[-2, 4], color=RED_LAPLACE)
-        true_curve.set_stroke(width=4.5)
-        approx_curve.set_stroke(width=4.0)
-        mode_line = DashedLine(axes.c2p(MODE_Z, 0), axes.c2p(MODE_Z, 0.8), color=YELLOW_NOTE, dash_length=0.1)
-        mode_dot = Dot(axes.c2p(MODE_Z, float(target_pdf(MODE_Z))), color=YELLOW_NOTE, radius=0.07)
-
-        posterior = self.formula_box(r"p(w|D)\propto p(D|w)p(w)", color=WHITE, font_size=33)
-        posterior.to_corner(UR).shift(DOWN * 0.8 + LEFT * 0.15)
-        not_gaussian = Text("非ガウス: 解析積分が難しい", font_size=24, color=ORANGE_CURVE)
-        not_gaussian.next_to(posterior, DOWN, buff=0.35)
-        zoom = Arrow(LEFT * 0.45, RIGHT * 0.45, color=YELLOW_NOTE, stroke_width=5)
-        local = Text("mode 近傍を拡大", font_size=22, color=YELLOW_NOTE)
-        local_group = VGroup(zoom, local).arrange(RIGHT, buff=0.18)
-        local_group.next_to(not_gaussian, DOWN, buff=0.35).align_to(not_gaussian, LEFT)
-        gaussian = self.formula_box(r"q(w)=\mathcal{N}(w|w_0,\Sigma)", color=RED_LAPLACE, font_size=33)
-        gaussian.next_to(local_group, DOWN, buff=0.35).align_to(posterior, LEFT)
-
-        legend = VGroup(
-            Line(LEFT * 0.35, RIGHT * 0.35, color=GREEN_TRUE, stroke_width=5),
-            Text("true posterior shape", font_size=19),
-            Line(LEFT * 0.35, RIGHT * 0.35, color=RED_LAPLACE, stroke_width=5),
-            Text("Laplace Gaussian", font_size=19),
-        ).arrange_in_grid(rows=2, cols=2, col_alignments="lr", buff=(0.2, 0.12))
-        legend.next_to(axes, DOWN, buff=0.18)
-
-        self.play(FadeIn(label), Write(title), run_time=1.4)
-        self.play(Create(axes), Create(true_curve), FadeIn(legend[0:2]), run_time=1.8)
-        self.play(Write(posterior), Write(not_gaussian), run_time=1.4)
-        self.play(Create(mode_line), FadeIn(mode_dot), FadeIn(local_group), run_time=1.2)
-        self.play(Create(approx_curve), FadeIn(legend[2:4]), Write(gaussian), run_time=1.8)
-        self.play(Indicate(mode_dot, color=YELLOW_NOTE), Indicate(approx_curve, color=RED_LAPLACE), run_time=1.1)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, axes, true_curve, approx_curve, mode_line, mode_dot, posterior, not_gaussian, local_group, gaussian, legend)
-
-    def one_dimensional_laplace(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("PRML 4.4 / Eq. (4.125)-(4.130)")
-        title = self.scene_title("1変数: mode を探し、log f を二次で近似する", font_size=32)
-
-        axes = self.density_axes(width=6.6, height=3.4, y_max=0.85).shift(LEFT * 2.1 + DOWN * 0.15)
-        true_curve = axes.plot(lambda z: target_pdf(z), x_range=[-2, 4], color=GREEN_TRUE).set_stroke(width=4.2)
-        approx_curve = axes.plot(lambda z: laplace_pdf(z), x_range=[-2, 4], color=RED_LAPLACE).set_stroke(width=4.0)
-        mode_line = DashedLine(axes.c2p(MODE_Z, 0), axes.c2p(MODE_Z, 0.78), color=YELLOW_NOTE, dash_length=0.1)
-        mode_label = MathTex(r"z_0", font_size=32, color=YELLOW_NOTE).next_to(mode_line, DOWN, buff=0.1)
-        mode_dot = Dot(axes.c2p(MODE_Z, float(target_pdf(MODE_Z))), color=YELLOW_NOTE, radius=0.065)
-
-        step1 = self.formula_box(r"p(z)=\frac{1}{Z}f(z)", font_size=32)
-        step2 = self.formula_box(r"f'(z_0)=0", color=YELLOW_NOTE, font_size=32)
-        step3 = self.formula_box(r"\ln f(z)\simeq \ln f(z_0)-\frac{A}{2}(z-z_0)^2", color=ORANGE_CURVE, font_size=30)
-        step4 = self.formula_box(r"q(z)=\mathcal{N}(z|z_0,A^{-1})", color=RED_LAPLACE, font_size=31)
-        steps = VGroup(step1, step2, step3, step4).arrange(DOWN, buff=0.23, aligned_edge=LEFT)
-        steps.next_to(axes, RIGHT, buff=0.35).shift(UP * 0.05)
-        arrow1 = Arrow(step1.get_bottom(), step2.get_top(), buff=0.08, color=TEXT_GREY)
-        arrow2 = Arrow(step2.get_bottom(), step3.get_top(), buff=0.08, color=TEXT_GREY)
-        arrow3 = Arrow(step3.get_bottom(), step4.get_top(), buff=0.08, color=TEXT_GREY)
-
-        self.play(FadeIn(label), Write(title), Create(axes), run_time=1.3)
-        self.play(Write(step1), Create(true_curve), run_time=1.4)
-        self.play(GrowArrow(arrow1), Write(step2), Create(mode_line), FadeIn(mode_dot), FadeIn(mode_label), run_time=1.4)
-        self.play(GrowArrow(arrow2), Write(step3), run_time=1.4)
-        self.play(GrowArrow(arrow3), Write(step4), Create(approx_curve), run_time=1.7)
-        self.wait(0.5)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, axes, true_curve, approx_curve, mode_line, mode_label, mode_dot, steps, arrow1, arrow2, arrow3)
-
-    def curvature_as_uncertainty(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("PRML 4.4 / negative log view")
-        title = self.scene_title("曲率 A が大きいほど、近似分布は細くなる", font_size=33)
-
-        axes = self.negative_log_axes(width=6.9, height=3.5).shift(LEFT * 1.75 + DOWN * 0.05)
-        x_values = np.linspace(-1.25, 2.15, 500)
-        true_values = np.minimum(negative_log_density(x_values), 7.0)
-        quad_values = np.minimum(quadratic_bowl(x_values), 7.0)
-        true_curve = self.make_curve_from_values(axes, x_values, true_values, GREEN_TRUE, width=4.2)
-        quad_curve = self.make_curve_from_values(axes, x_values, quad_values, RED_LAPLACE, width=4.2)
-        mode_dot = Dot(axes.c2p(MODE_Z, 0), color=YELLOW_NOTE, radius=0.07)
-        tangent = Line(axes.c2p(MODE_Z - 0.45, 0), axes.c2p(MODE_Z + 0.45, 0), color=YELLOW_NOTE, stroke_width=5)
-
-        equation = self.formula_box(r"A=-\frac{d^2}{dz^2}\ln f(z)\bigg|_{z_0}", color=ORANGE_CURVE, font_size=34)
-        equation.to_corner(UR).shift(DOWN * 0.65 + LEFT * 0.1)
-
-        mini_axes = Axes(
-            x_range=[-3, 3, 1],
-            y_range=[0, 1.1, 0.5],
-            x_length=3.3,
-            y_length=1.75,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 1.5},
-        ).next_to(equation, DOWN, buff=0.45)
-        wide = mini_axes.plot(lambda x: math.exp(-0.5 * 0.55 * x * x) * math.sqrt(0.55 / (2 * math.pi)) * 2.3, x_range=[-3, 3], color=BLUE_DATA)
-        narrow = mini_axes.plot(lambda x: math.exp(-0.5 * 2.6 * x * x) * math.sqrt(2.6 / (2 * math.pi)) * 2.3, x_range=[-3, 3], color=RED_LAPLACE)
-        wide.set_stroke(width=3.5)
-        narrow.set_stroke(width=3.5)
-        wide_label = Text("小さい A: 広い", font_size=20, color=BLUE_DATA).next_to(mini_axes, DOWN, buff=0.12).align_to(mini_axes, LEFT)
-        narrow_label = Text("大きい A: 細い", font_size=20, color=RED_LAPLACE).next_to(wide_label, RIGHT, buff=0.35)
-
-        note = Text("log の山 -> 負の log の谷", font_size=26, color=YELLOW_NOTE).next_to(axes, DOWN, buff=0.18)
-
-        self.play(FadeIn(label), Write(title), Create(axes), run_time=1.3)
-        self.play(Create(true_curve), Write(note), run_time=1.4)
-        self.play(FadeIn(mode_dot), Create(tangent), Write(equation), run_time=1.3)
-        self.play(Create(quad_curve), run_time=1.5)
-        self.play(Create(mini_axes), Create(wide), Write(wide_label), run_time=1.2)
-        self.play(Create(narrow), Write(narrow_label), run_time=1.2)
-        self.play(Indicate(equation, color=ORANGE_CURVE), run_time=0.9)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, axes, true_curve, quad_curve, mode_dot, tangent, equation, mini_axes, wide, narrow, wide_label, narrow_label, note)
-
-    def multivariate_extension(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("PRML 4.4 / Eq. (4.131)-(4.134)")
-        title = self.scene_title("多変数: Hessian がガウスの精度行列になる", font_size=33)
-
-        axes = Axes(
-            x_range=[-3, 3, 1],
-            y_range=[-2.5, 2.5, 1],
-            x_length=5.0,
-            y_length=4.0,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(LEFT * 2.25 + DOWN * 0.05)
-        center = Dot(axes.c2p(0.15, -0.05), color=YELLOW_NOTE, radius=0.075)
-        ellipses = VGroup()
-        for scale, opacity in [(1.0, 1.0), (1.55, 0.65), (2.1, 0.38)]:
-            ellipse = Ellipse(width=2.6 * scale, height=1.05 * scale, color=RED_LAPLACE, stroke_width=4 * opacity)
-            ellipse.rotate(0.48)
-            ellipse.move_to(axes.c2p(0.15, -0.05))
-            ellipse.set_opacity(opacity)
-            ellipses.add(ellipse)
-        steep_arrow = Arrow(axes.c2p(0.15, -0.05), axes.c2p(-0.45, 0.75), buff=0, color=ORANGE_CURVE)
-        flat_arrow = Arrow(axes.c2p(0.15, -0.05), axes.c2p(1.45, 0.68), buff=0, color=BLUE_DATA)
-        steep_label = Text("曲率大", font_size=22, color=ORANGE_CURVE).next_to(steep_arrow.get_end(), UP, buff=0.08)
-        flat_label = Text("曲率小", font_size=22, color=BLUE_DATA).next_to(flat_arrow.get_end(), RIGHT, buff=0.08)
-
-        eq1 = self.formula_box(r"\ln f(z)\simeq \ln f(z_0)-\frac{1}{2}(z-z_0)^T A (z-z_0)", color=WHITE, font_size=28)
-        eq2 = self.formula_box(r"A=-\nabla\nabla\ln f(z)\big|_{z_0}", color=ORANGE_CURVE, font_size=31)
-        eq3 = self.formula_box(r"q(z)=\mathcal{N}(z|z_0,A^{-1})", color=RED_LAPLACE, font_size=31)
-        equations = VGroup(eq1, eq2, eq3).arrange(DOWN, buff=0.22, aligned_edge=LEFT)
-        equations.next_to(axes, RIGHT, buff=0.35).shift(UP * 0.25)
-
-        valid = VGroup(
-            Text("local maximum", font_size=24, color=GREEN_TRUE),
-            MathTex(r"A\succ 0", font_size=34, color=GREEN_TRUE),
-        ).arrange(RIGHT, buff=0.25)
-        invalid = VGroup(
-            Text("minimum / saddle", font_size=24, color=RED_LAPLACE),
-            Text("A は正定値でない", font_size=22, color=RED_LAPLACE),
-        ).arrange(RIGHT, buff=0.25)
-        signs = VGroup(valid, invalid).arrange(DOWN, buff=0.18, aligned_edge=LEFT)
-        signs.next_to(equations, DOWN, buff=0.25)
-
-        self.play(FadeIn(label), Write(title), Create(axes), run_time=1.3)
-        self.play(FadeIn(center), Create(ellipses[2]), Create(ellipses[1]), Create(ellipses[0]), run_time=1.5)
-        self.play(GrowArrow(steep_arrow), GrowArrow(flat_arrow), Write(steep_label), Write(flat_label), run_time=1.2)
-        self.play(Write(eq1), run_time=1.1)
-        self.play(Write(eq2), Write(eq3), run_time=1.4)
-        self.play(FadeIn(valid), run_time=0.9)
-        self.play(FadeIn(invalid), run_time=0.9)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, axes, center, ellipses, steep_arrow, flat_arrow, steep_label, flat_label, equations, signs)
-
-    def evidence_and_occam(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("PRML 4.4.1 / Eq. (4.135)-(4.137)")
-        title = self.scene_title("積分 Z は、山の高さと幅の両方で決まる", font_size=33)
-
-        formula = self.formula_box(r"Z\simeq f(z_0)\frac{(2\pi)^{M/2}}{|A|^{1/2}}", color=PURPLE_EVIDENCE, font_size=36)
-        formula.to_edge(UP).shift(DOWN * 1.18)
-
-        panel_group = VGroup()
-        specs = [
-            ("高いが狭い", RED_LAPLACE, 2.35, 0.23, 1.2),
-            ("少し低いが広い", BLUE_DATA, 1.65, 0.65, 4.0),
-        ]
-        for heading, color, height, sigma, area_value in specs:
-            axes = Axes(
-                x_range=[-2.2, 2.2, 1],
-                y_range=[0, 2.7, 1],
-                x_length=4.3,
-                y_length=2.65,
-                tips=False,
-                axis_config={"color": GREY_B, "stroke_width": 1.8},
-            )
-            curve = axes.plot(
-                lambda x, h=height, s=sigma: h * math.exp(-0.5 * (x / s) ** 2),
-                x_range=[-2.2, 2.2],
-                color=color,
-            ).set_stroke(width=4)
-            peak = Dot(axes.c2p(0, height), color=YELLOW_NOTE, radius=0.06)
-            width_line = Line(axes.c2p(-sigma, 0.18), axes.c2p(sigma, 0.18), color=YELLOW_NOTE, stroke_width=4)
-            title_text = Text(heading, font_size=25, color=color).next_to(axes, UP, buff=0.16)
-            area = MathTex(r"\mathrm{area}\propto", f"{area_value:.1f}", font_size=28, color=YELLOW_NOTE)
-            area.next_to(axes, DOWN, buff=0.12)
-            panel = VGroup(axes, curve, peak, width_line, title_text, area)
-            panel_group.add(panel)
-        panel_group.arrange(RIGHT, buff=0.55).shift(DOWN * 0.55)
-
-        evidence = self.formula_box(r"p(D)=\int p(D|\theta)p(\theta)\,d\theta", color=WHITE, font_size=31)
-        evidence.next_to(formula, DOWN, buff=0.25)
-        occam = Text("Occam factor: 複雑さを「幅」で調整", font_size=28, color=YELLOW_NOTE)
-        occam.to_edge(DOWN, buff=0.45)
-
-        self.play(FadeIn(label), Write(title), Write(formula), run_time=1.4)
-        self.play(Write(evidence), run_time=1.1)
-        self.play(Create(panel_group[0][0]), Create(panel_group[0][1]), FadeIn(panel_group[0][2:]), run_time=1.4)
-        self.play(Create(panel_group[1][0]), Create(panel_group[1][1]), FadeIn(panel_group[1][2:]), run_time=1.4)
-        self.play(Write(occam), run_time=1.1)
-        self.play(Indicate(panel_group[0][3], color=YELLOW_NOTE), Indicate(panel_group[1][3], color=YELLOW_NOTE), run_time=1.0)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, formula, evidence, panel_group, occam)
-
-    def bic_bridge(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("PRML 4.4.1 / Eq. (4.138)-(4.139)")
-        title = self.scene_title("BIC: 当てはまりから、パラメータ数の罰則を引く", font_size=32)
-
-        lhs = MathTex(r"\ln p(D)\simeq", font_size=35, color=YELLOW_NOTE)
-        fit_part = MathTex(r"\ln p(D|\theta_{\mathrm{MAP}})", font_size=35, color=GREEN_TRUE)
-        minus = MathTex(r"-", font_size=35, color=YELLOW_NOTE)
-        penalty_part = MathTex(r"\frac{M}{2}\ln N", font_size=35, color=RED_LAPLACE)
-        formula_terms = VGroup(lhs, fit_part, minus, penalty_part).arrange(RIGHT, buff=0.16)
-        formula_terms.to_edge(UP).shift(DOWN * 1.0)
-        formula_box = SurroundingRectangle(formula_terms, color=YELLOW_NOTE, buff=0.18)
-        formula_box.set_stroke(width=1.5, opacity=0.7)
-        formula = VGroup(formula_box, formula_terms)
-        under_fit = Brace(fit_part, DOWN, color=GREEN_TRUE)
-        fit_label = Text("最適化した尤度", font_size=22, color=GREEN_TRUE).next_to(under_fit, DOWN, buff=0.1)
-        under_penalty = Brace(penalty_part, DOWN, color=RED_LAPLACE)
-        penalty_label = Text("複雑さへの罰則", font_size=22, color=RED_LAPLACE).next_to(under_penalty, DOWN, buff=0.1)
-
-        axes = Axes(
-            x_range=[0, 4, 1],
-            y_range=[0, 36, 6],
-            x_length=7.5,
-            y_length=3.3,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(DOWN * 0.8)
-        y_label = Text("penalty", font_size=20, color=TEXT_GREY).next_to(axes, UP, buff=0.05).align_to(axes, LEFT)
-        m_values = [2, 6, 10]
-
-        def make_bars(n_value: int, color: ManimColor) -> VGroup:
-            bars = VGroup()
-            for i, m_value in enumerate(m_values, start=1):
-                penalty = 0.5 * m_value * math.log(n_value)
-                width = 0.55
-                height = axes.c2p(0, penalty)[1] - axes.c2p(0, 0)[1]
-                bar = Rectangle(width=width, height=max(height, 0.001), stroke_width=0)
-                bar.set_fill(color, opacity=0.75)
-                bar.move_to(axes.c2p(i, penalty / 2.0))
-                label_m = MathTex(f"M={m_value}", font_size=24, color=WHITE).next_to(axes.c2p(i, 0), DOWN, buff=0.15)
-                value = MathTex(f"{penalty:.1f}", font_size=22, color=color).next_to(bar, UP, buff=0.08)
-                bars.add(VGroup(bar, label_m, value))
-            return bars
-
-        bars_small = make_bars(50, BLUE_DATA)
-        bars_large = make_bars(500, RED_LAPLACE)
-        n_label = MathTex(r"N=50", font_size=34, color=BLUE_DATA).next_to(axes, RIGHT, buff=0.35).shift(UP * 0.7)
-        n_label_large = MathTex(r"N=500", font_size=34, color=RED_LAPLACE).move_to(n_label)
-        note = Text("M が多いほど、N が大きいほど、罰則は重い", font_size=27, color=YELLOW_NOTE)
-        note.to_edge(DOWN, buff=0.45)
-
-        self.play(FadeIn(label), Write(title), Write(formula), run_time=1.4)
-        self.play(GrowFromCenter(under_fit), Write(fit_label), GrowFromCenter(under_penalty), Write(penalty_label), run_time=1.2)
-        self.play(Create(axes), Write(y_label), FadeIn(bars_small), Write(n_label), run_time=1.5)
-        self.play(Transform(bars_small, bars_large), Transform(n_label, n_label_large), run_time=1.5)
-        self.play(Write(note), run_time=1.0)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, formula, under_fit, fit_label, under_penalty, penalty_label, axes, y_label, bars_small, n_label, note)
-
-    def strengths_and_limits(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("PRML 4.4 / practical notes")
-        title = self.scene_title("得意なのは、一つの鋭い山を局所的に読むこと", font_size=32)
-
-        def item_box(text: str, color: ManimColor, width: float = 3.25) -> VGroup:
-            rect = RoundedRectangle(width=width, height=1.0, corner_radius=0.08, color=color)
-            rect.set_fill(color, opacity=0.12)
-            label_text = Text(text, font_size=24, color=color)
-            label_text.move_to(rect)
-            return VGroup(rect, label_text)
-
-        strengths = VGroup(
-            item_box("Z を知らなくてよい", GREEN_TRUE),
-            item_box("大標本で効きやすい", GREEN_TRUE),
-            item_box("次節 4.5 の道具", GREEN_TRUE),
-        ).arrange(RIGHT, buff=0.35).shift(UP * 1.25)
-
-        limits = VGroup(
-            item_box("多峰性は苦手", RED_LAPLACE),
-            item_box("強い歪みは苦手", RED_LAPLACE),
-            item_box("境界付き変数は変換", RED_LAPLACE),
-        ).arrange(RIGHT, buff=0.35).shift(DOWN * 0.25)
-
-        curve_axes = Axes(
-            x_range=[-3, 3, 1],
-            y_range=[0, 1.1, 0.5],
-            x_length=5.8,
-            y_length=1.6,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 1.5},
-        ).to_edge(DOWN, buff=0.4)
-        multimodal = curve_axes.plot(
-            lambda x: 0.85 * math.exp(-0.5 * ((x + 1.2) / 0.45) ** 2) + 0.65 * math.exp(-0.5 * ((x - 1.1) / 0.6) ** 2),
-            x_range=[-3, 3],
-            color=GREEN_TRUE,
-        ).set_stroke(width=3.5)
-        local_gaussian = curve_axes.plot(
-            lambda x: 0.9 * math.exp(-0.5 * ((x + 1.2) / 0.45) ** 2),
-            x_range=[-3, 0.2],
-            color=RED_LAPLACE,
-        ).set_stroke(width=3.5)
-        curve_note = Text("一つの mode だけを見ると、もう一つの山を落とす", font_size=23, color=TEXT_GREY)
-        curve_note.next_to(curve_axes, UP, buff=0.1)
-
-        bridge = self.formula_box(r"p(w|D)\approx \mathcal{N}(w|w_{\mathrm{MAP}},S_N)", color=PURPLE_EVIDENCE, font_size=34)
-        bridge.next_to(limits, DOWN, buff=0.35)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(FadeIn(strengths, lag_ratio=0.15), run_time=1.3)
-        self.play(FadeIn(limits, lag_ratio=0.15), run_time=1.3)
-        self.play(Write(bridge), run_time=1.1)
-        self.play(Create(curve_axes), Create(multimodal), Create(local_gaussian), Write(curve_note), run_time=1.6)
-        self.play(Indicate(limits[0], color=RED_LAPLACE), run_time=1.0)
-        self.finish_narration(narration)
-        self.clear_scene(label, title, strengths, limits, curve_axes, multimodal, local_gaussian, curve_note, bridge)
+import numpy as np
+from scene_support import NarratedScene, jp, tex, polyline, BLUE, RED, GOLD, GREEN, PURPLE, MUTED
+from laplace_model import *
+
+
+class PRML44LaplaceApproximation(NarratedScene):
+    def construct(self):
+        for i,method in enumerate([self.question,self.mode_and_log,self.curvature,self.normalization,
+                                   self.multivariate,self.integral,self.model_evidence,self.bic,self.limits]):
+            self.begin(i);method();self.finish()
+        self.save_timeline()
+
+    def question(self):
+        self.legend(('元の分布',BLUE),('ガウス近似',RED))
+        ax=self.axes(y=(0,.9,.3),ylabel='p(z)')
+        curve=self.curve(ax,pdf)
+        self.beat(Create(curve))
+        t=ValueTracker(-1.2)
+        dot=always_redraw(lambda:Dot(ax.c2p(t.get_value(),pdf(t.get_value())),color=GOLD))
+        self.add(dot)
+        self.beat(t.animate.set_value(2.1))
+        self.beat(self.equation(r'p(z\mid D)',r'\propto',r'p(D\mid z)',r'p(z)',colors={0:BLUE,2:GOLD,3:PURPLE}),t.animate.set_value(Z0))
+        self.beat(self.equation(r'f(z)=',r'e^{-z^2/(2\cdot1.1^2)}',r'\frac{1}{1+e^{-(4z+0.8)}}',colors={1:PURPLE,2:GOLD}),t.animate.set_value(1.6))
+        scan=ValueTracker(-1.99)
+        area=always_redraw(lambda:self.area(ax,pdf,hi=scan.get_value()))
+        self.add(area)
+        self.beat(scan.animate.set_value(3),self.equation(r'p(z)=\frac{f(z)}{Z}',r',\quad Z=\int f(z)\,dz',colors={0:BLUE,1:GOLD}))
+        focus=Circle(radius=.5,color=GOLD).move_to(ax.c2p(Z0,pdf(Z0)))
+        self.beat(Create(focus),t.animate.set_value(Z0))
+        q=self.curve(ax,gaussian,RED)
+        self.beat(Create(q),FadeOut(area),FadeOut(focus))
+        self.beat(t.animate.set_value(Z0+.45),self.equation(r'q(z)=\mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
+
+    def mode_and_log(self):
+        self.legend(('関数と対数',BLUE),('頂上・接線',GOLD),('二次近似',RED))
+        ax=self.axes(x=(-1,2.5,.5),y=(-4,1,1),height=3.35,center=(0,.5,0))
+        x=ValueTracker(-.6);scale=ValueTracker(1);morph=ValueTracker(0)
+        fn=lambda z:(1-morph.get_value())*scale.get_value()*f(z)+morph.get_value()*logf(z)
+        c=always_redraw(lambda:self.curve(ax,fn))
+        dot=always_redraw(lambda:Dot(ax.c2p(x.get_value(),fn(x.get_value())),color=GOLD))
+        self.add(c,dot)
+        self.beat(x.animate.set_value(Z0+.3),self.equation(r'z_0=\arg\max_z f(z)',colors={0:GOLD}))
+        def tangent():
+            z=x.get_value();v=fn(z);s=(1-morph.get_value())*scale.get_value()*f(z)*grad(z)+morph.get_value()*grad(z)
+            return Line(ax.c2p(z-.3,v-.3*s),ax.c2p(z+.3,v+.3*s),color=GOLD)
+        line=always_redraw(tangent);self.add(line)
+        self.beat(x.animate.set_value(Z0),self.equation(r'f\prime(z_0)=0',colors={0:GOLD}))
+        self.slider(scale,.4,1.2,'c');self.beat(scale.animate.set_value(.45),self.equation(r'\arg\max_z c f(z)=z_0\quad(c>0)'))
+        self.beat(morph.animate.set_value(1),self.equation(r'g(z)=\ln f(z)',colors={0:BLUE}))
+        marker=ValueTracker(Z0-.28)
+        near=always_redraw(lambda:Dot(ax.c2p(marker.get_value(),logf(marker.get_value())),color=RED,radius=.065))
+        self.add(near)
+        self.beat(marker.animate.set_value(Z0+.28))
+        quadratic=lambda z:logf(Z0)-.5*A*(z-Z0)**2
+        quad=self.curve(ax,quadratic,RED)
+        self.beat(Create(quad),self.equation(r'g(z)\simeq',r'g(z_0)',r'+g\prime(z_0)(z-z_0)',r'+\frac12g^{\prime\prime}(z_0)(z-z_0)^2',colors={1:BLUE,2:GOLD,3:RED},size=29))
+        self.beat(self.equation(r'\ln f(z)\simeq',r'\ln f(z_0)',r'-\frac A2(z-z_0)^2',colors={1:BLUE,2:RED}),marker.animate.set_value(Z0))
+        self.beat(self.equation(r'A=-\left.\frac{d^2\ln f}{dz^2}\right|_{z_0}',colors={0:RED}),marker.animate.set_value(Z0+.2))
+
+    def curvature(self):
+        legend=self.legend(('元の負の対数（谷底を0に）',BLUE),('二次の形',RED))
+        ax=self.axes(x=(-1.5,2.5,1),y=(0,5,1),height=3.2,center=(0,.5,0))
+        original=self.curve(ax,bowl);self.beat(Create(original),self.equation(r'h(z)=\ln f(z_0)-\ln f(z)'))
+        a=ValueTracker(A);m=ValueTracker(0)
+        fn=lambda z:(1-m.get_value())*.5*a.get_value()*(z-Z0)**2+m.get_value()*np.exp(-.5*a.get_value()*(z-Z0)**2)*np.sqrt(a.get_value()/(2*np.pi))
+        curve=always_redraw(lambda:self.curve(ax,fn,RED));self.add(curve)
+        self.beat(self.equation(r'h(z)\simeq\frac A2(z-z_0)^2',colors={0:RED}),Create(Dot(ax.c2p(Z0,0),color=GOLD)))
+        self.slider(a,.7,6,'A',RED)
+        self.number('A=',a.get_value,[-2.7,2.25,0],RED)
+        span=always_redraw(lambda:Line(ax.c2p(Z0-1/np.sqrt(a.get_value()),.5),ax.c2p(Z0+1/np.sqrt(a.get_value()),.5),color=GOLD,stroke_width=4))
+        self.add(span)
+        self.beat(a.animate.set_value(6),FadeOut(original))
+        self.beat(a.animate.set_value(.7))
+        # Reuse x coordinates; rescale vertical view to show the whole bell.
+        self.remove(span)
+        self.beat(m.animate.set_value(1),self.equation(r'e^{-h(z)}\simeq e^{-A(z-z_0)^2/2}',colors={0:RED}))
+        # Enlarge the normalized bell vertically with a labelled new density axis.
+        self.remove(curve,ax,legend)
+        self.legend(('正規化したガウス密度',RED),('標準偏差の幅',GOLD))
+        # Remove old axis labels only; title, slider and captions are retained below.
+        for obj in list(self.mobjects):
+            if isinstance(obj,VGroup) and obj is not self.formula and obj is not self.caption and len(obj)>5:self.remove(obj)
+        ax=self.axes(x=(-1.5,2.5,1),y=(0,1.1,.5),height=3.2,center=(0,.5,0),ylabel='q(z)')
+        curve=always_redraw(lambda:self.curve(ax,lambda z:gaussian(z,Z0,a.get_value()),RED));self.add(curve)
+        self.beat(a.animate.set_value(6),self.equation(r'q(z)=\sqrt{\frac{A}{2\pi}}\,e^{-A(z-z_0)^2/2}',colors={0:RED}))
+        width=always_redraw(lambda:Line(ax.c2p(Z0-1/np.sqrt(a.get_value()),.12),ax.c2p(Z0+1/np.sqrt(a.get_value()),.12),color=GOLD,stroke_width=4));self.add(width)
+        self.beat(a.animate.set_value(1),self.equation(r'\mathrm{Var}[z]=A^{-1}',r',\qquad \sigma=A^{-1/2}',colors={0:RED,1:GOLD}))
+        self.beat(a.animate.set_value(2.5),self.equation(r'A>0',colors={0:GOLD}))
+
+    def normalization(self):
+        self.legend(('元の関数・密度',BLUE),('局所近似・ガウス',RED))
+        ax=self.axes(y=(0,1,.25))
+        n=ValueTracker(0)
+        pf=lambda z:f(z)/((1-n.get_value())+n.get_value()*Z)
+        qf=lambda z:local(z)/((1-n.get_value())+n.get_value()*ZL)
+        pcurve=always_redraw(lambda:self.curve(ax,pf));qcurve=always_redraw(lambda:self.curve(ax,qf,RED))
+        self.add(pcurve)
+        self.beat(Create(qcurve),self.equation(r'f(z)\simeq',r'f(z_0)e^{-A(z-z_0)^2/2}',colors={1:RED}))
+        areas=always_redraw(lambda:VGroup(self.area(ax,pf),self.area(ax,qf,RED)))
+        self.add(areas)
+        self.number('Z=',lambda:Z,[-3,2.2,0],BLUE);self.number(r'Z_{\rm L}=',lambda:ZL,[3,2.2,0],RED)
+        scan=ValueTracker(-1.5)
+        dot=always_redraw(lambda:Dot(ax.c2p(scan.get_value(),pf(scan.get_value())),color=GOLD));self.add(dot)
+        self.beat(scan.animate.set_value(2.5))
+        self.beat(n.animate.set_value(1),self.equation(r'p=f/Z',r',\qquad q=f_{\rm local}/Z_{\rm L}',colors={0:BLUE,1:RED}))
+        difference=Line(ax.c2p(Z0,pdf(Z0)),ax.c2p(Z0,gaussian(Z0)),color=GOLD,stroke_width=5)
+        self.beat(Create(difference),scan.animate.set_value(Z0))
+        self.beat(self.equation(r'q(z)=\sqrt{\frac A{2\pi}}e^{-A(z-z_0)^2/2}',r'=\mathcal N(z\mid z_0,A^{-1})',colors={0:RED,1:RED},size=29),FadeOut(areas))
+        self.beat(scan.animate.set_value(2))
+        meanline=DashedLine(ax.c2p(MEAN,0),ax.c2p(MEAN,.6),color=PURPLE)
+        modeline=DashedLine(ax.c2p(Z0,0),ax.c2p(Z0,.8),color=GOLD)
+        self.beat(Create(meanline),Create(modeline),self.equation(r'z_0='+f'{Z0:.3f}',r',\quad \mathbb E_p[z]='+f'{MEAN:.3f}',colors={0:GOLD,1:PURPLE}))
+        self.beat(scan.animate.set_value(Z0),self.equation(r'z_0\quad\longrightarrow\quad A\quad\longrightarrow\quad q(z)',colors={0:RED}))
+
+    def multivariate(self):
+        self.legend(('同じ高さの等高線',RED),('曲率の大きい方向',GOLD),('小さい方向',BLUE))
+        ax=self.axes(x=(-2.5,2.5,1),y=(-2.5,2.5,1),width=4.4,height=4.4,center=(-2.1,.25,0),xlabel='z_1',ylabel='z_2')
+        a=ValueTracker(1);theta=ValueTracker(0)
+        def contours():
+            r=rotation(theta.get_value());out=VGroup();t=np.linspace(0,2*np.pi,161)
+            for radius in [.7,1.4,2.1]:
+                xy=r@(np.array([np.cos(t)/np.sqrt(a.get_value()),np.sin(t)])*radius)
+                out.add(polyline([ax.c2p(*z) for z in xy.T],RED,2))
+            return out
+        ell=always_redraw(contours);self.add(ell,Dot(ax.c2p(0,0),color=GOLD))
+        self.beat(self.equation(r'(z-z_0)^T A(z-z_0)=c',colors={0:RED}))
+        self.beat(a.animate.set_value(5))
+        self.beat(theta.animate.set_value(.65))
+        mat=tex(r'A=-\nabla\nabla\ln f(z_0)',30,GOLD).move_to([3,1.5,0])
+        self.beat(Write(mat),self.equation(r'\ln f(z)\simeq\ln f(z_0)-\frac12(z-z_0)^TA(z-z_0)',size=28))
+        def vectors():
+            r=rotation(theta.get_value())
+            return VGroup(Arrow(ax.c2p(0,0),ax.c2p(*(r[:,0]/np.sqrt(a.get_value())*1.5)),buff=0,color=GOLD),Arrow(ax.c2p(0,0),ax.c2p(*(r[:,1]*1.5)),buff=0,color=BLUE))
+        vec=always_redraw(vectors);self.add(vec)
+        self.number(r'\lambda_1=',a.get_value,[3,.6,0],GOLD)
+        self.beat(theta.animate.set_value(1),self.equation(r'\sigma_i=1/\sqrt{\lambda_i}',colors={0:GOLD}))
+        self.beat(a.animate.set_value(2),self.equation(r'q(z)=\frac{|A|^{1/2}}{(2\pi)^{M/2}}e^{-\frac12(z-z_0)^TA(z-z_0)}',r',\quad\Sigma=A^{-1}',colors={0:RED,1:GOLD},size=27))
+        # Show a flat direction explicitly, not an ill-defined Gaussian ellipse.
+        self.remove(ell,vec)
+        flat=VGroup(*[Line(ax.c2p(-2.3,y),ax.c2p(2.3,y),color=RED) for y in [-1.4,-.7,.7,1.4]])
+        self.beat(Create(flat),self.equation(r'A=\begin{pmatrix}0&0\\0&1\end{pmatrix}\quad\Rightarrow\quad |A|=0',colors={0:GOLD}))
+        self.remove(flat);self.add(ell,vec)
+        self.beat(a.animate.set_value(5),self.equation(r'A\succ0\quad\Longleftrightarrow\quad\lambda_i>0\ (\forall i)',colors={0:GOLD}))
+
+    def integral(self):
+        self.legend(('未正規化のガウス形',RED),('積分＝面積',PURPLE))
+        ax=self.axes(x=(-3,3,1),y=(0,2.4,.6),height=3.35,center=(0,.5,0))
+        h=ValueTracker(2);sigma=ValueTracker(.75)
+        fn=lambda z:h.get_value()*np.exp(-.5*(z/sigma.get_value())**2)
+        curve=always_redraw(lambda:self.curve(ax,fn,RED));self.add(curve)
+        self.beat(self.equation(r'f_{\rm local}(z)=f(z_0)e^{-A(z-z_0)^2/2}',colors={0:RED}))
+        def rectangles():
+            group=VGroup();dx=.15
+            for z in np.arange(-3,3,dx):
+                v=fn(z+dx/2)
+                group.add(Polygon(ax.c2p(z,0),ax.c2p(z,v),ax.c2p(z+dx,v),ax.c2p(z+dx,0),fill_color=PURPLE,fill_opacity=.35,stroke_color=PURPLE,stroke_width=.4))
+            return group
+        bars=always_redraw(rectangles);self.add(bars)
+        self.beat(self.equation(r'Z=\int f(z)\,dz',colors={0:PURPLE}))
+        self.number(r'\mathrm{area}=',lambda:h.get_value()*sigma.get_value()*np.sqrt(2*np.pi),[2.8,2.2,0],PURPLE)
+        self.slider(sigma,.2,1,r'\sigma',GOLD)
+        self.beat(sigma.animate.set_value(.25))
+        self.beat(h.animate.set_value(1.4),sigma.animate.set_value(.85))
+        self.beat(self.equation(r'Z_{\rm L}=',r'f(z_0)',r'\sqrt{2\pi/A}',colors={0:PURPLE,1:RED,2:GOLD}),sigma.animate.set_value(.7))
+        self.beat(sigma.animate.set_value(.9),self.equation(r'|A|=\prod_{i=1}^{M}\lambda_i',r',\quad \prod_i\lambda_i^{-1/2}=|A|^{-1/2}',colors={1:GOLD},size=30))
+        self.beat(self.equation(r'Z\simeq',r'f(z_0)',r'\frac{(2\pi)^{M/2}}{|A|^{1/2}}',colors={0:PURPLE,1:RED,2:GOLD}),sigma.animate.set_value(.6))
+        self.beat(sigma.animate.set_value(.85),self.equation(r'Z\simeq Z_{\rm L}',colors={0:PURPLE}))
+
+    def model_evidence(self):
+        self.legend(('尤度',GOLD),('事前',BLUE),('積・証拠',PURPLE))
+        ax=self.axes(x=(-4.5,4.5,1.5),y=(0,1.1,.5),height=3.25,center=(0,.5,0),xlabel=r'\theta')
+        width=ValueTracker(.8);prior=ValueTracker(5)
+        likelihood=lambda z:np.exp(-.5*(z/width.get_value())**2)
+        lc=always_redraw(lambda:self.curve(ax,likelihood,GOLD));self.add(lc)
+        self.beat(self.equation(r'L(\theta)=p(D\mid\theta)',colors={0:GOLD}))
+        pr=always_redraw(lambda:VGroup(Line(ax.c2p(-prior.get_value()/2,0),ax.c2p(-prior.get_value()/2,1/prior.get_value()),color=BLUE),Line(ax.c2p(-prior.get_value()/2,1/prior.get_value()),ax.c2p(prior.get_value()/2,1/prior.get_value()),color=BLUE),Line(ax.c2p(prior.get_value()/2,0),ax.c2p(prior.get_value()/2,1/prior.get_value()),color=BLUE)))
+        product=always_redraw(lambda:self.area(ax,lambda z:likelihood(z)/prior.get_value(),PURPLE,lo=-prior.get_value()/2,hi=prior.get_value()/2))
+        self.add(pr,product)
+        self.beat(self.equation(r'p(D)=\int',r'p(D\mid\theta)',r'p(\theta)',r'\,d\theta',colors={1:GOLD,2:BLUE}))
+        self.number('p(D)=',lambda:evidence(width.get_value(),prior.get_value()),[3,2.15,0],PURPLE)
+        self.beat(Create(Dot(ax.c2p(0,1/prior.get_value()),color=PURPLE)),self.equation(r'\theta_{\rm MAP}=\arg\max_\theta p(D\mid\theta)p(\theta)',colors={0:PURPLE}))
+        self.beat(width.animate.set_value(.3))
+        self.beat(prior.animate.set_value(8))
+        self.beat(self.equation(r'\ln p(D)\simeq',r'\ln p(D\mid\theta_{\rm MAP})',r'+\ln p(\theta_{\rm MAP})',r'+\frac M2\ln(2\pi)',r'-\frac12\ln|A|',colors={1:GOLD,2:BLUE,3:PURPLE,4:PURPLE},size=26),width.animate.set_value(.6))
+        bracket=Brace(VGroup(*self.formula[2:]),UP,color=PURPLE,buff=.12)
+        label=jp('オッカム因子',20,PURPLE).next_to(bracket,UP,buff=.1)
+        self.beat(Create(bracket),FadeIn(label),width.animate.set_value(.4))
+        self.remove(bracket,label)
+        self.beat(self.equation(r'A=-\nabla\nabla\ln[p(D\mid\theta)p(\theta)]\big|_{\theta_{\rm MAP}}',colors={0:PURPLE},size=30),width.animate.set_value(.55))
+
+    def bic(self):
+        self.legend(('パラメータ2個',BLUE),('パラメータ5個',RED))
+        n=ValueTracker(20)
+        conditions=jp('広い事前・十分なデータ・全方向が決まる',23,GOLD).move_to([0,2.16,0])
+        self.add(conditions)
+        self.beat(self.equation(r'A\simeq N H',colors={0:GOLD}))
+        self.beat(self.equation(r'|A|\simeq N^M|H|',colors={0:GOLD}))
+        ax=self.axes(x=(0,3,1),y=(0,15,5),width=6.4,height=2.5,center=(0,.4,0),xlabel='M')
+        # Category labels replace the numeric x-axis labels below.
+        self.remove(self.mobjects[-1])
+        self.add(tex('2',23,BLUE).move_to(ax.c2p(1,0)+DOWN*.22),tex('5',23,RED).move_to(ax.c2p(2,0)+DOWN*.22),tex(r'\frac M2\ln N',25).move_to([-4.7,.7,0]))
+        def bars():
+            out=VGroup()
+            for x,m,c in [(1,2,BLUE),(2,5,RED)]:
+                v=m/2*np.log(n.get_value());out.add(Polygon(ax.c2p(x-.22,0),ax.c2p(x-.22,v),ax.c2p(x+.22,v),ax.c2p(x+.22,0),fill_color=c,fill_opacity=.8,stroke_width=0))
+            return out
+        bar=always_redraw(bars);self.add(bar)
+        self.slider(n,20,200,'N',GOLD,y=-1.75)
+        self.number('N=',n.get_value,[4.5,1.2,0])
+        self.number('M=2:',lambda:np.log(n.get_value()),[4.5,.4,0],BLUE)
+        self.number('M=5:',lambda:2.5*np.log(n.get_value()),[4.5,-.4,0],RED)
+        self.beat(self.equation(r'\frac12\ln|A|\simeq\frac M2\ln N+\frac12\ln|H|',size=30))
+        self.beat(n.animate.set_value(200))
+        self.beat(n.animate.set_value(100))
+        self.beat(self.equation(r'S=\ln p(D\mid\theta_{\rm MAP})-\frac M2\ln N',colors={0:GREEN},size=30),n.animate.set_value(200))
+        self.beat(self.equation(r'\mathrm{BIC}=-2\ln p(D\mid\hat\theta_{\rm ML})+M\ln N',colors={0:GREEN},size=29),n.animate.set_value(100))
+        self.beat(ReplacementTransform(conditions,jp('平らな方向があると、この簡略化は使えない',23,GOLD).move_to(conditions)),self.equation(r'|H|=0\quad\Rightarrow\quad\ln|H|\ \mathrm{undefined}',colors={0:GOLD}))
+
+    def limits(self):
+        self.legend(('元の密度',BLUE),('選んだモードの近似',RED))
+        ax=self.axes(x=(-3,3,1),y=(0,1.2,.4),height=3.4,center=(0,.45,0))
+        weight=ValueTracker(.001)
+        pc=always_redraw(lambda:self.curve(ax,lambda z:mixture(z,weight.get_value())))
+        mu=ValueTracker(-1.5);prec=ValueTracker(5)
+        qc=always_redraw(lambda:self.curve(ax,lambda z:gaussian(z,mu.get_value(),prec.get_value()),RED))
+        self.add(pc,qc)
+        self.beat(self.equation(r'q(z)=\mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
+        self.beat(weight.animate.set_value(.6),self.equation(r'p(z)=(1-r)\mathcal N(z\mid-1.5,1/5)+r\mathcal N(z\mid1.6,1/7)',colors={0:BLUE},size=26))
+        m,a=mixture_laplace(1)
+        self.beat(mu.animate.set_value(m),prec.animate.set_value(a),self.equation(r'z_0:\ -1.5\ \longrightarrow\ 1.6',colors={0:RED}))
+        self.remove(pc,qc)
+        skew=self.curve(ax,pdf);q=self.curve(ax,gaussian,RED)
+        self.beat(Create(skew),Create(q),self.equation(r'p(z)\ne q(z)',colors={0:GOLD}))
+        # Positive-variable mapping is shown explicitly with its Jacobian.
+        self.beat(self.equation(r'u=\ln\tau',r',\quad p_\tau(\tau)=\frac{p_u(\ln\tau)}{\tau}\quad(\tau>0)',colors={0:GOLD,1:PURPLE},size=29),FadeOut(skew),FadeOut(q))
+        power=ValueTracker(1)
+        # A normalized powered target illustrates concentration; no claim of all datasets.
+        def concentrated(z):
+            v=power.get_value();norm=np.trapezoid(np.exp(v*(logf(GRID)-logf(Z0))),GRID)
+            return np.exp(v*(logf(z)-logf(Z0)))/norm
+        # Horizontal standardized coordinates keep the increasingly sharp peak visible.
+        self.remove(ax)
+        for obj in list(self.mobjects):
+            if isinstance(obj,VGroup) and obj is not self.formula and obj is not self.caption and len(obj)>5:self.remove(obj)
+        ax=self.axes(x=(-3,3,1),y=(0,.7,.2),height=3.4,center=(0,.45,0),xlabel=r'\sqrt{nA}(z-z_0)')
+        def standardized(x):
+            v=power.get_value();s=np.sqrt(v*A)
+            return concentrated(Z0+x/s)/s
+        pc=always_redraw(lambda:self.curve(ax,standardized));qc=self.curve(ax,lambda z:gaussian(z,0,1),RED)
+        self.add(pc,qc)
+        self.number('n=',power.get_value,[3.2,2.15,0],GOLD)
+        self.beat(power.animate.set_value(12),self.equation(r'p_n(z)\propto f(z)^n',r',\quad\mathrm{standardized}',colors={0:BLUE},size=30))
+        self.beat(power.animate.set_value(20),self.equation(r'z_0\ \longrightarrow\ A\ \longrightarrow\ \mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
+        self.beat(power.animate.set_value(30),self.equation(r'p(w\mid D)\approx\mathcal N(w\mid w_{\rm MAP},S_N)',colors={0:PURPLE}))
