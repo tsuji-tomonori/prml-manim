@@ -87,7 +87,7 @@ def number(label,fn,at,color=WHITE,places=2,size=25):
     t=tex(label,size,color); n=DecimalNumber(fn(),num_decimal_places=places,font_size=size,color=color)
     g=VGroup(t,n).arrange(RIGHT,buff=.14).move_to(at)
     anchor=n.get_left().copy()
-    n.add_updater(lambda m:m.set_value(fn()).move_to(anchor,aligned_edge=LEFT))
+    n.add_updater(lambda m:m.set_value(fn()).next_to(t,RIGHT,buff=.14))
     return g
 
 
