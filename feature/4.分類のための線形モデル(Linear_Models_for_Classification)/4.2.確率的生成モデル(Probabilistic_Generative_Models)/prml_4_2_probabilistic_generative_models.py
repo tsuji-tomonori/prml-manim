@@ -92,9 +92,9 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
     def boundary(self,ax,means=lambda:MEANS[:2],covs=lambda:[COV,COV],priors=lambda:[.5,.5]):
         return always_redraw(lambda:VGroup(*[path(ax,p,GOLD,2.8) for p in decision_paths(means(),covs(),priors(),ax.x_range[:2],ax.y_range[:2],75)]))
 
-    def probability_bars(self,get,k=2,pos=(4.7,.2,0)):
-        left=pos[0]-1.0;bottom=pos[1]-.85
-        g=VGroup(jp('事後確率',22).move_to([pos[0],pos[1]+1.55,0]))
+    def probability_bars(self,get,k=2,pos=(4.7,.2,0),title='事後確率'):
+        left=pos[0]-(k-1)*.43;bottom=pos[1]-.85
+        g=VGroup(jp(title,22).move_to([pos[0],pos[1]+1.55,0]))
         for i in range(k):
             x=left+i*.86
             bar=Rectangle(width=.48,height=1,stroke_width=0,fill_color=COLORS[i],fill_opacity=.9)
@@ -112,7 +112,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.beat(Create(curves))
         f=self.formula(r'p(x\mid C_k)');self.beat(x.animate.set_value(-1.1))
         self.remove(f);f=self.formula(r'q_k=',r'p(x\mid C_k)',r'p(C_k)');f[2].set_color(ORANGE_CLS)
-        self.beat(scale.animate.set_value(.5))
+        self.beat(scale.animate.set_value(.5),Transform(ax.marks[-1],tex('q_k',24).move_to(ax.marks[-1])))
         prob=lambda:np.array([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])/sum([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])
         heights=always_redraw(lambda:VGroup(*[Dot(ax.c2p(x.get_value(),.5*normal1(x.get_value(),m)),radius=.07,color=c) for m,c in [(-1.1,RED_CLS),(1.1,BLUE_CLS)]]))
         self.add(heights);bars=self.probability_bars(prob)
@@ -154,10 +154,11 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         eq=MathTex(r'a=',r'[-\tfrac12x^T\Sigma^{-1}x',r'+\mu_1^T\Sigma^{-1}x+c_1]',r'-',r'[-\tfrac12x^T\Sigma^{-1}x',r'+\mu_2^T\Sigma^{-1}x+c_2]',font_size=30).move_to([0,.9,0])
         eq[1].set_color(PURPLE_CLS);eq[4].set_color(PURPLE_CLS);eq[2].set_color(RED_CLS);eq[5].set_color(BLUE_CLS)
         self.add(jp('対数を引くと、同じ二次項が現れる',27).move_to([0,2.2,0]))
-        self.beat(Write(eq))
+        self.beat(phases=[('show expanded logs',.8,lambda:FadeIn(eq)),('match quadratic terms',self.beat_cues()[-1]['end']-.8,lambda:AnimationGroup(Circumscribe(eq[1],color=PURPLE_CLS),Circumscribe(eq[4],color=PURPLE_CLS)))])
         reduced=MathTex(r'a=',r'(\mu_1-\mu_2)^T\Sigma^{-1}x',r'+c_1-c_2',font_size=38).move_to([0,-.6,0]);reduced[1].set_color(GOLD)
         cross=VGroup(Cross(eq[1],stroke_color=GOLD),Cross(eq[4],stroke_color=GOLD))
-        self.beat(Create(cross),TransformFromCopy(eq,reduced))
+        self.add(jp('c₁、c₂ は、入力に依存しない定数',23,MUTED).move_to([0,-1.6,0]))
+        self.beat(phases=[('cancel common terms',self.sentence_duration(0),lambda:Create(cross)),('collect linear terms',.8,lambda:TransformFromCopy(eq,reduced)),('explain remaining terms',self.sentence_duration(1)-.8,lambda:Circumscribe(reduced,color=GOLD))])
         self.remove(*[m for m in self.mobjects if m is not self.subtitle and m.get_center()[1]<3])
         self.add(ax,ax.marks,dots,ell,field,boundary)
         f=self.formula(r'p(C_1\mid x)=\sigma(w^Tx+w_0),\qquad',r'w=\Sigma^{-1}(\mu_1-\mu_2)',size=29);f[1].set_color(GOLD)
@@ -175,9 +176,9 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.probability_bars(lambda:posterior(point,priors=get()))
         slider=self.slider(prior,.2,.8,[0,2.55,0],r'p(C_1)',width=3.3)
         f=self.formula(r'w_0=-\tfrac12\mu_1^T\Sigma^{-1}\mu_1+\tfrac12\mu_2^T\Sigma^{-1}\mu_2',r'+\ln\frac{p(C_1)}{p(C_2)}',size=29);f[1].set_color(ORANGE_CLS)
-        self.beat(Indicate(boundary))
+        self.beat(Indicate(boundary,scale_factor=1,color=GOLD))
         self.beat(prior.animate.set_value(.8))
-        self.beat(Circumscribe(f[1],color=ORANGE_CLS),Indicate(boundary))
+        self.beat(Circumscribe(f[1],color=ORANGE_CLS),Indicate(boundary,scale_factor=1,color=GOLD))
         self.beat(prior.animate.set_value(.2))
         ghosts=VGroup(*[path(ax,p,MUTED,1.2).set_opacity(.5) for pi in [.2,.5,.8] for p in decision_paths(priors=[pi,1-pi])])
         self.beat(Create(ghosts));self.beat(prior.animate.set_value(.5))
@@ -196,7 +197,8 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.beat(x.animate.set_value(0),y.animate.set_value(.9),Circumscribe(f,color=MUTED,buff=.1))
         self.remove(f);f=self.formula(r'a_k\equiv w_k^Tx+w_{k0},\quad w_k=\Sigma^{-1}\mu_k,\quad w_{k0}=-\tfrac12\mu_k^T\Sigma^{-1}\mu_k+\ln p(C_k)',size=25)
         boundary=self.boundary(ax,means,covs,lambda:[1/3]*3);self.beat(Create(boundary))
-        self.remove(note);slider=self.slider(t,0,1,[0,2.55,0],r'\tau',GREEN_CLS,width=3)
+        self.remove(note);self.note('緑の共分散：共有の形から、別の形へ').move_to([-1.5,2.55,0])
+        slider=self.slider(t,0,1,[4.65,2.35,0],r'\tau',GREEN_CLS,width=2.2)
         self.beat(t.animate.set_value(1))
         self.remove(f);f=self.formula(r'a_i-a_j=-\tfrac12x^T',r'(\Sigma_i^{-1}-\Sigma_j^{-1})',r'x+\text{linear terms}',size=30);f[1].set_color(GREEN_CLS)
         self.beat(Circumscribe(f[1],color=GREEN_CLS),x.animate.set_value(-.5))
@@ -210,8 +212,8 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         label=tex(r't_n=1:C_1\quad t_n=0:C_2',24).move_to([4.45,1.35,0]);self.add(label)
         self.beat(Circumscribe(f,color=MUTED,buff=.1),Indicate(dots[:5]))
         self.remove(label,f);f=self.formula(r'\hat\pi=\frac{N_1}{N_1+N_2}=\frac{30}{50}=0.60');f.set_color(ORANGE_CLS)
-        self.probability_bars(lambda:np.array([prior,1-prior]))
-        self.beat(Circumscribe(f,color=ORANGE_CLS),Indicate(dots))
+        self.probability_bars(lambda:np.array([prior,1-prior]),title='事前確率')
+        self.beat(Circumscribe(f,color=ORANGE_CLS),Indicate(dots[:30],color=RED_CLS,scale_factor=1.02))
         centers=VGroup(*[Dot(ax.c2p(*m),radius=.1,color=c) for m,c in zip(means,COLORS)])
         links=VGroup(*[Line(ax.c2p(*p),ax.c2p(*m),color=c,stroke_width=1,stroke_opacity=.55) for a,m,c in zip([RED_POINTS,BLUE_POINTS],means,COLORS) for p in a])
         self.remove(f);f=self.formula(r'\hat\mu_k=\frac1{N_k}\sum_{n\in C_k}x_n');f.set_color(GOLD)
@@ -244,7 +246,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         residual=always_redraw(lambda:Line(ax.c2p(*means()[0]),ax.c2p(*contaminated(t.get_value())[0]),color=GOLD))
         self.beat(Create(residual),Circumscribe(num,color=GOLD))
         self.beat(t.animate.set_value(0))
-        self.beat(Indicate(ell),Circumscribe(f,color=MUTED,buff=.1))
+        self.beat(Circumscribe(ell,color=GOLD),Circumscribe(f,color=MUTED,buff=.1))
 
     def discrete(self):
         combos=VGroup(*[VGroup(*[Square(.34,fill_color=GOLD if b=='1' else MUTED,fill_opacity=.7 if b=='1' else .12,stroke_width=1) for b in f'{n:03b}']).arrange(RIGHT,buff=.1) for n in range(8)]).arrange_in_grid(rows=2,cols=4,buff=(.5,.6)).move_to([0,.8,0])
@@ -255,7 +257,8 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.remove(combos,f)
         root=tex('C_k',34,PURPLE_CLS).move_to([0,1.9,0]);nodes=VGroup(*[VGroup(Square(.7,color=MUTED),tex(f'x_{i+1}',28)).move_to([(i-1)*2.4,.6,0]) for i in range(3)])
         arrows=VGroup(*[Arrow(root.get_bottom(),n.get_top(),buff=.15,color=MUTED) for n in nodes]);self.add(root)
-        self.beat(Create(arrows),FadeIn(nodes))
+        self.add(nodes)
+        self.beat(phases=[('show conditional dependence',.8,lambda:Create(arrows)),('condition on class',self.beat_cues()[-1]['end']-.8,lambda:Circumscribe(root,color=PURPLE_CLS))])
         self.remove(root,arrows,nodes)
         bits=np.array([0,0,0]);bit_mobs=VGroup();params=VGroup()
         for i in range(3):
@@ -267,13 +270,21 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         f=self.formula(r'p(x\mid C_k)=\prod_i\mu_{ki}^{x_i}(1-\mu_{ki})^{1-x_i}',size=32)
         self.beat(Circumscribe(params,color=MUTED,buff=.15),Circumscribe(f,color=MUTED,buff=.1))
         self.remove(f);f=self.formula(r'a_k=\sum_i[x_i\ln\mu_{ki}+(1-x_i)\ln(1-\mu_{ki})]+\ln p(C_k)',size=29)
+        rail=NumberLine(x_range=[-2,3,1],length=7,include_numbers=True,font_size=17,color=MUTED).move_to([-1,-1.25,0])
+        odds=lambda:float(np.diff(binary_scores(bits)[::-1])[0])
+        marker=Dot(radius=.075,color=GOLD).add_updater(lambda m:m.move_to(rail.n2p(odds())))
+        value=readout(r'a_1-a_2=',odds,[-1,-.75,0],GOLD,2,23)
+        self.add(rail,marker,value)
         # Binary inputs change discretely; only the visual emphasis is interpolated.
         def switch(i,value):
+            old_odds=odds()
             bits[i]=value
+            arrow=Arrow(rail.n2p(old_odds),rail.n2p(odds()),buff=0,color=GOLD,stroke_width=4)
+            self.add(arrow)
             return Transform(bit_mobs[i][1],tex(str(value),34,GOLD).move_to(bit_mobs[i][1]))
         self.beat(phases=[('add word 1',.7,lambda:switch(0,1)),('explain contribution',self.beat_cues()[-1]['end']-.7,lambda:Circumscribe(params[:2],color=GOLD))])
         self.equation(f,r'a_k=\sum_i x_i',r'\ln\frac{\mu_{ki}}{1-\mu_{ki}}',r'+\sum_i\ln(1-\mu_{ki})+\ln p(C_k)',colors={1:GOLD},size=29)
-        self.beat(phases=[('add word 3',.7,lambda:switch(2,1)),('explain posterior',self.beat_cues()[-1]['end']-.7,lambda:Indicate(bars))])
+        self.beat(phases=[('add word 3',.7,lambda:switch(2,1)),('explain posterior',self.beat_cues()[-1]['end']-.7,lambda:Circumscribe(bars,color=GOLD))])
 
     def family(self):
         self.note('指数型分布族：共通する「書き方」から考える')
@@ -281,11 +292,11 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.beat(Circumscribe(f,color=GOLD))
         f=self.equation(f,r'p(x\mid\lambda_k)=',r'h(x)',r'g(\lambda_k)',r'\exp[\lambda_k^Tu(x)]',y=1.1,size=36,colors={1:PURPLE_CLS,2:ORANGE_CLS,3:GOLD})
         restriction=tex(r'u(x)=x,\qquad s\ \mathrm{shared}',36,GREEN_CLS).move_to([0,-.4,0])
-        self.beat(Write(restriction))
+        self.beat(phases=[('state restrictions',.6,lambda:FadeIn(restriction)),('explain restrictions',self.beat_cues()[-1]['end']-.6,lambda:Circumscribe(restriction,color=GREEN_CLS))])
         self.remove(restriction)
         restriction=tex(r'u(x)=x,\qquad s=1',30,GREEN_CLS).move_to([0,2.05,0]);self.add(restriction)
         ratio=MathTex(r'\frac{p(x\mid\lambda_1)}{p(x\mid\lambda_2)}=',r'\frac{h(x)}{h(x)}',r'\frac{g(\lambda_1)}{g(\lambda_2)}',r'e^{(\lambda_1-\lambda_2)^Tx}',font_size=35).move_to([0,-.5,0]);ratio[1].set_color(PURPLE_CLS);ratio[3].set_color(GOLD)
-        self.beat(TransformFromCopy(f,ratio),Create(Cross(ratio[1],stroke_color=GOLD)))
+        self.beat(phases=[('form density ratio',.8,lambda:TransformFromCopy(f,ratio)),('cancel shared factor',self.beat_cues()[-1]['end']-.8,lambda:Create(Cross(ratio[1],stroke_color=GOLD)))])
         self.remove(f,ratio,*[m for m in self.mobjects if isinstance(m,Cross)])
         f=self.formula(r'a(x)=',r'(\lambda_1-\lambda_2)^Tx',r'+\ln\frac{g(\lambda_1)p(C_1)}{g(\lambda_2)p(C_2)}',size=34,y=.75);f[1].set_color(GOLD)
         k=self.formula(r'a_k\equiv\lambda_k^Tx+\ln g(\lambda_k)+\ln p(C_k)',size=30,y=-.6)
