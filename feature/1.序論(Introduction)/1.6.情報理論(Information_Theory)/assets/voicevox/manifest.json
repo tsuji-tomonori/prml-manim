@@ -158,7 +158,7 @@
       "title": "よく出るカードを、短く伝える",
       "status": "generated",
       "path": "assets/voicevox/scene02.wav",
-      "script_sha256": "2928cb923a9013e9c7c90b547694cc5bb42a180fd166f10d909a20dd0a54d10d",
+      "script_sha256": "34d461a150d178bcbeb59890fa32e7db04fb3a1807771e4a98c6693f8d78becc",
       "wav_sha256": "3abaf4ba8fabb9afb96f9c201fe14d4fe97bb35c3f7913d0cd4786f0c736bd49",
       "duration": 62.8,
       "beat_durations": [
@@ -229,7 +229,7 @@
         {
           "beat_index": 2,
           "id": "scene02-03-02",
-          "display": "ゼロ、いちゼロ、いちいちゼロ、いちいちいち。",
+          "display": "$0$、$10$、$110$、$111$。",
           "speech": "ゼロ、いちゼロ、いちいちゼロ、いちいちいち。",
           "start": 21.256,
           "end": 24.722666666666665

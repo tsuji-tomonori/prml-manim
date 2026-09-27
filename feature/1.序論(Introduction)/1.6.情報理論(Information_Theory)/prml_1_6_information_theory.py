@@ -259,7 +259,7 @@ class PRML16InformationTheory(Scene):
         sigma=ValueTracker(1.3); uniform=ValueTracker(0); concentrate=ValueTracker(0)
         one=np.eye(30)[14]
         probs=lambda:(1-concentrate.get_value())*((1-uniform.get_value())*spread(sigma.get_value())+uniform.get_value()/30)+concentrate.get_value()*one
-        chart=always_redraw(lambda:bars(probs(),width=10,height=3/max(.16,float(max(probs()))),color=BLUE_DATA))
+        chart=always_redraw(lambda:bars(probs(),width=10,height=3/max(.001,float(max(probs()))),color=BLUE_DATA))
         # Explicit adaptive vertical scale keeps both the broad and point-mass views readable.
         note=jp('30状態 ／ 棒の高さは確率（縦軸は拡大縮小）',20,MUTED).move_to([0,2.15,0])
         counter=readout('H=',lambda:entropy(probs()),[0,-2.35,0],YELLOW_INFO)
@@ -304,7 +304,8 @@ class PRML16InformationTheory(Scene):
 
     def gaussian(self):
         ax=self.ax([-4,4,2],[0,1,.25],center=(0,.1,0))
-        ax.y_axis.remove(ax.y_axis.numbers)
+        ax.y_axis.set_opacity(0)
+        self.add(Line(ax.c2p(-4,0),ax.c2p(-4,1),color=MUTED,stroke_width=1.3))
         span=ValueTracker(.5)
         plot=SimpleNamespace(c2p=lambda x,y:ax.c2p(x,y/span.get_value()))
         ticks=VGroup(*[readout('',lambda f=f:span.get_value()*f,ax.c2p(-4,f)+LEFT*.42,MUTED,2) for f in [.25,.5,.75,1]])
@@ -360,7 +361,7 @@ class PRML16InformationTheory(Scene):
         selected=self.mosaic(.6)[0:2].copy()
         self.beat(selected.animate.stretch(2,0).move_to([3.5,.2,0]))
         cond=tex(r'p(y\mid x=0)=(0.8,0.2)',27).move_to([0,-2.4,0]);self.add(cond)
-        defn=tex(r'H[y\mid x]=-\sum_{x,y}p(x,y)\ln p(y\mid x)',26).move_to([0,-2,0])
+        defn=tex(r'H[y\mid x]=-\sum_{x,y}p(x,y)\ln p(y\mid x)',26).move_to([3.2,2.1,0])
         self.add(defn)
         self.beat(pulse(selected),pulse(cond))
         self.remove(defn)
