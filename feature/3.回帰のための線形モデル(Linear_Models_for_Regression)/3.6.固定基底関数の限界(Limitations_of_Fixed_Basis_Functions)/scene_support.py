@@ -117,7 +117,21 @@ class NarratedScene(Scene):
         if animations:
             if action_start > 0:
                 visual.append(Wait(action_start))
-            visual.append(AnimationGroup(*animations, run_time=action_end-action_start))
+            action_duration = action_end - action_start
+            linked = []
+            for animation in animations:
+                is_text = (isinstance(animation, (Write, ReplacementTransform, FadeIn, FadeOut))
+                           and any(isinstance(m, (Text, Tex, MathTex))
+                                   for m in animation.mobject.get_family()))
+                if is_text:
+                    # Equations must be readable while their terms are explained.
+                    # Continuous visual partners still occupy the full speech cue.
+                    reveal = min(1.4, .25 * action_duration)
+                    animation.set_run_time(reveal)
+                    linked.append(Succession(animation, Wait(action_duration - reveal)))
+                else:
+                    linked.append(AnimationGroup(animation, run_time=action_duration))
+            visual.append(AnimationGroup(*linked, run_time=action_duration))
             visual.append(Wait(max(.001, duration-action_end)))
         else:
             visual.append(Wait(duration))
