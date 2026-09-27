@@ -11,7 +11,7 @@
       "title": "この観測は、どちらのクラスから？",
       "status": "generated",
       "path": "assets/voicevox/scene01.wav",
-      "script_sha256": "0570c09ec8112d29799e67593074a7877b43a9e12baba1030a3f2f8d78d044c0",
+      "script_sha256": "3ec46fb564e354f7a008cddce7bd814788f11b7a89b2205ea5d13c62f52a8d8c",
       "wav_sha256": "d592a6aedb829c54516380a301e5a851254910c312ea35d57b66629a31782c31",
       "duration": 82.2,
       "beat_durations": [
@@ -152,7 +152,7 @@
       "title": "比を取ると、S字が現れる",
       "status": "generated",
       "path": "assets/voicevox/scene02.wav",
-      "script_sha256": "dc77c59b8f0bcf0a5c4389dea8e2dc49a34a75bb3df1d7c215df8ec5d9298c3d",
+      "script_sha256": "9d7b2c2cca785797b367ebb19ee1580fe3a928ffc743d54407cfa21753d1dd8c",
       "wav_sha256": "1ac9dee21aa35f4ed901c36c0f8f179b960bbcbaf03d07cd816c152e65c1b2df",
       "duration": 80.8,
       "beat_durations": [
