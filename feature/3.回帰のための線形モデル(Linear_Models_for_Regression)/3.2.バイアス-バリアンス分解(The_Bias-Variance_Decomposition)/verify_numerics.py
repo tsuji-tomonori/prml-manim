@@ -16,6 +16,8 @@ for lam in [-3,BEST,3]:
     mean=predictions.mean(axis=0)
     b=np.mean((mean-truth(EVAL_X))**2)
     v=np.mean((predictions-mean)**2)
+    np.testing.assert_allclose(np.mean((predictions-truth(EVAL_X))**2,axis=0),
+        (mean-truth(EVAL_X))**2+np.mean((predictions-mean)**2,axis=0),atol=2e-14)
     lhs=np.mean((predictions-truth(EVAL_X))**2)
     errors.append(abs(lhs-b-v))
     np.testing.assert_allclose([b,v],[d['bias2'],d['variance']],atol=2e-14)
