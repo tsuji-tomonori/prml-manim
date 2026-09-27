@@ -23,7 +23,7 @@ def band(ax,x,y,var,color=POST,opacity=.22):
 
 def contours(ax,m,c,color=POST):
     theta=np.linspace(0,TAU,100); unit=np.array([np.cos(theta),np.sin(theta)])
-    return VGroup(*[path(ax,*(m[:,None]+r*np.linalg.cholesky(c)@unit),color,2,.8) for r in [.6,1.2,1.8]])
+    return VGroup(*[path(ax,*(m[:,None]+r*np.linalg.cholesky(c)@unit),color,2.5,.8) for r in [.6,1.2,1.8]])
 
 def number(label,get,pos,color=WHITE,places=2):
     prefix=tex(label,25,color); num=DecimalNumber(get(),num_decimal_places=places,font_size=25,color=color)
@@ -58,10 +58,15 @@ class PRML33BayesianLinearRegression(NarratedScene):
         if obj.width>12:obj.scale_to_fit_width(12)
         self.add(obj);return obj
 
+    def equation_change(self, old, new, *correspondence):
+        duration=self.beat_cues()[-1]['end']
+        self.beat(phases=[('equation transition',.6,lambda:ReplacementTransform(old,new)),
+                          ('explain equation',duration-.6,lambda:AnimationGroup(Circumscribe(new,color=MUTED,buff=.09),*correspondence))])
+
     def slider(self,tr,lo,hi,pos,label,color=PRIOR,width=3.2):
         rail=NumberLine(x_range=[lo,hi,hi-lo],length=width,include_ticks=False,color=MUTED).move_to(pos)
         dot=Dot(color=color,radius=.07).add_updater(lambda m:m.move_to(rail.n2p(tr.get_value())))
-        nums=number(label+'=',tr.get_value,np.array(pos)+UP*.35,color)
+        nums=number(label+'=',(lambda: np.floor(tr.get_value()+1e-8)) if label=='N' else tr.get_value,np.array(pos)+UP*.35,color,0 if label=='N' else 2)
         g=VGroup(rail,dot,nums);self.add(g);return g
 
     def dots(self,ax,n,kind='line'):
@@ -75,7 +80,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
 
     def candidates(self,ax,n,kind='line',alpha=None,beta=None,phase=None):
         grid=np.linspace(-1,1,100) if kind=='line' else np.linspace(0,1,150)
-        return always_redraw(lambda:VGroup(*[path(ax,grid,phi(grid,kind)@w,c,1.7,.55) for w,c in zip(samples(n.get_value(),alpha.get_value() if alpha else 2,beta.get_value() if beta else 25,kind,phase.get_value() if phase else 0),COLORS)]))
+        return always_redraw(lambda:VGroup(*[path(ax,grid,phi(grid,kind)@w,c,2.2,.7) for w,c in zip(samples(n.get_value(),alpha.get_value() if alpha else 2,beta.get_value() if beta else 25,kind,phase.get_value() if phase else 0),COLORS)]))
 
     def question(self):
         ax=self.axes();n=ValueTracker(0);a=ValueTracker(.15);b=ValueTracker(.65)
@@ -87,7 +92,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
         cloud=self.candidates(ax,n);self.beat(FadeOut(line),FadeIn(cloud))
         self.remove(s0,s1);f=self.formula(r't=w_0+w_1x+\epsilon,\qquad',r'\epsilon\sim\mathcal N(0,\beta^{-1})');f[1].set_color(NOISE)
         noise=VGroup(*[Line(ax.c2p(x,.15+.65*x),ax.c2p(x,t),color=NOISE,stroke_width=5) for x,t in zip(X[:2],T[:2])])
-        self.beat(Create(noise));self.beat(Indicate(dots[:2],scale_factor=1.1),Indicate(f,scale_factor=1.02))
+        self.beat(Create(noise));self.beat(Indicate(dots[:2],scale_factor=1.1),Circumscribe(f,color=MUTED,buff=.09))
 
     def map(self):
         left=self.axes((-3.25,.15,0),4.4,3.5,(-1.5,1.5,1),(-1.5,1.5,1),('w_0','w_1'))
@@ -109,7 +114,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
         n=ValueTracker(0);seen=ValueTracker(0);self.dots(data,seen)
         ellipse=always_redraw(lambda:contours(ax,*posterior(n.get_value())))
         self.add(ellipse);cloud=self.candidates(data,n);self.add(cloud)
-        f=self.formula(r'p(w\mid t)\propto',r'p(t\mid w)',r'p(w)');f[1].set_color(NOISE);f[2].set_color(PRIOR)
+        f=self.formula(r'p(w\mid\mathbf t)\propto',r'p(\mathbf t\mid w)',r'p(w)');f[1].set_color(NOISE);f[2].set_color(PRIOR)
         self.beat(seen.animate.set_value(1))
         def stripe(i):
             yy=np.linspace(-1.5,1.5,100); xx=T[i]-X[i]*yy
@@ -122,22 +127,23 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.add(dot,ln);self.beat(slope.animate.set_value(1.2))
         self.remove(dot,ln);self.beat(n.animate.set_value(1),FadeOut(st))
         st2=stripe(1);self.add(st2);self.beat(n.animate.set_value(2),seen.animate.set_value(2),FadeOut(st2))
-        self.remove(f);f=self.formula(r'p(w\mid t)=\mathcal N(w\mid',r'm_N',',',r'S_N',')');f[1].set_color(MEAN);f[3].set_color(POST)
-        self.beat(Indicate(ellipse),Indicate(f))
+        self.remove(f);f=self.formula(r'p(w\mid\mathbf t)=\mathcal N(w\mid',r'm_N',',',r'S_N',')');f[1].set_color(MEAN);f[3].set_color(POST)
+        self.beat(Indicate(ellipse),Circumscribe(f,color=MUTED,buff=.09))
 
     def sequence(self):
-        ax=self.axes((-3.2,.25,0),4.5,3.3,(-1.4,1.4,1),(-1.4,1.4,1),('w_0','w_1'))
+        ax=self.axes((-3.2,.25,0),4.5,3.3,(-.35,.5,.2),(0,1.2,.4),('w_0','w_1'))
         data=self.axes((3.15,.25,0),4.5,3.3)
         n=ValueTracker(2);self.dots(data,n)
         cs=always_redraw(lambda:contours(ax,*posterior(n.get_value())));cloud=self.candidates(data,n)
         self.add(cs,cloud);self.slider(n,0,20,[0,2.55,0],'N',DATA)
         self.beat(n.animate.set_value(4));self.beat(n.animate.set_value(8));self.beat(n.animate.set_value(20))
-        f=self.formula(r'\Phi=\begin{pmatrix}1&x_1\\1&x_N\end{pmatrix}\ (\cdots),\quad\phi(x)=(1,x)^T')
-        self.beat(Write(f))
+        f=self.formula(r'\Phi=\begin{pmatrix}1&x_1\\\vdots&\vdots\\1&x_N\end{pmatrix},\quad\phi(x)=(1,x)^T')
+        f.scale_to_fit_height(.85)
+        self.beat(Circumscribe(f,color=MUTED,buff=.09))
         g=MathTex(r'S_N^{-1}=',r'\alpha I',r'+',r'\beta\Phi^T\Phi',font_size=32).move_to([0,-2.4,0]);g[1].set_color(PRIOR);g[3].set_color(DATA)
-        self.beat(ReplacementTransform(f,g))
-        h=tex(r'm_N=\beta S_N\Phi^Tt\qquad\text{sequential}=\text{batch}',30).move_to([0,-2.4,0])
-        self.beat(ReplacementTransform(g,h),Indicate(cs))
+        self.equation_change(f,g)
+        h=tex(r'm_N=\beta S_N\Phi^T\mathbf t\qquad\text{sequential}=\text{batch}',30).move_to([0,-2.4,0])
+        self.equation_change(g,h,Indicate(cs))
 
     def regularization(self):
         ax=self.axes((-1.8,.25,0),6.7,3.6);n=ValueTracker(4);alpha=ValueTracker(2);beta=ValueTracker(25)
@@ -150,16 +156,16 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.slider(beta,25,100,[4.2,.25,0],r'\beta',NOISE,width=2.4)
         bars=always_redraw(lambda:VGroup(*[Rectangle(width=.42,height=max(.008,v*v*1.3),stroke_width=0,fill_color=PRIOR,fill_opacity=.8).move_to([3.7+j,-1.1+v*v*.65,0]) for j,v in enumerate(mean())]))
         self.add(bars,tex('w_0^2',21,PRIOR).move_to([3.7,-1.4,0]),tex('w_1^2',21,PRIOR).move_to([4.7,-1.4,0]))
-        f=self.formula(r'w_{\rm MAP}=m_N');self.beat(Indicate(line),Indicate(f))
-        g=MathTex(r'-\ln p(w\mid t)=',r'\frac\beta2\sum_n(t_n-w^T\phi_n)^2',r'+',r'\frac\alpha2w^Tw',r'+C',font_size=28).move_to([0,-2.5,0]);g[1].set_color(YELLOW);g[3].set_color(PRIOR)
-        self.beat(ReplacementTransform(f,g),Indicate(residuals),Indicate(bars))
+        f=self.formula(r'w_{\rm MAP}=m_N');self.beat(Indicate(line),Circumscribe(f,color=MUTED,buff=.09))
+        g=MathTex(r'-\ln p(w\mid\mathbf t)=',r'\frac\beta2\sum_n(t_n-w^T\phi_n)^2',r'+',r'\frac\alpha2w^Tw',r'+C',font_size=28).move_to([0,-2.5,0]);g[1].set_color(YELLOW);g[3].set_color(PRIOR)
+        self.equation_change(f,g,Indicate(residuals),Indicate(bars,color=PRIOR))
         self.beat(alpha.animate.set_value(60))
         self.add(tex(r'\lambda=\alpha/\beta',28,PRIOR).move_to([4.2,2.5,0]))
-        note=self.note('事前を強くすると、係数がゼロへ近づく',PRIOR)
-        self.beat(alpha.animate.set_value(2));self.remove(note);self.note('ノイズの精度を上げると、点を強く信じる',NOISE)
+        note=self.note('事前を強くすると、係数がゼロへ近づく',PRIOR).move_to([-1.8,2.6,0])
+        self.beat(alpha.animate.set_value(2));self.remove(note);self.note('ノイズの精度を上げると、点を強く信じる',NOISE).move_to([-1.8,2.6,0])
         self.beat(beta.animate.set_value(100))
         q=tex(r'p(w\mid\alpha)\propto\exp\!\left(-\frac\alpha2\sum_j|w_j|^q\right)\quad(q>0)',29).move_to([0,-2.5,0])
-        self.beat(ReplacementTransform(g,q))
+        self.equation_change(g,q)
 
     def prediction(self):
         ax=self.axes(width=8.5);n=ValueTracker(2);cursor=ValueTracker(-.8);noise=ValueTracker(0)
@@ -168,8 +174,8 @@ class PRML33BayesianLinearRegression(NarratedScene):
         cloud=self.candidates(ax,n);self.add(cloud)
         guide=always_redraw(lambda:Line(ax.c2p(cursor.get_value(),-1.6),ax.c2p(cursor.get_value(),1.6),color=MUTED,stroke_width=1))
         self.add(guide);self.beat(cursor.animate.set_value(.3))
-        f=self.formula(r'p(t_*\mid x_*,t)=\int',r'p(t_*\mid x_*,w)',r'p(w\mid t)',r'\,dw');f[1].set_color(NOISE);f[2].set_color(POST)
-        self.beat(Indicate(cloud),Write(f))
+        f=self.formula(r'p(t_*\mid x_*,\mathbf t)=\int',r'p(t_*\mid x_*,w)',r'p(w\mid\mathbf t)',r'\,dw');f[1].set_color(NOISE);f[2].set_color(POST)
+        self.beat(Indicate(cloud),Circumscribe(f,color=MUTED,buff=.09))
         latent=always_redraw(lambda:band(ax,grid,calc()[0],calc()[1],POST,.35));mean=always_redraw(lambda:path(ax,grid,calc()[0]))
         self.beat(FadeIn(latent),FadeOut(cloud),FadeIn(mean))
         outer=always_redraw(lambda:band(ax,grid,calc()[0],calc()[1]+noise.get_value()/25,NOISE,.16));self.add(outer)
@@ -179,15 +185,16 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.beat(cursor.animate.set_value(.95));self.beat(n.animate.set_value(20))
 
     def curves(self):
-        ax=self.axes(xr=(0,1,.5),yr=(-2.2,2.2,1),width=8.8)
+        ax=self.axes(xr=(0,1,.5),yr=(-1.65,1.65,1),width=8.8)
         grid=np.linspace(0,1,160);n=ValueTracker(1)
         bases=VGroup(*[path(ax,grid,phi(grid,'rbf')[:,j],PRIOR,1.5,.65) for j in range(9)])
         f=self.formula(r'y(x,w)=\sum_{j=1}^9w_j\phi_j(x),\qquad\phi_j(x)=e^{-(x-\mu_j)^2/(2s^2)}')
-        self.beat(LaggedStart(*[Create(g) for g in bases],lag_ratio=.1));self.remove(bases)
+        basis_note=VGroup(jp('中心',21),tex(r'\mu_j',24,PRIOR),jp('と幅',21),tex('s=0.14',24,PRIOR),jp('は固定',21)).arrange(RIGHT,buff=.13).move_to([0,2.65,0]);self.add(basis_note)
+        self.beat(LaggedStart(*[Create(g) for g in bases],lag_ratio=.1));self.remove(bases,*bases,basis_note)
         self.dots(ax,n,'rbf');self.add(path(ax,grid,np.sin(2*PI*grid),POST,2,.5))
         calc=lambda:predict(grid,n.get_value(),kind='rbf')
         fill=always_redraw(lambda:band(ax,grid,calc()[0],calc()[2],MEAN,.2));mean=always_redraw(lambda:path(ax,grid,calc()[0]));self.add(fill,mean)
-        label=number('N=',n.get_value,[0,2.65,0],DATA,0);self.add(label)
+        label=number('N=',lambda:np.floor(n.get_value()+1e-8),[0,2.65,0],DATA,0);self.add(label)
         self.beat(n.animate.set_value(2));self.beat(n.animate.set_value(4));self.beat(n.animate.set_value(25))
         phase=ValueTracker(0);cloud=self.candidates(ax,n,'rbf',phase=phase)
         self.beat(FadeOut(fill),FadeIn(cloud));self.beat(phase.animate.set_value(PI/2))
@@ -223,7 +230,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
         note=self.note('予測の幅は、モデルの仮定にも依存する',YELLOW)
         self.beat(x.animate.set_value(-.75))
         self.remove(f);f=self.formula(r'\beta\ \mathrm{known}:\ \mathcal N\qquad\longrightarrow\qquad (w,\beta)\ \mathrm{unknown}:\ \mathrm{Student}\ t')
-        self.beat(Write(f));self.remove(f);f=self.formula(r'k(x,z)=\psi(x)^T\psi(z),\qquad\psi(x)=\sqrt\beta\,S_N^{1/2}\phi(x)')
-        self.beat(x.animate.set_value(.5),Write(f));self.remove(f)
-        f=self.formula(r'p(w)\ \longrightarrow\ p(w\mid t)\ \longrightarrow\ p(t_*\mid x_*,t)')
-        self.beat(Write(f),Indicate(focus))
+        self.beat(Circumscribe(f,color=MUTED,buff=.09));self.remove(f);f=self.formula(r'k(x,z)=\psi(x)^T\psi(z),\qquad\psi(x)=\sqrt\beta\,S_N^{1/2}\phi(x)')
+        self.beat(x.animate.set_value(.5),Circumscribe(f,color=MUTED,buff=.09));self.remove(f)
+        f=self.formula(r'p(w)\ \longrightarrow\ p(w\mid\mathbf t)\ \longrightarrow\ p(t_*\mid x_*,\mathbf t)')
+        self.beat(Circumscribe(f,color=MUTED,buff=.09),Indicate(focus))

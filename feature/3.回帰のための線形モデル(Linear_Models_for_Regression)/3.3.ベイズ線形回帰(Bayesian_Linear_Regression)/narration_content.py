@@ -105,6 +105,8 @@ for item in SCENES:
             if seg['id'] in READING_FIXES:
                 old, new = READING_FIXES[seg['id']]
                 seg['speech'] = seg['speech'].replace(old, new)
+            if seg['id'] == 'scene07-02-01':
+                seg['display'] = r'$\sin$の波にノイズを加えた自作データで試します。緑は答え合わせ用の生成関数です。'
             if seg['id'] == 'scene04-05-02':
                 seg['display'] = '右肩の$T$は、表の行と列を入れ替える転置を表します。'
             if seg['id'] == 'scene09-04-02':

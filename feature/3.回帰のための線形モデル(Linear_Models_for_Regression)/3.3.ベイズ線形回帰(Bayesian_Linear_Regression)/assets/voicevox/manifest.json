@@ -749,7 +749,7 @@
       "title": "曲線でも、同じ計算が使える",
       "status": "generated",
       "path": "assets/voicevox/scene07.wav",
-      "script_sha256": "e52f41bdbe87178a288d3b903fde829189d0c0d07682a1aef36d64d5512f2963",
+      "script_sha256": "5925dc42f5e31ce05123b280f7a1bdfb13ac64aa05ba73e14e7bf6bfbd60afbc",
       "wav_sha256": "5835d7477fb020c4609625ddbefebb67831bb34ce731f676a7f12cbd18103d6e",
       "duration": 71.06666666666666,
       "beat_durations": [
@@ -788,7 +788,7 @@
         {
           "beat_index": 1,
           "id": "scene07-02-01",
-          "display": "サインの波にノイズを加えた自作データで試します。緑は答え合わせ用の生成関数です。",
+          "display": "$\\sin$の波にノイズを加えた自作データで試します。緑は答え合わせ用の生成関数です。",
           "speech": "サインの波にノイズを加えた自作データで試します。緑は答え合わせ用の生成関数です。",
           "start": 12.333333333333334,
           "end": 18.914666666666665
