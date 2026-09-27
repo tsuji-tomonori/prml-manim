@@ -85,7 +85,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
     def question(self):
         ax=self.axes();n=ValueTracker(0);a=ValueTracker(.15);b=ValueTracker(.65)
         dots=self.dots(ax,n);line=always_redraw(lambda:path(ax,[-1,1],[a.get_value()-b.get_value(),a.get_value()+b.get_value()]))
-        self.beat(n.animate.set_value(2));self.add(line)
+        self.beat(n.animate.set_value(2),end_sentence=1);self.add(line)
         s0=self.slider(a,-.5,.6,[-2.4,-2.4,0],'w_0',MEAN)
         s1=self.slider(b,-.3,1.3,[2.4,-2.4,0],'w_1',YELLOW)
         self.beat(a.animate.set_value(.45));self.beat(b.animate.set_value(1.1))
@@ -137,8 +137,8 @@ class PRML33BayesianLinearRegression(NarratedScene):
         cs=always_redraw(lambda:contours(ax,*posterior(n.get_value())));cloud=self.candidates(data,n)
         self.add(cs,cloud);self.slider(n,0,20,[0,2.55,0],'N',DATA)
         self.beat(n.animate.set_value(4));self.beat(n.animate.set_value(8));self.beat(n.animate.set_value(20))
-        f=self.formula(r'\Phi=\begin{pmatrix}1&x_1\\\vdots&\vdots\\1&x_N\end{pmatrix},\quad\phi(x)=(1,x)^T')
-        f.scale_to_fit_height(.85)
+        f=VGroup(tex(r'\Phi',34),jp('の各行：',25),tex(r'(1,x_n)',34),tex(r'\qquad\phi(x)=(1,x)^T',34)).arrange(RIGHT,buff=.12).move_to([0,-2.5,0])
+        self.add(f)
         self.beat(Circumscribe(f,color=MUTED,buff=.09))
         g=MathTex(r'S_N^{-1}=',r'\alpha I',r'+',r'\beta\Phi^T\Phi',font_size=32).move_to([0,-2.4,0]);g[1].set_color(PRIOR);g[3].set_color(DATA)
         self.equation_change(f,g)
@@ -165,6 +165,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.beat(alpha.animate.set_value(2));self.remove(note);self.note('ノイズの精度を上げると、点を強く信じる',NOISE).move_to([-1.8,2.6,0])
         self.beat(beta.animate.set_value(100))
         q=tex(r'p(w\mid\alpha)\propto\exp\!\left(-\frac\alpha2\sum_j|w_j|^q\right)\quad(q>0)',29).move_to([0,-2.5,0])
+        q.shift(UP*.2)
         self.equation_change(g,q)
 
     def prediction(self):
