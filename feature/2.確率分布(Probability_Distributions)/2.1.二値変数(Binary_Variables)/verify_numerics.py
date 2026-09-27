@@ -34,6 +34,13 @@ class Numerics(unittest.TestCase):
             self.assertAlmostEqual(np.trapezoid(p,xs),1,places=8)
             self.assertAlmostEqual(np.trapezoid(xs*p,xs),beta_mean(a,b),places=8)
             self.assertAlmostEqual(np.trapezoid((xs-beta_mean(a,b))**2*p,xs),beta_var(a,b),places=8)
+        # Cosine substitution resolves the integrable singularities at both ends.
+        nodes=200000
+        t=(np.arange(nodes)+.5)*np.pi/nodes
+        x=(1-np.cos(t))/2
+        mass=np.sum(beta_pdf(x,.7,.7)*np.sin(t)/2)*np.pi/nodes
+        self.assertAlmostEqual(mass,1,places=7)
+        self.assertGreater(beta_pdf(.005,.7,.7),beta_pdf(.5,.7,.7))
         self.assertAlmostEqual(beta_mean(*posterior()),8/13)
     def test_sequential_conjugacy(self):
         a,b=PRIOR
