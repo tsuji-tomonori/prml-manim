@@ -1,51 +1,79 @@
-# 1.4 次元の呪い
+# PRML 1.4 次元の呪い
 
-PRML Chapter 1 の 1.4 節を、Manim アニメーションと VOICEVOX ナレーションで説明する動画です。
+問いを出し、数値実験を動かし、式で確かめる約9分52秒の解説動画です。
+Manim Community で制作し、ナレーションは VOICEVOX:WhiteCUL（ノーマル、speaker 23）です。
 
-## ファイル
+[動画（480p15）](media/videos/prml_1_4_curse_of_dimensionality/480p15/PRML14CurseOfDimensionality.mp4) ／ [全台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
 
-- `prml_1_4_curse_of_dimensionality.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## 構成
 
-## レンダリング
+時刻・尺は文単位で合成した WAV の実測値（秒）です。
 
-ナレーションを再生成する場合は、VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから実行します。
+| シーン | 問い | 開始 | 尺 | 視覚的アイデア | 原文参照 |
+|---|---|---:|---:|---|---|
+| scene01 | この点は、何色？ | 0.000 | 62.533 | 自作の点群を箱で囲み、多数派を数える | pp.33–35 / Figs.1.19–1.20 |
+| scene02 | 箱は、どれだけ増える？ | 62.533 | 64.933 | 5区間→25マス→125区画、次元と対数グラフを連動 | p.35 / Fig.1.21 |
+| scene03 | 多項式なら、つまみはいくつ？ | 127.467 | 75.000 | 交差項の係数で曲面を変形し、係数数を数える | p.36 / Eq.(1.74), Ex.1.16 |
+| scene04 | 球の体積は、どこにある？ | 202.467 | 76.733 | 内側を縮め、体積比の定数を約分する | p.36 / Eqs.(1.75)–(1.76) |
+| scene05 | 薄い表面が、ほとんど全部？ | 279.200 | 69.600 | 厚さと次元を動かし、同じ座標上で殻の割合を比較 | pp.36–37 / Fig.1.22 |
+| scene06 | 中心が一番高いのに、中心にはいない？ | 348.800 | 85.000 | 600標本を半径のヒストグラムへ移し、環と面積を連動 | pp.36–37 / Fig.1.23, Ex.1.20 |
+| scene07 | 次元を上げると、確率の山は？ | 433.800 | 74.533 | 同じ半径軸で山を移し、規格化した半径で相対集中を示す | pp.36–37 / Fig.1.23, Ex.1.20 |
+| scene08 | 画像の数字は多い。でも自由度は？ | 508.333 | 83.533 | 16×16画素を位置・角度の3つのつまみで連動させる | pp.37–38 / 実効次元・滑らかさ |
+
+## 原文と数値実験
+
+Bishop, *Pattern Recognition and Machine Learning* (2006), §1.4、印刷 pp.33–38（PDF pp.53–58）を参照。式 (1.74)–(1.76)、図 1.19–1.23 の構造を扱います。この節に表はありません。
+
+- 分類用の90点は seed=1401 の独自データです。原文の油流測定データを再現したものではありません。例の箱には A=22、B=12、C=0 点が入ります。
+- 5分割格子は `5**D`、空の箱の期待割合は、一様・独立に1000点を置く仮定で `(1-1/5**D)**1000`。D=10では 99.9897605%。任意のデータ分布についての値ではありません。
+- 三次以下の多項式の独立係数数は `comb(D+3,3)`。掛ける順番だけが異なる項をまとめます。D=2,10,100で 10,286,176851。次数固定のべき乗則と、格子の指数増加を区別します。
+- 球の外殻の体積比は `1-(1-epsilon)**D`。ε=0.1、D=2,3,20,50で19%、27.1%、87.8423%、99.4846%。D=50で半分の体積を含む厚さは約1.37673%。円は半径の模式図で、高次元の体積比は計算値と曲線で示します。
+- ガウス分布は各座標が独立、平均0、標準偏差1。半径密度は `p(r)=r**(D-1)*exp(-r*r/2)/(2**(D/2-1)*Gamma(D/2))`。原文図1.23の描画値を転写せず、この条件で再計算しています。
+- ガウス標本は seed=1406 の600点。ヒストグラムは個数を標本数とビン幅で割った密度で、理論曲線と単位をそろえています。
+- `u=r/sqrt(D)` への変換後は `q(u)=sqrt(D)*p(sqrt(D)*u)`。面積を保存し、相対的な幅の縮小を示します。半径の絶対的な幅が0に縮むとは説明しません。
+- 次元は整数です。球とガウスのつまみの途中は、整数の状態をつなぐために公式を正の実数へ拡張した図形変形です。係数数・箱数は整数次元ごとに更新します。
+- 画像は一定の照明・大きさの非対称物体を仮定した、自作の滑らかな画素モデルです。256画素、位置2＋角度1の自由度、向きの予測に関わる自由度1を分けます。輪郭を滑らかにして画素境界の不連続を避けています。
+
+## 実装
+
+- `narration_content.py`: 全116文の display / speech と58 beat、原文参照の正本。
+- `caption_layout.py`: 1.1と同じ日本語・MathTex混在字幕。かなの実測文字高、添字を除いた本体中心、数式左右の余白で配置します。
+- `check_narration_readings.py`: 全 speech を audio_query に送り、初回と修正後の読みを `reading_check.md` / JSON に記録。
+- `make_voicevox_narration.py`: 文単位PCMを連結し、短い息継ぎを加え、文の字幕時刻・台本とWAVのハッシュをmanifestに保存。`--from-scene scene05` で再開できます。
+- `dimension_model.py`: NumPy による数値計算と自作データ。
+- `prml_1_4_curse_of_dimensionality.py`: 元のクラス名 `PRML14CurseOfDimensionality` を維持。ValueTracker / updater / 数式の色分けを使用。
+- `verify_numerics.py`: 格子・単項式列挙、球の体積比とMonte Carlo、半径密度の積分・モーメント、画素、音声整合性の検証。
+
+各シーンの音声開始と映像時計を一致させ、文の実測時間から字幕・動作を切り替えます。境界は累積時間を15fpsに丸め、音声の長さを静止待ちで埋める方式を避けています。古い台本の音声はハッシュ検査で排除し、音声が未生成・不一致なら描画を停止します。
+
+## 再生成
+
+このディレクトリで実行します。既存の仮想環境を使用します。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_1_4_curse_of_dimensionality.py PRML14CurseOfDimensionality
+curl --fail http://127.0.0.1:50021/version
+/home/t-tsuji/project/prml-manim/.venv/bin/python narration_content.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+# reading_check.md の全文を確認し、誤読は speech を修正して再確認
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_1_4_curse_of_dimensionality.py PRML14CurseOfDimensionality
 ```
 
-生成される低解像度動画:
+Engine が応答しない場合は音声生成を停止してください。生成スクリプトはコンテナを操作しません。
 
-```text
-media/videos/prml_1_4_curse_of_dimensionality/480p15/PRML14CurseOfDimensionality.mp4
-```
+## 演出の参照
 
-高品質で出力する場合:
+[3b1b/manim](https://github.com/3b1b/manim) と [3b1b/videos](https://github.com/3b1b/videos) を参照しました。ManimGL のコードは取り込んでいません。
 
-```bash
-uv run manim --disable_caching --flush_cache -pqh prml_1_4_curse_of_dimensionality.py PRML14CurseOfDimensionality
-```
+- `_2023/clt/main.py` の `BuildUpGaussian` / `get_variable_display`: つまみ・数式・曲線・塗り面積を同じ状態に連動させる考え方。
+- `_2023/convolutions2/gauss_example_supplements.py` の `RotationalSymmetryAnnotations`: 座標の二乗和から半径への対応を色で保持し、密度と面積を結ぶ説明。
+- `manimlib/mobject/value_tracker.py` と `mobject_update_utils.py`: 状態を一つに持ち、図を更新する構成。実装は CE の ValueTracker / always_redraw を使用。
 
-## 原文参照
+## 検証と制約
 
-主に `.working/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf` の以下を参照しています。
+最終検証数値は `validation_summary.json` と作業レポートに保存します。
+API の読みの全文照合は、実音声の全編通し聴取を意味しません。全編の通し聴取、高品質レンダリング、全フレームの目視は実施していません。
 
-- Chapter 1 Introduction
-- Section 1.4: The Curse of Dimensionality
-- 高次元空間における体積、格子数、データの疎性に関する説明
-
-## 制作方針
-
-- PRML の図を直接複製せず、単位超立方体を前提にした自作の数値例で再構成する。
-- 「次元が増えると、同じ細かさの格子数が指数的に増える」ことを最初に示す。
-- `0.1^(1/D)` と `0.8^D` を、局所領域の幅と境界近くの体積として視覚化する。
-- 近傍点が遠くなること、空の箱が増えることを、近傍法や表形式の学習の限界として説明する。
-- 最後は、特徴選択、次元削減、正則化、モデルの仮定が汎化を支えるという流れで 1.5 節へ橋渡しする。
-
-## 音声クレジット
-
-- ナレーション: VOICEVOX:WhiteCUL
+音声クレジット: **VOICEVOX:WhiteCUL**
