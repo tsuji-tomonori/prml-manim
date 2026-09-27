@@ -1,4 +1,4 @@
-"""Extract every beat, every formula caption, and three synchronization pairs."""
+"""Extract every beat, every formula caption, and four synchronization pairs."""
 import json
 import subprocess
 import wave
@@ -22,7 +22,7 @@ def main():
                 if '$' in c['display']:
                     frames.append(dict(name=c['id']+'-math',time=(c['start']+c['end'])/2))
     sync=[]
-    for scene_i,beat_i,cue_i in [(2,1,1),(3,0,1),(7,3,0)]:
+    for scene_i,beat_i,cue_i in [(2,1,1),(3,0,1),(3,1,0),(7,3,0)]:
         s=timeline[scene_i]; c=s['beats'][beat_i]['cues'][cue_i]
         with wave.open(str(ROOT/f"assets/voicevox/{s['id']}.wav"),'rb') as w:
             rate=w.getframerate(); pcm=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2')/32768
