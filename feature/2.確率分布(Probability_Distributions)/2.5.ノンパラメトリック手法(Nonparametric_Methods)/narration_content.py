@@ -510,7 +510,7 @@ def export_script():
             for s in b['segments']:
                 lines += [f"- {s['id']} 字幕: {s['display']}", f"  読み上げ: {s['speech']}"]
             lines += ['']
-    Path(__file__).with_name('narration_script.md').write_text('\n'.join(lines)+'\n')
+    Path(__file__).with_name('narration_script.md').write_text('\n'.join(lines).rstrip()+'\n')
 
 if __name__ == '__main__':
     export_script()
