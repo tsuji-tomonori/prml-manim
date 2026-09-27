@@ -1,412 +1,401 @@
+"""PRML 2.1: linked visual experiments in Manim Community."""
 from __future__ import annotations
-
-import math
-import wave
+import itertools
+import json
 from pathlib import Path
-
 import numpy as np
 from manim import *
+from binary_model import *
+from caption_layout import jp, tex
+from narrated_scene import NarratedScene
+from make_voicevox_narration import MANIFEST
+from narration_content import SCENES
+
+BG='#10141F'
+HEAD=ManimColor('#77D49A')
+TAIL=ManimColor('#58B5ED')
+YELLOW=ManimColor('#FFE079')
+PRIOR_COLOR=ManimColor('#C29AFF')
+POST=ManimColor('#FFB45B')
+MUTED=ManimColor('#A8B2C5')
 
 
-JAPANESE_FONT = "Noto Sans CJK JP"
-BLUE_DATA = BLUE_C
-SUCCESS_GREEN = GREEN_C
-FAIL_RED = RED_C
-MODEL_YELLOW = YELLOW_C
-PRIOR_PURPLE = PURPLE_C
-POST_ORANGE = ORANGE
-TEXT_GREY = GREY_B
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def readout(label,getter,pos,color=WHITE,places=3,size=26):
+    number=DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
+    group=VGroup(tex(label,size,color),number).arrange(RIGHT,buff=.12).move_to(pos)
+    anchor=number.get_left().copy()
+    number.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return group
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def curve(ax,fn,color=POST,lo=0,hi=1):
+    xs=np.linspace(lo,hi,301)
+    return VMobject().set_points_as_corners([ax.c2p(x,float(fn(x))) for x in xs]).set_stroke(color,3)
 
 
-def beta_pdf(mu: float, a: float, b: float) -> float:
-    if mu <= 0.0 or mu >= 1.0:
-        return 0.0
-    log_norm = math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
-    return float(math.exp(log_norm + (a - 1.0) * math.log(mu) + (b - 1.0) * math.log(1.0 - mu)))
+def area(ax,fn,lo=0,hi=1,color=POST):
+    xs=np.linspace(lo,max(lo+1e-5,hi),151)
+    return Polygon(ax.c2p(lo,0),*[ax.c2p(x,float(fn(x))) for x in xs],ax.c2p(hi,0),
+                   stroke_width=0,fill_color=color,fill_opacity=.25)
 
 
-def bernoulli_likelihood(mu: float, successes: int, failures: int) -> float:
-    if mu <= 0.0 or mu >= 1.0:
-        if successes == 0 and mu == 0.0:
-            return 1.0
-        if failures == 0 and mu == 1.0:
-            return 1.0
-        return 0.0
-    return float(mu**successes * (1.0 - mu) ** failures)
+def coin(value,r=.27):
+    color=HEAD if value else TAIL
+    return VGroup(Circle(radius=r,color=color,fill_color=color,fill_opacity=.17),tex(str(value),29,WHITE))
 
 
-class PRML21BinaryVariables(Scene):
-    """PRML 2.1 Binary Variables.
+def coins(values,y=1.85,r=.23):
+    return VGroup(*[coin(x,r) for x in values]).arrange(RIGHT,buff=.22).move_to([0,y,0])
 
-    Render example:
-        uv run manim -pql prml_2_1_binary_variables.py PRML21BinaryVariables
-    """
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.observations = [1, 0, 1, 1, 0, 1, 1, 0, 1, 1]
+def pulse(m,color=YELLOW):
+    return Circumscribe(m,color=color,buff=.10)
 
-        self.binary_variable_intro()
-        self.bernoulli_distribution()
-        self.maximum_likelihood()
-        self.small_data_instability()
-        self.beta_prior_to_posterior()
-        self.sequential_update()
-        self.predictive_distribution()
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+class PRML21BinaryVariables(NarratedScene):
+    def construct(self):
+        self.camera.background_color=BG
+        self.timeline=[]
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        for i,method in enumerate([self.question,self.moments,self.fit,self.counts,self.prior,
+                                  self.update,self.sequence,self.predict,self.uncertainty]):
+            self.begin(i)
+            if not self.audio_entry: raise RuntimeError('Generate matching narration before rendering')
+            method()
+            assert self.beat_index==len(self.story['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        Path('media/prml21_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def f(self,*parts,y=-2.45,size=32,colors=None):
+        m=MathTex(*parts,font_size=size).move_to([0,y,0])
+        if colors:
+            for p,c in zip(m,colors):p.set_color(c)
+        if m.width>12.6: raise ValueError('Formula exceeds safe width')
+        return m
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def ax(self,xr=(0,1,.25),yr=(0,4,1),width=8.6,height=3.1,center=(0,0,0),xlabel=r'\mu',ylabel='確率密度'):
+        ax=Axes(x_range=xr,y_range=yr,x_length=width,y_length=height,tips=False,
+            axis_config=dict(color=MUTED,stroke_width=1.4,include_numbers=True,font_size=19)).move_to(center)
+        labels=VGroup(tex(xlabel,25).next_to(ax.x_axis,RIGHT,buff=.15),
+            jp(ylabel,20,MUTED).move_to([-width/2+.4,center[1]+height/2+.35,0]))
+        self.add(ax,labels)
+        ax.labels=labels
+        return ax
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size, color=WHITE)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def slider(self,t,lo=0,hi=1,label=r'\mu=',pos=(0,2.15,0),width=4):
+        line=Line(LEFT*width/2,RIGHT*width/2,color=MUTED).move_to(pos)
+        dot=Dot(color=YELLOW,radius=.07).add_updater(lambda m:m.move_to(line.point_from_proportion((t.get_value()-lo)/(hi-lo))))
+        return VGroup(line,dot,readout(label,t.get_value,[pos[0]+width/2+1.0,pos[1],0],YELLOW,2))
 
-    def make_mu_axes(self, width: float = 6.8, height: float = 3.4, y_max: float = 5.0) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[0, y_max, y_max / 5],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
+    def discard(self,*mobjects):
+        # Individual FadeIn/Transform animations may add children as scene roots.
+        # Remove the complete family, including those roots, at scene transitions.
+        return self.remove(*[m for root in mobjects for m in root.get_family()])
 
-    def beta_curve(self, axes: Axes, a: float, b: float, color: ManimColor = POST_ORANGE) -> VMobject:
-        ymax = axes.y_range[1]
-        curve = axes.plot(
-            lambda u: min(beta_pdf(u, a, b), ymax),
-            x_range=[0.001, 0.999],
-            color=color,
-            use_smoothing=False,
-        )
-        curve.set_stroke(width=4)
-        return curve
+    def replace_formula(self,old,new):
+        self.discard(old);self.add(new);return new
 
-    def likelihood_curve(self, axes: Axes, successes: int, failures: int) -> VMobject:
-        raw = np.array([bernoulli_likelihood(x, successes, failures) for x in np.linspace(0, 1, 300)])
-        scale = 1.0 / raw.max()
-        curve = axes.plot(
-            lambda u: bernoulli_likelihood(u, successes, failures) * scale,
-            x_range=[0, 1],
-            color=MODEL_YELLOW,
-            use_smoothing=False,
-        )
-        curve.set_stroke(width=4)
-        return curve
+    def question(self):
+        cs=VGroup(*[VGroup(Circle(radius=.53,color=HEAD),jp('表',34,HEAD)) for _ in range(3)]).arrange(RIGHT,buff=.5).move_to([-.8,.8,0])
+        q=jp('？',55,YELLOW).move_to([3,.8,0])
+        self.beat(phases=[('three-heads',self.sentence_duration(0),lambda:LaggedStart(*[FadeIn(c,shift=UP*.3) for c in cs],lag_ratio=.3)),
+            ('next-question',self.sentence_duration(1),lambda:FadeIn(q)),
+            ('question-emphasis',self.sentence_duration(2),lambda:pulse(q))])
+        zeros=VGroup(coin(0,.5),jp('裏',26,TAIL)).arrange(DOWN,buff=.15).move_to([3,.7,0])
+        self.beat(*[Transform(c,coin(1,.53).move_to(c),rate_func=lambda t:smooth(min(1,5*t))) for c in cs],Transform(q,zeros,rate_func=lambda t:smooth(min(1,5*t))))
+        self.discard(cs,q)
+        mu=ValueTracker(.5)
+        ax=self.ax(xr=(-.5,1.5,.5),yr=(0,1,.25),width=6.5,xlabel='x',ylabel='確率')
+        origin=ax.c2p(0,0).copy(); ux=ax.c2p(1,0)-origin; uy=ax.c2p(0,1)-origin
+        ax.y_axis.shift(-.5*ux)
+        ax.c2p=lambda x,y=0:origin+x*ux+y*uy
+        ax.x_axis.ticks.set_opacity(0)
+        chart=always_redraw(lambda:VGroup(*[Rectangle(width=1,height=max(.002,3.1*p),fill_color=c,fill_opacity=.8,stroke_width=0)
+            .move_to(ax.c2p(i,0)+UP*max(.002,3.1*p)/2) for i,p,c in zip([0,1],bernoulli(mu.get_value()),[TAIL,HEAD])]))
+        ax.x_axis.numbers.set_opacity(0)
+        self.add(tex('0',22,TAIL).next_to(ax.c2p(0,0),DOWN,buff=.15),tex('1',22,HEAD).next_to(ax.c2p(1,0),DOWN,buff=.15))
+        labels=VGroup(tex(r'1-\mu',27,TAIL).move_to([-4.9,.3,0]),tex(r'\mu',29,HEAD).move_to([4.5,.3,0]))
+        sl=self.slider(mu);self.add(chart,labels,sl)
+        f=self.f(r'p(x=1\mid\mu)=',r'\mu',r',\quad p(x=0\mid\mu)=',r'1-\mu',colors=[WHITE,HEAD,WHITE,TAIL])
+        self.add(f)
+        self.beat(mu.animate.set_value(.8),start_sentence=1)
+        self.beat(mu.animate.set_value(.2))
+        f=self.replace_formula(f,self.f(r'\operatorname{Bern}(x\mid\mu)=',r'\mu^x',r'(1-\mu)^{1-x}',colors=[WHITE,HEAD,TAIL]))
+        sub=self.f(r'x=1:\quad \mu^1(1-\mu)^0=\mu',y=-1.98,size=27)
+        self.add(sub)
+        self.beat(pulse(sub),pulse(f[1]),start_sentence=1)
+        self.discard(sub)
+        sub=self.f(r'x=0:\quad\mu^0(1-\mu)^1=1-\mu',y=-1.98,size=27)
+        self.add(sub)
+        self.beat(pulse(sub),pulse(f[2]))
 
-    def observation_tokens(self, observations: list[int], radius: float = 0.19) -> VGroup:
-        tokens = VGroup()
-        for value in observations:
-            token = Circle(radius=radius, color=SUCCESS_GREEN if value else FAIL_RED, fill_opacity=0.9)
-            label = Text(str(value), font_size=22, color=BLACK)
-            token.add(label.move_to(token.get_center()))
-            tokens.add(token)
-        tokens.arrange(RIGHT, buff=0.13)
-        return tokens
+    def moments(self):
+        mu=ValueTracker(.2)
+        line=NumberLine(x_range=[0,1,.25],length=8,include_numbers=True,font_size=22).move_to([0,.1,0])
+        weights=always_redraw(lambda:VGroup(*[Rectangle(width=.75,height=max(.002,2*p),fill_color=c,fill_opacity=.8,stroke_width=0)
+            .move_to(line.n2p(x)+UP*max(.002,2*p)/2) for x,p,c in zip([0,1],bernoulli(mu.get_value()),[TAIL,HEAD])]))
+        pivot=always_redraw(lambda:Triangle(color=YELLOW,fill_opacity=1).scale(.13).next_to(line.n2p(mu.get_value()),DOWN,buff=.1))
+        mean=readout(r'\mathbb E[x]=',mu.get_value,[0,-1,0],YELLOW)
+        self.add(line,weights,pivot,mean,self.slider(mu))
+        self.beat(pulse(pivot))
+        self.beat(mu.animate.set_value(.8))
+        f=self.f(r'\mathbb E[x]=',r'0(1-\mu)',r'+',r'1\mu',r'=\mu',colors=[YELLOW,TAIL,WHITE,HEAD,YELLOW])
+        self.beat(FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))),LaggedStart(pulse(weights[0],TAIL),pulse(weights[1],HEAD),lag_ratio=.5))
+        distances=always_redraw(lambda:VGroup(Line(line.n2p(0)+DOWN*.5,line.n2p(mu.get_value())+DOWN*.5,color=TAIL),
+            Line(line.n2p(mu.get_value())+DOWN*.65,line.n2p(1)+DOWN*.65,color=HEAD)))
+        self.add(distances)
+        f=self.replace_formula(f,self.f(r'\operatorname{var}[x]=',r'(1-\mu)\mu^2',r'+',r'\mu(1-\mu)^2',r'=\mu(1-\mu)',size=28,colors=[WHITE,TAIL,WHITE,HEAD,YELLOW]))
+        self.beat(mu.animate.set_value(.35))
+        self.discard(line,weights,pivot,mean,distances)
+        ax=self.ax(yr=(0,.27,.05),ylabel='分散',height=3)
+        graph=curve(ax,lambda u:u*(1-u),YELLOW)
+        dot=always_redraw(lambda:Dot(ax.c2p(mu.get_value(),mu.get_value()*(1-mu.get_value())),color=HEAD))
+        self.add(graph,dot)
+        self.beat(mu.animate.set_value(.5),end_sentence=1)
+        self.beat(mu.animate.set_value(.95),end_sentence=1)
 
-    def binary_variable_intro(self) -> None:
-        narration = self.start_narration("scene01")
-        title = Text("PRML 2.1 Binary Variables", font_size=42)
-        subtitle = Text("二値変数: 1 か 0 の確率モデル", font_size=30, color=TEXT_GREY).next_to(title, DOWN, buff=0.25)
+    def fit(self):
+        cs=coins(OBS,.7,r=.34)
+        count=self.f(r'N=8,\quad m=\sum_n x_n=5,\quad l=N-m=3',y=-.7)
+        self.beat(LaggedStart(*[FadeIn(c) for c in cs],lag_ratio=.15),FadeIn(count),end_sentence=2)
+        factors=VGroup(*[tex(r'\mu' if x else r'(1-\mu)',26,HEAD if x else TAIL) for x in OBS]).arrange(RIGHT,buff=.26).move_to([0,.7,0])
+        f=self.f(r'p(\mathcal D\mid\mu)=\prod_{n=1}^N p(x_n\mid\mu)=',r'\mu^5',r'(1-\mu)^3',colors=[WHITE,HEAD,TAIL],size=29)
+        self.beat(Transform(cs,factors,rate_func=lambda t:smooth(min(1,4*t))),FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))))
+        self.discard(cs,count)
+        mu=ValueTracker(.15)
+        ax=self.ax(yr=(0,.0055,.001),ylabel='尤度',height=2.55,center=(0,.2,0))
+        graph=curve(ax,likelihood,YELLOW)
+        point=always_redraw(lambda:Dot(ax.c2p(mu.get_value(),likelihood(mu.get_value())),color=POST))
+        guide=always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),point.get_center(),color=POST))
+        self.add(graph,point,guide,self.slider(mu))
+        self.beat(mu.animate.set_value(.625))
+        self.beat(mu.animate.set_value(.9))
+        f=self.replace_formula(f,self.f(r'\ln p(\mathcal D\mid\mu)=m\ln\mu+(N-m)\ln(1-\mu)',size=29))
+        deriv=self.f(r'\frac{m}{\mu}-\frac{N-m}{1-\mu}=0\quad\Longrightarrow\quad\mu_{\rm ML}=\frac mN',y=-1.88,size=25)
+        self.add(deriv)
+        self.beat(mu.animate.set_value(.625),pulse(deriv),end_sentence=2)
+        top=coins(OBS,2.15,r=.18)
+        # Remove slider to leave room for the permuted observations.
+        for m in list(self.mobjects):
+            if isinstance(m,VGroup) and len(m)==3 and any(isinstance(x,Line) for x in m): self.discard(m)
+        self.add(top)
+        self.beat(Transform(top,coins(OBS[::-1],2.15,r=.18),rate_func=lambda t:smooth(min(1,4*t))),pulse(deriv))
 
-        examples = VGroup(
-            self.binary_card("coin", "表", "裏"),
-            self.binary_card("test", "陽性", "陰性"),
-            self.binary_card("click", "する", "しない"),
-        ).arrange(RIGHT, buff=0.5)
-        examples.next_to(subtitle, DOWN, buff=0.85)
+    def counts(self):
+        rows=[]
+        for chosen in itertools.combinations(range(4),2):
+            rows.append(coins([int(i in chosen) for i in range(4)],0,r=.22))
+        grid=VGroup(*rows).arrange_in_grid(rows=2,cols=3,buff=(.8,.7)).move_to([0,.5,0])
+        self.beat(LaggedStart(*[FadeIn(row) for row in grid],lag_ratio=.15))
+        f=self.f(r'p(m=2\mid N=4,\mu)=',r'6',r'\mu^2(1-\mu)^2',colors=[WHITE,YELLOW,HEAD])
+        self.beat(FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))),LaggedStart(*[pulse(r) for r in grid],lag_ratio=.12))
+        f=self.replace_formula(f,self.f(r'\operatorname{Bin}(m\mid N,\mu)=',r'\binom Nm',r'\mu^m(1-\mu)^{N-m}',colors=[WHITE,YELLOW,HEAD]))
+        choose=self.f(r'\binom Nm=\frac{N!}{m!(N-m)!}',y=-1.6,size=29)
+        self.beat(FadeIn(choose,rate_func=lambda t:smooth(min(1,5*t))),pulse(grid[0]))
+        self.discard(grid,choose)
+        mu=ValueTracker(.25)
+        ax=self.ax(xr=(-.6,8.6,1),yr=(0,.38,.1),ylabel='確率',xlabel='m',height=2.9,center=(0,-.1,0))
+        origin=ax.c2p(0,0).copy(); ux=ax.c2p(1,0)-origin; uy=ax.c2p(0,1)-origin
+        ax.y_axis.shift(-.6*ux)
+        ax.c2p=lambda x,y=0:origin+x*ux+y*uy
+        self.add(tex('0',19,MUTED).next_to(ax.c2p(0,0),DOWN,buff=.15))
+        chart=always_redraw(lambda:VGroup(*[Polygon(ax.c2p(i-.35,0),ax.c2p(i-.35,p),ax.c2p(i+.35,p),ax.c2p(i+.35,0),
+            stroke_width=0,fill_color=HEAD,fill_opacity=.8) for i,p in enumerate(binomial(8,mu.get_value()))]))
+        self.add(chart,self.slider(mu))
+        self.beat(mu.animate.set_value(.7))
+        f=self.replace_formula(f,self.f(r'\mathbb E[m]=N\mu,\qquad\operatorname{var}[m]=N\mu(1-\mu)',size=30))
+        meanline=always_redraw(lambda:DashedLine(ax.c2p(8*mu.get_value(),0),ax.c2p(8*mu.get_value(),.35),color=YELLOW))
+        self.add(meanline)
+        self.beat(mu.animate.set_value(.5))
+        self.beat(pulse(ax.x_axis),mu.animate.set_value(.625))
 
-        mapping = VGroup(
-            MathTex(r"x=1", font_size=42, color=SUCCESS_GREEN),
-            Text("成功 / yes / on", font_size=25),
-            MathTex(r"x=0", font_size=42, color=FAIL_RED),
-            Text("失敗 / no / off", font_size=25),
-        ).arrange(RIGHT, buff=0.35)
-        mapping.to_edge(DOWN).shift(UP * 0.75)
+    def prior(self):
+        ax=self.ax(yr=(0,4,1),ylabel='尤度')
+        g=curve(ax,lambda u:u**3,YELLOW)
+        note=jp('３回とも表：最尤推定は１',25,YELLOW).move_to([0,2.15,0])
+        tip=Dot(ax.c2p(1,1),color=YELLOW)
+        self.add(note,g,tip)
+        self.beat(pulse(g),pulse(tip))
+        self.discard(g,note,tip)
+        ax.labels[1].become(jp('確率密度',20,MUTED).move_to(ax.labels[1]))
+        # Fixed axes compare densities at their true height; every density has area 1.
+        a,b=ValueTracker(1),ValueTracker(1)
+        g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,a.get_value(),b.get_value()),PRIOR_COLOR,
+            lo=.005 if min(a.get_value(),b.get_value())<1 else 0,hi=.995 if min(a.get_value(),b.get_value())<1 else 1))
+        fill=always_redraw(lambda:area(ax,lambda u:beta_pdf(u,a.get_value(),b.get_value()),color=PRIOR_COLOR))
+        counters=VGroup(readout('a=',a.get_value,[-1.8,2.15,0],HEAD,1),readout('b=',b.get_value,[1.8,2.15,0],TAIL,1))
+        self.add(fill,g,counters)
+        self.beat(pulse(counters))
+        self.beat(a.animate.set_value(3),b.animate.set_value(2))
+        mean=always_redraw(lambda:DashedLine(ax.c2p(beta_mean(a.get_value(),b.get_value()),0),ax.c2p(beta_mean(a.get_value(),b.get_value()),3.5),color=YELLOW))
+        self.add(mean)
+        self.beat(a.animate.set_value(9),b.animate.set_value(6))
+        f=self.f(r'\operatorname{Beta}(\mu\mid a,b)=',r'\frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}',r'\mu^{a-1}(1-\mu)^{b-1}',size=29,colors=[WHITE,PRIOR_COLOR,WHITE])
+        sweep=ValueTracker(.1)
+        strip=always_redraw(lambda:area(ax,lambda u:beta_pdf(u,a.get_value(),b.get_value()),.1,sweep.get_value(),YELLOW))
+        self.add(f,strip)
+        self.beat(sweep.animate.set_value(.9),pulse(f[1]))
+        self.discard(strip,f,mean,fill)
+        f=self.f(r'\mathbb E[\mu]=\frac a{a+b},\qquad\operatorname{var}[\mu]=\frac{ab}{(a+b)^2(a+b+1)}',size=30)
+        self.add(f)
+        tailnote=jp('両端で密度は発散（端のごく近くは省略）',20,MUTED).move_to([0,.6,0])
+        arrows=VGroup(*[Arrow(ax.c2p(x,2.9),ax.c2p(x,3.9),color=PRIOR_COLOR,buff=0) for x in [.005,.995]])
+        def show_u():
+            return AnimationGroup(a.animate.set_value(.7),b.animate.set_value(.7),rate_func=lambda t:smooth(min(1,3*t)))
+        def label_u():
+            self.add(tailnote,arrows)
+            return pulse(g)
+        def restore_prior():
+            self.discard(tailnote,arrows)
+            return AnimationGroup(a.animate.set_value(3),b.animate.set_value(2))
+        self.beat(phases=[('moments',self.sentence_duration(0),lambda:pulse(f)),
+            ('u-transition',1.,show_u),
+            ('u-shaped',self.sentence_duration(1)-1.,label_u),
+            ('chosen-prior',self.sentence_duration(2),restore_prior)])
 
-        self.play(FadeIn(title, shift=DOWN * 0.15), FadeIn(subtitle, shift=DOWN * 0.15))
-        self.play(LaggedStart(*[FadeIn(card, shift=UP * 0.2) for card in examples], lag_ratio=0.18), run_time=1.7)
-        self.play(FadeIn(mapping, shift=UP * 0.2))
-        self.wait(1.2)
-        self.play(Indicate(mapping[0], color=SUCCESS_GREEN), Indicate(mapping[2], color=FAIL_RED))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(title, subtitle, examples, mapping)))
+    def update(self):
+        ax=self.ax(yr=(0,2.6,.5),height=3)
+        mult=ValueTracker(0);norm=ValueTracker(1)
+        fn=lambda u:beta_pdf(u,3,2)*((1-mult.get_value())+mult.get_value()*u)*norm.get_value()
+        g=always_redraw(lambda:curve(ax,fn,POST))
+        base=curve(ax,lambda u:beta_pdf(u,3,2),PRIOR_COLOR).set_stroke(opacity=.35)
+        xs=[.2,.4,.6,.8]
+        stems=always_redraw(lambda:VGroup(*[Line(ax.c2p(u,0),ax.c2p(u,fn(u)),color=POST) for u in xs]))
+        note=jp('事前分布 → 表を１回観測',24).move_to([0,2.15,0])
+        self.add(g,base,stems,note)
+        self.beat(LaggedStart(*[pulse(stem) for stem in stems],lag_ratio=.2))
+        weights=VGroup(*[tex(str(u),23,HEAD).move_to(ax.c2p(u,beta_pdf(u,3,2)) + UP*.35) for u in xs])
+        f=self.f(r'p(\mu\mid x=1)\propto',r'p(\mu)',r'\mu',colors=[WHITE,PRIOR_COLOR,HEAD])
+        self.add(f,weights)
+        self.beat(mult.animate.set_value(1))
+        self.discard(weights)
+        integral=readout(r'\int q(\mu)\,d\mu=',lambda:.6*norm.get_value(),[2.8,2.15,0],YELLOW,2)
+        self.discard(note);self.add(integral,jp('面積を１へ戻す',24).move_to([-2.5,2.15,0]))
+        self.beat(norm.animate.set_value(1/.6),start_sentence=1)
+        self.discard(f)
+        f=self.f(r'\mu^{a-1}(1-\mu)^{b-1}\times',r'\mu',r'=\mu^{(a+1)-1}(1-\mu)^{b-1}',size=29,colors=[PRIOR_COLOR,HEAD,POST])
+        self.add(f)
+        self.beat(pulse(f[1]),pulse(f[2]))
+        self.discard(g,stems,integral)
+        b=ValueTracker(2)
+        g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,4,b.get_value()),POST))
+        self.add(g)
+        self.discard(f)
+        f=self.f(r'x=0:\quad\operatorname{Beta}(\mu\mid4,2)\ \longrightarrow\ \operatorname{Beta}(\mu\mid4,3)',size=29)
+        self.add(f)
+        self.beat(b.animate.set_value(3))
+        self.discard(f)
+        f=self.f(r'\operatorname{Beta}(\mu\mid a,b)\ \longrightarrow\ ',r'\operatorname{Beta}(\mu\mid a+m,b+l)',size=30,colors=[PRIOR_COLOR,POST])
+        counts=VGroup(readout('a+m=',lambda:4,[-2,-1.95,0],HEAD,0),readout('b+l=',lambda:3,[2,-1.95,0],TAIL,0))
+        self.add(f,counts)
+        self.beat(pulse(counts),pulse(g))
 
-    def binary_card(self, title: str, yes: str, no: str) -> VGroup:
-        box = RoundedRectangle(width=3.15, height=1.7, corner_radius=0.08, color=GREY_B, fill_color="#1f1f1f", fill_opacity=1)
-        head = Text(title, font_size=24, color=WHITE).move_to(box.get_top() + DOWN * 0.38)
-        yes_dot = Dot(color=SUCCESS_GREEN, radius=0.08)
-        no_dot = Dot(color=FAIL_RED, radius=0.08)
-        yes_text = Text(yes, font_size=24)
-        no_text = Text(no, font_size=24)
-        row = VGroup(
-            VGroup(yes_dot, yes_text).arrange(RIGHT, buff=0.12),
-            VGroup(no_dot, no_text).arrange(RIGHT, buff=0.12),
-        ).arrange(RIGHT, buff=0.32)
-        row.move_to(box.get_center() + DOWN * 0.22)
-        return VGroup(box, head, row)
+    def sequence(self):
+        ax=self.ax(yr=(0,3.4,1),height=2.7,center=(0,-.25,0))
+        a,b=ValueTracker(3),ValueTracker(2)
+        g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,a.get_value(),b.get_value()),POST))
+        cs=coins(OBS,2.1,r=.19).set_opacity(.2)
+        counters=VGroup(readout('a=',a.get_value,[-2,-1.95,0],HEAD,1),readout('b=',b.get_value,[2,-1.95,0],TAIL,1))
+        f=self.f(r'x=1:\ a\leftarrow a+1\qquad x=0:\ b\leftarrow b+1',size=29)
+        self.add(g,cs,counters,f)
+        self.beat(pulse(counters))
+        def step(i, aa, bb):
+            return lambda:AnimationGroup(a.animate.set_value(aa),b.animate.set_value(bb),cs[i].animate.set_opacity(1),lag_ratio=0)
+        aa,bb=3,2
+        for indices in [range(3),range(3,8)]:
+            phases=[];duration=sum(c['end']-c['start'] for c in self.beat_cues())
+            for i in indices:
+                aa+=int(OBS[i]);bb+=1-int(OBS[i]);phases.append((f'observe-{i+1}',duration/len(indices),step(i,aa,bb)))
+            self.beat(phases=phases)
+        self.discard(f)
+        f=self.f(r'(3,2)+(5,3)=(8,5)',colors=[POST],size=34)
+        batch=curve(ax,lambda u:beta_pdf(u,8,5),PRIOR_COLOR)
+        self.add(f)
+        self.beat(Create(batch),pulse(counters))
+        self.discard(batch)
+        self.beat(Transform(cs,coins(OBS[::-1],2.1,r=.19),rate_func=lambda t:smooth(min(1,4*t))),pulse(g))
+        self.beat(cs.animate.scale(.2).move_to([0,-1.95,0]).set_opacity(0),pulse(counters))
 
-    def bernoulli_distribution(self) -> None:
-        narration = self.start_narration("scene02")
-        title = self.scene_title("Bernoulli 分布")
-        label = self.section_label("PRML 2.1")
-        formula = MathTex(r"p(x \mid \mu)=\mu^x(1-\mu)^{1-x}", font_size=44)
-        formula.next_to(title, DOWN, buff=0.35)
+    def predict(self):
+        ax=self.ax(yr=(0,3.2,1),height=3)
+        fn=lambda u:beta_pdf(u,8,5)
+        g=curve(ax,fn,POST)
+        u=ValueTracker(.15)
+        stem=always_redraw(lambda:Line(ax.c2p(u.get_value(),0),ax.c2p(u.get_value(),fn(u.get_value())),color=YELLOW))
+        self.add(g,stem)
+        self.beat(u.animate.set_value(.85))
+        self.discard(stem)
+        stop=ValueTracker(.002)
+        weighted=curve(ax,lambda u:u*fn(u),YELLOW)
+        fill=always_redraw(lambda:area(ax,lambda u:u*fn(u),0,stop.get_value(),YELLOW))
+        label=jp('オレンジ：事後密度　黄色：候補の確率 × 密度',22).move_to([0,2.15,0])
+        self.add(weighted,fill,label)
+        self.beat(stop.animate.set_value(1))
+        f=self.f(r'p(x=1\mid\mathcal D)=\int_0^1\mu p(\mu\mid\mathcal D)\,d\mu=\frac{a+m}{a+b+N}',size=29)
+        answer=tex(r'\frac{8}{13}\approx0.615',36,YELLOW).move_to([-2,1.1,0])
+        self.add(f)
+        self.beat(FadeIn(answer,rate_func=lambda t:smooth(min(1,5*t))),pulse(fill))
+        self.discard(ax,ax.labels,g,fill,weighted,label,answer,f)
+        line=NumberLine(x_range=[.595,.63,.005],length=8,include_numbers=True,font_size=18,decimal_number_config={'num_decimal_places':3}).move_to([0,.4,0])
+        p=ValueTracker(.6)
+        marker=always_redraw(lambda:Dot(line.n2p(p.get_value()),color=POST))
+        labels=VGroup(jp('事前の平均 0.600',23,PRIOR_COLOR).move_to([-3,-.4,0]),jp('観測の割合 0.625',23,HEAD).move_to([3,-.4,0]))
+        f=self.f(r'\frac{a+b}{a+b+N}\frac{a}{a+b}+\frac{N}{a+b+N}\frac{m}{N}',size=32)
+        self.add(line,marker,labels,f)
+        self.beat(p.animate.set_value(8/13))
+        self.discard(line,marker,labels,f)
+        cs=coins([1,1,1],.8,.45)
+        f=self.f(r'a=b=1:\quad p(x=1\mid1,1,1)=\frac{1+3}{1+1+3}=\frac45',size=33)
+        self.add(cs,f)
+        self.beat(FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))),LaggedStart(*[pulse(c,HEAD) for c in cs],lag_ratio=.2))
+        self.discard(cs,f)
+        n=ValueTracker(8)
+        line=NumberLine(x_range=[.60,.626,.005],length=8,include_numbers=True,font_size=18,decimal_number_config={'num_decimal_places':3}).move_to([0,.4,0])
+        pred=lambda:(3+5*n.get_value()/8)/(5+n.get_value())
+        marker=always_redraw(lambda:Dot(line.n2p(pred()),color=POST))
+        f=self.f(r'\frac{3+5N/8}{5+N}\ \longrightarrow\ \frac58\quad(N\to\infty)',size=33)
+        self.add(line,marker,f,readout('N=',n.get_value,[0,1.6,0],WHITE,0))
+        self.beat(n.animate.set_value(80))
 
-        bars = self.bernoulli_bars(0.7).move_to(LEFT * 3.25 + DOWN * 0.35)
-        slider, knob, mu_label = self.mu_slider(0.7)
-        slider.move_to(RIGHT * 2.7 + DOWN * 1.75)
-        knob.move_to(slider[0].point_from_proportion(0.7))
-        mu_label.next_to(slider, UP, buff=0.32)
-
-        case_one = VGroup(MathTex(r"x=1", font_size=36, color=SUCCESS_GREEN), MathTex(r"p(x=1\mid\mu)=\mu", font_size=36))
-        case_zero = VGroup(MathTex(r"x=0", font_size=36, color=FAIL_RED), MathTex(r"p(x=0\mid\mu)=1-\mu", font_size=36))
-        for case in (case_one, case_zero):
-            case.arrange(RIGHT, buff=0.35)
-        cases = VGroup(case_one, case_zero).arrange(DOWN, buff=0.35).move_to(RIGHT * 2.7 + DOWN * 0.25)
-
-        self.play(FadeIn(label), FadeIn(title), Write(formula))
-        self.play(FadeIn(bars), FadeIn(slider), FadeIn(knob), FadeIn(mu_label), FadeIn(cases))
-        for mu in [0.25, 0.5, 0.85, 0.7]:
-            new_bars = self.bernoulli_bars(mu).move_to(bars)
-            new_knob = knob.copy().move_to(slider[0].point_from_proportion(mu))
-            new_label = Text(f"mu = {mu:.2f}", font_size=24, color=MODEL_YELLOW).next_to(slider, UP, buff=0.32)
-            self.play(Transform(bars, new_bars), Transform(knob, new_knob), Transform(mu_label, new_label), run_time=0.9)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, formula, bars, slider, knob, mu_label, cases)))
-
-    def bernoulli_bars(self, mu: float) -> VGroup:
-        chart = VGroup()
-        baseline = Line(LEFT * 1.35, RIGHT * 1.35, color=GREY_B, stroke_width=2)
-        chart.add(baseline)
-        for index, (value, prob, color) in enumerate([(0, 1.0 - mu, FAIL_RED), (1, mu, SUCCESS_GREEN)]):
-            x = -0.65 + index * 1.3
-            height = 2.4 * prob
-            bar = Rectangle(width=0.62, height=max(height, 0.04), color=color, fill_color=color, fill_opacity=0.85)
-            bar.move_to(np.array([x, height / 2, 0.0]))
-            value_label = MathTex(str(value), font_size=30).next_to(np.array([x, 0.0, 0.0]), DOWN, buff=0.22)
-            prob_label = Text(f"{prob:.2f}", font_size=24, color=color).next_to(bar, UP, buff=0.12)
-            chart.add(bar, value_label, prob_label)
-        axis_label = Text("x", font_size=24, color=TEXT_GREY).next_to(baseline, RIGHT, buff=0.12)
-        chart.add(axis_label)
-        return chart
-
-    def mu_slider(self, mu: float) -> tuple[VGroup, Dot, Text]:
-        line = Line(LEFT * 1.7, RIGHT * 1.7, color=GREY_B, stroke_width=4)
-        ticks = VGroup()
-        for p in [0.0, 0.5, 1.0]:
-            point = line.point_from_proportion(p)
-            ticks.add(Line(point + DOWN * 0.09, point + UP * 0.09, color=GREY_B, stroke_width=3))
-        labels = VGroup(MathTex("0", font_size=22), MathTex("0.5", font_size=22), MathTex("1", font_size=22))
-        for label, p in zip(labels, [0.0, 0.5, 1.0]):
-            label.next_to(line.point_from_proportion(p), DOWN, buff=0.16)
-        slider = VGroup(line, ticks, labels)
-        knob = Dot(line.point_from_proportion(mu), color=MODEL_YELLOW, radius=0.1)
-        mu_label = Text(f"mu = {mu:.2f}", font_size=24, color=MODEL_YELLOW).next_to(slider, UP, buff=0.32)
-        return slider, knob, mu_label
-
-    def maximum_likelihood(self) -> None:
-        narration = self.start_narration("scene03")
-        title = self.scene_title("データから mu を推定する")
-        label = self.section_label("Maximum likelihood")
-        observations = self.observation_tokens(self.observations).next_to(title, DOWN, buff=0.6)
-        counts = Text("N = 10,  m = 7", font_size=30, color=WHITE).next_to(observations, DOWN, buff=0.35)
-
-        axes = self.make_mu_axes(width=6.8, height=3.0, y_max=1.05)
-        axes.move_to(DOWN * 1.15)
-        x_label = MathTex(r"\mu", font_size=28).next_to(axes.x_axis, RIGHT, buff=0.12)
-        y_label = Text("normalized likelihood", font_size=20, color=TEXT_GREY).next_to(axes.y_axis, UP, buff=0.12)
-        curve = self.likelihood_curve(axes, 7, 3)
-        peak = Dot(axes.c2p(0.7, 1.0), color=MODEL_YELLOW, radius=0.08)
-        peak_line = DashedLine(axes.c2p(0.7, 0.0), axes.c2p(0.7, 1.0), color=MODEL_YELLOW, stroke_width=3)
-        mle = MathTex(r"\mu_{\mathrm{ML}}=\frac{m}{N}=\frac{7}{10}=0.7", font_size=38, color=MODEL_YELLOW)
-        mle.to_edge(DOWN).shift(UP * 0.18)
-
-        likelihood_formula = MathTex(r"p(\mathcal{D}\mid\mu)=\mu^m(1-\mu)^{N-m}", font_size=38)
-        likelihood_formula.next_to(counts, DOWN, buff=0.28)
-
-        self.play(FadeIn(label), FadeIn(title))
-        self.play(LaggedStart(*[FadeIn(token, shift=UP * 0.15) for token in observations], lag_ratio=0.08), run_time=1.6)
-        self.play(FadeIn(counts), Write(likelihood_formula))
-        self.play(Create(axes), FadeIn(x_label), FadeIn(y_label), Create(curve), run_time=1.7)
-        self.play(Create(peak_line), FadeIn(peak), Write(mle))
-        self.play(Indicate(peak, color=MODEL_YELLOW), run_time=1.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, observations, counts, likelihood_formula, axes, x_label, y_label, curve, peak, peak_line, mle)))
-
-    def small_data_instability(self) -> None:
-        narration = self.start_narration("scene04")
-        title = self.scene_title("データが少ないときの最尤推定")
-        label = self.section_label("Why prior matters")
-
-        few_tokens = self.observation_tokens([1, 1, 1], radius=0.23)
-        few_tokens.move_to(LEFT * 3.1 + UP * 0.8)
-        few_text = VGroup(
-            Text("3 回中 3 回が 1", font_size=28),
-            MathTex(r"\mu_{\mathrm{ML}}=1.0", font_size=36, color=MODEL_YELLOW),
-        ).arrange(DOWN, buff=0.25).next_to(few_tokens, DOWN, buff=0.4)
-
-        many_tokens = self.observation_tokens([1, 0, 1, 1, 0, 1, 1, 0, 1, 1], radius=0.16)
-        many_tokens.move_to(RIGHT * 3.1 + UP * 0.8)
-        many_text = VGroup(
-            Text("10 回中 7 回が 1", font_size=28),
-            MathTex(r"\mu_{\mathrm{ML}}=0.7", font_size=36, color=MODEL_YELLOW),
-        ).arrange(DOWN, buff=0.25).next_to(many_tokens, DOWN, buff=0.4)
-
-        beta_title = Text("mu 自体の不確かさを分布で表す", font_size=28, color=WHITE).to_edge(DOWN).shift(UP * 1.35)
-        beta_formula = MathTex(r"\mathrm{Beta}(\mu\mid a,b)", font_size=42, color=PRIOR_PURPLE).next_to(beta_title, DOWN, buff=0.24)
-
-        self.play(FadeIn(label), FadeIn(title))
-        self.play(FadeIn(few_tokens), FadeIn(few_text), run_time=1.1)
-        self.play(FadeIn(many_tokens), FadeIn(many_text), run_time=1.1)
-        self.play(Indicate(few_text[1], color=MODEL_YELLOW))
-        self.play(FadeIn(beta_title, shift=UP * 0.15), Write(beta_formula))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, few_tokens, few_text, many_tokens, many_text, beta_title, beta_formula)))
-
-    def beta_prior_to_posterior(self) -> None:
-        narration = self.start_narration("scene05")
-        title = self.scene_title("Beta 分布は Bernoulli の共役事前分布")
-        label = self.section_label("Prior to posterior")
-
-        axes = self.make_mu_axes(width=6.8, height=3.4, y_max=5.2)
-        axes.move_to(LEFT * 2.6 + DOWN * 0.55)
-        x_label = MathTex(r"\mu", font_size=28).next_to(axes.x_axis, RIGHT, buff=0.12)
-        y_label = Text("density", font_size=20, color=TEXT_GREY).next_to(axes.y_axis, UP, buff=0.12)
-
-        prior = self.beta_curve(axes, 2, 2, PRIOR_PURPLE)
-        posterior = self.beta_curve(axes, 9, 5, POST_ORANGE)
-        prior_label = Text("prior: Beta(2, 2)", font_size=24, color=PRIOR_PURPLE).next_to(axes, UP, buff=0.12).shift(LEFT * 0.8)
-        posterior_label = Text("posterior: Beta(9, 5)", font_size=24, color=POST_ORANGE).next_to(prior_label, RIGHT, buff=0.35)
-
-        update_formula = VGroup(
-            MathTex(r"p(\mu)=\mathrm{Beta}(\mu\mid a,b)", font_size=33, color=PRIOR_PURPLE),
-            MathTex(r"m=\sum_n x_n,\quad l=N-m", font_size=33),
-            MathTex(r"p(\mu\mid\mathcal{D})=\mathrm{Beta}(\mu\mid a+m,b+l)", font_size=33, color=POST_ORANGE),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.35)
-        update_formula.move_to(RIGHT * 3.0 + DOWN * 0.25)
-
-        counts = VGroup(
-            Text("a = 2", font_size=27, color=PRIOR_PURPLE),
-            Text("b = 2", font_size=27, color=PRIOR_PURPLE),
-            Text("m = 7", font_size=27, color=SUCCESS_GREEN),
-            Text("l = 3", font_size=27, color=FAIL_RED),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
-        counts.next_to(update_formula, DOWN, buff=0.45).align_to(update_formula, LEFT)
-
-        self.play(FadeIn(label), FadeIn(title), Create(axes), FadeIn(x_label), FadeIn(y_label))
-        self.play(Create(prior), FadeIn(prior_label), FadeIn(counts[0]), FadeIn(counts[1]))
-        self.play(FadeIn(counts[2]), FadeIn(counts[3]), Write(update_formula), run_time=2.0)
-        self.play(TransformFromCopy(prior, posterior), FadeIn(posterior_label), run_time=1.6)
-        self.play(Indicate(update_formula[2], color=POST_ORANGE), run_time=1.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, x_label, y_label, prior, posterior, prior_label, posterior_label, update_formula, counts)))
-
-    def sequential_update(self) -> None:
-        narration = self.start_narration("scene06")
-        title = self.scene_title("データを 1 個ずつ見ても更新できる")
-        label = self.section_label("Sequential Bayesian update")
-
-        axes = self.make_mu_axes(width=7.0, height=3.6, y_max=5.6)
-        axes.move_to(DOWN * 0.55)
-        x_label = MathTex(r"\mu", font_size=28).next_to(axes.x_axis, RIGHT, buff=0.12)
-        y_label = Text("posterior density", font_size=20, color=TEXT_GREY).next_to(axes.y_axis, UP, buff=0.12)
-        curve = self.beta_curve(axes, 2, 2, PRIOR_PURPLE)
-
-        tokens = self.observation_tokens(self.observations, radius=0.17)
-        tokens.next_to(title, DOWN, buff=0.5)
-        counter = Text("a = 2, b = 2", font_size=30, color=WHITE).next_to(tokens, DOWN, buff=0.28)
-        rule = MathTex(r"x=1:\ a\leftarrow a+1,\qquad x=0:\ b\leftarrow b+1", font_size=34)
-        rule.to_edge(DOWN).shift(UP * 0.18)
-
-        self.play(FadeIn(label), FadeIn(title), FadeIn(tokens), FadeIn(counter), Create(axes), FadeIn(x_label), FadeIn(y_label), Create(curve), Write(rule))
-        a = 2
-        b = 2
-        current_curve = curve
-        for index, value in enumerate(self.observations[:7]):
-            if value:
-                a += 1
-            else:
-                b += 1
-            new_curve = self.beta_curve(axes, a, b, POST_ORANGE if index >= 5 else MODEL_YELLOW)
-            new_counter = Text(f"a = {a}, b = {b}", font_size=30, color=WHITE).move_to(counter)
-            self.play(
-                tokens[index].animate.scale(1.18).set_stroke(WHITE, width=3),
-                Transform(current_curve, new_curve),
-                Transform(counter, new_counter),
-                run_time=0.65,
-            )
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, x_label, y_label, current_curve, tokens, counter, rule)))
-
-    def predictive_distribution(self) -> None:
-        narration = self.start_narration("scene07")
-        title = self.scene_title("次の 1 回を予測する")
-        label = self.section_label("Predictive distribution")
-
-        formula = MathTex(
-            r"p(x=1\mid\mathcal{D})=\mathbb{E}[\mu]=\frac{m+a}{N+a+b}",
-            font_size=43,
-            color=POST_ORANGE,
-        )
-        formula.next_to(title, DOWN, buff=0.55)
-
-        observations = self.observation_tokens(self.observations)
-        observations.next_to(formula, DOWN, buff=0.55)
-        calc = MathTex(r"\frac{7+2}{10+2+2}=\frac{9}{14}\approx 0.64", font_size=42, color=MODEL_YELLOW)
-        calc.next_to(observations, DOWN, buff=0.45)
-
-        comparison = VGroup(
-            VGroup(Text("最尤推定", font_size=27, color=TEXT_GREY), MathTex(r"7/10=0.70", font_size=36, color=MODEL_YELLOW)).arrange(DOWN, buff=0.2),
-            VGroup(Text("ベイズ予測", font_size=27, color=TEXT_GREY), MathTex(r"9/14\approx0.64", font_size=36, color=POST_ORANGE)).arrange(DOWN, buff=0.2),
-        ).arrange(RIGHT, buff=0.9)
-        comparison.to_edge(DOWN).shift(UP * 0.45)
-
-        bridge = VGroup(
-            Text("Binary", font_size=28, color=SUCCESS_GREEN),
-            MathTex(r"x\in\{0,1\}", font_size=30),
-            Arrow(LEFT, RIGHT, color=TEXT_GREY),
-            Text("Multinomial", font_size=28, color=BLUE_DATA),
-            MathTex(r"x\in\{1,\ldots,K\}", font_size=30),
-        ).arrange(RIGHT, buff=0.25)
-        bridge.move_to(DOWN * 0.7)
-
-        self.play(FadeIn(label), FadeIn(title), Write(formula))
-        self.play(FadeIn(observations), Write(calc))
-        self.play(FadeIn(comparison, shift=UP * 0.2))
-        self.wait(0.7)
-        self.play(FadeOut(observations), FadeOut(calc), FadeOut(comparison), FadeIn(bridge, shift=UP * 0.2))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, formula, bridge)))
+    def uncertainty(self):
+        ax=self.ax(yr=(0,10,2),height=3)
+        b=ValueTracker(1)
+        g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,9,b.get_value()),POST))
+        old=curve(ax,lambda u:beta_pdf(u,9,1),PRIOR_COLOR).set_stroke(opacity=.35)
+        v=readout(r'\operatorname{var}[\mu]=',lambda:beta_var(9,b.get_value()),[1.8,2.15,0],POST,5)
+        self.add(g,old,v)
+        self.beat(b.animate.set_value(2),start_sentence=1)
+        h=curve(ax,lambda u:beta_pdf(u,10,1),HEAD)
+        label=jp('緑：表の後　オレンジ：裏の後　紫：観測前',22).move_to([0,-2.05,0])
+        self.add(label)
+        self.beat(Create(h))
+        self.discard(ax,ax.labels,g,old,h,v,label)
+        r=variance_decomposition(9,1)
+        # Heights share the same linear variance scale.
+        def bar(x,val,color):
+            return Rectangle(width=1.3,height=val*240,fill_color=color,fill_opacity=.8,stroke_width=0).move_to([x,-1+val*120,0])
+        bars=VGroup(bar(-3,r['variances'][1],HEAD),bar(0,r['variances'][0],TAIL),bar(3,r['prior'],PRIOR_COLOR))
+        labels=VGroup(jp('表の後（確率0.9）',20,HEAD).move_to([-3,-1.4,0]),jp('裏の後（確率0.1）',20,TAIL).move_to([0,-1.4,0]),jp('観測前',22,PRIOR_COLOR).move_to([3,-1.4,0]))
+        nums=VGroup(*[tex(f'{val:.5f}',25,c).next_to(m,UP,buff=.15) for m,val,c in zip(bars,[r['variances'][1],r['variances'][0],r['prior']],[HEAD,TAIL,PRIOR_COLOR])])
+        self.add(bars,labels,nums)
+        f=self.f(r'0.9\times0.00689+0.1\times0.01240\approx0.00744<0.00818',size=27)
+        self.beat(FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))),LaggedStart(pulse(bars[0]),pulse(bars[1]),lag_ratio=.5))
+        self.discard(nums,f,labels,bars)
+        whole=bar(-2,r['prior'],PRIOR_COLOR)
+        remaining=bar(2,r['remaining'],POST)
+        moved=bar(2,r['moved'],YELLOW).next_to(remaining,UP,buff=0)
+        labels=VGroup(jp('観測前の分散',24,PRIOR_COLOR).move_to([-2,-1.4,0]),jp('残る分散の平均 ＋ 平均の移動の分散',23).move_to([1.5,1.7,0]))
+        f=self.f(r'\operatorname{var}[\mu]=',r'\mathbb E_{\mathcal D}[\operatorname{var}[\mu\mid\mathcal D]]',r'+\operatorname{var}_{\mathcal D}[\mathbb E[\mu\mid\mathcal D]]',size=27,colors=[PRIOR_COLOR,POST,YELLOW])
+        self.add(whole,labels,f)
+        self.beat(TransformFromCopy(whole,remaining),FadeIn(moved))
+        self.discard(whole,remaining,moved,labels,f)
+        line=NumberLine(x_range=[.8,.92,.02],length=8,include_numbers=True,font_size=20,decimal_number_config={'num_decimal_places':2}).move_to([0,0,0])
+        dots=VGroup(Dot(line.n2p(9/11),radius=.08,color=TAIL),Dot(line.n2p(10/11),radius=.18,color=HEAD))
+        f=self.f(r'\mathbb E_{\mathcal D}[\mathbb E[\mu\mid\mathcal D]]=\mathbb E[\mu]=0.9',size=32)
+        self.add(line,dots,f)
+        self.beat(*[d.animate.move_to(line.n2p(.9)) for d in dots])
+        self.discard(line,dots,f)
+        chain=VGroup(*[VGroup(jp(title,25,col),tex(formula,32,col)).arrange(DOWN,buff=.4) for title,formula,col in [
+            ('観測',r'0,1,1,\ldots',HEAD),('尤度',r'\mu^m(1-\mu)^l',YELLOW),('事後',r'\operatorname{Beta}(a+m,b+l)',POST),('予測',r'\frac{a+m}{a+b+N}',TAIL)]]).arrange(RIGHT,buff=.6).move_to([0,.2,0])
+        if chain.width>12.4: chain.scale_to_fit_width(12.4)
+        self.beat(LaggedStart(*[FadeIn(c,shift=RIGHT*.15) for c in chain],lag_ratio=.3))
