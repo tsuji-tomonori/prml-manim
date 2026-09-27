@@ -1,370 +1,364 @@
-from __future__ import annotations
-
-import math
-import wave
+"""PRML 2.3 — linked numerical experiments in Manim Community."""
+import json
 from pathlib import Path
-
 import numpy as np
 from manim import *
+from scene_support import NarratedScene, jp, tex
+from narration_content import SCENES
+from make_voicevox_narration import MANIFEST
+from gaussian_model import *
+
+BG='#10141F'
+BLUE=ManimColor('#58B5ED'); GREEN=ManimColor('#77D49A')
+YELLOW=ManimColor('#FFE079'); RED=ManimColor('#FF6B77')
+PURPLE=ManimColor('#C29AFF'); MUTED=ManimColor('#A8B2C5')
 
 
-BLUE_DATA = BLUE_C
-GREEN_CURVE = GREEN_C
-RED_MODEL = RED_C
-ORANGE_ALT = ORANGE
-YELLOW_NOTE = YELLOW_C
-PURPLE_BAYES = PURPLE_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def line(points,color=BLUE,width=3):
+    return VMobject().set_points_as_corners(points).set_stroke(color,width)
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def coords(ax,xy):
+    xy=np.asarray(xy); o=ax.c2p(0,0)
+    return o+xy[:,0,None]*(ax.c2p(1,0)-o)+xy[:,1,None]*(ax.c2p(0,1)-o)
 
 
-def normal_pdf(x: np.ndarray | float, mu: float = 0.0, sigma: float = 1.0) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    return np.exp(-0.5 * ((x_array - mu) / sigma) ** 2) / (sigma * np.sqrt(2 * np.pi))
+def curve(ax,fn,lo=None,hi=None,color=GREEN):
+    u=np.linspace(ax.x_range[0] if lo is None else lo,ax.x_range[1] if hi is None else hi,241)
+    return line(coords(ax,np.c_[u,fn(u)]),color)
 
 
-def student_t_shape(x: np.ndarray | float, nu: float = 2.0) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    coefficient = math.gamma((nu + 1) / 2) / (np.sqrt(nu * np.pi) * math.gamma(nu / 2))
-    return coefficient * (1 + x_array**2 / nu) ** (-(nu + 1) / 2)
+def outline(ax,cov,radius=1,color=GREEN):
+    return line(coords(ax,ellipse(cov,radius)),color)
 
 
-class PRML23GaussianDistribution(Scene):
-    """PRML 2.3 overview for a high-school math audience.
+def readout(label,getter,pos,color=WHITE,places=2,size=25):
+    num=DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
+    g=VGroup(tex(label,size,color),num).arrange(RIGHT,buff=.12).move_to(pos)
+    anchor=num.get_left().copy()
+    num.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return g
 
-    Render example:
-        uv run manim -pql prml_2_3_gaussian_distribution.py PRML23GaussianDistribution
-    """
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.gaussian_shape()
-        self.central_limit_theorem()
-        self.multivariate_geometry()
-        self.covariance_restrictions()
-        self.conditional_and_marginal()
-        self.maximum_likelihood()
-        self.bayesian_mean()
-        self.robust_and_mixture_bridge()
+class PRML23GaussianDistribution(NarratedScene):
+    def construct(self):
+        self.camera.background_color=BG
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        self.timeline=[]
+        for i,method in enumerate([self.shape,self.clt,self.geometry,self.restrictions,self.conditioning,
+                                   self.linear_bayes,self.estimation,self.bayesian,self.robust,self.periodic,self.mixtures]):
+            self.begin(i)
+            if not self.audio_entry:
+                raise RuntimeError('Generate matching narration before rendering')
+            self.top=None; self.bottom=None
+            method()
+            assert self.beat_index==len(SCENES[i]['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        Path(config.media_dir,'prml23_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+    def equation(self,s,bottom=False,size=29):
+        m=tex(s,size).move_to([0,-2.55 if bottom else 2.55,0])
+        if m.width>12.6: raise ValueError(f'Equation too wide: {s}')
+        attr='bottom' if bottom else 'top'; old=getattr(self,attr)
+        setattr(self,attr,m)
+        return ReplacementTransform(old,m) if old is not None else FadeIn(m)
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def note(self,s,pos=(0,-2.5,0),color=MUTED,size=23):
+        return jp(s,size,color).move_to(pos)
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def ax(self,x=(-4,4,2),y=(0,.65,.2),pos=(0,.1,0),w=9,h=3.3,xlabel='x',ylabel='p(x)'):
+        ax=Axes(x_range=x,y_range=y,x_length=w,y_length=h,tips=False,
+                axis_config={'color':MUTED,'stroke_width':1.2,'include_ticks':False}).move_to(pos)
+        labs=VGroup()
+        for v in np.arange(x[0],x[1]+1e-6,x[2]):
+            labs.add(tex(f'{v:g}',17,MUTED).move_to(ax.c2p(v,y[0])+DOWN*.22))
+        for v in np.arange(y[0],y[1]+1e-6,y[2]):
+            if abs(v)>1e-8: labs.add(tex(f'{v:g}',17,MUTED).next_to(ax.c2p(x[0],v),LEFT,buff=.1))
+        labs.add(tex(xlabel,22).next_to(ax.c2p(x[1],y[0]),RIGHT,buff=.2))
+        labs.add(tex(ylabel,22).next_to(ax.c2p(x[0],y[1]),UP,buff=.12))
+        self.add(ax,labs); ax.labels=labs
+        return ax
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def slider(self,t,lo,hi,pos,label,color=YELLOW,width=3):
+        axis=NumberLine(x_range=[lo,hi],length=width,include_ticks=False,color=MUTED).move_to(pos)
+        knob=Dot(axis.n2p(t.get_value()),radius=.07,color=color)
+        knob.add_updater(lambda m:m.move_to(axis.n2p(t.get_value())))
+        labelmob=tex(label,24,color).next_to(axis,LEFT,buff=.18)
+        value=readout('',t.get_value,axis.get_right()+RIGHT*.5,color,size=21)
+        return VGroup(axis,knob,labelmob,value)
 
-    def density_axes(self, width: float = 7.0, height: float = 3.5, y_max: float = 0.55) -> Axes:
-        return Axes(
-            x_range=[-4, 4, 1],
-            y_range=[0, y_max, 0.1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
+    def cloud(self,ax,getter,base=BASE_POINTS,color=BLUE):
+        dots=VGroup(*[Dot(radius=.026,color=color) for _ in base])
+        def update(m):
+            for dot,p in zip(m,coords(ax,getter())): dot.move_to(p)
+        dots.add_updater(update); update(dots)
+        return dots
 
-    def plane_axes(self, width: float = 4.3, height: float = 3.6) -> Axes:
-        return Axes(
-            x_range=[-3, 3, 1],
-            y_range=[-2.5, 2.5, 1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def make_histogram(self, axes: Axes, samples: np.ndarray, bins: np.ndarray, color: ManimColor) -> VGroup:
-        counts, edges = np.histogram(samples, bins=bins, density=True)
-        bars = VGroup()
-        for count, left, right in zip(counts, edges[:-1], edges[1:]):
-            width = axes.c2p(float(right), 0)[0] - axes.c2p(float(left), 0)[0]
-            height = axes.c2p(0, float(count))[1] - axes.c2p(0, 0)[1]
-            rect = Rectangle(width=width * 0.92, height=max(height, 0.001), stroke_width=0)
-            rect.set_fill(color, opacity=0.72)
-            rect.move_to(axes.c2p(float((left + right) / 2), 0) + UP * height / 2)
-            bars.add(rect)
+    def histogram(self,ax,data,bins,color=BLUE):
+        counts,edges=np.histogram(data,bins=bins,density=True)
+        bars=VGroup()
+        for h,l,r in zip(counts,edges[:-1],edges[1:]):
+            pts=coords(ax,[[l,0],[l,h],[r,h],[r,0],[l,0]])
+            bars.add(Polygon(*pts,stroke_width=.3,stroke_color=BG,fill_color=color,fill_opacity=.6))
         return bars
 
-    def gaussian_shape(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 2.3 / Eq. (2.42)")
-        title = self.scene_title("ガウス分布: 中心と広がりで連続値を表す", font_size=32)
-        axes = self.density_axes(width=7.2, height=3.4).shift(DOWN * 0.1)
-        curve_mu0 = axes.plot(lambda x: normal_pdf(x, 0.0, 0.8), x_range=[-4, 4], color=GREEN_CURVE)
-        curve_mu1 = axes.plot(lambda x: normal_pdf(x, 1.0, 0.8), x_range=[-4, 4], color=GREEN_CURVE)
-        curve_wide = axes.plot(lambda x: normal_pdf(x, 1.0, 1.35), x_range=[-4, 4], color=ORANGE_ALT)
-        for curve in [curve_mu0, curve_mu1, curve_wide]:
-            curve.set_stroke(width=4)
+    def shape(self):
+        ax=self.ax(x=(-5,5,2),y=(0,.65,.2),w=9,h=3.1,pos=(0,.05,0))
+        mu=ValueTracker(0); sd=ValueTracker(.75)
+        graph=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),sd.get_value())))
+        points=np.random.default_rng(2301).normal(0,.75,60)
+        dots=VGroup(*[Dot(ax.c2p(x,.015+(i%3)*.017),radius=.035,color=BLUE) for i,x in enumerate(points)])
+        self.add(dots)
+        self.beat(Create(graph),self.equation(r'\mathcal N(x\mid\mu,\sigma^2)'))
+        self.add(self.slider(mu,-1.5,1.5,(-2.7,-2.25,0),r'\mu',YELLOW,2.5),self.slider(sd,.55,1.4,(2.5,-2.25,0),r'\sigma',PURPLE,2.5))
+        marker=always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),normal(mu.get_value(),mu.get_value(),sd.get_value())),color=YELLOW))
+        self.add(marker)
+        self.beat(mu.animate.set_value(1.2),FadeOut(dots))
+        self.beat(sd.animate.set_value(1.35))
+        edge=ValueTracker(-.2)
+        def area():
+            x=np.linspace(-.5,edge.get_value(),81)
+            p=coords(ax,np.r_[np.c_[x,normal(x,mu.get_value(),sd.get_value())],[[edge.get_value(),0],[-.5,0]]])
+            return Polygon(*p,stroke_width=0,fill_color=BLUE,fill_opacity=.4)
+        shade=always_redraw(area); self.add(shade)
+        self.beat(edge.animate.set_value(2.5),self.equation(r'P(a<x<b)=\int_a^b p(x)\,dx'))
+        self.remove(shade)
+        z=ValueTracker(.2)
+        pair=always_redraw(lambda:VGroup(*[Dot(ax.c2p(mu.get_value()+sg*z.get_value()*sd.get_value(),normal(mu.get_value()+sg*z.get_value()*sd.get_value(),mu.get_value(),sd.get_value())),color=YELLOW,radius=.06) for sg in [-1,1]]))
+        self.add(pair)
+        formula=MathTex(r'\mathcal N(x\mid',r'\mu',r',',r'\sigma^2',r')=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]',font_size=29).move_to([0,2.55,0])
+        formula[1].set_color(YELLOW); formula[3].set_color(PURPLE)
+        self.beat(z.animate.set_value(1.7),ReplacementTransform(self.top,formula));self.top=formula
+        self.beat(mu.animate.set_value(0),sd.animate.set_value(.8))
 
-        formula = MathTex(
-            r"\mathcal{N}(x|\mu,\sigma^2)=\frac{1}{(2\pi\sigma^2)^{1/2}}"
-            r"\exp\left\{-\frac{(x-\mu)^2}{2\sigma^2}\right\}",
-            font_size=33,
-        ).to_edge(DOWN, buff=0.45)
-        mu_note = MathTex(r"\mu:\ center", font_size=31, color=GREEN_CURVE).next_to(axes, RIGHT, buff=0.35).shift(UP * 0.7)
-        sigma_note = MathTex(r"\sigma^2:\ spread", font_size=31, color=ORANGE_ALT).next_to(mu_note, DOWN, buff=0.25)
-        center_line = DashedLine(axes.c2p(0, 0), axes.c2p(0, 0.52), color=GREEN_CURVE, dash_length=0.1)
-        center_line2 = DashedLine(axes.c2p(1, 0), axes.c2p(1, 0.52), color=GREEN_CURVE, dash_length=0.1)
+    def clt(self):
+        ax=self.ax(x=(0,1,.25),y=(0,4.6,1),xlabel=r'\bar x',h=3.2)
+        bars=self.histogram(ax,CLT_MEANS[1],np.linspace(0,1,31))
+        self.beat(FadeIn(bars),self.equation(r'\bar x=(x_1+\cdots+x_N)/N\qquad N=1'))
+        self.beat(Transform(bars,self.histogram(ax,CLT_MEANS[2],np.linspace(0,1,31))),self.equation(r'N=2\qquad \mathbb E[\bar x]=1/2'))
+        gauss=curve(ax,lambda x:normal(x,.5,np.sqrt(1/120)),color=YELLOW)
+        self.beat(Transform(bars,self.histogram(ax,CLT_MEANS[10],np.linspace(0,1,31))),Create(gauss),self.equation(r'N=10\qquad \mathrm{var}[\bar x]=1/(12N)'))
+        self.remove(ax,ax.labels,bars,gauss)
+        ax=self.ax(x=(-4,4,2),y=(0,.48,.2),xlabel='z',h=3.2)
+        std=lambda n:(CLT_MEANS[n]-.5)/np.sqrt(1/(12*n))
+        bars=self.histogram(ax,std(10),np.linspace(-4,4,41))
+        self.beat(FadeIn(bars),self.equation(r'z=\frac{\bar x-1/2}{\sqrt{1/(12N)}}'))
+        gauss=curve(ax,normal,color=YELLOW)
+        self.beat(Transform(bars,self.histogram(ax,std(32),np.linspace(-4,4,41))),Create(gauss),self.equation(r'N=32\qquad z\ \longrightarrow\ \mathcal N(0,1)'))
+        self.beat(Indicate(gauss,color=YELLOW),FadeIn(self.note('独立・同分布・有限の分散')))
 
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(Create(curve_mu0), FadeIn(center_line), Write(formula))
-        self.play(Transform(curve_mu0, curve_mu1), Transform(center_line, center_line2), FadeIn(mu_note), run_time=1.4)
-        self.play(Transform(curve_mu0, curve_wide), FadeIn(sigma_note), run_time=1.4)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(curve_mu0), FadeOut(center_line), FadeOut(formula), FadeOut(mu_note), FadeOut(sigma_note))
+    def geometry(self):
+        ax=self.ax(x=(-4.6,4.6,2),y=(-3.2,3.2,2),w=5.52,h=3.84,xlabel='x_1',ylabel='x_2',pos=(-1.9,0,0))
+        s1=ValueTracker(1);s2=ValueTracker(1);angle=ValueTracker(0)
+        mat=lambda:rotation(angle.get_value())@np.diag([s1.get_value(),s2.get_value()])
+        dots=self.cloud(ax,lambda:BASE_POINTS@mat().T)
+        rings=always_redraw(lambda:VGroup(*[outline(ax,mat()@mat().T,r) for r in [1,2]]))
+        self.beat(FadeIn(dots),Create(rings),self.equation(r'\mu=0\qquad \Sigma=I'))
+        self.add(self.slider(s1,.65,1.6,(3.5,1.2,0),r'\sqrt{\lambda_1}',GREEN,1.5),self.slider(s2,.65,1.6,(3.5,.3,0),r'\sqrt{\lambda_2}',PURPLE,1.5))
+        self.beat(s1.animate.set_value(1.6),s2.animate.set_value(.65),self.equation(r'\Sigma=R\,\mathrm{diag}(\lambda_1,\lambda_2)R^T'))
+        self.beat(angle.animate.set_value(.6))
+        axes=always_redraw(lambda:VGroup(*[Arrow(ax.c2p(0,0),ax.c2p(*mat()[:,i]),buff=0,color=c,stroke_width=4) for i,c in enumerate([GREEN,PURPLE])]))
+        self.beat(Create(axes),self.equation(r'\Sigma u_i=\lambda_i u_i\qquad p(x)/p(\mu)=e^{-1/2}',bottom=True,size=27))
+        t=ValueTracker(0)
+        dot=always_redraw(lambda:Dot(ax.c2p(*(mat()@np.array([np.cos(t.get_value()),np.sin(t.get_value())]))),color=YELLOW,radius=.08))
+        self.add(dot)
+        self.beat(t.animate.set_value(2*np.pi),self.equation(r'\Delta^2=(x-\mu)^T\Sigma^{-1}(x-\mu)=\sum_i y_i^2/\lambda_i',bottom=True,size=26))
+        self.beat(angle.animate.set_value(0),s1.animate.set_value(1),s2.animate.set_value(1),self.equation(r'\mathcal N(x\mid\mu,\Sigma)=\frac{e^{-\Delta^2/2}}{(2\pi)^{D/2}|\Sigma|^{1/2}}',size=29),self.equation(r'z_i=y_i/\sqrt{\lambda_i}\quad\Rightarrow\quad\Delta^2=\sum_i z_i^2',bottom=True))
 
-    def central_limit_theorem(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("PRML 2.3 / Fig. 2.6")
-        title = self.scene_title("平均を取るほど、ベル型へ近づく", font_size=34)
-        axes = Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[0, 4.2, 1],
-            x_length=7.0,
-            y_length=3.55,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(DOWN * 0.1)
-        rng = np.random.default_rng(23)
-        bins = np.linspace(0, 1, 21)
-        samples = {
-            1: rng.uniform(0, 1, size=(9000, 1)).mean(axis=1),
-            2: rng.uniform(0, 1, size=(9000, 2)).mean(axis=1),
-            10: rng.uniform(0, 1, size=(9000, 10)).mean(axis=1),
-        }
-        bars = {n: self.make_histogram(axes, values, bins, BLUE_DATA) for n, values in samples.items()}
-        gaussian_curve = axes.plot(lambda x: normal_pdf(x, 0.5, math.sqrt(1 / 120)), x_range=[0.08, 0.92], color=GREEN_CURVE)
-        gaussian_curve.set_stroke(width=4)
-        n_text = MathTex(r"N=1", font_size=38, color=YELLOW_NOTE).next_to(axes, RIGHT, buff=0.35).shift(UP * 0.75)
-        equation = MathTex(r"\bar{x}=\frac{x_1+\cdots+x_N}{N}", font_size=38).to_edge(DOWN, buff=0.55)
-        note = Text("小さな偶然の平均", font_size=25, color=TEXT_GREY).next_to(equation, UP, buff=0.15)
+    def restrictions(self):
+        ax=self.ax(x=(-4,4,2),y=(-3,3,1),pos=(-2.2,0,0),w=5.2,h=3.9,xlabel='x_1',ylabel='x_2')
+        off=ValueTracker(.85); diag=ValueTracker(1.8)
+        cov=lambda:np.array([[diag.get_value(),off.get_value()],[off.get_value(),.8]])
+        points=BASE_POINTS@np.linalg.cholesky(cov()).T
+        dots=self.cloud(ax,lambda:points)
+        rings=always_redraw(lambda:VGroup(*[outline(ax,cov(),r) for r in [1,1.8]]))
+        self.add(dots,rings)
+        matrix=Matrix([[r'\sigma_1^2',r'\sigma_{12}'],[r'\sigma_{12}',r'\sigma_2^2']],element_to_mobject=lambda s:tex(s,28)).move_to([3.2,.6,0])
+        matrix.get_entries()[1].set_color(YELLOW);matrix.get_entries()[2].set_color(YELLOW)
+        self.beat(FadeIn(matrix),self.equation(r'\Sigma=\mathbb E[(x-\mu)(x-\mu)^T]'))
+        self.beat(off.animate.set_value(0),self.equation(r'\Sigma=\mathrm{diag}(\sigma_1^2,\ldots,\sigma_D^2)'))
+        self.beat(diag.animate.set_value(.8),self.equation(r'\Sigma=\sigma^2I'))
+        self.remove(matrix)
+        counts=VGroup(jp('一般形',23,GREEN),tex(r'D(D+3)/2',28,GREEN),jp('対角形',23,BLUE),tex('2D',28,BLUE),jp('等方形',23,PURPLE),tex('D+1',28,PURPLE)).arrange(DOWN,buff=.16).move_to([3.4,0,0])
+        self.beat(FadeIn(counts),self.equation(r'D+\frac{D(D+1)}2=\frac{D(D+3)}2'))
+        replacement=VGroup(jp('一般形',23,GREEN),tex('5150',28,GREEN),jp('対角形',23,BLUE),tex('200',28,BLUE),jp('等方形',23,PURPLE),tex('101',28,PURPLE)).arrange(DOWN,buff=.16).move_to(counts)
+        self.beat(Transform(counts,replacement),self.equation(r'D=100'))
+        self.beat(off.animate.set_value(.85),diag.animate.set_value(1.8),FadeIn(self.note('相関を表す自由さと、必要なパラメータ数')))
 
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(bars[1]), Write(n_text), Write(equation))
-        self.play(Write(note))
-        for n in [2, 10]:
-            next_text = MathTex(f"N={n}", font_size=38, color=YELLOW_NOTE).move_to(n_text)
-            self.play(Transform(bars[1], bars[n]), Transform(n_text, next_text), run_time=1.2)
-        self.play(Create(gaussian_curve), run_time=0.9)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(bars[1]), FadeOut(n_text), FadeOut(equation), FadeOut(note), FadeOut(gaussian_curve))
+    def conditioning(self):
+        ax=self.ax(x=(-3,3,1),y=(-2.5,2.5,1),pos=(-3.2,.1,0),w=4.4,h=3.5,xlabel='x_a',ylabel='x_b')
+        dens=self.ax(x=(-3,3,2),y=(0,.55,.2),pos=(3.1,.1,0),w=4.4,h=3.5,xlabel='x_a',ylabel='p')
+        rings=VGroup(*[outline(ax,COV,r) for r in [.7,1.4,2]])
+        self.beat(Create(rings),self.equation(r'\Sigma=\begin{pmatrix}1.4&0.85\\0.85&1\end{pmatrix}'))
+        b=ValueTracker(-1)
+        cut=always_redraw(lambda:Line(ax.c2p(-3,b.get_value()),ax.c2p(3,b.get_value()),color=YELLOW))
+        conditional_curve=always_redraw(lambda:curve(dens,lambda x:normal(x,*self.cond_sd(b.get_value())),color=YELLOW))
+        self.add(cut)
+        self.beat(Create(conditional_curve),self.equation(r'p(x_a\mid x_b)=\frac{p(x_a,x_b)}{p(x_b)}'))
+        self.add(readout('x_b=',b.get_value,(-3,-2.2,0),YELLOW))
+        self.beat(b.animate.set_value(1.2))
+        self.beat(b.animate.set_value(-.5),self.equation(r'\mu_{a|b}=\mu_a+\Sigma_{ab}\Sigma_{bb}^{-1}(x_b-\mu_b)',size=27),self.equation(r'\Sigma_{a|b}=\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}=0.6775',bottom=True,size=27))
+        sweep=ValueTracker(-2.4)
+        scan=always_redraw(lambda:Line(ax.c2p(-3,sweep.get_value()),ax.c2p(3,sweep.get_value()),color=BLUE,stroke_opacity=.5))
+        self.add(scan)
+        # Integrate joint density from -infinity to the moving scan height.
+        from scipy.special import ndtr
+        partial=always_redraw(lambda:curve(dens,lambda x:normal(x,0,np.sqrt(1.4))*ndtr((sweep.get_value()-.85/1.4*x)/np.sqrt(1-.85**2/1.4)),color=BLUE))
+        self.beat(sweep.animate.set_value(2.4),Create(partial),self.equation(r'p(x_a)=\int p(x_a,x_b)\,dx_b'))
+        self.remove(scan,partial)
+        marginal=curve(dens,lambda x:normal(x,0,np.sqrt(1.4)),color=BLUE)
+        self.add(marginal)
+        self.beat(b.animate.set_value(1),self.equation(r'p(x_a)=\mathcal N(x_a\mid\mu_a,\Sigma_{aa})',bottom=True),FadeIn(self.note('周辺',pos=(4.5,1.5,0),color=BLUE,size=21)),FadeIn(self.note('条件付き',pos=(4.5,1.9,0),color=YELLOW,size=21)))
 
-    def multivariate_geometry(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("PRML 2.3 / Fig. 2.7 / Eq. (2.44)-(2.52)")
-        title = self.scene_title("多変量ガウス: 共分散が楕円の向きと幅を決める", font_size=31)
-        axes = self.plane_axes(width=5.0, height=3.9).shift(LEFT * 2.1 + DOWN * 0.15)
-        rng = np.random.default_rng(8)
-        cov = np.array([[1.45, 0.85], [0.85, 0.8]])
-        points = rng.multivariate_normal([0.15, -0.05], cov, size=120)
-        dots = VGroup(*[Dot(axes.c2p(float(x), float(y)), radius=0.025, color=BLUE_DATA) for x, y in points])
-        ellipse = Ellipse(width=3.2, height=1.25, color=GREEN_CURVE, stroke_width=4).rotate(0.58).move_to(axes.c2p(0.15, -0.05))
-        center = Dot(axes.c2p(0.15, -0.05), radius=0.07, color=YELLOW_NOTE)
-        u1 = Arrow(axes.c2p(0.15, -0.05), axes.c2p(1.45, 0.78), buff=0, color=GREEN_CURVE)
-        u2 = Arrow(axes.c2p(0.15, -0.05), axes.c2p(-0.38, 0.92), buff=0, color=ORANGE_ALT)
-        u1_label = MathTex(r"u_1,\lambda_1", font_size=28, color=GREEN_CURVE).next_to(u1.get_end(), RIGHT, buff=0.1)
-        u2_label = MathTex(r"u_2,\lambda_2", font_size=28, color=ORANGE_ALT).next_to(u2.get_end(), UP, buff=0.1)
-        formula = MathTex(r"\Delta^2=(x-\mu)^T\Sigma^{-1}(x-\mu)", font_size=36, color=WHITE)
-        formula.to_edge(DOWN, buff=0.5)
-        matrix = MathTex(
-            r"\mu=\begin{bmatrix}\mu_1\\\mu_2\end{bmatrix}",
-            r"\quad",
-            r"\Sigma=\begin{bmatrix}\sigma_1^2&\sigma_{12}\\\sigma_{21}&\sigma_2^2\end{bmatrix}",
-            font_size=34,
-        ).next_to(axes, RIGHT, buff=0.45).shift(UP * 0.65)
-        note = Text("同じ密度 = 楕円上", font_size=27, color=GREEN_CURVE).next_to(matrix, DOWN, buff=0.35)
+    def cond_sd(self,b):
+        m,v=conditional(COV,b);return m,np.sqrt(v)
 
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(FadeIn(dots, lag_ratio=0.01), FadeIn(center), run_time=1.0)
-        self.play(Create(ellipse), Write(matrix), Write(note))
-        self.play(GrowArrow(u1), GrowArrow(u2), FadeIn(u1_label), FadeIn(u2_label))
-        self.play(Write(formula))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(ellipse), FadeOut(center), FadeOut(u1), FadeOut(u2), FadeOut(u1_label), FadeOut(u2_label), FadeOut(matrix), FadeOut(note), FadeOut(formula))
+    def linear_bayes(self):
+        ax=self.ax(x=(-3.2,3.2,1),y=(-5.2,5.2,2),pos=(-3,.1,0),w=4.4,h=3.4,xlabel='x',ylabel='y')
+        a=ValueTracker(.6);noise=ValueTracker(.9);obs=ValueTracker(1.3)
+        base=BASE_POINTS
+        dots=self.cloud(ax,lambda:np.c_[base[:,0],a.get_value()*base[:,0]+noise.get_value()*base[:,1]],base=base)
+        straight=always_redraw(lambda:curve(ax,lambda x:a.get_value()*x,color=GREEN))
+        self.beat(FadeIn(dots),Create(straight),self.equation(r'x\sim\mathcal N(0,1),\quad y=ax+\epsilon,\quad\epsilon\sim\mathcal N(0,s^2)'))
+        self.add(self.slider(a,.6,1.4,(3,1.2,0),'a',GREEN,2),self.slider(noise,.35,.9,(3,.3,0),'s',PURPLE,2))
+        self.beat(a.animate.set_value(1.4),self.equation(r'\mathbb E[y]=0,\qquad\mathrm{var}[y]=a^2+s^2',bottom=True))
+        cut=always_redraw(lambda:Line(ax.c2p(-2.6,obs.get_value()),ax.c2p(2.6,obs.get_value()),color=YELLOW))
+        self.beat(Create(cut),self.equation(r'y=1.3\quad\Longrightarrow\quad p(x\mid y)'))
+        # The sliders move below the shared posterior plot.
+        for mob in list(self.mobjects):
+            if isinstance(mob,VGroup) and len(mob)==4: self.remove(mob)
+        den=self.ax(x=(-2.5,2.5,1),y=(0,1.75,.5),pos=(3.2,.1,0),w=4.1,h=3.1,xlabel='x',ylabel='p')
+        prior=curve(den,normal,color=BLUE)
+        post=always_redraw(lambda:curve(den,lambda x:normal(x,linear_posterior(a.get_value(),noise.get_value(),obs.get_value())[0],np.sqrt(linear_posterior(a.get_value(),noise.get_value(),obs.get_value())[1])),color=YELLOW))
+        self.beat(Create(prior),Create(post),self.equation(r'p(x\mid y)\propto p(y\mid x)p(x)'))
+        self.beat(noise.animate.set_value(.35),self.equation(r'\mathrm{var}[x\mid y]^{-1}=1+a^2/s^2',bottom=True))
+        self.beat(obs.animate.set_value(-.5),self.equation(r'S=(\Lambda+A^TLA)^{-1},\quad m=S\{A^TL(y-b)+\Lambda\mu\}',bottom=True,size=25),self.equation(r'p(x)=\mathcal N(\mu,\Lambda^{-1}),\quad p(y\mid x)=\mathcal N(Ax+b,L^{-1})',size=25))
 
-    def covariance_restrictions(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("PRML 2.3 / Fig. 2.8")
-        title = self.scene_title("共分散行列を制限すると、表現力と計算量が変わる", font_size=31)
-        panels = VGroup()
-        configs = [
-            ("general", r"D(D+3)/2", 0.55, 3.0, 1.25, GREEN_CURVE),
-            ("diagonal", r"2D", 0.0, 2.35, 1.15, ORANGE_ALT),
-            ("isotropic", r"D+1", 0.0, 1.65, 1.65, BLUE_DATA),
-        ]
-        for name, params, angle, width, height, color in configs:
-            box = RoundedRectangle(width=3.45, height=3.35, corner_radius=0.1, color=color)
-            head = Text(name, font_size=27, color=color).move_to(box.get_top() + DOWN * 0.35)
-            ellipse = Ellipse(width=width, height=height, color=color, stroke_width=4).rotate(angle).move_to(box.get_center() + DOWN * 0.1)
-            par = MathTex(params, font_size=31, color=YELLOW_NOTE).move_to(box.get_bottom() + UP * 0.35)
-            panels.add(VGroup(box, head, ellipse, par))
-        panels.arrange(RIGHT, buff=0.35).shift(DOWN * 0.05)
-        captions = Text("相関を表せるほど、必要なパラメータも増える", font_size=28, color=YELLOW_NOTE)
-        captions.to_edge(DOWN, buff=0.55)
-        limitation = Text("単峰: 山は一つだけ", font_size=25, color=RED_MODEL).next_to(captions, UP, buff=0.2)
+    def estimation(self):
+        ax=self.ax(x=(-3,3,1),y=(0,.65,.2),w=8.8,h=3.1)
+        mu=ValueTracker(-1);sd=ValueTracker(1.2)
+        g=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),sd.get_value())))
+        dots=VGroup(*[Dot(ax.c2p(x,.025+(i%2)*.025),radius=.045,color=BLUE) for i,x in enumerate(DATA)])
+        self.add(dots,g)
+        self.beat(mu.animate.set_value(-.6),self.equation(r'\log p(X\mid\mu,\sigma^2)=-\frac N2\log(2\pi\sigma^2)-\frac{\sum_n(x_n-\mu)^2}{2\sigma^2}',size=27))
+        residuals=always_redraw(lambda:VGroup(*[Line(ax.c2p(x,.09+.02*i),ax.c2p(mu.get_value(),.09+.02*i),color=YELLOW,stroke_width=1.4) for i,x in enumerate(DATA)]))
+        self.add(residuals)
+        self.beat(mu.animate.set_value(DATA.mean()),self.equation(r'\mu_{ML}=\frac1N\sum_n x_n',bottom=True))
+        self.beat(sd.animate.set_value(DATA.std()),self.equation(r'\Sigma_{ML}=\frac1N\sum_n(x_n-\mu_{ML})(x_n-\mu_{ML})^T',bottom=True,size=27))
+        self.remove(g,residuals,dots,ax,ax.labels)
+        bx=self.ax(x=(0,6000,2000),y=(0,1.2,.3),xlabel='M',ylabel=r'\overline{\hat\sigma^2}',w=8.8,h=3.1)
+        count=ValueTracker(20)
+        means=np.cumsum(BIAS)/np.arange(1,len(BIAS)+1)
+        progress=always_redraw(lambda:line(coords(bx,np.c_[np.arange(1,int(count.get_value())+1),means[:int(count.get_value())]]),BLUE,2))
+        true=Line(bx.c2p(0,1),bx.c2p(6000,1),color=MUTED)
+        expect=DashedLine(bx.c2p(0,.75),bx.c2p(6000,.75),color=YELLOW)
+        self.add(progress,true,expect)
+        self.beat(count.animate.set_value(6000),self.equation(r'N=4\qquad \mathbb E[\hat\sigma^2_{ML}]=\frac{N-1}{N}\sigma^2'),self.equation(r'\sigma^2=1\qquad M=6000',bottom=True))
+        corrected=line(coords(bx,np.c_[np.arange(1,6001),means*4/3]),GREEN,2)
+        progress.clear_updaters()
+        self.beat(Transform(progress,corrected),self.equation(r'\hat\sigma^2=\frac1{N-1}\sum_n(x_n-\bar x)^2',bottom=True))
+        # Do not let the running-estimate updater overwrite the corrected curve.
+        progress.clear_updaters();self.remove(progress,corrected,true,expect,bx,bx.labels)
+        numberline=NumberLine(x_range=[-2,2,1],length=9,include_numbers=True,font_size=22).move_to([0,0,0]);self.add(numberline)
+        old=DATA[:4].mean();new=DATA[:5].mean();marker=Dot(numberline.n2p(old),color=YELLOW,radius=.09)
+        incoming=Dot(numberline.n2p(DATA[4]),color=BLUE,radius=.09)
+        self.add(marker,incoming,self.note('新しい観測',pos=numberline.n2p(DATA[4])+UP*.6,color=BLUE))
+        self.beat(marker.animate.move_to(numberline.n2p(new)),self.equation(r'\mu^{(N)}=\mu^{(N-1)}+\frac{x_N-\mu^{(N-1)}}N',bottom=True),self.equation(r'N=5'))
 
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(panels[0]), run_time=0.8)
-        self.play(FadeIn(panels[1]), run_time=0.8)
-        self.play(FadeIn(panels[2]), run_time=0.8)
-        self.play(Write(captions), Write(limitation))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(panels), FadeOut(captions), FadeOut(limitation))
+    def bayesian(self):
+        ax=self.ax(x=(-2,2.5,1),y=(0,2.3,.5),xlabel=r'\mu',ylabel=r'p(\mu\mid X)',h=3.2)
+        mean=ValueTracker(0);variance=ValueTracker(1)
+        post=always_redraw(lambda:curve(ax,lambda x:normal(x,mean.get_value(),np.sqrt(variance.get_value())),color=PURPLE))
+        prior=curve(ax,normal,color=MUTED).set_opacity(.45)
+        self.add(prior)
+        self.beat(Create(post),self.equation(r'p(\mu)=\mathcal N(\mu\mid0,1)\qquad N=0'))
+        m,v=posterior(1)
+        self.beat(mean.animate.set_value(m),variance.animate.set_value(v),self.equation(r'\sigma^2=0.36\quad\text{(known)}\qquad N=1'))
+        marks=VGroup(*[Dot(ax.c2p(x,.02+.035*(i%2)),color=BLUE,radius=.035) for i,x in enumerate(BAYES_DATA)])
+        m,v=posterior(10)
+        self.beat(mean.animate.set_value(m),variance.animate.set_value(v),FadeIn(marks),self.equation(r'N=10\qquad p(\mu\mid X)\propto p(X\mid\mu)p(\mu)'))
+        self.beat(Indicate(post,color=PURPLE),self.equation(r'\frac1{\sigma_N^2}=\frac1{\sigma_0^2}+\frac N{\sigma^2}',bottom=True),self.equation(r'\mu_N=\sigma_N^2\left(\frac{\mu_0}{\sigma_0^2}+\frac{\sum_n x_n}{\sigma^2}\right)'))
+        self.remove(ax,ax.labels,post,prior,marks)
+        ax=self.ax(x=(0,12,3),y=(0,.48,.2),xlabel=r'\lambda',ylabel=r'p(\lambda\mid X)',h=3.2)
+        gamma_prior=curve(ax,lambda x:gamma_posterior(x,0),color=MUTED)
+        gamma_post=curve(ax,lambda x:gamma_posterior(x,10),color=PURPLE)
+        self.add(gamma_prior)
+        self.beat(Transform(gamma_prior,gamma_post),self.equation(r'\lambda=1/\sigma^2,\quad p(\lambda\mid X)=\mathrm{Gam}(\lambda\mid a_N,b_N)',size=27),self.equation(r'a_N=a_0+N/2,\qquad b_N=b_0+\tfrac12\sum_n(x_n-\mu)^2',bottom=True,size=27))
+        self.beat(Indicate(gamma_prior,color=PURPLE),self.equation(r'p(\mu,\lambda)=\mathcal N(\mu\mid\mu_0,(\beta\lambda)^{-1})\,\mathrm{Gam}(\lambda\mid a,b)',size=27),self.equation(r'p(\mu,\Lambda)=\mathcal N(\mu\mid\mu_0,(\beta\Lambda)^{-1})\,\mathcal W(\Lambda\mid W,\nu)',bottom=True,size=27))
 
-    def conditional_and_marginal(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("PRML 2.3.1-2.3.3")
-        title = self.scene_title("条件付けても、周辺化しても、ガウスのまま", font_size=32)
-        axes = self.plane_axes(width=4.5, height=3.75).shift(LEFT * 2.3 + DOWN * 0.05)
-        ellipse = Ellipse(width=3.3, height=1.25, color=GREEN_CURVE, stroke_width=4).rotate(0.52).move_to(axes.c2p(0.0, 0.0))
-        slice_line = DashedLine(axes.c2p(0.9, -2.1), axes.c2p(0.9, 2.1), color=YELLOW_NOTE, dash_length=0.1)
-        slice_label = MathTex(r"x_b=fixed", font_size=28, color=YELLOW_NOTE).next_to(slice_line, UP, buff=0.1)
-        cond_axes = Axes(
-            x_range=[-2.5, 2.5, 1],
-            y_range=[0, 0.6, 0.2],
-            x_length=3.7,
-            y_length=1.55,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(RIGHT * 2.7 + UP * 0.75)
-        cond_curve = cond_axes.plot(lambda x: normal_pdf(x, 0.65, 0.65), x_range=[-2.5, 2.5], color=YELLOW_NOTE)
-        marginal_axes = cond_axes.copy().shift(DOWN * 2.15)
-        marginal_curve = marginal_axes.plot(lambda x: normal_pdf(x, 0.0, 1.1), x_range=[-2.5, 2.5], color=BLUE_DATA)
-        cond_title = MathTex(r"p(x_a|x_b)=Gaussian", font_size=30, color=YELLOW_NOTE).next_to(cond_axes, UP, buff=0.13)
-        marg_title = MathTex(r"p(x_a)=\int p(x_a,x_b)\,dx_b", font_size=30, color=BLUE_DATA).next_to(marginal_axes, UP, buff=0.13)
-        note = Text("平均は固定した値に合わせて動く", font_size=26, color=TEXT_GREY).to_edge(DOWN, buff=0.55)
+    def robust(self):
+        ax=self.ax(x=(-3,8,2),y=(0,.9,.3),w=9,h=3.2)
+        outlier=ValueTracker(0)
+        dots=VGroup(*[Dot(ax.c2p(x,.02+.035*(i%2)),color=BLUE,radius=.035) for i,x in enumerate(ROBUST_DATA)])
+        od=always_redraw(lambda:Dot(ax.c2p(outlier.get_value(),.04),color=RED,radius=.075))
+        gc=always_redraw(lambda:curve(ax,lambda x:normal(x,*fit_at(outlier.get_value())[:2]),color=GREEN))
+        self.add(dots,od,gc)
+        self.beat(outlier.animate.set_value(7),self.equation(r'\text{Gaussian: }\ -\log p(x)\sim(x-\mu)^2'))
+        tc=always_redraw(lambda:curve(ax,lambda x:student(x,*fit_at(outlier.get_value())[2:],3),color=PURPLE))
+        self.add(self.note('ガウス',pos=(3.5,1.55,0),color=GREEN),self.note('t 分布（自由度 3）',pos=(3.5,1.1,0),color=PURPLE))
+        self.beat(Create(tc),self.equation(r'\nu=3\quad\text{(fixed)}',bottom=True))
+        self.remove(dots,od,gc,tc)
+        for mob in list(self.mobjects):
+            if isinstance(mob,Text) and mob.get_center()[0]>2: self.remove(mob)
+        components=VGroup(*[curve(ax,lambda x,s=s:normal(x,0,s),color=MUTED).set_opacity(.38) for s in [.5,.8,1.3,2.2]])
+        tcurve=curve(ax,lambda x:student(x,0,1,3),color=PURPLE)
+        self.beat(Create(components),Create(tcurve),self.equation(r'p(x)=\int_0^\infty\mathcal N(x\mid\mu,\tau^{-1})\,\mathrm{Gam}(\tau\mid a,b)\,d\tau',size=25),self.equation(r'\nu=2a,\quad\lambda=a/b',bottom=True))
+        self.remove(components,tcurve)
+        nu=ValueTracker(3)
+        dynamic=always_redraw(lambda:curve(ax,lambda x:student(x,0,1,nu.get_value()),color=PURPLE));self.add(dynamic)
+        target=curve(ax,normal,color=GREEN).set_opacity(.5)
+        self.beat(nu.animate.set_value(40),Create(target),self.equation(r'\mathrm{St}(x\mid\mu,\lambda,\nu)=\frac{\Gamma((\nu+1)/2)}{\Gamma(\nu/2)}\sqrt{\frac\lambda{\pi\nu}}\left[1+\frac{\lambda(x-\mu)^2}{\nu}\right]^{-(\nu+1)/2}',size=25),self.equation(r'\nu\to\infty:\quad\mathcal N(\mu,\lambda^{-1})',bottom=True))
+        self.beat(nu.animate.set_value(3),self.equation(r'\mathrm{var}[x]=\frac\nu{\nu-2}\lambda^{-1}\quad(\nu>2)',bottom=True))
+        self.remove(dynamic,target);outlier.set_value(7);self.add(dots,od,gc,tc)
+        self.beat(outlier.animate.set_value(0),self.equation(r'\nu=3\qquad\text{Gaussian / Student }t',bottom=True))
 
-        self.play(FadeIn(label), Write(title), Create(axes), Create(ellipse))
-        self.play(Create(slice_line), FadeIn(slice_label))
-        self.play(Create(cond_axes), Create(cond_curve), Write(cond_title))
-        self.play(Create(marginal_axes), Create(marginal_curve), Write(marg_title), Write(note))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(ellipse), FadeOut(slice_line), FadeOut(slice_label), FadeOut(cond_axes), FadeOut(cond_curve), FadeOut(cond_title), FadeOut(marginal_axes), FadeOut(marginal_curve), FadeOut(marg_title), FadeOut(note))
+    def periodic(self):
+        center=np.array([-2.6,0.,0.]);radius=1.35
+        circle=Circle(radius=radius,color=MUTED).move_to(center)
+        pt=lambda a:center+radius*np.array([np.cos(a),np.sin(a),0])
+        d1=Dot(pt(np.deg2rad(5)),color=BLUE,radius=.075);d2=Dot(pt(np.deg2rad(355)),color=YELLOW,radius=.075)
+        wrong=Arrow(center,pt(np.pi),buff=0,color=RED)
+        self.add(circle,d1,d2)
+        eq=self.equation(r'(5^\circ+355^\circ)/2=180^\circ')
+        self.beat(GrowArrow(wrong),eq)
+        vectors=VGroup(Arrow(center,d1.get_center(),buff=0,color=BLUE),Arrow(center,d2.get_center(),buff=0,color=YELLOW))
+        good=Arrow(center,(d1.get_center()+d2.get_center())/2,buff=0,color=GREEN)
+        self.beat(FadeOut(wrong),GrowArrow(vectors[0]),GrowArrow(vectors[1]),GrowArrow(good),self.equation(r'\bar v=\frac1N\sum_n(\cos\theta_n,\sin\theta_n)'))
+        self.beat(Indicate(good,color=GREEN),self.equation(r'\bar\theta=\mathrm{atan2}\left(\sum_n\sin\theta_n,\sum_n\cos\theta_n\right)=0',bottom=True,size=27))
+        self.remove(vectors,good,d1,d2)
+        concentration=ValueTracker(0);direction=ValueTracker(0)
+        def polar():
+            t=np.linspace(0,2*np.pi,241);r=radius+.6*von_mises(t,direction.get_value(),concentration.get_value())
+            return line(center+np.c_[r*np.cos(t),r*np.sin(t),np.zeros(len(t))],PURPLE)
+        graph=always_redraw(polar)
+        self.add(self.note('円からの距離が密度',pos=(3,.8,0),size=24),self.slider(concentration,0,5,(3,-.2,0),'m',PURPLE,2.2))
+        self.beat(Create(graph),self.equation(r'p(\theta+2\pi)=p(\theta)'),self.equation(r'p(\theta\mid\theta_0,m)=\frac{e^{m\cos(\theta-\theta_0)}}{2\pi I_0(m)}',bottom=True))
+        self.beat(concentration.animate.set_value(5))
+        self.beat(direction.animate.set_value(2*np.pi),self.equation(r'0\leq\theta<2\pi\qquad\int_0^{2\pi}p(\theta)\,d\theta=1'))
 
-    def maximum_likelihood(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("PRML 2.3.4 / Eq. (2.118)-(2.124)")
-        title = self.scene_title("最尤推定: データに一番合う平均と共分散", font_size=32)
-        axes = self.density_axes(width=6.4, height=3.2, y_max=0.72).shift(LEFT * 1.35 + DOWN * 0.1)
-        rng = np.random.default_rng(11)
-        data = rng.normal(0.55, 0.75, size=16)
-        dots = VGroup(*[Dot(axes.c2p(float(x), 0.02), radius=0.055, color=BLUE_DATA) for x in data])
-        sample_mean = float(data.mean())
-        sample_std = float(data.std())
-        curve = axes.plot(lambda x: normal_pdf(x, sample_mean, sample_std), x_range=[-4, 4], color=GREEN_CURVE)
-        curve.set_stroke(width=4)
-        mean_line = DashedLine(axes.c2p(sample_mean, 0), axes.c2p(sample_mean, 0.68), color=YELLOW_NOTE, dash_length=0.09)
-        mu_formula = MathTex(r"\mu_{ML}=\frac{1}{N}\sum_{n=1}^{N}x_n", font_size=34, color=YELLOW_NOTE)
-        sigma_formula = MathTex(r"\Sigma_{ML}=\frac{1}{N}\sum_n(x_n-\mu_{ML})(x_n-\mu_{ML})^T", font_size=24, color=GREEN_CURVE)
-        formulas = VGroup(mu_formula, sigma_formula).arrange(DOWN, buff=0.28, aligned_edge=LEFT).next_to(axes, RIGHT, buff=0.35)
-        warning = Text("有限データでは共分散が小さめ", font_size=24, color=RED_MODEL).to_edge(DOWN, buff=0.55)
-
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(FadeIn(dots, lag_ratio=0.08), run_time=1.0)
-        self.play(Create(mean_line), Write(mu_formula))
-        self.play(Create(curve), Write(sigma_formula))
-        self.play(Write(warning))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(dots), FadeOut(curve), FadeOut(mean_line), FadeOut(formulas), FadeOut(warning))
-
-    def bayesian_mean(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("PRML 2.3.6 / Fig. 2.12")
-        title = self.scene_title("ベイズ推定: 平均そのものの不確かさを更新する", font_size=31)
-        axes = self.density_axes(width=7.0, height=3.35, y_max=2.5).shift(DOWN * 0.05)
-        posterior_specs = [
-            (0, 0.0, 0.85, BLUE_DATA),
-            (1, 0.38, 0.55, ORANGE_ALT),
-            (2, 0.55, 0.38, YELLOW_NOTE),
-            (10, 0.75, 0.18, GREEN_CURVE),
-        ]
-        curves = []
-        for _, mu, sigma, color in posterior_specs:
-            curve = axes.plot(lambda x, m=mu, s=sigma: normal_pdf(x, m, s), x_range=[-2.2, 2.2], color=color)
-            curve.set_stroke(width=4)
-            curves.append(curve)
-        current = curves[0]
-        n_text = MathTex(r"N=0", font_size=37, color=BLUE_DATA).next_to(axes, RIGHT, buff=0.35).shift(UP * 0.65)
-        formula = MathTex(r"p(\mu|X)\propto p(X|\mu)p(\mu)", font_size=38, color=PURPLE_BAYES).to_edge(DOWN, buff=0.55)
-        data_marks = VGroup(
-            *[Triangle(color=WHITE, fill_opacity=1).scale(0.08).rotate(PI).move_to(axes.c2p(x, 0.02)) for x in [0.4, 0.7, 0.85, 0.95]]
-        )
-        note = Text("事後分布が狭くなる = 推定の不確かさが減る", font_size=25, color=TEXT_GREY).next_to(formula, UP, buff=0.18)
-
-        self.play(FadeIn(label), Write(title), Create(axes), Create(current), Write(n_text), Write(formula))
-        self.play(FadeIn(data_marks, lag_ratio=0.18), Write(note), run_time=1.0)
-        for (n, _, _, color), curve in zip(posterior_specs[1:], curves[1:]):
-            next_text = MathTex(f"N={n}", font_size=37, color=color).move_to(n_text)
-            self.play(Transform(current, curve), Transform(n_text, next_text), run_time=1.05)
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(axes), FadeOut(current), FadeOut(n_text), FadeOut(formula), FadeOut(data_marks), FadeOut(note))
-
-    def robust_and_mixture_bridge(self) -> None:
-        narration = self.start_narration("scene08")
-        label = self.section_label("PRML 2.3.7 / 2.3.9")
-        title = self.scene_title("ガウスの限界から、t分布と混合ガウスへ", font_size=33)
-        left_axes = self.density_axes(width=4.6, height=2.7, y_max=0.55).shift(LEFT * 3.0 + UP * 0.15)
-        right_axes = self.density_axes(width=4.6, height=2.7, y_max=0.55).shift(RIGHT * 3.0 + UP * 0.15)
-        gaussian = left_axes.plot(lambda x: normal_pdf(x, 0, 1), x_range=[-4, 4], color=GREEN_CURVE)
-        t_curve = left_axes.plot(lambda x: student_t_shape(x, 2), x_range=[-4, 4], color=ORANGE_ALT)
-        mixture = right_axes.plot(
-            lambda x: 0.48 * normal_pdf(x, -1.25, 0.55) + 0.52 * normal_pdf(x, 1.15, 0.65),
-            x_range=[-4, 4],
-            color=PURPLE_BAYES,
-        )
-        for curve in [gaussian, t_curve, mixture]:
-            curve.set_stroke(width=4)
-        outliers = VGroup(*[Dot(left_axes.c2p(x, 0.03), radius=0.055, color=RED_MODEL) for x in [2.8, 3.2, 3.55]])
-        left_label = Text("外れ値には厚い裾", font_size=25, color=ORANGE_ALT).next_to(left_axes, DOWN, buff=0.18)
-        right_label = Text("複数の山には混合", font_size=25, color=PURPLE_BAYES).next_to(right_axes, DOWN, buff=0.18)
-        legend = VGroup(
-            MathTex(r"Gaussian", font_size=27, color=GREEN_CURVE),
-            MathTex(r"Student\ t", font_size=27, color=ORANGE_ALT),
-            MathTex(r"Mixture\ of\ Gaussians", font_size=27, color=PURPLE_BAYES),
-        ).arrange(RIGHT, buff=0.45).to_edge(DOWN, buff=0.55)
-
-        self.play(FadeIn(label), Write(title), Create(left_axes), Create(right_axes))
-        self.play(Create(gaussian), Create(t_curve), FadeIn(outliers), Write(left_label), FadeIn(legend[0]), FadeIn(legend[1]))
-        self.play(Create(mixture), Write(right_label), FadeIn(legend[2]))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(label), FadeOut(title), FadeOut(left_axes), FadeOut(right_axes), FadeOut(gaussian), FadeOut(t_curve), FadeOut(mixture), FadeOut(outliers), FadeOut(left_label), FadeOut(right_label), FadeOut(legend))
+    def mixtures(self):
+        ax=self.ax(x=(-4,4,2),y=(0,.5,.2),w=9,h=3.2)
+        dots=VGroup(*[Dot(ax.c2p(x,.012+(i%3)*.013),color=BLUE,radius=.025) for i,x in enumerate(MIX_DATA)])
+        single=curve(ax,lambda x:normal(x,MIX_DATA.mean(),MIX_DATA.std()),color=GREEN)
+        self.add(dots)
+        self.beat(Create(single),self.equation(r'K=1'))
+        weight=ValueTracker(.45)
+        mixture_curve=always_redraw(lambda:curve(ax,lambda x:mixture(x,weight.get_value()),color=PURPLE))
+        components=always_redraw(lambda:VGroup(curve(ax,lambda x:weight.get_value()*normal(x,-1.7,.55),color=BLUE),curve(ax,lambda x:(1-weight.get_value())*normal(x,1.5,.7),color=YELLOW)))
+        self.beat(FadeOut(single),Create(components),Create(mixture_curve),self.equation(r'p(x)=\sum_{k=1}^K\pi_k\mathcal N(x\mid\mu_k,\Sigma_k)'))
+        self.add(self.slider(weight,.2,.65,(0,-2.15,0),r'\pi_1',BLUE,3.5))
+        self.beat(weight.animate.set_value(.65),self.equation(r'\pi_k\geq0,\qquad\sum_k\pi_k=1'))
+        self.remove(dots)
+        point=ValueTracker(-1.7)
+        marker=always_redraw(lambda:DashedLine(ax.c2p(point.get_value(),0),ax.c2p(point.get_value(),mixture(point.get_value(),weight.get_value())),color=WHITE))
+        self.add(marker)
+        self.beat(self.equation(r'\gamma_k(x)=\frac{\pi_k\mathcal N(x\mid\mu_k,\Sigma_k)}{\sum_l\pi_l\mathcal N(x\mid\mu_l,\Sigma_l)}'),Indicate(marker))
+        barbase=np.array([-1.5,-2.15,0])
+        for mob in list(self.mobjects):
+            if isinstance(mob,VGroup) and len(mob)==4: self.remove(mob)
+        def rbar():
+            r=float(responsibility(point.get_value(),weight.get_value()))
+            return VGroup(Line(barbase,barbase+RIGHT*3*r,color=BLUE,stroke_width=18),Line(barbase+RIGHT*3*r,barbase+RIGHT*3,color=YELLOW,stroke_width=18))
+        bar=always_redraw(rbar);self.add(bar,readout(r'\gamma_1=',lambda:responsibility(point.get_value(),weight.get_value()),(-3.7,-2.15,0),BLUE),readout(r'\gamma_2=',lambda:1-responsibility(point.get_value(),weight.get_value()),(3.7,-2.15,0),YELLOW))
+        self.beat(point.animate.set_value(1.7))
+        self.beat(point.animate.set_value(0),self.equation(r'\log p(X)=\sum_n\log\left[\sum_k\pi_k\mathcal N(x_n\mid\mu_k,\Sigma_k)\right]',size=28))
