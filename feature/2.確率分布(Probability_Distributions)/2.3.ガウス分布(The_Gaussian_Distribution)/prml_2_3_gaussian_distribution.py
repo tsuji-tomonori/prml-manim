@@ -134,7 +134,7 @@ class PRML23GaussianDistribution(NarratedScene):
         self.add(pair)
         formula=MathTex(r'\mathcal N(x\mid',r'\mu',r',',r'\sigma^2',r')=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]',font_size=29).move_to([0,2.55,0])
         formula[1].set_color(YELLOW); formula[3].set_color(PURPLE)
-        self.beat(z.animate.set_value(1.7),ReplacementTransform(self.top,formula));self.top=formula
+        self.beat(z.animate.set_value(1.7),ReplacementTransform(self.top,formula,run_time=.08));self.top=formula
         self.beat(mu.animate.set_value(0),sd.animate.set_value(.8))
 
     def clt(self):
@@ -151,7 +151,7 @@ class PRML23GaussianDistribution(NarratedScene):
         self.beat(FadeIn(bars),self.equation(r'z=\frac{\bar x-1/2}{\sqrt{1/(12N)}}'))
         gauss=curve(ax,normal,color=YELLOW)
         self.beat(Transform(bars,self.histogram(ax,std(32),np.linspace(-4,4,41))),Create(gauss),self.equation(r'N=32\qquad z\ \longrightarrow\ \mathcal N(0,1)'))
-        self.beat(Indicate(gauss,color=YELLOW),FadeIn(self.note('独立・同分布・有限の分散')))
+        self.beat(Indicate(gauss,color=WHITE,scale_factor=1),FadeIn(self.note('独立・同分布・有限の分散')))
 
     def geometry(self):
         ax=self.ax(x=(-4.6,4.6,2),y=(-3.2,3.2,2),w=5.52,h=3.84,xlabel='x_1',ylabel='x_2',pos=(-1.9,0,0))
@@ -284,14 +284,14 @@ class PRML23GaussianDistribution(NarratedScene):
         marks=VGroup(*[Dot(ax.c2p(x,.02+.035*(i%2)),color=BLUE,radius=.035) for i,x in enumerate(BAYES_DATA)])
         m,v=posterior(10)
         self.beat(mean.animate.set_value(m),variance.animate.set_value(v),FadeIn(marks),self.equation(r'N=10\qquad p(\mu\mid X)\propto p(X\mid\mu)p(\mu)'))
-        self.beat(Indicate(post,color=PURPLE),self.equation(r'\frac1{\sigma_N^2}=\frac1{\sigma_0^2}+\frac N{\sigma^2}',bottom=True),self.equation(r'\mu_N=\sigma_N^2\left(\frac{\mu_0}{\sigma_0^2}+\frac{\sum_n x_n}{\sigma^2}\right)'))
+        self.beat(Indicate(post,color=YELLOW,scale_factor=1),self.equation(r'\frac1{\sigma_N^2}=\frac1{\sigma_0^2}+\frac N{\sigma^2}',bottom=True),self.equation(r'\mu_N=\sigma_N^2\left(\frac{\mu_0}{\sigma_0^2}+\frac{\sum_n x_n}{\sigma^2}\right)'))
         self.remove(ax,ax.labels,post,prior,marks)
         ax=self.ax(x=(0,8,2),y=(0,.65,.2),xlabel=r'\lambda',ylabel=r'p(\lambda\mid X)',h=3.2)
         gamma_prior=curve(ax,lambda x:gamma_posterior(x,0),color=MUTED)
         gamma_post=curve(ax,lambda x:gamma_posterior(x,10),color=PURPLE)
         self.add(gamma_prior)
         self.beat(Transform(gamma_prior,gamma_post),self.equation(r'\mu=0.8,\quad\lambda=1/\sigma^2,\quad p(\lambda\mid X)=\mathrm{Gam}(\lambda\mid a_N,b_N)',size=27),self.equation(r'a_N=a_0+N/2,\qquad b_N=b_0+\tfrac12\sum_n(x_n-\mu)^2',bottom=True,size=27))
-        self.beat(Indicate(gamma_prior,color=PURPLE),self.equation(r'p(\mu,\lambda)=\mathcal N(\mu\mid\mu_0,(\beta\lambda)^{-1})\,\mathrm{Gam}(\lambda\mid a,b)',size=27),self.equation(r'p(\mu,\Lambda)=\mathcal N(\mu\mid\mu_0,(\beta\Lambda)^{-1})\,\mathcal W(\Lambda\mid W,\nu)',bottom=True,size=27))
+        self.beat(Indicate(gamma_prior,color=YELLOW,scale_factor=1),self.equation(r'p(\mu,\lambda)=\mathcal N(\mu\mid\mu_0,(\beta\lambda)^{-1})\,\mathrm{Gam}(\lambda\mid a,b)',size=27),self.equation(r'p(\mu,\Lambda)=\mathcal N(\mu\mid\mu_0,(\beta\Lambda)^{-1})\,\mathcal W(\Lambda\mid W,\nu)',bottom=True,size=27))
 
     def robust(self):
         ax=self.ax(x=(-3,8,2),y=(0,.9,.3),w=9,h=3.2)
@@ -335,7 +335,7 @@ class PRML23GaussianDistribution(NarratedScene):
         vectors=VGroup(Arrow(center,d1.get_center(),buff=0,color=BLUE),Arrow(center,d2.get_center(),buff=0,color=YELLOW))
         good=Arrow(center,(d1.get_center()+d2.get_center())/2,buff=0,color=GREEN)
         self.beat(FadeOut(wrong),GrowArrow(vectors[0]),GrowArrow(vectors[1]),GrowArrow(good),self.equation(r'\bar v=\frac1N\sum_n(\cos\theta_n,\sin\theta_n)'))
-        self.beat(Indicate(good,color=GREEN),self.equation(r'\bar\theta=\mathrm{atan2}\left(\sum_n\sin\theta_n,\sum_n\cos\theta_n\right)=0',bottom=True,size=27))
+        self.beat(Indicate(good,color=YELLOW,scale_factor=1),self.equation(r'\bar\theta=\mathrm{atan2}\left(\sum_n\sin\theta_n,\sum_n\cos\theta_n\right)=0',bottom=True,size=27))
         self.remove(vectors,*vectors,good,d1,d2)
         concentration=ValueTracker(0);direction=ValueTracker(0)
         def polar():
@@ -363,7 +363,7 @@ class PRML23GaussianDistribution(NarratedScene):
         point=ValueTracker(-1.7)
         marker=always_redraw(lambda:DashedLine(ax.c2p(point.get_value(),0),ax.c2p(point.get_value(),mixture(point.get_value(),weight.get_value())),color=WHITE))
         self.add(marker)
-        self.beat(self.equation(r'\gamma_k(x)=\frac{\pi_k\mathcal N(x\mid\mu_k,\Sigma_k)}{\sum_l\pi_l\mathcal N(x\mid\mu_l,\Sigma_l)}'),Indicate(marker))
+        self.beat(self.equation(r'\gamma_k(x)=\frac{\pi_k\mathcal N(x\mid\mu_k,\Sigma_k)}{\sum_l\pi_l\mathcal N(x\mid\mu_l,\Sigma_l)}'),Indicate(marker,scale_factor=1))
         barbase=np.array([-1.5,-2.15,0])
         for mob in list(self.mobjects):
             if isinstance(mob,VGroup) and len(mob)==4: self.remove(mob)
