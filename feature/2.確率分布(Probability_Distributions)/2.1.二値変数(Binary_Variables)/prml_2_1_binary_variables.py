@@ -195,6 +195,10 @@ class PRML21BinaryVariables(NarratedScene):
         self.discard(grid,choose)
         mu=ValueTracker(.25)
         ax=self.ax(xr=(-.6,8.6,1),yr=(0,.38,.1),ylabel='確率',xlabel='m',height=2.9,center=(0,-.1,0))
+        origin=ax.c2p(0,0).copy(); ux=ax.c2p(1,0)-origin; uy=ax.c2p(0,1)-origin
+        ax.y_axis.shift(-.6*ux)
+        ax.c2p=lambda x,y=0:origin+x*ux+y*uy
+        self.add(tex('0',19,MUTED).next_to(ax.c2p(0,0),DOWN,buff=.15))
         chart=always_redraw(lambda:VGroup(*[Polygon(ax.c2p(i-.35,0),ax.c2p(i-.35,p),ax.c2p(i+.35,p),ax.c2p(i+.35,0),
             stroke_width=0,fill_color=HEAD,fill_opacity=.8) for i,p in enumerate(binomial(8,mu.get_value()))]))
         self.add(chart,self.slider(mu))
@@ -206,13 +210,14 @@ class PRML21BinaryVariables(NarratedScene):
         self.beat(pulse(ax.x_axis),mu.animate.set_value(.625))
 
     def prior(self):
-        ax=self.ax(yr=(0,4,1))
+        ax=self.ax(yr=(0,4,1),ylabel='尤度')
         g=curve(ax,lambda u:u**3,YELLOW)
         note=jp('３回とも表：最尤推定は１',25,YELLOW).move_to([0,2.15,0])
         tip=Dot(ax.c2p(1,1),color=YELLOW)
-        self.add(note)
-        self.beat(Create(g),GrowFromCenter(tip))
+        self.add(note,g,tip)
+        self.beat(pulse(g),pulse(tip))
         self.discard(g,note,tip)
+        ax.labels[1].become(jp('確率密度',20,MUTED).move_to(ax.labels[1]))
         # Fixed axes compare densities at their true height; every density has area 1.
         a,b=ValueTracker(1),ValueTracker(1)
         g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,a.get_value(),b.get_value()),PRIOR_COLOR,
