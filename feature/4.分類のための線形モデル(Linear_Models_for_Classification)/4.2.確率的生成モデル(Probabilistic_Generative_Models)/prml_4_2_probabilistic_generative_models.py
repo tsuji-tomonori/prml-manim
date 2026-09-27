@@ -116,7 +116,9 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         prob=lambda:np.array([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])/sum([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])
         heights=always_redraw(lambda:VGroup(*[Dot(ax.c2p(x.get_value(),.5*normal1(x.get_value(),m)),radius=.07,color=c) for m,c in [(-1.1,RED_CLS),(1.1,BLUE_CLS)]]))
         self.add(heights);bars=self.probability_bars(prob)
-        self.beat(Indicate(heights[0],color=RED_CLS,scale_factor=1),Indicate(heights[1],color=BLUE_CLS,scale_factor=1),Circumscribe(bars,color=GOLD))
+        # Keep the always_redraw group intact: animating its children separately
+        # makes Scene restructure the group and drops the parent's updater.
+        self.beat(Circumscribe(heights,color=MUTED),Circumscribe(bars,color=GOLD))
         self.beat(x.animate.set_value(1.1))
         f=self.equation(f,r'p(C_1\mid x)=',r'\frac{q_1}{q_1+q_2}',r'=\frac{p(x\mid C_1)p(C_1)}{\sum_jp(x\mid C_j)p(C_j)}',colors={1:GOLD})
         self.beat(x.animate.set_value(0),Circumscribe(f,color=MUTED,buff=.1))
