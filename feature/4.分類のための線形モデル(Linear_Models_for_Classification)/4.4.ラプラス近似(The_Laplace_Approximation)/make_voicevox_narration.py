@@ -17,7 +17,7 @@ SCENE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCENE_DIR / "assets" / "voicevox"
 MANIFEST = OUTPUT_DIR / "manifest.json"
 CACHE_DIR = SCENE_DIR / ".working" / "voicevox-lines"
-SPEAKER = {"label": "VOICEVOX:WhiteCUL", "id": 23, "speed_scale": 1.08}
+SPEAKER = {"label": "VOICEVOX:WhiteCUL", "id": 23, "speed_scale": 1.04}
 
 
 def wav_duration(path):
