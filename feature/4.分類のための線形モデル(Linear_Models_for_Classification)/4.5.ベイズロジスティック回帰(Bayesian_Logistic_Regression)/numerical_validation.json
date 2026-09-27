@@ -18,6 +18,7 @@
   "scalar_density_integral": 0.9999999999999997,
   "scalar_curvature_error": 1.1786543256508963e-05,
   "projection_integral_error": 6.661338147750939e-16,
+  "probit_identity_error": 0.0,
   "quadrature_error": 4.527099806139745e-10,
   "kappa_max_error_mu2_var0to9": 0.0017105222181174051,
   "probability_at_mu2_var9": 0.7174239856878676,

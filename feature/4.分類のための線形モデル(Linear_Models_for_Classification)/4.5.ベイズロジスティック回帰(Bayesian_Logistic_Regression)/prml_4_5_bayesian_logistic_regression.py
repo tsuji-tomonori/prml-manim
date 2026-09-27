@@ -110,7 +110,11 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         f = self.equation(r'p(C_1\mid x,w)=\sigma(', r'w_0', '+', r'w_1x', ')',
                           y=-2.65)
         f[1].set_color(PURPLE); f[3].set_color(YELLOW)
+        self.remove(note)
+        sigmoid_formula = self.equation(r'\sigma(a)=\frac{1}{1+e^{-a}}', y=2.5, size=28)
         self.beat(Create(line))
+        self.remove(sigmoid_formula)
+        self.add(note)
         s0 = self.slider(b, -1.2, .6, [-2.7, -2.1, 0], 'w_0', PURPLE)
         s1 = self.slider(w, .3, 2, [2.7, -2.1, 0], 'w_1', YELLOW)
         self.beat(b.animate.set_value(.4), end_sentence=1)
@@ -137,7 +141,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         f = self.equation(r'p(w)=\mathcal N(w\mid0,\alpha^{-1})', y=-2.45)
         f.set_color(PURPLE)
         self.beat(Create(prior))
-        self.beat(Indicate(prior, color=PURPLE), Circumscribe(f, color=PURPLE))
+        self.beat(ShowPassingFlash(prior.copy().set_stroke(PURPLE, 5), time_width=.35), Circumscribe(f, color=PURPLE))
         post = always_redraw(lambda: curve(ax, u, scalar_density(u, n.get_value()), GREEN))
         self.add(post)
         self.remove(f)
@@ -145,6 +149,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         f[1].set_color(PURPLE); f[2].set_color(YELLOW)
         counter = readout('N=', n.get_value, [4.5, 1.4, 0], YELLOW, 0)
         self.add(counter)
+        self.equation(r'y_n=\sigma(wx_n),\quad t_n\in\{0,1\}', y=2.0, size=24)
         self.beat(n.animate.set_value(1), start_sentence=0)
         # Data are introduced at integer n; in-between frames are tempered updates.
         self.beat(n.animate.set_value(len(X)))
@@ -153,7 +158,11 @@ class PRML45BayesianLogisticRegression(NarratedScene):
                       r'+\sum_n[t_n\ln y_n+(1-t_n)\ln(1-y_n)]+c',
                       font_size=27).move_to([0, -2.45, 0])
         new[1].set_color(PURPLE); new[2].set_color(YELLOW)
-        self.beat(ReplacementTransform(f, new), start_sentence=1)
+        self.beat(phases=[
+            ('posterior product', self.sentence_duration(0), lambda: Circumscribe(f, color=PURPLE)),
+            ('log transform', .65, lambda: ReplacementTransform(f, new)),
+            ('log terms', self.sentence_duration(1)-.65, lambda: Circumscribe(new, color=YELLOW)),
+        ])
         scan = ValueTracker(-1)
         marker = always_redraw(lambda: Dot(ax.c2p(scan.get_value(),
                          scalar_density(np.array([scan.get_value()]))[0]), color=YELLOW))
@@ -161,7 +170,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.beat(scan.animate.set_value(3.3))
 
     def laplace(self):
-        ax = self.axes((-.6, 2.8, 1), (0, 5, 1), labels=('w', r'E(w)-E_{\min}'))
+        ax = self.axes((-.6, 2.8, 1), (0, 6, 1), labels=('w', r'E(w)-E_{\min}'))
         u = np.linspace(-.6, 2.8, 221)
         exact = curve(ax, u, scalar_energy(u), YELLOW)
         f = self.equation(r'E(w)=-\ln p(w\mid\mathbf t)+c')
@@ -194,7 +203,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         values = VGroup(tex(f'w_{{\\mathrm{{MAP}}}}={SW:.3f}', 24, RED),
                         tex(f'H^{{-1}}={SV:.3f}', 24, GREEN)).arrange(RIGHT, buff=1).move_to([0, 2.05, 0])
         self.add(values)
-        self.beat(Circumscribe(f, color=GREEN), Indicate(gaussian))
+        self.beat(Circumscribe(f, color=GREEN), ShowPassingFlash(gaussian.copy().set_stroke(GREEN, 5), time_width=.35))
 
     def ellipse(self):
         ax = self.axes((-2.1, 1.1, 1), (-.3, 2.6, 1), (-3.1, .1, 0),
@@ -205,13 +214,15 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         dot = always_redraw(lambda: Dot(ax.c2p(b.get_value(), w.get_value()), color=RED))
         line = always_redraw(lambda: curve(data_ax, u, sigmoid(b.get_value()+w.get_value()*u), RED))
         self.add(dot, line, self.data(data_ax))
-        self.note('重みの空間　→　入力ごとの予測')
+        note = self.note('重みの空間　→　入力ごとの予測')
         f = self.equation(r'a=', r'w_0', '+', r'w_1x', r',\quad y=\sigma(a)')
         f[1].set_color(PURPLE); f[3].set_color(YELLOW)
-        self.beat(Indicate(dot), Indicate(line))
+        self.beat(Indicate(dot), ShowPassingFlash(line.copy().clear_updaters().set_stroke(RED, 5), time_width=.35))
         self.beat(b.animate.set_value(.3), w.animate.set_value(1.7), end_sentence=1)
         ell = contours(ax)
         self.beat(Create(ell), b.animate.set_value(MAP[0]), w.animate.set_value(MAP[1]))
+        self.remove(note)
+        self.equation(r'q(w)=\mathcal N(w\mid w_{\mathrm{MAP}},S_N)', y=2.5)
         theta = ValueTracker(0)
         self.remove(dot, line)
         pair = lambda: MAP + 1.6*np.linalg.cholesky(COV)@np.array([np.cos(theta.get_value()), np.sin(theta.get_value())])
@@ -282,11 +293,13 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.beat(scan.animate.set_value(11))
         mean = lambda: float(predictive_integral(2, var.get_value()))
         bar = NumberLine(x_range=[0, 1, .5], length=3.4, rotation=PI/2,
-                         include_numbers=True, font_size=18, color=MUTED).move_to([5.1, .15, 0])
+                         include_numbers=False, color=MUTED).move_to([5.1, .15, 0])
         avgdot = Dot(color=GREEN, radius=.09).add_updater(lambda m: m.move_to(bar.n2p(mean())))
         mapdot = Dot(bar.n2p(sigmoid(2)), color=RED, radius=.075)
-        self.add(bar, avgdot, mapdot,
-                 readout('P=', mean, [4.95, 2.0, 0], GREEN, 3))
+        bar_labels = VGroup(*[tex(str(v), 18, MUTED).next_to(bar.n2p(v), RIGHT, buff=.17)
+                              for v in [0, .5, 1]])
+        self.add(bar, bar_labels, avgdot, mapdot,
+                 readout('P=', mean, [5.1, 2.2, 0], GREEN, 3))
         self.beat(var.animate.set_value(9))
         self.beat(var.animate.set_value(.36))
         self.remove(f)
@@ -310,7 +323,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.beat(Create(blue), lam.animate.set_value(np.sqrt(np.pi/8)), start_sentence=1)
         tangent = curve(ax, np.array([-.9,.9]), np.array([.275,.725]), YELLOW, 5)
         self.remove(f)
-        f = self.equation(r'\sigma\prime(0)=\tfrac14=\lambda/\sqrt{2\pi}',
+        f = self.equation(r"\sigma'(0)=\tfrac14=\lambda/\sqrt{2\pi}",
                           r'\quad\Rightarrow\quad\lambda^2=\pi/8')
         self.beat(Create(tangent), Circumscribe(f, color=YELLOW))
         self.remove(f)
@@ -362,9 +375,12 @@ class PRML45BayesianLogisticRegression(NarratedScene):
             return float(np.interp(threshold.get_value(), values, u))
         points = always_redraw(lambda: VGroup(*[Dot(ax.c2p(crossing(b),threshold.get_value()),
                                                    color=c,radius=.075) for b,c in [(False,RED),(True,GREEN)]]))
-        self.add(horizontal, points)
+        threshold_label = DecimalNumber(.5, num_decimal_places=1, font_size=24, color=PURPLE)
+        threshold_label.add_updater(lambda m: m.set_value(threshold.get_value()).next_to(
+            ax.c2p(3, threshold.get_value()), RIGHT, buff=.15))
+        self.add(horizontal, points, threshold_label)
         self.beat(threshold.animate.set_value(.8), end_sentence=1)
-        self.remove(horizontal, points)
+        self.remove(horizontal, points, threshold_label)
         self.beat(scale.animate.set_value(.05), Indicate(vertical, color=YELLOW))
         self.remove(f)
         f = self.equation(r'w_{\mathrm{MAP}},S_N', r'\longrightarrow',
@@ -373,4 +389,4 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         f[0].set_color(PURPLE); f[2].set_color(YELLOW); f[4].set_color(GREEN)
         self.beat(scale.animate.set_value(1), Circumscribe(f, color=GREEN))
         cloud = VGroup(*[curve(ax, u, sigmoid(design(u)@v), GREEN, 1.2, .23) for v in SAMPLES])
-        self.beat(Create(cloud), Indicate(line, color=GREEN))
+        self.beat(Create(cloud), ShowPassingFlash(line.copy().clear_updaters().set_stroke(GREEN, 5), time_width=.35))

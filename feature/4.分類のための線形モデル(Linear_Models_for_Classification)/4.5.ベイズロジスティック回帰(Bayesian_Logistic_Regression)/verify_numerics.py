@@ -37,6 +37,18 @@ projected = predictive_integral(*stats(points))
 report['projection_integral_error'] = float(np.max(np.abs(direct-projected)))
 assert report['projection_integral_error'] < 1e-8
 
+# Displayed Laplace energy curves stay within the chosen vertical extent.
+energy_x = np.linspace(-.6,2.8,1001)
+assert scalar_energy(energy_x).max() < 6
+assert (.5*(energy_x-SW)**2/SV).max() < 6
+# Exact Gaussian-CDF identity (4.152), independently integrated on a grid.
+z = np.linspace(-14,14,40001)
+lam = np.sqrt(np.pi/8)
+probit_numeric = np.trapezoid(cdf(lam*z)*normal(z,1.2,1.7),z)
+probit_exact = cdf(1.2/np.sqrt(lam**-2+1.7))
+report['probit_identity_error'] = float(abs(probit_numeric-probit_exact))
+assert report['probit_identity_error'] < 1e-10
+
 # A separate dense trapezoidal integral checks Gauss-Hermite quadrature.
 xx = np.linspace(-35,35,100001)
 vals = np.linspace(0,9,37)
