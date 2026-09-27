@@ -1,52 +1,100 @@
-# 2.4 指数型分布族
+# PRML 2.4 指数型分布族
 
-PRML Chapter 2 の 2.4 節 "The Exponential Family" を、Manim と VOICEVOX で解説動画化するための制作単位です。
+「確率のつまみをどう作る？」から始める、約10分・全10シーンの日本語動画です。指数型分布族の共通形、十分統計量、最尤推定、共役事前分布、無情報事前分布までを扱います。
 
-## ファイル
+[音声付き480p15動画](media/videos/prml_2_4_exponential_family/480p15/PRML24ExponentialFamily.mp4) / [台本](narration_script.md) / [全文の読み確認](reading_check.md)
 
-- `prml_2_4_exponential_family.py`: Manim アニメーション実装
-- `narration_script.md`: 日本語ナレーション台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## シーン構成
 
-## レンダリング
+| シーン | 秒 | 視覚的な実験 | 原文の印刷ページ・式 |
+|---|---:|---|---|
+| 1 確率のつまみ | 54.933 | 二本の重みを動かし、合計で割って正規化 | p.113、(2.194)–(2.198) |
+| 2 指数の中の共通形 | 58.867 | シグモイド上を動く点、標準形への変形と色の対応 | pp.113–114、(2.194)–(2.203) |
+| 3 三択のつまみ | 56.800 | 二つのつまみで三本すべての確率を連動 | pp.114–115、(2.204)–(2.217) |
+| 4 山の位置と幅 | 59.867 | 平均・標準偏差・自然パラメータと密度を連動 | pp.115–116、(2.218)–(2.223) |
+| 5 データの要約 | 64.000 | コイン記録の並べ替え、観測点の和と二乗和の集計 | pp.116–117、(2.227)–(2.228) |
+| 6 最尤推定 | 65.467 | 平均を一致させ、対数正規化関数の接線を動かす | pp.116–117、(2.224)–(2.228)、演習2.58 |
+| 7 ベイズ更新 | 63.933 | 同じ軸で Beta(2,2) → Beta(9,5)、一般式の足し算へ | p.117、(2.229)–(2.230) |
+| 8 一様と座標 | 52.267 | 四つの等確率領域を、面積を保ったまま変形 | pp.117–118、(2.231) |
+| 9 原点と単位 | 59.667 | 位置の区間を平行移動、尺度の等倍率区間を対数軸で比較 | pp.118–120、(2.232)–(2.240) |
+| 10 推定の仕組みへ | 63.667 | 観測点から推定した山、一般の混合分布への問い | pp.113–120、(2.194), (2.228), (2.230), (2.231) |
 
-VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、音声を生成します。
+原文は Bishop (2006), *Pattern Recognition and Machine Learning*, §2.4。印刷pp.113–120（ローカルPDF pp.133–140）を `pdftotext -layout` で抽出して照合しました。**この節に図・表はありません。** 図はすべて原文の式に基づく自作で、原文図の複製ではありません。
+
+## 数式・例の条件
+
+- 指数型分布族の標準形は `p(x|η)=h(x)g(η)exp{ηᵀu(x)}`。離散変数では和、連続変数では積分で正規化します。最尤の微分では、パラメータによらない台と、微分・積分を交換できる正則な内部を扱います。
+- 三カテゴリの例は一回の観測を one-hot で記録し、第三カテゴリを基準にします。自由な自然パラメータは二つ。原文(2.204)の直後にあるベクトル末尾の `x_N` は文脈上カテゴリ数 `M` に対応し、実装では三要素に統一しています。
+- ガウスでは平均・分散をともに可変とし、`u(x)=(x,x²)ᵀ`、`η=(μ/σ²,−1/(2σ²))ᵀ`。`η₂<0` が必要です。グラフは有限の表示窓ですが、正規化は実数全体について行います。
+- 自作のコイン記録は10回中7回が表。十分統計量とともに観測数 `N` も保持します。ガウスの6点は `[-1.2,−0.4,0.1,0.6,1.0,1.7]`、和1.8、二乗和5.86、最尤平均0.3、最尤分散0.8866667。分散の分母は `N` です。
+- `A=−ln g` と置き、`∇A=E[u]`、`∇²A=Cov[u]`。後者は原文の演習2.58に対応します。最尤の平均一致は有限な内部解の停留条件です。全観測が表のときは `μ=1` が境界解で、有限な `η` はありません。動画ではこの極限に向かう方向だけを有限のつまみ範囲で示します。
+- ベータの横軸は `μ`。Beta(2,2)から表7・裏3でBeta(9,5)へ更新し、平均は9/14≃0.642857。途中の連続変形は二つの密度を結ぶ説明用の補間で、端点だけが今回の整数個の観測に対応します。
+- 一般の共役事前(2.229)は `η` 上の密度です。`dμ/dη=μ(1−μ)` を含めると、Beta(2,2)の例は `ν=4, χ=1/2`、更新後は `ν'=14, χ'=9/14` に対応します。異なる座標の密度を同一視しません。共役事前のハイパーパラメータは積分が有限になる範囲で使います。
+- 変数変換は有限区間 `0≤λ≤1` と `λ=η², η≥0`。`pη=2η` となり、四つの領域は各1/4です。変形途中は `λ=η^q, 1≤q≤2` による正規化済み密度で、単なる図形の補間ではありません。
+- 位置事前の一定密度、尺度事前 `1/σ`、精度事前 `1/λ` は無限の台では非正規です。対数軸の図は有限窓で等しい重みを示し、各領域へ正規化済みの確率を割り当てた図ではありません。事後が正規化可能か別途確認します。
+- 原文p.120のガンマ事前の `a₀=b₀=0` という形式的極限、共役事前の正規化定数 `f` の具体的導出は動画では省略しています。一般のガウス混合分布は本節の単純な指数型分布族の例に含めません。
+
+## 3Blue1Brownから参考にした手法
+
+ManimGLのコードは取り込まず、Manim Communityで実装しています。
+
+- [ProbabilityBar](https://github.com/3b1b/videos/blob/ae2b911326b8255dfae790b6e8764a8a400c5875/_2019/bayes/part1.py)：一つの状態から棒の高さ・数値・合計を連動させる。
+- [VariableC](https://github.com/3b1b/videos/blob/ae2b911326b8255dfae790b6e8764a8a400c5875/_2023/gauss_int/herschel.py)：指数関数のつまみと曲線を連続的に変形する。
+- [MeanAndStandardDeviation](https://github.com/3b1b/videos/blob/ae2b911326b8255dfae790b6e8764a8a400c5875/_2023/clt/main.py)：同じ分布上で平均の位置と分布の広がりを比較する。
+- [ValueTracker](https://github.com/3b1b/manim/blob/fafa083a4fb274bba9cabde0b6e2f50ba6da0622/manimlib/mobject/value_tracker.py)：つまみ・数値・図の状態を一か所に保持する。
+
+## 字幕と音声
+
+`narration_content.py` が正本です。60 beat・120文の `display` と `speech` を独立に保持します。字幕中の数式はMathTexで描き、日本語かなの実測文字高・数式本体の中心・左右の余白を1.1と同じ方法でそろえます。
+
+全120文を speaker=23 の `audio_query` で取得し、修正前後を `reading_check.md` / `reading_check.json` に記録しています。「表→ひょう」「負→まけ」「値→ね」「標準形→ひょうじゅんがた」「指数分布→ゆびすうふんぬの」「割るので→われるので」「四分の一→よんぷんのいち」「節→ふし」をspeech側で補正しました。
+
+文単位のPCM長をmanifestへ保存し、字幕と動作を同じ時計から再生します。音声・台本のSHA-256が不一致ならレンダリングを停止します。各beat末尾の余白は約0.35〜0.42秒です。既存8 WAVはすべて置換し、全10 WAVとmanifestを整合させています。
+
+## 再生成
+
+このディレクトリで実行します。既存venv、LaTeX、Noto Sans CJK JP、ffmpegを使用します。VOICEVOX Engineは `http://127.0.0.1:50021` で稼働している必要があります。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_2_4_exponential_family.py PRML24ExponentialFamily
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python narration_content.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_2_4_exponential_family.py PRML24ExponentialFamily
+/home/t-tsuji/project/prml-manim/.venv/bin/python review_video.py
 ```
 
-生成済み動画:
+音声生成の再開例は `make_voicevox_narration.py --from-scene scene06`。公開クラス名とモジュール名は維持しています。
 
-```text
-media/videos/prml_2_4_exponential_family/480p15/PRML24ExponentialFamily.mp4
-```
-
-高品質で出力する場合:
-
-```bash
-uv run manim --disable_caching --flush_cache -qh prml_2_4_exponential_family.py PRML24ExponentialFamily
-```
-
-## 内容
-
-- 指数型分布族の標準形
-- `h(x)`, `g(eta)`, `u(x)`, `eta` の役割
-- ベルヌーイ分布の log-odds 表現
-- 分散固定の一変量ガウス分布の自然パラメータ
-- 十分統計量によるデータ要約
-- 最尤推定条件と平均合わせの見方
-- 共役事前分布と足し算としてのベイズ更新
-
-## 制作方針
-
-- 式をいきなり暗記させず、部品の役割を色分けして見せる。
-- ベルヌーイとガウスの例で、いつものパラメータから自然パラメータへの見方をつなぐ。
-- 十分統計量、最尤推定、共役事前分布を、同じ「足し合わせる統計量」の流れとして見せる。
-- PRML の式は参照しつつ、図表は動画用に自作する。
+`exponential_model.py` はNumPyによる計算、`caption_layout.py` は字幕、`scene_support.py` は同期と描画補助です。`media/prml24_timeline.json` と `media/review/` はレビュー用の生成物で、Git管理しません。最終MP4だけを既定の `480p15/` に収録します。
 
 ## 音声クレジット
 
-- ナレーション: VOICEVOX:WhiteCUL
+VOICEVOX:WhiteCUL（ノーマル、speaker 23）。Engine 0.25.2、話速1.08、抑揚0.95、音量係数1.0。
+
+## 検証結果（2026-09-27、最終MP4）
+
+| 検証 | 実測・結果 |
+|---|---|
+| Python / 数値 | `py_compile` 成功、数値検証8群成功 |
+| 正規化・変換の誤差 | ガウス積分・四分の一領域とも最大 2.22×10⁻¹⁶ |
+| 微分の数値照合 | 平均 1.60×10⁻⁸、分散 1.04×10⁻⁸ |
+| フルレンダリング | 指定の `--disable_caching --flush_cache -ql`、180 animations、成功 |
+| 動画 | H.264、854×480、15 fps、599.465044秒 |
+| 音声 | AAC、599.509333秒、映像との差0.044289秒 |
+| ファイルサイズ | 14,583,487 bytes |
+| 長い無音 | `silencedetect=noise=-45dB:d=3`：0件 |
+| 音量 | `volumedetect`：平均 −26.6 dB、最大 −6.8 dB |
+| 全文の読み | 120文を初回取得、27文を補正後、120文を再取得して照合 |
+| 字幕 | 120文の幅・高さ検査成功、最大幅9.39765625／許容12.9、最大高0.701875／許容0.9 |
+| 字幕データ | 記号読み仮名の検索0件、描画timelineと正本の120文すべて一致 |
+| 画像の目視 | 全60 beat＋記号字幕15場面＋同期8枚＝83枚を抽出、すべて確認 |
+| 音声と動作 | 3シーン4動作を実PCM発話開始・timeline・前後画像で照合 |
+| 同期の丸め誤差 | 文境界最大0.032秒、シーン尺の誤差5×10⁻¹¹秒未満 |
+
+最終MP4 SHA-256: `a1ab87456e358542af40b91f807b8e3bf1937d3c09d5d5a51f9e2547b27e2c1e`。
+
+音声全編の通し聴取、音素単位の強制アラインメント、全フレームの目視、高品質版のレンダリングは未実施です。全文の読み確認はVOICEVOXのAPI出力に対して行いました。抽出画像では文字・数式・字幕の重なりやはみ出しは見つかりませんでした。
+
+[作業レポート](../../../reports/working/20260927-1644-prml-2-4-3b1b-remake.md)
