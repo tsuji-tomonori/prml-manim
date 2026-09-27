@@ -60,7 +60,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         out=Path(config.media_dir)/'prml31_timeline.json'
         out.write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-    def axes(self,center=(-1.7,.05,0),width=7.1,height=3.3,span=1.65,positive=False):
+    def axes(self,center=(-1.7,.05,0),width=7.1,height=3.3,span=1.65,positive=False,ylabel=r't,\ y'):
         low=0 if positive else -span
         ax=Axes(x_range=[0,1,.25],y_range=[low,span,1],x_length=width,y_length=height,
                 tips=False,axis_config={'color':MUTED,'stroke_width':1.3,'include_ticks':False}).move_to(center)
@@ -68,6 +68,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         for x in [0,.5,1]:labels.add(tex(str(x),18,MUTED).next_to(ax.c2p(x,low),DOWN,buff=.12))
         for y in ([0,1] if positive else [-1,0,1]):labels.add(tex(str(y),18,MUTED).next_to(ax.c2p(0,y),LEFT,buff=.12))
         labels.add(tex('x',22,MUTED).next_to(ax.c2p(1,low),RIGHT,buff=.13))
+        labels.add(tex(ylabel,22,MUTED).next_to(ax.c2p(0,span),UP,buff=.12))
         self.add(ax,labels)
         return ax
 
@@ -129,7 +130,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
                   self.equation(r'y(\mathbf{x},\mathbf{w})=\sum_{j=0}^{M-1}w_j\phi_j(\mathbf{x})=\mathbf{w}^T\boldsymbol\phi(\mathbf{x})'))
 
     def bases(self):
-        ax=self.axes(center=(-1.7,.15,0),span=1.15,positive=True)
+        ax=self.axes(center=(-1.7,.15,0),span=1.15,positive=True,ylabel=r'\phi(x)')
         amp=ValueTracker(.4)
         polys=VGroup(curve(ax,U,DATA),curve(ax,U**2,PURPLE),curve(ax,U**3,ORANGE))
         active=always_redraw(lambda:curve(ax,amp.get_value()*U**2,GOLD))
@@ -183,7 +184,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.beat(self.equation(r'\beta_{\rm ML}^{-1}=\frac1N\sum_n(t_n-y_n)^2='+f'{variance:.4f}'),Indicate(squares.copy().clear_updaters(),scale_factor=1.08))
 
     def matrix(self):
-        ax=self.axes(center=(-4,.1,0),width=4,height=2.7,span=1.2)
+        ax=self.axes(center=(-4,.1,0),width=4,height=2.7,span=1.2,ylabel=r'\phi(x)')
         xx=np.array([.2,.5,.8]);centers=np.array([.25,.75]);small=design(xx,centers,.18)
         basislines=VGroup(*[curve(ax,gaussian(U,centers,.18)[:,j],c) for j,c in enumerate([GOLD,PURPLE])])
         self.add(basislines)
@@ -261,11 +262,12 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.add(experiment,expbars,dots(ax,X[[i]],T[[i]]),self.slider(eta,.05,.45,(3.8,-1.8,0),r'\eta=',GOLD))
         self.beat(eta.animate.set_value(.45),self.equation(r'\Delta\mathbf w=\eta\,r_n\boldsymbol\phi_n'))
         self.remove(experiment,expbars)
+        eta.set_value(.22)
         self.add(live,bars)
         arriving=always_redraw(lambda:dots(ax,X[ORDER[:max(3,int(step.get_value()))]],T[ORDER[:max(3,int(step.get_value()))]]))
         self.add(arriving)
         self.beat(step.animate.set_value(12),self.equation(r'\mathbf w^{(\tau+1)}=\mathbf w^{(\tau)}-\eta\nabla E_n'))
-        self.beat(Indicate(bars.copy().clear_updaters(),color=PURPLE),self.equation(r'E_n=\frac12(t_n-\mathbf w^T\boldsymbol\phi_n)^2,\qquad\mathrm{LMS}'))
+        self.beat(ShowPassingFlash(Underline(bars,color=PURPLE),time_width=.35),self.equation(r'E_n=\frac12(t_n-\mathbf w^T\boldsymbol\phi_n)^2,\qquad\mathrm{LMS}'))
 
     def ridge(self):
         ax=self.axes(span=1.8)
@@ -306,7 +308,15 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.beat(radius.animate.set_value(np.linalg.norm(center)-1),self.equation(r'w_1^2+w_2^2\le1',PURPLE))
         opt=Dot(ax.c2p(*L2_POINT),radius=.085,color=MODEL)
         self.beat(FadeIn(opt),self.equation(r'\mathbf w^*='+r'('+f'{L2_POINT[0]:.3f},{L2_POINT[1]:.3f}'+r')^T',MODEL))
-        self.beat(q.animate.set_value(1),radius.animate.set_value(np.linalg.norm(center-L1_POINT)),opt.animate.move_to(ax.c2p(*L1_POINT)),self.equation(r'|w_1|+|w_2|\le1',PURPLE))
+        # During the shape change both the point and tangent contour use the
+        # actual constrained minimizer, recomputed from the current q.
+        from functools import lru_cache
+        solution=lru_cache(maxsize=256)(constraint_solution)
+        opt.add_updater(lambda m:m.move_to(ax.c2p(*solution(q.get_value()))))
+        level.clear_updaters()
+        level.add_updater(lambda m:m.become(circle(np.linalg.norm(center-solution(q.get_value())))))
+        self.beat(q.animate.set_value(1),self.equation(r'|w_1|+|w_2|\le1',PURPLE))
+        opt.clear_updaters()
         self.beat(Indicate(opt,color=GOLD),self.equation(r'\mathbf w^*=(1,0)^T\quad\Longrightarrow\quad w_2\phi_2(x)=0',MODEL))
         self.remove(level,opt,self.formula)
         self.formula=tex(r'\sum_j|w_j|^q\le1',31,PURPLE).move_to([0,-2.55,0])
@@ -316,7 +326,9 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
                           ('q4',self.sentence_duration(1)/2,lambda:q.animate.set_value(4)),
                           ('q05',self.sentence_duration(1)/2,lambda:q.animate.set_value(.5)),
                           ('nonconvex',self.sentence_duration(2),lambda:Create(Line(ax.c2p(1,0),ax.c2p(0,1),color=GOLD)))])
-        self.beat(q.animate.set_value(1),self.equation(r'E_D+\frac\lambda2\sum_j|w_j|^q\quad\longleftrightarrow\quad\sum_j|w_j|^q\le c',size=29))
+        q.set_value(1)
+        self.update_mobjects(0)
+        self.beat(ShowPassingFlash(boundary.copy().clear_updaters(),time_width=.35),self.equation(r'E_D+\frac\lambda2\sum_j|w_j|^q\quad\longleftrightarrow\quad\sum_j|w_j|^q\le c',size=29))
 
     def outputs(self):
         ax=self.axes()

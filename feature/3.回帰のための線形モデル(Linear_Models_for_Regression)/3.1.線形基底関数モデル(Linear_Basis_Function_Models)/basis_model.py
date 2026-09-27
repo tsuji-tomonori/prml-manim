@@ -60,3 +60,32 @@ def q_boundary(q, count=361):
     c,s=np.cos(a),np.sin(a)
     r=(np.abs(c)**q+np.abs(s)**q)**(-1/q)
     return np.column_stack([r*c,r*s])
+
+
+def constraint_solution(q):
+    """Closest point on the q-ball for this positive 2D target, 1 <= q <= 2.
+
+    Golden-section minimization of the angle on the first-quadrant boundary;
+    compare endpoints explicitly. No interpolation of the minimizers is used.
+    """
+    if not 1 <= q <= 2:
+        raise ValueError('The convex constraint experiment uses 1 <= q <= 2')
+    if q == 1:
+        return L1_POINT.copy()
+    if q == 2:
+        return L2_POINT.copy()
+    def point(a):
+        v=np.array([np.cos(a),np.sin(a)])
+        return v/np.sum(v**q)**(1/q)
+    def cost(a):return np.sum((point(a)-CONSTRAINT_TARGET)**2)
+    low,high=0.,np.pi/2
+    ratio=(np.sqrt(5)-1)/2
+    a=high-ratio*(high-low);b=low+ratio*(high-low)
+    fa,fb=cost(a),cost(b)
+    for _ in range(65):
+        if fa<fb:
+            high,b,fb=b,a,fa;a=high-ratio*(high-low);fa=cost(a)
+        else:
+            low,a,fa=a,b,fb;b=low+ratio*(high-low);fb=cost(b)
+    angle=min([0.,np.pi/2,(low+high)/2],key=cost)
+    return point(angle)

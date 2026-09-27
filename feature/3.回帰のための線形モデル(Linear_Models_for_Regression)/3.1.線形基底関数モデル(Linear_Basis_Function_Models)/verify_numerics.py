@@ -46,12 +46,13 @@ def main():
     assert np.max(np.abs(grid@overshoot))<1.65
     checks['lms']={'overshoot_prediction':float(PHI[ORDER[2]]@overshoot),'target':float(T[ORDER[2]])}
     # Dense boundary search independently confirms both constrained minima.
-    for q,opt in [(1,L1_POINT),(2,L2_POINT)]:
+    for q in [1,1.1,1.25,1.5,1.75,2]:
+        opt=constraint_solution(q)
         points=q_boundary(q,200001)
         costs=np.sum((points-CONSTRAINT_TARGET)**2,axis=1)
         np.testing.assert_allclose(np.min(costs),np.sum((opt-CONSTRAINT_TARGET)**2),atol=1e-8)
         np.testing.assert_allclose(np.sum(np.abs(points)**q,axis=1),1,atol=1e-12)
-    checks['constraints']={'l1':L1_POINT.tolist(),'l2':L2_POINT.tolist()}
+    checks['constraints']={'tested_q':[1,1.1,1.25,1.5,1.75,2],'l1':L1_POINT.tolist(),'l2':L2_POINT.tolist()}
     both=fit(t=np.column_stack([T,T2]))
     np.testing.assert_allclose(both[:,0],fit(t=T),atol=1e-10)
     np.testing.assert_allclose(both[:,1],fit(t=T2),atol=1e-10)
