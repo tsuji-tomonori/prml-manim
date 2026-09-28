@@ -68,10 +68,12 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         if len(parts)>1:
             for i,p in enumerate(m):p.set_color(colors[i%len(colors)])
         old=self.formula;self.formula=m
-        return TransformMatchingTex(old,m) if old is not None else Write(m)
+        if old is not None:self.remove(old)
+        return FadeIn(m,rate_func=lambda t:smooth(min(1.,6*t)))
     def note_anim(self,text,color=MUTED):
         m=jp(text,21,color).move_to([0,2.12,0]);old=self.note;self.note=m
-        return ReplacementTransform(old,m) if old is not None else FadeIn(m)
+        if old is not None:self.remove(old)
+        return FadeIn(m,rate_func=lambda t:smooth(min(1.,6*t)))
     def slider(self,tracker,lo,hi,label,pos=(0,-1.9,0),width=5,color=GOLD):
         base=NumberLine(x_range=[lo,hi],length=width,include_ticks=False,color=MUTED).move_to(pos)
         dot=Dot(color=color,radius=.075).add_updater(lambda m:m.move_to(base.n2p(tracker.get_value())))
@@ -128,9 +130,9 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
             return np.interp(grid,full,v)
         post=always_redraw(lambda:line(ax,grid,density(),POST));self.add(post)
         self.beat(power.animate.set_value(1),self.eq(r'p(w\mid D)\propto',r'p(D\mid w)',r'p(w)',colors=[WHITE,NOISE,PRIOR]))
-        self.beat(Indicate(post,color=POST),self.eq(r'E(w)=',r'\frac{\beta}{2}\sum_n[y(x_n,w)-t_n]^2',r'+\frac{\alpha}{2}w^Tw',colors=[WHITE,NOISE,PRIOR]))
+        self.beat(Indicate(post,color=POST,scale_factor=1),self.eq(r'E(w)=',r'\frac{\beta}{2}\sum_n[y(x_n,w)-t_n]^2',r'+\frac{\alpha}{2}w^Tw',colors=[WHITE,NOISE,PRIOR]))
         mode=Dot(ax.c2p(coordinate,float(np.interp(coordinate,grid,density()))),color=MAP)
-        self.beat(FadeIn(mode),Indicate(post),self.eq(r'w_{\mathrm{MAP}}=\operatorname*{arg\,min}_w E(w)'))
+        self.beat(FadeIn(mode),Indicate(post,scale_factor=1),self.eq(r'w_{\mathrm{MAP}}=\operatorname*{arg\,min}_w E(w)'))
 
     def laplace(self):
         ax=self.axes(x=(-.32,.32,.2),y=(0,3.5,1),height=3.2,center=(-2,.3,0),width=6.5,xlabel='s',ylabel=r'E(w)-E(w_{\rm MAP})')
@@ -152,7 +154,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.add(bell)
         self.beat(angle.animate.set_value(.55),self.note_anim('曲がり方が大きい方向 → 幅が狭い',GOLD))
         self.beat(angle.animate.set_value(0),self.note_anim('曲がり方が小さい方向 → 幅が広い',POST))
-        self.beat(Indicate(quad),self.eq(r'A=',r'\alpha I',r'+\beta H',r',\quad H=\nabla\nabla\frac12\sum_n(y_n-t_n)^2'))
+        self.beat(Indicate(quad,scale_factor=1),self.eq(r'A=',r'\alpha I',r'+\beta H',r',\quad H=\nabla\nabla\frac12\sum_n(y_n-t_n)^2'))
         self.beat(self.eq(r'q(w\mid D)=',r'\mathcal N(w\mid w_{\rm MAP},A^{-1})'),self.note_anim('正定値の A が必要。一つの山の近似',PRIOR),angle.animate.set_value(.25))
 
     def project(self):
@@ -190,9 +192,9 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
             first=Rectangle(width=.65,height=max(.001,a*unit),fill_color=NOISE,fill_opacity=.85,stroke_width=0).move_to(start+UP*a*unit/2)
             second=Rectangle(width=.65,height=max(.001,v*unit),fill_color=POST,fill_opacity=.85,stroke_width=0).move_to(start+UP*(a+v/2)*unit)
             return VGroup(first,second)
-        bar=always_redraw(bars);self.add(bar,jp('分散の和',21).move_to([3.5,1.9,0]),readout(r'\sigma^2=',lambda:1/BETA+scale.get_value()*variance(W,COV,[x.get_value()])[0],(4.35,-1.25,0)))
+        bar=always_redraw(bars);self.add(bar,jp('分散の和',21).move_to([3.5,1.5,0]),readout(r'\sigma^2=',lambda:noise.get_value()/BETA+scale.get_value()*variance(W,COV,[x.get_value()])[0],(4.35,-1.25,0)))
         self.beat(noise.animate.set_value(1),self.eq(r'p(t\mid x,D)\simeq\mathcal N(t\mid y(x,w_{\rm MAP}),\sigma^2(x))'))
-        self.beat(self.eq(r'\sigma^2(x)=',r'g^TA^{-1}g',r'+\beta^{-1}'),Indicate(bar))
+        self.beat(self.eq(r'\sigma^2(x)=',r'g^TA^{-1}g',r'+\beta^{-1}'),Indicate(bar,scale_factor=1))
         self.slider(x,-2.4,2.4,'x',pos=(-1.3,-1.85,0),width=4.5)
         self.beat(x.animate.set_value(2.4))
         self.beat(scale.animate.set_value(.03),self.note_anim('思考実験：重みの共分散だけを縮める'))
@@ -216,7 +218,8 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         value=readout(r'p(D)=',lambda:evidence_example(sd.get_value()),(4.35,1.7,0),POST);self.add(value)
         self.beat(end.animate.set_value(4))
         self.beat(sd.animate.set_value(2.8))
-        self.beat(sd.animate.set_value(.25).set_rate_func(there_and_back))
+        self.beat(phases=[('狭すぎる事前',self.sentence_duration(0),lambda:sd.animate.set_value(.25)),
+                          ('中間の幅へ',self.sentence_duration(1),lambda:sd.animate.set_value(1.1))])
         self.remove(prior,lc,product,ar,value,ax)
         # Preserve graph labels only until this transition; full clearing avoids stray ticks.
         for m in list(self.mobjects):
@@ -224,7 +227,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
         formula=MathTex(r'\log p(D\mid\alpha,\beta)\simeq',r'-E(w_{\rm MAP})',r'-\frac12\log|A|',r'+\frac W2\log\alpha+\frac N2\log\beta-\frac N2\log(2\pi)',font_size=29).arrange(DOWN,buff=.3).move_to([0,.6,0])
         formula[1].set_color(MAP);formula[2].set_color(POST);formula[3].set_color(PRIOR)
-        self.beat(Write(formula),self.eq(r'W:\ \mathrm{weights},\qquad N:\ \mathrm{observations}'))
+        self.beat(FadeIn(formula,rate_func=lambda t:smooth(min(1.,6*t))),self.eq(r'W:\ \mathrm{weights},\qquad N:\ \mathrm{observations}'))
         self.beat(Indicate(formula[2]),self.eq(r'\log|A|=\sum_i\log a_i',r'\qquad(a_i>0)'))
 
     def hyper(self):
@@ -249,7 +252,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
             rows.add(tex(f'{i}\\qquad {a:.3f}\\qquad {b:.2f}\\qquad {g:.3f}',25,POST if i else MUTED))
         rows.arrange(DOWN,buff=.21).move_to([0,.5,0])
         self.beat(LaggedStart(*[FadeIn(r) for r in rows],lag_ratio=.3),self.eq(r'\beta_{\rm new}^{-1}=\frac{\sum_n(y_n-t_n)^2}{N-\gamma}'))
-        self.beat(Indicate(rows[-1]),self.note_anim('非線形モデルでは、固有値の変化を無視した再推定'))
+        self.beat(Indicate(rows[-1],scale_factor=1),self.note_anim('非線形モデルでは、固有値の変化を無視した再推定'))
         self.remove(*rows,self.note);self.note=None
         net=self.network(lambda:W,pos=(-3,.5,0))
         net[1][1].set_color(DATA);net[1][2].set_color(NOISE)
@@ -285,7 +288,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         chosen=self.contours(ax,D['cw'],levels=(.5,))
         self.beat(ReplacementTransform(weak,chosen),Transform(tag,jp('エビデンスで選択',23,POST).move_to(tag)))
         self.beat(self.eq(r'\log p(D\mid w)=\sum_n[t_n\log y_n+(1-t_n)\log(1-y_n)]'),self.note_anim('ベルヌーイ尤度：回帰の β は使わない'))
-        self.beat(self.eq(r'E(w)=-\log p(D\mid w)+\frac\alpha2 w^Tw'),Indicate(chosen))
+        self.beat(self.eq(r'E(w)=-\log p(D\mid w)+\frac\alpha2 w^Tw'),Indicate(chosen,scale_factor=1))
         evidence=VGroup(*[tex(r'\alpha='+f'{a:g}'+r'\ :\ '+f'{v:.2f}',23,POST if a==D['calpha'] else MUTED) for a,v in zip(D['class_alphas'],D['class_evidence'])]).arrange(DOWN,buff=.18).move_to([3.45,-.25,0])
         self.add(tex(r'\log p(D\mid\alpha)',23).move_to([3.45,.95,0]))
         self.beat(FadeIn(evidence),self.eq(r'\log p(D\mid\alpha)\simeq-E(w_{\rm MAP})-\frac12\log|A|+\frac W2\log\alpha'))
@@ -314,4 +317,4 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         contours=always_redraw(lambda:self.contours(ax,D['cw'],scale.get_value()));self.add(contours)
         self.add(jp('緑：0.5の境界',23,POST).move_to([3.8,1.2,0]),jp('黄：周囲の確率',23,GOLD).move_to([3.8,.65,0]))
         self.beat(scale.animate.set_value(1),self.note_anim('同じ MAP を固定し、共分散を0倍から1倍へ'))
-        self.beat(Indicate(contours),self.eq(r'D\ \longrightarrow\ p(w\mid D)\ \longrightarrow\ p(t\mid x,D)'),self.note_anim('代表値とともに、不確かさを予測へ渡す',POST))
+        self.beat(Indicate(contours,scale_factor=1),self.eq(r'D\ \longrightarrow\ p(w\mid D)\ \longrightarrow\ p(t\mid x,D)'),self.note_anim('代表値とともに、不確かさを予測へ渡す',POST))
