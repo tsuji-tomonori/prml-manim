@@ -259,7 +259,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         eps=ValueTracker(.6);w=.2
         ax=self.plot_axes(x=(-.6,1,.4),y=(0,.9,.3),width=8.5,height=3.3,labels=('w','E_n'))
         graph=curve(ax,lambda u:scalar(u)['E'],color=BLUE_CLASS)
-        sec=always_redraw(lambda:tangent(ax,w,(scalar(w+eps.get_value())['E']+scalar(w-eps.get_value())['E'])/2,central(w,eps.get_value()),YELLOW_ACC,half=.3))
+        sec=always_redraw(lambda:tangent(ax,w,(scalar(w+eps.get_value())['E']+scalar(w-eps.get_value())['E'])/2,central(w,eps.get_value()),YELLOW_ACC,half=max(.3,eps.get_value())))
         dots=always_redraw(lambda:VGroup(*[Dot(ax.c2p(w+s*eps.get_value(),scalar(w+s*eps.get_value())['E']),color=YELLOW_ACC) for s in [-1,1]]))
         self.add(graph,sec,dots,number(r'\epsilon=',eps.get_value,(-3,-2.5,0),YELLOW_ACC,places=3),number('g_{CD}=',lambda:central(w,eps.get_value()),(2,-2.5,0),YELLOW_ACC,places=4))
         self.equation(r'\frac{E_n(w+\epsilon)-E_n(w-\epsilon)}{2\epsilon}=\frac{\partial E_n}{\partial w}+O(\epsilon^2)',size=33)
