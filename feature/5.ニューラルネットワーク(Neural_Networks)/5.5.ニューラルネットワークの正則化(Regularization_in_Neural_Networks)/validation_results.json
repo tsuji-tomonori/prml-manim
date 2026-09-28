@@ -1,0 +1,83 @@
+{
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "501.400000"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "501.440000"
+      }
+    ],
+    "format": {
+      "duration": "501.440000"
+    }
+  },
+  "stream_difference": 0.040000000000020464,
+  "silences_over_3s": 0,
+  "mean_volume": -26.2,
+  "max_volume": -6.7,
+  "caption_count": 108,
+  "math_caption_count": 9,
+  "max_clock_error": 3.609557097661309e-12,
+  "sync": [
+    {
+      "id": "scene02-04-01",
+      "display": "強すぎる正則化では、必要な曲がり方まで失われます。",
+      "action": "lambda を強へ、訓練と検証の数値を比較",
+      "action_start": 75.33333333333418,
+      "action_end": 79.53333333333394,
+      "pcm_onset": 75.42850000000078
+    },
+    {
+      "id": "scene02-04-02",
+      "display": "訓練誤差が少し増えても、検証誤差が小さい設定を探します。",
+      "action": "lambda を強へ、訓練と検証の数値を比較",
+      "action_start": 79.53333333333394,
+      "action_end": 84.80000000000031,
+      "pcm_onset": 79.61829166666745
+    },
+    {
+      "id": "scene06-04-01",
+      "display": "例として、半径の二乗に横座標の項を加えた関数を考えます。",
+      "action": "角度走査と係数 c を1→0へ",
+      "action_start": 296.9333333333216,
+      "action_end": 301.8666666666547,
+      "pcm_onset": 296.98699999999013
+    },
+    {
+      "id": "scene06-04-02",
+      "display": "横座標の項を弱めると、円周を動いたときの出力変化が小さくなります。",
+      "action": "角度走査と係数 c を1→0へ",
+      "action_start": 301.8666666666547,
+      "action_end": 307.933333333321,
+      "pcm_onset": 301.92383333332344
+    },
+    {
+      "id": "scene08-02-01",
+      "display": "窓の九個の画素と、九個の重みを掛けて足します。",
+      "action": "実際の積和値と特徴マップを順に更新",
+      "action_start": 392.59999999998286,
+      "action_end": 396.19999999998265,
+      "pcm_onset": 392.67824999998334
+    },
+    {
+      "id": "scene08-02-02",
+      "display": "同じ重みを次の位置でも使い、応答を地図に書き込みます。",
+      "action": "実際の積和値と特徴マップを順に更新",
+      "action_start": 396.19999999998265,
+      "action_end": 400.9333333333157,
+      "pcm_onset": 396.2787083333167
+    }
+  ],
+  "sha256": "0e6011384b8d26870f2889ff69a8240320885868d8fd80283669cac494cc2c6f",
+  "full_listen": false
+}

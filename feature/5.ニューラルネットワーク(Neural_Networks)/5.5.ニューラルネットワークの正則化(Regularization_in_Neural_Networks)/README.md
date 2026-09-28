@@ -1,63 +1,79 @@
-# 5.5 ニューラルネットワークの正則化
+# PRML 5.5 ニューラルネットワークの正則化
 
-PRML Chapter 5 の 5.5 節を、重み減衰、早期終了、不変性、タンジェント伝播、変換データ、畳み込みネットワーク、ソフト重み共有の流れとして解説する Manim アニメーションと台本です。
+「点に合えば、よい予測？」から始まり、重み・学習時間・入力変換・共有構造を動かして確かめる、約8分21秒の日本語動画です。
 
-## ファイル
+[音声付き動画（480p15）](media/videos/prml_5_5_regularization_in_neural_networks/480p15/PRML55RegularizationInNeuralNetworks.mp4) / [全文台本](narration_script.md) / [全文読み確認](reading_check.md)
 
-- `prml_5_5_regularization_in_neural_networks.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## シーンと原文
 
-## レンダリング
+Bishop (2006), *Pattern Recognition and Machine Learning*, §5.5、印刷pp.256–272（PDF pp.276–292）。本文を `pdftotext -layout` で抽出し、図5.9–5.17を画像でも確認しました。本節に表はありません。p.272の図5.18は次節5.6の内容です。
 
-Manim は `pangocairo` などの system dependency を必要とします。`uv sync` が `No package 'pangocairo' found` で失敗する場合は、OS 側で Cairo/Pango/pkg-config 関連パッケージを入れてから再実行してください。
-`MathTex` の数式描画には LaTeX と `dvisvgm` も必要です。
+| シーン | 尺（秒） | 視覚的な操作 | 原文 |
+|---|---:|---|---|
+| scene01 点に合えば、よい予測？ | 49.467 | 同じ軸で1・3・10ユニット、初期値4種、検証点を比較 | pp.256–257 / 図5.9–5.10 |
+| scene02 重みを縮めると、曲線はどうなる？ | 52.067 | λの往復で曲線・重みノルム・訓練／検証誤差が連動 | p.257 / 式(5.112) |
+| scene03 同じ関数なのに、重みが違う？ | 57.867 | 入力単位と重みを逆に変換し、ガウス精度と関数を動かす | pp.257–260 / 式(5.113)–(5.124) / 図5.11 |
+| scene04 学習は、いつ止めればよい？ | 53.800 | 学習履歴を走査し保存点へ戻る。二次誤差の同じ地図で比較 | pp.259–262 / 図5.12–5.13 / 演習5.25 |
+| scene05 動かしても、同じ数字？ | 51.667 | 自作の数字2を移動・回転し、4つの導入方法を視覚化 | pp.261–263 / §5.5.3 / 図5.14 |
+| scene06 変換の接線だけ、鈍感にする | 61.867 | 円上の入力・接線・出力・方向微分を同時に更新 | pp.263–265 / 式(5.125)–(5.128) / 図5.15–5.16 |
+| scene07 データを増やすと、微分を抑える？ | 57.400 | 傾きと変換量を動かし、正確な期待誤差と二次近似を比較 | pp.265–267 / 式(5.129)–(5.135)、公式正誤表 |
+| scene08 同じ検出器を、画像の上で動かす | 53.800 | 3×3の共有窓、実際の積和と8×8応答、2×2平均 | pp.267–269 / §5.5.6 / 図5.17 |
+| scene09 重みを、いくつかの群へ集める | 63.467 | ガウス混合・重みの点・負担率・勾配を連動、共同最適化 | pp.269–272 / 式(5.136)–(5.147)、公式正誤表 |
 
-ナレーション入りで再生成する場合は、VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、先に音声を生成します。
+## 数値実験と説明の範囲
+
+- 青：訓練データ、赤：予測、緑：生成関数、橙：検証、紫：正則化、黄：方向・重みの注目箇所。生成関数は答え合わせ用で、学習には渡しません。
+- 訓練10点は `sin(2πx)` に標準偏差0.22のガウスノイズを加えたもの（seed 5506）。独立した検証60点はseed 5507。検証でモデルを選ぶため、最終テスト性能の報告ではありません。
+- 1入力・1線形出力のtanhネットワークをNumPyで実装。隠れユニット1、3、10の最適化にはSciPy L-BFGS-Bを使います。初期値比較はM=10、seed 550、551、553、554。曲線の間の変形は学習過程を表しません。
+- 重み減衰は全重み・バイアスの二乗和を対象とします。λ=10⁻⁵〜10の49設定を弱い側から順に最適化し、描画時の途中値は隣接解の重みを補間します。非凸最適化の局所解で、全域最適解の保証はありません。画面のデータ誤差は E/N = MSE/2 です。
+- このデータで検証MSEはλ≈0.001778で0.047258、弱いλでは0.068434。重みノルムは弱い側23.7445、強い側0.009008です。
+- 早期終了の履歴はAdam、学習率0.025、4000更新、20更新ごとに記録。検証最小は220更新（MSE 0.051490）、最終0.080871。後半の等高線は別の二次誤差で、ヘッセ固有値(0.35,3)、学習率0.25、原点初期化です。二次誤差の解析と、非線形ネットワークの実測を区別します。
+- 整合的な事前では、第1層・第2層の重みを分け、バイアスを除く式(5.121)を表示します。バイアスを無制約にした事前は規格化できず、別の事前を置くと平行移動不変性が破れます。関数標本は3本、12隠れユニット、seed 5511。入力側／出力側重みの精度を1〜16で変更し、バイアスの精度は1です。
+- 接線の例は回転 `s(x,ξ)=R(ξ)x` と `y=||x||²+c x₁`。`Jτ=−c x₂` を計算し、c→0で回転への感度が消えます。局所的な不変性を扱い、任意の大変換への保証はしません。
+- データ拡張は、平均0・小分散の変換の二次展開です。一般には残差×二階微分の項も残ります。無限データ極限で条件付き平均に近い解という条件を示して式(5.134)へ進みます。等方的な微小ノイズの場合が式(5.135)です。
+- ノイズ数値例は `y(x)=a x+x², x=0, t=−0.3, ξ=±ε`。二次近似との差は厳密にε⁴/2です。ε=0.6、0.2、0.04で、それぞれ0.0648、0.0008、0.00000128になります。
+- 畳み込みは自作10×10画像、3×3カーネル、valid相互相関（学習用CNNの慣例）、sigmoid、バイアス0。9重みと1バイアスを共有し8×8応答を作ります。2×2平均の後、a=1、b=0のsigmoidで4×4へ。原文の平均型サブサンプリングを再現し、max poolingへ置き換えていません。移動同変性と完全な不変性を区別します。
+- ソフト重み共有は2成分のガウス混合。負担率とその重み付き勾配を計算し、最近傍の中心への割当てにはしていません。最後の共同更新は説明用データ項 `2||w−target||²+Ω`、学習率0.008、100更新です。μ・対数分散・softmax logitsも同時に更新し、目的関数は14.089588→11.241444。これは前半のネットワークを再学習した例ではありません。
+- 正分散のパラメータ化だけでは、混合成分が一点へ崩壊する特異解を防ぎ切れません。動画で注意を付けています。式(5.142)〜(5.147)の全微分導出、ARD、tangent distanceの詳細は8分台の本編では省略します。
+
+## 原文の正誤への対応
+
+[著者公式の初刷正誤表](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/05/prml-errata-1st-20110921.pdf) のpp.13–14を照合しました。図5.11の精度ラベル、p.262のapproach参照、式(5.132)の1/2、式(5.133)の次数、式(5.142)の添字、分散パラメータと混合比パラメータの区別に注意しています。ソフト重み共有の映像では正誤表に従い独立なλを省き、データ項+Ωで表します。
+
+p.259に印刷された重みのスケーリング係数は式(5.116)、(5.119)、(5.121)へ代入すると整合しません。入力をa倍・出力をc倍とする場合、ペナルティを保つ係数はλ₁→a²λ₁、λ₂→c⁻²λ₂です。これは式への直接代入で確認した訂正で、上記正誤表に掲載された訂正とは区別します。数値検証にも含めています。
+
+## 参照した演出
+
+[3b1b/videos](https://github.com/3b1b/videos) と [3b1b/manim](https://github.com/3b1b/manim) を参照し、Manim CEで実装しました。ManimGLのソースは取り込んでいません。
+
+- `_2017/nn/part2.py`: `FunctionMinmization`の連続更新、`TrainingVsTestData`のデータ分離。点→誤差→最適化の順序と、同じ座標上での比較に使用。
+- `_2017/nn/part3.py`: `InterpretGradientComponents`。数式の成分と変化する対象を対応させ、接線方向の反応・ソフト共有の力を可視化。
+- `_2017/nn/network.py`: 順伝播・重みとバイアスの区別を参照。数値計算は独自のtanh回帰として実装。
+- `_2017/gradient.py`: 変数のつまみと表示値の連動。学習時間・正則化係数・方向微分に使用。
+- `_2023/gauss_int/herschel.py`: 同じ座標系でガウスの幅を変える演出。ガウス事前・混合密度に使用。
+- `manimlib/mobject/value_tracker.py`: 状態を一つの値で持ち、図形・数値をその状態へ連動させる設計。
+- リポジトリ1.1の字幕の日本語実測高・数式本体中心合わせ、display/speech分離、PCM時刻・ハッシュ検証を移植。3.1・3.3の正則化／事前の説明と4.4・5.4の二次形式の説明・検証構成も参照。
+
+## 再生成と検証
+
+元のファイル名・クラス名を維持しています。対象ディレクトリで次を実行します。VOICEVOX Engineは既存の `http://127.0.0.1:50021` を使用します。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_5_5_regularization_in_neural_networks.py PRML55RegularizationInNeuralNetworks
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_5_5_regularization_in_neural_networks.py PRML55RegularizationInNeuralNetworks
+/home/t-tsuji/project/prml-manim/.venv/bin/python validate_video.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python review_video.py
 ```
 
-生成済み動画:
+`--from-scene sceneNN` で音声生成を再開できます。9本のWAV、全108文・54操作の長さと字幕をmanifestへ保存し、レンダリング時はハッシュ不一致をエラーにします。各文のPCM時間に動作を割り当て、操作の末尾だけ短い間を置きます。
 
-```text
-media/videos/prml_5_5_regularization_in_neural_networks/480p15/PRML55RegularizationInNeuralNetworks.mp4
-```
-
-高品質で出力する場合:
-
-```bash
-uv run manim -pqh prml_5_5_regularization_in_neural_networks.py PRML55RegularizationInNeuralNetworks
-```
-
-## 原文参照
-
-主に `.working/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf` の以下を参照しています。
-
-- Section 5.5: Regularization in Neural Networks
-- Figure 5.9, Figure 5.10: hidden units and local minima
-- Eq. (5.112): weight decay
-- Section 5.5.1: consistent Gaussian priors
-- Figure 5.11: prior hyperparameters for layers, weights, and biases
-- Section 5.5.2, Figure 5.12, Figure 5.13: early stopping
-- Section 5.5.3: invariances and four approaches
-- Section 5.5.4, Eq. (5.125) to Eq. (5.128): tangent propagation
-- Section 5.5.5: training with transformed data and Tikhonov regularization
-- Section 5.5.6: convolutional networks
-- Section 5.5.7: soft weight sharing
-
-## 制作方針
-
-- PRML の図を直接複製せず、同じ構造を自作データと自作レイアウトで再構成する。
-- 重み減衰は `lambda` スライダーと係数バーの縮小で、曲線の暴れが抑えられる様子として見せる。
-- 早期終了は訓練誤差と検証誤差の分岐、重み空間の停止点を同時に見せる。
-- 不変性は「データ拡張」「正則化項」「特徴抽出」「構造」の四分類として整理する。
-- タンジェント伝播は、入力変換の接線方向と `J tau` の小ささを可視化する。
-- 畳み込みネットワークは、局所受容野、重み共有、サブサンプリングを一つの流れで示す。
+`numerical_results.json`、`caption_validation.json`、`validation_results.json`、`scene_timeline.json`、`review_frames.json` は検証結果です。画像・TeX・partial_movie_filesは再生成可能な一時ファイルとしてGitへ含めません。最終動画はH.264 501.400秒、AAC 501.440秒（差0.040秒）。3秒以上の無音0件、平均−26.2 dB、最大−6.7 dB。全54操作・全9記号字幕・3シーンの同期前後を含む70枚を抽出して目視確認しました。実測値は作業レポートにも記載します。全編の通し聴取、全フレームの人手検査、高解像度版のレンダリングは未実施です。
 
 ## 音声クレジット
 
-- ナレーション: VOICEVOX:WhiteCUL
+ナレーション: **VOICEVOX:WhiteCUL**（ノーマル、speaker 23）。Engine 0.25.2、話速1.08、抑揚0.95。

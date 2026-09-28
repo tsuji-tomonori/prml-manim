@@ -1,537 +1,369 @@
-from __future__ import annotations
-
-import math
-import wave
+"""PRML 5.5: linked numerical experiments in Manim Community."""
 from pathlib import Path
-
+import json
+import re
 import numpy as np
 from manim import *
+import regularization_model as model
+from video_support import jp,tex,caption_mobject
+from narration_content import SCENES
+from make_voicevox_narration import MANIFEST,OUTPUT_DIR,valid_entry
+
+BLUE_DATA=ManimColor('#58B5ED'); RED_MODEL=ManimColor('#FF6B77')
+GREEN_TRUE=ManimColor('#77D49A'); PURPLE_REG=ManimColor('#C29AFF')
+ORANGE_VAL=ManimColor('#FFB45B'); YELLOW_TERM=ManimColor('#FFE079')
+MUTED=ManimColor('#A8B2C5');BG='#10141F'
 
 
-BLUE_DATA = BLUE_C
-MODEL_RED = RED_C
-REG_PURPLE = PURPLE_C
-TRUE_GREEN = GREEN_C
-VALID_ORANGE = ORANGE
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def line(points,color=RED_MODEL,width=3):
+    return VMobject().set_points_as_corners(points).set_stroke(color,width)
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def curve(ax,x,y,color=RED_MODEL):
+    origin=ax.c2p(0,0);dx=ax.c2p(1,0)-origin;dy=ax.c2p(0,1)-origin
+    return line(origin+np.asarray(x)[:,None]*dx+np.asarray(y)[:,None]*dy,color)
 
 
-def make_sine_data(n: int = 12, seed: int = 55) -> tuple[np.ndarray, np.ndarray]:
-    rng = np.random.default_rng(seed)
-    x = np.linspace(0.05, 0.95, n)
-    y = np.sin(2.0 * np.pi * x) + rng.normal(0.0, 0.22, size=n)
-    return x, y
+def axes(xrange=(0,1,.25),yrange=(-1.5,1.5,1),center=(-1.1,.0,0),width=8,height=3.65,xlabel='x',ylabel='y'):
+    ax=Axes(x_range=xrange,y_range=yrange,x_length=width,y_length=height,tips=False,
+            axis_config={'color':MUTED,'stroke_width':1.3,'include_numbers':True,'font_size':18})
+    ax.move_to(center)
+    labels=VGroup(tex(xlabel,24,MUTED).next_to(ax.x_axis.get_right(),RIGHT,buff=.15),
+                  tex(ylabel,24,MUTED).next_to(ax.y_axis.get_top(),UP,buff=.13))
+    return ax,VGroup(ax,labels)
 
 
-def true_function(x: float | np.ndarray) -> float | np.ndarray:
-    return np.sin(2.0 * np.pi * x)
+def readout(label,getter,pos,color=WHITE,places=3):
+    prefix=tex(label,26,color);num=DecimalNumber(getter(),num_decimal_places=places,font_size=26,color=color)
+    group=VGroup(prefix,num).arrange(RIGHT,buff=.13).move_to(pos)
+    anchor=num.get_left().copy()
+    num.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return group
 
 
-def overfit_function(x: float | np.ndarray, amplitude: float = 0.34) -> float | np.ndarray:
-    return np.sin(2.0 * np.pi * x) + amplitude * np.sin(14.0 * np.pi * x)
-
-
-def gaussian_pdf(x: float, mu: float, sigma: float) -> float:
-    return math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * math.sqrt(2.0 * math.pi))
+def pixels(data,cell=.30,center=(0,0,0),signed=False):
+    rows,cols=data.shape
+    squares=VGroup()
+    for i in range(rows):
+        for j in range(cols):
+            value=float(data[i,j]);color=BLUE_DATA if value>=0 else ORANGE_VAL
+            sq=Square(cell,stroke_width=.7,stroke_color='#424B5C')
+            sq.set_fill(color,opacity=min(abs(value)/(3 if signed else 1),1))
+            sq.move_to([(j-(cols-1)/2)*cell,((rows-1)/2-i)*cell,0]);squares.add(sq)
+    return squares.move_to(center)
 
 
 class PRML55RegularizationInNeuralNetworks(Scene):
-    """PRML 5.5 regularization in neural networks overview.
+    def construct(self):
+        self.camera.background_color=BG
+        self.timeline=[]
+        entries=json.loads(MANIFEST.read_text())['scenes']
+        self.entries={e['id']:e for e in entries}
+        for i,method in enumerate([self.question,self.decay,self.priors,self.stopping,self.invariance,
+                                   self.tangent,self.augmentation,self.convolution,self.soft_sharing]):
+            self.begin(i);method()
+            assert self.beat_index==len(self.story['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        Path('scene_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-    Render example:
-        uv run manim -pql prml_5_5_regularization_in_neural_networks.py PRML55RegularizationInNeuralNetworks
-    """
+    def begin(self,i):
+        self.clear();self.story=SCENES[i];self.beat_index=0;self.caption=None;self.formula=None;self.note=None
+        self.entry=self.entries[self.story['id']]
+        if not valid_entry(self.story,self.entry):raise ValueError('Audio and script mismatch')
+        self.scene_start=float(self.time)
+        self.add(jp(self.story['title'],32).move_to([0,3.45,0]))
+        self.add(Line([-6.7,-2.91,0],[6.7,-2.91,0],color=MUTED,stroke_opacity=.22))
+        self.add_sound(str(OUTPUT_DIR/f"{self.story['id']}.wav"))
+        self.timeline.append(dict(id=self.story['id'],title=self.story['title'],reference=self.story['reference'],start=self.scene_start,beats=[]))
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.x_train, self.y_train = make_sine_data()
+    def equation(self,expression,size=31):
+        if self.formula is not None:self.remove(self.formula)
+        parts=[p for p in re.split(r'(\\lambda|\\alpha|\\Omega|\\tau)',expression) if p]
+        self.formula=MathTex(*parts,font_size=size,arg_separator='').move_to([0,2.53,0])
+        self.formula.set_color_by_tex_to_color_map({r'\lambda':PURPLE_REG,r'\alpha':PURPLE_REG,r'\Omega':PURPLE_REG,r'\tau':YELLOW_TERM})
+        if self.formula.width>12.4:raise ValueError('Equation too wide: '+expression)
+        self.add(self.formula)
+        return self.formula
 
-        self.opening_capacity_control()
-        self.weight_decay()
-        self.gaussian_priors()
-        self.early_stopping()
-        self.invariances()
-        self.tangent_propagation()
-        self.transformed_data()
-        self.convolutional_networks()
-        self.soft_weight_sharing()
+    def label(self,message,color=MUTED):
+        if self.note is not None:self.remove(self.note)
+        self.note=jp(message,21,color).move_to([0,-2.55,0]);self.add(self.note)
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+    def beat(self,*factories):
+        b=self.story['beats'][self.beat_index]
+        cues=[c for c in self.entry['subtitle_cues'] if c['beat_index']==self.beat_index]
+        record=dict(start=float(self.time),visual=b['visual_note'],cues=[],actions=[])
+        for i,c in enumerate(cues):
+            if self.caption is not None:self.remove(self.caption)
+            self.caption=caption_mobject(c['display']);self.add(self.caption)
+            end=cues[i+1]['start'] if i+1<len(cues) else sum(self.entry['beat_durations'][:self.beat_index+1])
+            absolute_end=self.scene_start+end
+            frames=round((absolute_end-float(self.time))*config.frame_rate)
+            factory=factories[min(i,len(factories)-1)]
+            action=factory()
+            start=float(self.time)
+            self.play(action,run_time=(frames-1e-5)/config.frame_rate,rate_func=linear)
+            record['cues'].append(dict(id=c['id'],display=c['display'],start=self.scene_start+c['start'],end=self.scene_start+c['end']))
+            record['actions'].append(dict(name=b['visual_note'],start=start,end=float(self.time)))
+        record['end']=float(self.time);self.timeline[-1]['beats'].append(record);self.beat_index+=1
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def regression(self,getter):
+        ax,group=axes();self.add(group)
+        data=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=BLUE_DATA) for x,t in zip(model.X,model.T)])
+        truth=curve(ax,model.GRID,np.sin(2*np.pi*model.GRID),GREEN_TRUE).set_stroke(opacity=.35)
+        pred=always_redraw(lambda:curve(ax,model.GRID,model.predict(getter(),model.GRID)))
+        self.add(truth,data,pred)
+        return ax,group,data,pred
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def question(self):
+        w=model.fit(1);ax,group,data,pred=self.regression(lambda:w)
+        m_count=ValueTracker(1);self.add(readout('M=',m_count.get_value,[4.6,1.0,0],YELLOW_TERM,0))
+        self.remove(pred);self.label('青：訓練データ　緑：生成関数（答え合わせ用）　赤：予測')
+        self.beat(lambda:LaggedStart(*[Indicate(d,color=BLUE_DATA) for d in data],lag_ratio=.15),lambda:Create(pred))
+        pred.clear_updaters();self.remove(pred);pred=curve(ax,model.GRID,model.predict(w,model.GRID));self.add(pred)
+        self.equation(r'y(x)=\sum_{j=1}^{M}v_j\tanh(a_jx+b_j)+c')
+        self.label('同じ座標系で比較：隠れユニット数 1 → 3 → 10')
+        self.beat(lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(3),model.GRID))),UpdateFromAlphaFunc(m_count,lambda m,a:m.set_value(3))),lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(10),model.GRID))),UpdateFromAlphaFunc(m_count,lambda m,a:m.set_value(10))))
+        validation=VGroup(*[Dot(ax.c2p(x,t),radius=.025,color=ORANGE_VAL) for x,t in zip(model.XV,model.TV)])
+        self.beat(lambda:Create(validation),lambda:Indicate(pred,color=ORANGE_VAL,scale_factor=1))
+        self.label('M = 10 を固定。初期値だけを変更')
+        variants=[curve(ax,model.GRID,model.predict(model.fit(10,s),model.GRID)) for s in [551,553,554,550]]
+        self.beat(lambda:Succession(Transform(pred,variants[0]),Transform(pred,variants[1])),lambda:Succession(Transform(pred,variants[2]),Transform(pred,variants[3])))
+        residual=VGroup(*[Line(ax.c2p(x,t),ax.c2p(x,float(model.predict(model.fit(10),x))),color=ORANGE_VAL,stroke_width=2) for x,t in zip(model.XV[::4],model.TV[::4])])
+        self.beat(lambda:Create(residual),lambda:Indicate(validation,color=ORANGE_VAL,scale_factor=1))
+        self.label('正則化：予測に必要な自由度を選ぶ',PURPLE_REG)
+        self.equation(r'\widetilde E(\mathbf w)=E(\mathbf w)+\frac{\lambda}{2}\|\mathbf w\|^2')
+        self.beat(lambda:FadeOut(residual),lambda:Indicate(self.formula,color=PURPLE_REG))
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def decay(self):
+        knob=ValueTracker(-5);get=lambda:model.ridge_weights(knob.get_value())
+        ax,group,data,pred=self.regression(get)
+        self.equation(r'\widetilde E=\underbrace{E}_{\text{data}}+\underbrace{\frac{\lambda}{2}\|\mathbf w\|^2}_{\text{weights}}')
+        track=Line([3.5,-1.6,0],[6.2,-1.6,0],color=PURPLE_REG)
+        dot=always_redraw(lambda:Dot(track.point_from_proportion((knob.get_value()+5)/6),color=PURPLE_REG))
+        self.add(track,dot,readout(r'\log_{10}\lambda=',knob.get_value,[4.8,-1.1,0],PURPLE_REG,2),
+                 readout(r'\|w\|=',lambda:np.linalg.norm(get()),[4.8,1.15,0],PURPLE_REG),
+                 readout(r'E_{\rm train}/N=',lambda:.5*model.mse(get()),[4.8,.5,0],BLUE_DATA),
+                 readout(r'E_{\rm val}/N_v=',lambda:.5*model.mse(get(),model.XV,model.TV),[4.8,-.15,0],ORANGE_VAL))
+        self.label('隠れユニット数10。全重み・バイアスに二乗正則化')
+        self.beat(lambda:knob.animate.set_value(-4),lambda:knob.animate.set_value(-3))
+        self.beat(lambda:Indicate(data,color=BLUE_DATA,scale_factor=1),lambda:knob.animate.set_value(-2.5))
+        self.beat(lambda:knob.animate.set_value(-4),lambda:knob.animate.set_value(-5))
+        self.beat(lambda:knob.animate.set_value(1),lambda:knob.animate.set_value(-3))
+        self.equation(r'\mathbf w^+=(1-\eta\lambda)\mathbf w-\eta\nabla E(\mathbf w)',32)
+        self.label('η：学習率　　紫のつまみと、曲線・誤差・重みが連動',PURPLE_REG)
+        self.beat(lambda:knob.animate.set_value(-2),lambda:knob.animate.set_value(-1))
+        self.beat(lambda:knob.animate.set_value(-3),lambda:Indicate(self.formula,color=PURPLE_REG))
 
-    def make_regression_axes(self, width: float = 6.8, height: float = 3.9) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[-1.5, 1.5, 0.5],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
+    def priors(self):
+        scale=ValueTracker(1)
+        self.equation(r'\widetilde x=ax,\quad \widetilde w=w/a,\quad \widetilde w\widetilde x=wx')
+        self.add(readout('a=',scale.get_value,[-4,1,0],BLUE_DATA),readout(r'\widetilde x=',lambda:2*scale.get_value(),[-1.3,1,0],BLUE_DATA),
+                 readout(r'\widetilde w=',lambda:3/scale.get_value(),[1.6,1,0],PURPLE_REG),readout(r'\widetilde w\widetilde x=',lambda:6,[4.9,1,0],GREEN_TRUE))
+        bar=always_redraw(lambda:Rectangle(width=5/scale.get_value()**2,height=.42,color=PURPLE_REG,fill_opacity=.75).move_to([-4.5,-.3,0],aligned_edge=LEFT))
+        self.add(bar,readout(r'\widetilde w^2=',lambda:9/scale.get_value()**2,[2.8,-.3,0],PURPLE_REG))
+        self.label('同じ入力の意味、同じ予測。重みの数値だけが変わる')
+        self.beat(lambda:scale.animate.set_value(1.5),lambda:scale.animate.set_value(2))
+        self.beat(lambda:scale.animate.set_value(1),lambda:scale.animate.set_value(2))
+        self.equation(r'\widetilde x=ax+b,\quad \widetilde w=w/a,\quad \widetilde b_0=b_0-wb/a',29)
+        self.beat(lambda:Indicate(self.formula,color=BLUE_DATA),lambda:Indicate(self.equation(r'\frac{\lambda_1}{2}\sum_{w\in W_1}w^2+\frac{\lambda_2}{2}\sum_{w\in W_2}w^2\quad\text{(bias excluded)}',30),color=PURPLE_REG))
+        self.remove(*[m for m in self.mobjects if m not in [self.caption,self.formula,self.note] and m.get_center()[1]<2.9])
+        alpha=ValueTracker(1);ax,g=axes((-3,3,1),(0,1.3,.5),center=(-3,.1,0),width=5,height=3)
+        gaussian=always_redraw(lambda:curve(ax,np.linspace(-3,3,161),np.sqrt(alpha.get_value()/(2*np.pi))*np.exp(-.5*alpha.get_value()*np.linspace(-3,3,161)**2),PURPLE_REG))
+        self.add(g,gaussian,readout(r'\alpha=',alpha.get_value,[-3,-1.85,0],PURPLE_REG,2))
+        self.equation(r'p(w)\propto e^{-\alpha w^2/2},\qquad \operatorname{Var}(w)=\alpha^{-1}')
+        self.beat(lambda:alpha.animate.set_value(2),lambda:alpha.animate.set_value(8))
+        a1=ValueTracker(1);a2=ValueTracker(1);rng=np.random.default_rng(5511)
+        samples=rng.normal(size=(3,3*12+1));fx=np.linspace(-1,1,121)
+        bx,bg=axes((-1,1,1),(-3,3,1),center=(3.35,.15,0),width=5.1,height=3,xlabel='x',ylabel='y')
+        colors=[BLUE_DATA,GREEN_TRUE,ORANGE_VAL]
+        def sample(j):
+            w=samples[j].copy();w[:12]/=np.sqrt(a1.get_value());w[24:36]/=np.sqrt(a2.get_value());return model.predict(w,fx)
+        curves=always_redraw(lambda:VGroup(*[curve(bx,fx,sample(j),colors[j]) for j in range(3)]))
+        self.add(bg,curves,readout(r'\alpha_1^w=',a1.get_value,[2,-2.05,0],PURPLE_REG,1),readout(r'\alpha_2^w=',a2.get_value,[4.8,-2.05,0],PURPLE_REG,1))
+        self.label('同じ標準正規乱数を使用。入力側と出力側の精度を別々に操作')
+        self.beat(lambda:a2.animate.set_value(16),lambda:a1.animate.set_value(16))
+        self.equation(r'p(\mathbf w)\propto\exp\!\left(-\frac12\sum_k\alpha_k\|\mathbf w\|_k^2\right)',31)
+        self.beat(lambda:a2.animate.set_value(1),lambda:a1.animate.set_value(1))
 
-    def plot_function(self, axes: Axes, func, color: ManimColor, width: float = 4.0, opacity: float = 1.0) -> VMobject:
-        curve = axes.plot(lambda u: float(func(u)), x_range=[0, 1], color=color, use_smoothing=False)
-        curve.set_stroke(width=width, opacity=opacity)
-        return curve
+    def stopping(self):
+        weights,tr,va=model.training_history();tick=ValueTracker(0);best=int(np.argmin(va))
+        ax,g=axes((0,4000,1000),(0,.25,.05),center=(0,.15,0),width=10.5,height=3.6,xlabel='t',ylabel='E/N')
+        self.add(g)
+        def history(vals,color):
+            q=tick.get_value();n=max(1,int(q));xx=np.r_[np.arange(n),q]*20;yy=np.r_[vals[:n],np.interp(q,np.arange(len(vals)),vals)]*.5
+            return curve(ax,xx,yy,color)
+        paths=always_redraw(lambda:VGroup(history(tr,BLUE_DATA),history(va,ORANGE_VAL)))
+        marker=always_redraw(lambda:Line(ax.c2p(tick.get_value()*20,0),ax.c2p(tick.get_value()*20,.25),color=YELLOW_TERM))
+        self.add(paths,marker);self.equation(r't_* = \arg\min_t E_{\rm validation}(\mathbf w_t)')
+        self.label('青：訓練誤差　橙：検証誤差　　自作データで実際に学習')
+        self.beat(lambda:tick.animate.set_value(25),lambda:tick.animate.set_value(200))
+        bestdot=Dot(ax.c2p(best*20,.5*va[best]),color=ORANGE_VAL,radius=.08)
+        self.beat(lambda:FadeIn(bestdot),lambda:tick.animate.set_value(best))
+        self.remove(g,paths,marker,bestdot)
+        ax,g=axes((0,3.4,1),(0,2.5,1),center=(0,.1,0),width=8,height=3.5,xlabel='w_1',ylabel='w_2')
+        self.add(g);theta=np.linspace(0,2*np.pi,181)
+        contours=VGroup(*[curve(ax,model.WML[0]+r/np.sqrt(model.H[0])*np.cos(theta),model.WML[1]+r/np.sqrt(model.H[1])*np.sin(theta),MUTED).set_stroke(opacity=.4) for r in [.15,.3,.45]])
+        self.equation(r'E=\frac12\sum_i h_i(w_i-w_{{\rm ML},i})^2,\quad (h_1,h_2)=(0.35,3)')
+        self.label('ここからは仕組みを見る二次誤差の例。原点から勾配降下')
+        self.beat(lambda:Create(contours),lambda:Indicate(contours,scale_factor=1))
+        time=ValueTracker(0);point=always_redraw(lambda:Dot(ax.c2p(*model.early_point(time.get_value())),color=YELLOW_TERM))
+        trace=always_redraw(lambda:curve(ax,*np.array([model.early_point(t) for t in np.linspace(0,max(.001,time.get_value()),80)]).T,YELLOW_TERM))
+        self.add(point,trace)
+        self.beat(lambda:time.animate.set_value(2),lambda:time.animate.set_value(7))
+        lam=ValueTracker(20);ridge=always_redraw(lambda:Dot(ax.c2p(*model.ridge_point(lam.get_value())),color=PURPLE_REG))
+        ridgepath=curve(ax,*np.array([model.ridge_point(l) for l in np.geomspace(40,.01,160)]).T,PURPLE_REG)
+        self.add(ridge);self.label('黄：早期終了の軌跡　紫：重み減衰の解　　似ているが一致しない')
+        self.beat(lambda:Create(ridgepath),lambda:lam.animate.set_value(.5))
+        self.equation(r'\frac{w_i(t)}{w_{{\rm ML},i}}=1-(1-\eta h_i)^t,\quad \frac{w_i(\lambda)}{w_{{\rm ML},i}}=\frac{h_i}{h_i+\lambda}',29)
+        self.beat(lambda:time.animate.set_value(15),lambda:lam.animate.set_value(.05))
 
-    def make_data_dots(self, axes: Axes) -> VGroup:
-        return VGroup(
-            *[
-                Dot(axes.c2p(float(x), float(y)), radius=0.06, color=BLUE_DATA)
-                for x, y in zip(self.x_train, self.y_train)
-            ]
-        )
+    def invariance(self):
+        digit=pixels(model.DIGIT,.38,(-3,.1,0));self.add(digit)
+        output=tex(r'\text{class}=2',40,GREEN_TRUE).move_to([3,.1,0]);self.add(output)
+        arrow=Arrow([-1.4,.1,0],[1.7,.1,0],color=MUTED);self.add(arrow)
+        self.equation(r'y(s(\mathbf x,\xi))\approx y(\mathbf x)')
+        self.label('意味を保つ変換を選ぶ：移動、小さな回転、拡縮')
+        self.beat(lambda:digit.animate.shift(RIGHT*.7),lambda:Indicate(output,color=GREEN_TRUE))
+        self.beat(lambda:Rotate(digit,.15),lambda:digit.animate.scale(.85))
+        copies=VGroup(*[digit.copy().scale(.55).move_to([x,-.1,0]) for x in [-4.5,-2.7,-.9]])
+        arrow.put_start_and_end_on([-.3,.1,0],[1.7,.1,0])
+        self.beat(lambda:Transform(digit,copies),lambda:Indicate(output,color=GREEN_TRUE))
+        self.remove(digit,arrow,output)
+        ax,g=axes((-1,1,1),(0,1,.5),center=(0,.1,0),width=8,height=3.2,xlabel=r'\xi',ylabel='y')
+        response=ValueTracker(.38);u=np.linspace(-1,1,121)
+        graph=always_redraw(lambda:curve(ax,u,.5+response.get_value()*np.sin(2*u)))
+        self.add(g,graph);self.label('二つ目：変換量に対する出力の変化を小さくする',PURPLE_REG)
+        self.beat(lambda:response.animate.set_value(.2),lambda:response.animate.set_value(.015))
+        self.remove(g,graph);digit=pixels(model.DIGIT,.3,(-3,.1,0));self.add(digit)
+        total=tex(r'\sum_i x_i='+str(int(model.DIGIT.sum())),40,GREEN_TRUE).move_to([2.4,.1,0]);self.add(total)
+        shuffled=model.DIGIT.ravel()[np.random.default_rng(5).permutation(model.DIGIT.size)].reshape(model.DIGIT.shape)
+        self.label('三つ目：総画素値は位置に依存しないが、形の情報を失う')
+        self.beat(lambda:digit.animate.shift(RIGHT*.5),lambda:Transform(digit,pixels(shuffled,.3,(-2.5,.1,0))))
+        patch=Square(.9,color=YELLOW_TERM).move_to([-2.5,.1,0]);self.add(patch)
+        self.label('四つ目：同じ局所検出器を各位置で使う構造')
+        self.beat(lambda:patch.animate.shift(UP*.6),lambda:patch.animate.shift(DOWN*1.2))
 
-    def make_lambda_slider(self, values: list[str], index: int) -> tuple[VGroup, Dot]:
-        line = Line(LEFT * 2.25, RIGHT * 2.25, color=GREY_B, stroke_width=4)
-        ticks = VGroup()
-        labels = VGroup()
-        for i, value in enumerate(values):
-            point = line.point_from_proportion(i / (len(values) - 1))
-            ticks.add(Line(point + DOWN * 0.08, point + UP * 0.08, color=GREY_B, stroke_width=3))
-            labels.add(Text(value, font_size=16, color=TEXT_GREY).next_to(point, DOWN, buff=0.12))
-        knob = Dot(line.point_from_proportion(index / (len(values) - 1)), color=REG_PURPLE, radius=0.09)
-        title = MathTex(r"\lambda", font_size=34, color=REG_PURPLE).next_to(line, UP, buff=0.12)
-        return VGroup(line, ticks, labels, title), knob
+    def tangent(self):
+        angle=ValueTracker(.45);c=ValueTracker(1)
+        ax,g=axes((-1.5,1.5,1),(-1.5,1.5,1),center=(-2.65,.0,0),width=3.7,height=3.7,xlabel='x_1',ylabel='x_2');self.add(g)
+        th=np.linspace(0,2*np.pi,181);circle=curve(ax,np.cos(th),np.sin(th),BLUE_DATA);self.add(circle)
+        x=lambda:np.array([np.cos(angle.get_value()),np.sin(angle.get_value())])
+        dot=always_redraw(lambda:Dot(ax.c2p(*x()),color=BLUE_DATA))
+        tau=always_redraw(lambda:Arrow(ax.c2p(*x()),ax.c2p(*(x()+.55*model.tangent(x()))),buff=0,color=YELLOW_TERM))
+        self.add(dot);self.equation(r'\mathbf s(\mathbf x,\xi)=R(\xi)\mathbf x')
+        self.label('回転の軌道を、2次元の入力空間で見る')
+        self.beat(lambda:angle.animate.set_value(1.2),lambda:angle.animate.set_value(3.7))
+        self.equation(r'\tau=\left.\frac{\partial s}{\partial\xi}\right|_0,\qquad \tau=(-x_2,x_1)^T')
+        self.beat(lambda:Create(tau.update()),lambda:angle.animate.set_value(.8))
+        self.equation(r'\frac{\partial y}{\partial\xi}=J\tau,\qquad y=x_1^2+x_2^2+c x_1')
+        sens=readout(r'J\tau=',lambda:model.sensitivity(x(),c.get_value()),[3.5,.8,0],YELLOW_TERM)
+        value=readout('y=',lambda:model.radial(x(),c.get_value()),[3.5,.0,0],RED_MODEL)
+        coef=readout('c=',c.get_value,[3.5,-.8,0],PURPLE_REG)
+        self.add(sens,value,coef)
+        self.beat(lambda:angle.animate.set_value(2.2),lambda:angle.animate.set_value(.8))
+        self.beat(lambda:angle.animate.set_value(2.2),lambda:AnimationGroup(c.animate.set_value(0),angle.animate.set_value(4)))
+        self.equation(r'\widetilde E=E+\lambda\Omega,\qquad \Omega=\frac12\sum_{n,k}(J_{nk}\tau_n)^2')
+        self.label('c = 0：円周上で y = 1、回転方向の微分は0',GREEN_TRUE)
+        self.beat(lambda:angle.animate.set_value(5.4),lambda:angle.animate.set_value(.45))
+        self.remove(sens,value,coef);angle.set_value(0);eps=ValueTracker(.02);base=np.array([1.,0.])
+        approx=always_redraw(lambda:Dot(ax.c2p(*(base+eps.get_value()*model.tangent(base))),color=PURPLE_REG))
+        actual=always_redraw(lambda:Dot(ax.c2p(*model.rotate(base,eps.get_value())),color=ORANGE_VAL))
+        self.add(approx,actual);self.equation(r'\tau\approx\frac{s(x,\epsilon)-x}{\epsilon},\quad x+\epsilon\tau\approx s(x,\epsilon)')
+        self.label('紫：接線近似　橙：真の回転　　局所的な一致')
+        self.beat(lambda:eps.animate.set_value(.8),lambda:eps.animate.set_value(.03))
 
-    def make_weight_bars(self, magnitudes: list[float], color: ManimColor) -> VGroup:
-        bars = VGroup()
-        for i, magnitude in enumerate(magnitudes):
-            height = max(0.08, 0.44 * magnitude)
-            bar = Rectangle(width=0.22, height=height, stroke_width=1.5, fill_color=color, fill_opacity=0.75)
-            bar.move_to(RIGHT * (i - (len(magnitudes) - 1) / 2.0) * 0.34 + UP * height / 2)
-            bars.add(bar)
-        baseline = Line(LEFT * 1.35, RIGHT * 1.35, color=GREY_B, stroke_width=2)
-        title = Text("重みの大きさ", font_size=20, color=TEXT_GREY).next_to(bars, UP, buff=0.18)
-        group = VGroup(baseline, bars, title)
-        return group
+    def augmentation(self):
+        eps=ValueTracker(.12);slope=ValueTracker(1.2);swing=ValueTracker(-1)
+        ax,g=axes((-1,1,.5),(-.7,3,1),center=(-2,.05,0),width=6.5,height=3.5);self.add(g)
+        u=np.linspace(-1,1,181)
+        graph=always_redraw(lambda:curve(ax,u,slope.get_value()*u+u*u))
+        dot=always_redraw(lambda:Dot(ax.c2p(swing.get_value()*eps.get_value(),slope.get_value()*swing.get_value()*eps.get_value()+(swing.get_value()*eps.get_value())**2),color=BLUE_DATA))
+        self.add(graph,dot);self.equation(r'\xi\in\{-\epsilon,+\epsilon\},\quad \mathbb E[\xi]=0,\quad\mathbb E[\xi^2]=\epsilon^2')
+        self.label('自作例：y(x) = a x + x²、中心 x = 0、目標 t = −0.3')
+        self.beat(lambda:swing.animate.set_value(1),lambda:swing.animate.set_value(-1))
+        exact=readout(r'\mathbb E[E_\xi]=',lambda:model.noise_example(eps.get_value(),slope.get_value())[0],[3.9,.8,0],ORANGE_VAL,4)
+        approx=readout(r'E_{\rm approx}=',lambda:model.noise_example(eps.get_value(),slope.get_value())[1],[3.9,.0,0],PURPLE_REG,4)
+        self.add(exact,approx)
+        self.beat(lambda:slope.animate.set_value(1.8),lambda:slope.animate.set_value(.3))
+        self.equation(r'\mathbb E[E_\xi]\approx\frac{r^2}{2}+\frac{\epsilon^2}{2}\left[(y\prime)^2+r\,y\prime\prime\right],\quad r=y-t',28)
+        self.beat(lambda:slope.animate.set_value(1.2),lambda:eps.animate.set_value(.5))
+        self.equation(r'\Omega\simeq\frac12\int(\tau^T\nabla y)^2p(x)\,dx\quad\left[y\approx\mathbb E[t|x]\right]',29)
+        self.label('無限データ極限・小さい平均0の変換・条件付き平均に近い解')
+        self.beat(lambda:eps.animate.set_value(.2),lambda:eps.animate.set_value(.08))
+        self.equation(r'\operatorname{Cov}(\xi)=\lambda I\quad\Rightarrow\quad\Omega=\frac12\int\|\nabla y\|^2p(x)\,dx',29)
+        self.label('ティホノフ正則化：全方向への小さな変化を抑える')
+        self.beat(lambda:swing.animate.set_value(1),lambda:swing.animate.set_value(-1))
+        self.equation(r'\mathbb E[E_\xi]-E_{\rm approx}=\frac12\epsilon^4\quad\text{(this example)}',31)
+        self.label('橙：対称な2点での正確な平均　紫：二次近似')
+        self.beat(lambda:eps.animate.set_value(.6),lambda:eps.animate.set_value(.04))
 
-    def make_layer_network(self, hidden_count: int, scale: float = 0.8) -> VGroup:
-        input_points = [LEFT * 2.2 + UP * y for y in (-0.8, 0.0, 0.8)]
-        hidden_y = np.linspace(-1.25, 1.25, hidden_count)
-        hidden_points = [ORIGIN + UP * float(y) for y in hidden_y]
-        output_points = [RIGHT * 2.2 + UP * y for y in (-0.45, 0.45)]
-        edges = VGroup()
-        for source in input_points:
-            for target in hidden_points:
-                edges.add(Line(source, target, color=GREY_D, stroke_width=1.2, stroke_opacity=0.55))
-        for source in hidden_points:
-            for target in output_points:
-                edges.add(Line(source, target, color=GREY_D, stroke_width=1.2, stroke_opacity=0.55))
-        nodes = VGroup(
-            *[Circle(radius=0.11, color=BLUE_DATA, fill_opacity=0.85).move_to(p) for p in input_points],
-            *[Circle(radius=0.09, color=REG_PURPLE, fill_opacity=0.85).move_to(p) for p in hidden_points],
-            *[Circle(radius=0.11, color=TRUE_GREEN, fill_opacity=0.85).move_to(p) for p in output_points],
-        )
-        label = Text(f"M = {hidden_count}", font_size=24, color=REG_PURPLE).next_to(nodes, DOWN, buff=0.16)
-        return VGroup(edges, nodes, label).scale(scale)
+    def convolution(self):
+        img=model.IMAGE;feat=model.convolution(img);activation=model.sigmoid(feat)
+        image=pixels(img,.31,(-4.5,.25,0));feature=pixels(activation,.31,(.7,.25,0));kernel=pixels(model.KERNEL,.33,(-1.8,.25,0),True)
+        self.add(image,kernel)
+        labels=VGroup(jp('入力 10×10',20).move_to([-4.5,2,0]),jp('共有する重み',20,YELLOW_TERM).move_to([-1.8,1.2,0]),jp('応答 8×8',20).move_to([.7,2,0]))
+        self.add(labels);self.label('橙：−1　青：+1　黒：0　　縦の変化を検出する自作フィルタ')
+        self.equation(r'z_{r,c}=\sigma\!(\sum_{i,j}K_{ij}x_{r+i,c+j}+b)',30)
+        scan=ValueTracker(0)
+        def patchpos():
+            k=min(63,int(scan.get_value()));r,c=divmod(k,8)
+            return image[r*10+c].get_center()+[.31,-.31,0]
+        patch=always_redraw(lambda:Square(.93,color=YELLOW_TERM,stroke_width=3).move_to(patchpos()))
+        self.add(patch)
+        self.beat(lambda:scan.animate.set_value(7),lambda:scan.animate.set_value(16))
+        self.add(feature)
+        pointer=always_redraw(lambda:Square(.31,color=YELLOW_TERM,stroke_width=3).move_to(feature[min(63,int(scan.get_value()))]))
+        value=readout(r'\sum Kx=',lambda:feat.ravel()[min(63,int(scan.get_value()))],[4.25,.8,0],YELLOW_TERM,1)
+        self.add(pointer,value)
+        self.beat(lambda:scan.animate.set_value(32),lambda:scan.animate.set_value(63))
+        self.label('8×8 箇所で同じ9個の重みと1個のバイアスを使用')
+        self.beat(lambda:scan.animate.set_value(40),lambda:scan.animate.set_value(5))
+        self.remove(patch,pointer,value)
+        shifted=np.roll(img,1,axis=1);sf=model.sigmoid(model.convolution(shifted))
+        self.label('入力を右へ1画素 → 応答も右へ1画素（境界の影響を除く）')
+        self.beat(lambda:Transform(image,pixels(shifted,.31,(-4.5,.25,0))),lambda:Transform(feature,pixels(sf,.31,(.7,.25,0))))
+        pooled=model.subsample(sf);pool=pixels(pooled,.45,(4.7,.25,0))
+        self.equation(r'u=\sigma\!(a\cdot\frac14\sum_{i,j\in 2\times2}z_{ij}+b),\quad a=1,\ b=0',29)
+        window=Square(.62,color=GREEN_TRUE).move_to(feature[0].get_center()+[.155,-.155,0]);self.add(window)
+        self.add(jp('4×4',20).move_to([4.7,1.5,0]))
+        self.label('原文のサブサンプリング：平均 → 学習可能な重みとバイアス → 非線形')
+        self.beat(lambda:Create(pool),lambda:window.animate.shift(RIGHT*.62+DOWN*.62))
+        self.equation(r'\frac{\partial E}{\partial K_{ij}}=\sum_{r,c}\frac{\partial E}{\partial a_{r,c}}x_{r+i,c+j}',31)
+        self.label('平均しても境界をまたぐ移動で値は変わる。重みへの勾配は全位置から合計')
+        sf2=model.sigmoid(model.convolution(np.roll(img,2,axis=1)))
+        self.beat(lambda:AnimationGroup(Transform(image,pixels(np.roll(img,2,axis=1),.31,(-4.5,.25,0))),Transform(feature,pixels(sf2,.31,(.7,.25,0))),Transform(pool,pixels(model.subsample(sf2),.45,(4.7,.25,0)))),lambda:LaggedStart(*[Indicate(kernel[i],color=YELLOW_TERM) for i in range(9)],lag_ratio=.12))
 
-    def make_digit(self, cell_size: float = 0.18, color: ManimColor = BLUE_DATA) -> VGroup:
-        pixels = [
-            "01110",
-            "10001",
-            "00110",
-            "01000",
-            "11111",
-        ]
-        cells = VGroup()
-        for row, line in enumerate(pixels):
-            for col, value in enumerate(line):
-                square = Square(side_length=cell_size, stroke_width=0.8, stroke_color=GREY_C)
-                square.set_fill(color if value == "1" else "#1c1c1c", opacity=0.9 if value == "1" else 0.35)
-                square.move_to(RIGHT * (col - 2) * cell_size + DOWN * (row - 2) * cell_size)
-                cells.add(square)
-        return cells
-
-    def opening_capacity_control(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 5.5 Regularization in Neural Networks")
-        title = self.scene_title("大きなネットワークを、実効的に小さく使う", font_size=34)
-        axes = self.make_regression_axes(width=5.7, height=3.2).to_edge(LEFT).shift(DOWN * 0.45 + RIGHT * 0.35)
-        dots = self.make_data_dots(axes)
-        under_curve = self.plot_function(axes, lambda x: 0.25 * math.sin(2 * math.pi * x), VALID_ORANGE, width=3.5)
-        over_curve = self.plot_function(axes, lambda x: overfit_function(x, 0.34), MODEL_RED, width=3.5)
-        smooth_curve = self.plot_function(axes, true_function, TRUE_GREEN, width=3.8)
-        network_small = self.make_layer_network(2, 0.88).to_edge(RIGHT).shift(UP * 0.95 + LEFT * 0.15)
-        network_large = self.make_layer_network(10, 0.72).to_edge(RIGHT).shift(DOWN * 1.25 + LEFT * 0.15)
-        under_label = Text("underfit", font_size=20, color=VALID_ORANGE).next_to(under_curve, UP, buff=0.2)
-        over_label = Text("overfit", font_size=20, color=MODEL_RED).next_to(axes, DOWN, buff=0.15).shift(LEFT * 1.1)
-        regularized = Text("regularized", font_size=20, color=TRUE_GREEN).next_to(over_label, RIGHT, buff=0.45)
-        note = Text("M だけでなく、解の選び方も複雑さを決める", font_size=25, color=WHITE).to_edge(DOWN).shift(UP * 0.18)
-
-        self.play(FadeIn(label), Write(title), run_time=1.4)
-        self.play(Create(axes), FadeIn(dots), FadeIn(network_small), run_time=1.8)
-        self.play(Create(under_curve), FadeIn(under_label), run_time=1.5)
-        self.play(ReplacementTransform(network_small.copy(), network_large), Create(over_curve), FadeIn(over_label), run_time=1.9)
-        self.play(Transform(over_curve, smooth_curve), FadeIn(regularized), Write(note), run_time=2.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, dots, under_curve, under_label, network_small, network_large, over_label, regularized, note)), run_time=0.8)
-        self.clear()
-
-    def weight_decay(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("Weight decay")
-        title = self.scene_title("lambda を上げると、重みと曲線の暴れが小さくなる", font_size=32)
-        formula = MathTex(r"\tilde{E}(w)=E(w)+\frac{\lambda}{2}w^T w", font_size=38)
-        formula.to_corner(UR).shift(DOWN * 0.42 + LEFT * 0.2)
-        axes = self.make_regression_axes(width=6.4, height=3.55).shift(LEFT * 2.45 + DOWN * 0.2)
-        dots = self.make_data_dots(axes)
-        true_curve = self.plot_function(axes, true_function, TRUE_GREEN, width=3.0, opacity=0.55)
-        low_curve = self.plot_function(axes, lambda x: overfit_function(x, 0.42), MODEL_RED, width=4.0)
-        mid_curve = self.plot_function(axes, lambda x: overfit_function(x, 0.20), REG_PURPLE, width=4.0)
-        high_curve = self.plot_function(axes, lambda x: overfit_function(x, 0.06), TRUE_GREEN, width=4.0)
-        slider, knob = self.make_lambda_slider(["小", "中", "大"], 0)
-        slider_group = VGroup(slider, knob).next_to(axes, DOWN, buff=0.24)
-        bars_low = self.make_weight_bars([1.7, 1.2, 1.55, 0.9, 1.45, 1.1, 1.35], MODEL_RED).shift(RIGHT * 3.75 + DOWN * 0.9)
-        bars_mid = self.make_weight_bars([1.0, 0.75, 0.95, 0.62, 0.85, 0.65, 0.8], REG_PURPLE).move_to(bars_low)
-        bars_high = self.make_weight_bars([0.55, 0.42, 0.5, 0.35, 0.46, 0.32, 0.4], TRUE_GREEN).move_to(bars_low)
-        note = Text("fit だけを追うほど、重みは大きくなりやすい", font_size=22, color=TEXT_GREY).next_to(bars_low, DOWN, buff=0.22)
-
-        self.play(FadeIn(label), Write(title), Write(formula), run_time=1.6)
-        self.play(Create(axes), FadeIn(dots), Create(true_curve), FadeIn(slider_group), FadeIn(bars_low), Write(note), run_time=2.0)
-        self.play(Create(low_curve), run_time=1.4)
-        self.play(
-            Transform(low_curve, mid_curve),
-            knob.animate.move_to(slider[0].point_from_proportion(0.5)),
-            Transform(bars_low, bars_mid),
-            run_time=2.0,
-        )
-        self.play(
-            Transform(low_curve, high_curve),
-            knob.animate.move_to(slider[0].point_from_proportion(1.0)),
-            Transform(bars_low, bars_high),
-            run_time=2.0,
-        )
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, formula, axes, dots, true_curve, low_curve, slider_group, bars_low, note)), run_time=0.8)
-        self.clear()
-
-    def gaussian_priors(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("Consistent Gaussian priors")
-        title = self.scene_title("重み群ごとに、抑える強さを分ける", font_size=34)
-        network = self.make_layer_network(6, 1.0).shift(LEFT * 3.25 + DOWN * 0.1)
-        groups = VGroup(
-            VGroup(Text("1層目 bias", font_size=21), MathTex(r"\alpha_1^b", font_size=32, color=VALID_ORANGE)).arrange(DOWN, buff=0.08),
-            VGroup(Text("1層目 weight", font_size=21), MathTex(r"\alpha_1^w", font_size=32, color=REG_PURPLE)).arrange(DOWN, buff=0.08),
-            VGroup(Text("2層目 bias", font_size=21), MathTex(r"\alpha_2^b", font_size=32, color=TRUE_GREEN)).arrange(DOWN, buff=0.08),
-            VGroup(Text("2層目 weight", font_size=21), MathTex(r"\alpha_2^w", font_size=32, color=MODEL_RED)).arrange(DOWN, buff=0.08),
-        ).arrange_in_grid(rows=2, cols=2, buff=(0.6, 0.45)).to_edge(RIGHT).shift(LEFT * 0.3 + UP * 0.25)
-        prior_formula = MathTex(r"p(w_i)\propto \exp\{-\alpha_i w_i^2/2\}", font_size=36).to_edge(DOWN).shift(UP * 0.45)
-        arrows = VGroup(
-            Arrow(groups[0].get_left(), network[1].get_center() + LEFT * 0.05, color=VALID_ORANGE, buff=0.15),
-            Arrow(groups[1].get_left(), network[0].get_center() + LEFT * 0.2, color=REG_PURPLE, buff=0.15),
-            Arrow(groups[2].get_left(), network[1].get_right(), color=TRUE_GREEN, buff=0.15),
-            Arrow(groups[3].get_left(), network[0].get_right(), color=MODEL_RED, buff=0.15),
-        )
-        note = Text("入力・出力のスケールに合わせて prior を設計する", font_size=24, color=WHITE)
-        note.next_to(prior_formula, UP, buff=0.25)
-
-        self.play(FadeIn(label), Write(title), run_time=1.4)
-        self.play(FadeIn(network), run_time=1.4)
-        self.play(LaggedStart(*[FadeIn(group) for group in groups], lag_ratio=0.15), run_time=1.8)
-        self.play(LaggedStart(*[GrowArrow(arrow) for arrow in arrows], lag_ratio=0.15), Write(prior_formula), Write(note), run_time=2.2)
-        self.play(Indicate(groups[1], color=REG_PURPLE), Indicate(groups[3], color=MODEL_RED), run_time=1.3)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, network, groups, arrows, prior_formula, note)), run_time=0.8)
-        self.clear()
-
-    def early_stopping(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("Early stopping")
-        title = self.scene_title("検証誤差が上がり始める前に止める", font_size=34)
-        axes = Axes(
-            x_range=[0, 40, 10],
-            y_range=[0, 1.2, 0.3],
-            x_length=5.9,
-            y_length=3.35,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).to_edge(LEFT).shift(RIGHT * 0.55 + DOWN * 0.2)
-        train = axes.plot(lambda t: 0.95 * math.exp(-0.055 * t) + 0.08, x_range=[0, 40], color=BLUE_DATA)
-        valid = axes.plot(lambda t: 0.62 * math.exp(-0.075 * t) + 0.12 + 0.00095 * (t - 17) ** 2, x_range=[0, 40], color=VALID_ORANGE)
-        labels = VGroup(
-            Text("training", font_size=19, color=BLUE_DATA).move_to(axes.c2p(32, 0.22)),
-            Text("validation", font_size=19, color=VALID_ORANGE).move_to(axes.c2p(31, 0.62)),
-            Text("iteration", font_size=19, color=TEXT_GREY).next_to(axes, DOWN, buff=0.16),
-            Text("error", font_size=19, color=TEXT_GREY).next_to(axes, LEFT, buff=0.12).rotate(PI / 2),
-        )
-        stop_x = 18.0
-        stop_dot = Dot(axes.c2p(stop_x, 0.62 * math.exp(-0.075 * stop_x) + 0.12 + 0.00095 * (stop_x - 17) ** 2), color=YELLOW, radius=0.08)
-        stop_line = DashedLine(axes.c2p(stop_x, 0), axes.c2p(stop_x, 0.52), color=YELLOW, stroke_width=3)
-        stop_label = Text("stop", font_size=24, color=YELLOW).next_to(stop_line, UP, buff=0.12)
-
-        plane = NumberPlane(
-            x_range=[-0.1, 2.8, 1],
-            y_range=[-0.1, 2.2, 1],
-            x_length=4.0,
-            y_length=3.0,
-            background_line_style={"stroke_color": GREY_E, "stroke_width": 1, "stroke_opacity": 0.35},
-            axis_config={"stroke_color": GREY_B, "stroke_width": 2},
-        ).to_edge(RIGHT).shift(LEFT * 0.45 + DOWN * 0.1)
-        ellipses = VGroup(
-            Ellipse(width=3.0, height=1.15, color=GREY_C, stroke_width=2).rotate(0.42).move_to(plane.c2p(1.55, 1.05)),
-            Ellipse(width=2.2, height=0.82, color=GREY_C, stroke_width=2).rotate(0.42).move_to(plane.c2p(1.55, 1.05)),
-            Ellipse(width=1.35, height=0.5, color=GREY_C, stroke_width=2).rotate(0.42).move_to(plane.c2p(1.55, 1.05)),
-        )
-        path = VMobject(color=YELLOW).set_points_smoothly(
-            [plane.c2p(0.1, 0.15), plane.c2p(0.45, 0.85), plane.c2p(0.9, 1.15), plane.c2p(1.55, 1.05)]
-        )
-        early_point = Dot(plane.c2p(0.9, 1.15), color=YELLOW, radius=0.07)
-        ml_point = Dot(plane.c2p(1.55, 1.05), color=MODEL_RED, radius=0.07)
-        w_labels = VGroup(
-            Text("早く止めた解", font_size=18, color=YELLOW).next_to(early_point, UP, buff=0.12),
-            Text("訓練誤差の最小", font_size=18, color=MODEL_RED).next_to(ml_point, DOWN, buff=0.12),
-        )
-
-        self.play(FadeIn(label), Write(title), run_time=1.3)
-        self.play(Create(axes), Create(train), Create(valid), FadeIn(labels), run_time=2.0)
-        self.play(Create(stop_line), FadeIn(stop_dot), Write(stop_label), run_time=1.4)
-        self.play(Create(plane), Create(ellipses), Create(path), FadeIn(early_point), FadeIn(ml_point), FadeIn(w_labels), run_time=2.4)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, train, valid, labels, stop_dot, stop_line, stop_label, plane, ellipses, path, early_point, ml_point, w_labels)), run_time=0.8)
-        self.clear()
-
-    def invariances(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("Invariances")
-        title = self.scene_title("同じ数字なら、少し動いても同じ答え", font_size=34)
-        digit = self.make_digit(cell_size=0.22).shift(LEFT * 4.4 + UP * 0.55)
-        shifted_digit = self.make_digit(cell_size=0.22, color=TRUE_GREEN).move_to(digit).shift(RIGHT * 1.0 + DOWN * 0.2)
-        arrows = VGroup(
-            Arrow(digit.get_right(), shifted_digit.get_left(), color=YELLOW, buff=0.15),
-            Text("translation", font_size=20, color=YELLOW).next_to(shifted_digit, DOWN, buff=0.18),
-        )
-        classifier_box = RoundedRectangle(width=2.2, height=0.9, corner_radius=0.08, color=GREY_B, fill_color="#202020", fill_opacity=0.8)
-        classifier_text = Text("network", font_size=25).move_to(classifier_box)
-        classifier = VGroup(classifier_box, classifier_text).to_edge(RIGHT).shift(UP * 0.55 + LEFT * 0.55)
-        output = Text("class = 2", font_size=28, color=TRUE_GREEN).next_to(classifier, DOWN, buff=0.3)
-        map_arrows = VGroup(
-            Arrow(shifted_digit.get_right(), classifier.get_left(), color=GREY_C, buff=0.2),
-            Arrow(classifier.get_bottom(), output.get_top(), color=TRUE_GREEN, buff=0.12),
-        )
-        options = VGroup(
-            Text("1. 変換データを増やす", font_size=24),
-            Text("2. 出力変化を抑える正則化", font_size=24),
-            Text("3. 不変な特徴を作る", font_size=24),
-            Text("4. 構造に不変性を入れる", font_size=24),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).to_edge(DOWN).shift(UP * 0.35)
-
-        self.play(FadeIn(label), Write(title), FadeIn(digit), run_time=1.5)
-        self.play(TransformFromCopy(digit, shifted_digit), GrowArrow(arrows[0]), Write(arrows[1]), run_time=1.8)
-        self.play(FadeIn(classifier), LaggedStart(*[GrowArrow(a) for a in map_arrows], lag_ratio=0.25), Write(output), run_time=1.7)
-        self.play(LaggedStart(*[FadeIn(option, shift=UP * 0.12) for option in options], lag_ratio=0.15), run_time=2.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, digit, shifted_digit, arrows, classifier, output, map_arrows, options)), run_time=0.8)
-        self.clear()
-
-    def tangent_propagation(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("Tangent propagation")
-        title = self.scene_title("変換方向へ出力が変わらないようにする", font_size=34)
-        plane = NumberPlane(
-            x_range=[-0.2, 4, 1],
-            y_range=[-0.2, 3, 1],
-            x_length=5.9,
-            y_length=4.0,
-            background_line_style={"stroke_color": GREY_E, "stroke_width": 1, "stroke_opacity": 0.35},
-            axis_config={"stroke_color": GREY_B, "stroke_width": 2},
-        ).to_edge(LEFT).shift(RIGHT * 0.45 + DOWN * 0.3)
-        manifold = VMobject(color=BLUE_DATA).set_points_smoothly(
-            [plane.c2p(0.7, 1.15), plane.c2p(1.35, 1.55), plane.c2p(2.05, 1.7), plane.c2p(2.9, 1.35), plane.c2p(3.45, 0.8)]
-        )
-        x_point = Dot(plane.c2p(1.95, 1.68), color=YELLOW, radius=0.08)
-        tangent = Arrow(plane.c2p(1.65, 1.63), plane.c2p(2.45, 1.58), color=YELLOW, buff=0.0)
-        labels = VGroup(
-            MathTex(r"x_n", font_size=32, color=YELLOW).next_to(x_point, UP, buff=0.12),
-            MathTex(r"\tau_n=\left.\frac{\partial s(x_n,\xi)}{\partial \xi}\right|_{\xi=0}", font_size=31, color=YELLOW).next_to(tangent, DOWN, buff=0.25),
-            Text("入力変換が作る局所的な曲線", font_size=22, color=BLUE_DATA).next_to(manifold, UP, buff=0.2),
-        )
-        network = self.make_layer_network(5, 0.74).to_edge(RIGHT).shift(UP * 0.75 + LEFT * 0.2)
-        formula = VGroup(
-            MathTex(r"\frac{\partial y_k}{\partial \xi}=\sum_i J_{ki}\tau_i", font_size=34),
-            MathTex(r"\Omega=\frac{1}{2}\sum_{n,k}\left(\sum_i J_{nki}\tau_{ni}\right)^2", font_size=31, color=REG_PURPLE),
-        ).arrange(DOWN, buff=0.28).to_edge(RIGHT).shift(DOWN * 1.35 + LEFT * 0.15)
-        arrow = Arrow(plane.get_right(), network.get_left(), color=GREY_C, buff=0.2)
-        invariant = Text("変換しても y が動かない", font_size=24, color=REG_PURPLE).next_to(network, DOWN, buff=0.18)
-
-        self.play(FadeIn(label), Write(title), Create(plane), run_time=1.5)
-        self.play(Create(manifold), FadeIn(x_point), GrowArrow(tangent), FadeIn(labels), run_time=2.1)
-        self.play(GrowArrow(arrow), FadeIn(network), Write(invariant), run_time=1.6)
-        self.play(Write(formula), run_time=2.0)
-        self.play(Indicate(formula[1], color=REG_PURPLE), run_time=1.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, plane, manifold, x_point, tangent, labels, network, formula, arrow, invariant)), run_time=0.8)
-        self.clear()
-
-    def transformed_data(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("Training with transformed data")
-        title = self.scene_title("データ拡張は、微分を抑える正則化になる", font_size=33)
-        base = self.make_digit(cell_size=0.18).shift(LEFT * 4.9 + UP * 0.75)
-        copies = VGroup()
-        shifts = [RIGHT * 0.85, RIGHT * 1.7 + UP * 0.18, RIGHT * 2.55 + DOWN * 0.18, RIGHT * 3.4]
-        colors = [BLUE_DATA, TRUE_GREEN, VALID_ORANGE, REG_PURPLE]
-        for shift, color in zip(shifts, colors):
-            copies.add(self.make_digit(cell_size=0.18, color=color).move_to(base).shift(shift))
-        braces = VGroup(
-            Brace(VGroup(base, copies), DOWN, color=TEXT_GREY),
-            Text("small transformed copies", font_size=21, color=TEXT_GREY),
-        )
-        braces[1].next_to(braces[0], DOWN, buff=0.12)
-        formula = VGroup(
-            MathTex(r"\tilde{E}=E+\lambda\Omega", font_size=40),
-            MathTex(r"\Omega \simeq \frac{1}{2}\int (\tau^T\nabla y(x))^2p(x)\,dx", font_size=31, color=REG_PURPLE),
-            MathTex(r"x\rightarrow x+\epsilon \quad \Rightarrow \quad \mathrm{Tikhonov}", font_size=30, color=TRUE_GREEN),
-        ).arrange(DOWN, buff=0.28).to_edge(RIGHT).shift(LEFT * 0.2 + UP * 0.1)
-        arrow = Arrow(copies.get_right(), formula.get_left(), color=YELLOW, buff=0.25)
-        caption = Text("平均ゼロ・小さい変換でテイラー展開", font_size=24, color=YELLOW).next_to(arrow, DOWN, buff=0.18)
-
-        self.play(FadeIn(label), Write(title), FadeIn(base), run_time=1.4)
-        self.play(LaggedStart(*[TransformFromCopy(base, copy) for copy in copies], lag_ratio=0.15), FadeIn(braces), run_time=2.1)
-        self.play(GrowArrow(arrow), Write(caption), run_time=1.2)
-        self.play(Write(formula), run_time=2.4)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, base, copies, braces, formula, arrow, caption)), run_time=0.8)
-        self.clear()
-
-    def convolutional_networks(self) -> None:
-        narration = self.start_narration("scene08")
-        label = self.section_label("Convolutional networks")
-        title = self.scene_title("局所受容野、重み共有、サブサンプリング", font_size=34)
-        image = self.make_digit(cell_size=0.22).to_edge(LEFT).shift(RIGHT * 0.75 + UP * 0.45)
-        patch = Rectangle(width=0.66, height=0.66, color=YELLOW, stroke_width=4).move_to(image[6:9].get_center())
-        kernel = VGroup(
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-            Square(side_length=0.18, color=YELLOW, fill_color="#303030", fill_opacity=0.8),
-        ).arrange_in_grid(rows=3, cols=3, buff=0.0).next_to(image, RIGHT, buff=0.9)
-        kernel_label = Text("shared weights", font_size=17, color=YELLOW).next_to(kernel, UP, buff=0.12)
-        feature_map = VGroup()
-        for row in range(4):
-            for col in range(4):
-                square = Square(side_length=0.18, stroke_width=1.0, stroke_color=GREY_C)
-                square.set_fill(REG_PURPLE if (row + col) % 2 == 0 else BLUE_D, opacity=0.75)
-                square.move_to(RIGHT * col * 0.18 + DOWN * row * 0.18)
-                feature_map.add(square)
-        feature_map.next_to(kernel, RIGHT, buff=1.05)
-        feature_label = Text("feature map", font_size=17, color=REG_PURPLE).next_to(feature_map, DOWN, buff=0.14)
-        pool = VGroup()
-        for row in range(2):
-            for col in range(2):
-                square = Square(side_length=0.28, stroke_width=1.0, stroke_color=GREY_C)
-                square.set_fill(TRUE_GREEN, opacity=0.75 if (row + col) % 2 == 0 else 0.45)
-                square.move_to(RIGHT * col * 0.28 + DOWN * row * 0.28)
-                pool.add(square)
-        pool.next_to(feature_map, RIGHT, buff=1.05)
-        pool_label = Text("subsample", font_size=17, color=TRUE_GREEN).next_to(pool, UP, buff=0.12)
-        arrows = VGroup(
-            Arrow(image.get_right(), kernel.get_left(), color=GREY_C, buff=0.2),
-            Arrow(kernel.get_right(), feature_map.get_left(), color=GREY_C, buff=0.2),
-            Arrow(feature_map.get_right(), pool.get_left(), color=GREY_C, buff=0.2),
-        )
-        bullets = VGroup(
-            Text("local receptive fields: 近い画素だけを見る", font_size=22),
-            Text("weight sharing: 同じ検出器を各位置で使う", font_size=22),
-            Text("subsampling: 小さな位置ずれに鈍感にする", font_size=22),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).to_edge(DOWN).shift(UP * 0.25)
-
-        self.play(FadeIn(label), Write(title), FadeIn(image), run_time=1.4)
-        self.play(Create(patch), FadeIn(kernel), Write(kernel_label), GrowArrow(arrows[0]), run_time=1.7)
-        self.play(patch.animate.shift(RIGHT * 0.44), run_time=0.7)
-        self.play(patch.animate.shift(DOWN * 0.44), run_time=0.7)
-        self.play(FadeIn(feature_map), Write(feature_label), GrowArrow(arrows[1]), run_time=1.3)
-        self.play(FadeIn(pool), Write(pool_label), GrowArrow(arrows[2]), run_time=1.3)
-        self.play(LaggedStart(*[FadeIn(bullet, shift=UP * 0.1) for bullet in bullets], lag_ratio=0.15), run_time=1.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, image, patch, kernel, kernel_label, feature_map, feature_label, pool, pool_label, arrows, bullets)), run_time=0.8)
-        self.clear()
-
-    def soft_weight_sharing(self) -> None:
-        narration = self.start_narration("scene09")
-        label = self.section_label("Soft weight sharing")
-        title = self.scene_title("重みを、いくつかの中心へやわらかく集める", font_size=33)
-        number_line = NumberLine(
-            x_range=[-3, 3, 1],
-            length=7.0,
-            include_numbers=True,
-            color=GREY_B,
-            font_size=20,
-        ).shift(LEFT * 1.95 + DOWN * 0.25)
-        weights = [-2.55, -1.8, -1.15, -0.35, 0.2, 0.65, 1.2, 1.85, 2.55]
-        centers = [-1.25, 1.35]
-        dots = VGroup(*[Dot(number_line.n2p(w), radius=0.07, color=BLUE_DATA) for w in weights])
-        centers_dots = VGroup(*[Dot(number_line.n2p(c), radius=0.1, color=YELLOW) for c in centers])
-        centers_labels = VGroup(
-            MathTex(r"\mu_1", font_size=28, color=YELLOW).next_to(centers_dots[0], UP, buff=0.12),
-            MathTex(r"\mu_2", font_size=28, color=YELLOW).next_to(centers_dots[1], UP, buff=0.12),
-        )
-        pulls = VGroup()
-        pulled_targets = []
-        for w in weights:
-            nearest = centers[0] if abs(w - centers[0]) < abs(w - centers[1]) else centers[1]
-            target = 0.55 * w + 0.45 * nearest
-            pulled_targets.append(target)
-            pulls.add(Arrow(number_line.n2p(w), number_line.n2p(target), color=REG_PURPLE, buff=0.08, max_tip_length_to_length_ratio=0.22))
-        pulled_dots = VGroup(*[Dot(number_line.n2p(t), radius=0.07, color=REG_PURPLE) for t in pulled_targets])
-        formula = VGroup(
-            MathTex(r"p(w_i)=\sum_j \pi_j\,\mathcal{N}(w_i|\mu_j,\sigma_j^2)", font_size=34),
-            MathTex(r"\tilde{E}=E+\lambda\Omega(w)", font_size=34, color=REG_PURPLE),
-        ).arrange(DOWN, buff=0.28).to_edge(RIGHT).shift(LEFT * 0.3 + UP * 0.25)
-        summary = VGroup(
-            Text("explicit: weight decay", font_size=21, color=REG_PURPLE),
-            Text("implicit: early stopping", font_size=21, color=VALID_ORANGE),
-            Text("invariance: tangent / CNN", font_size=21, color=TRUE_GREEN),
-            Text("grouping: soft sharing", font_size=21, color=YELLOW),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_edge(DOWN).shift(UP * 0.25)
-
-        self.play(FadeIn(label), Write(title), Create(number_line), FadeIn(dots), run_time=1.6)
-        self.play(FadeIn(centers_dots), FadeIn(centers_labels), Write(formula[0]), run_time=1.6)
-        self.play(LaggedStart(*[GrowArrow(arrow) for arrow in pulls], lag_ratio=0.06), Transform(dots, pulled_dots), Write(formula[1]), run_time=2.2)
-        self.play(LaggedStart(*[FadeIn(item, shift=UP * 0.1) for item in summary], lag_ratio=0.13), run_time=1.8)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, number_line, dots, centers_dots, centers_labels, pulls, formula, summary)), run_time=0.8)
-        self.clear()
+    def soft_sharing(self):
+        ax,g=axes((-3,3,1),(0,.55,.2),center=(0,.15,0),width=10.5,height=3.1,xlabel='w',ylabel='p(w)');g[1][1].move_to([-5.9,1.65,0]);self.add(g)
+        u=np.linspace(-3,3,241);mu=np.array([-1.2,1.2]);sigma=np.array([.6,.6]);pi=np.array([.5,.5])
+        comps=model.mixture_components(u);graphs=VGroup(curve(ax,u,comps[:,0],BLUE_DATA),curve(ax,u,comps[:,1],ORANGE_VAL),curve(ax,u,comps.sum(1),PURPLE_REG))
+        weights=model.soft_history()[0][0];dots=VGroup(*[Dot(ax.c2p(w,.015),radius=.055,color=YELLOW_TERM) for w in weights]);self.add(dots)
+        self.equation(r'p(w_i)=\sum_j\pi_j\mathcal N(w_i|\mu_j,\sigma_j^2)')
+        self.label('黄：重み　青・橙：混合成分　紫：合計の密度')
+        self.beat(lambda:Create(graphs),lambda:Indicate(dots,color=YELLOW_TERM,scale_factor=1))
+        self.equation(r'\Omega=-\sum_i\ln\!\left[\sum_j\pi_j\mathcal N(w_i|\mu_j,\sigma_j^2)\right]',31)
+        self.beat(lambda:Indicate(graphs[0],color=BLUE_DATA,scale_factor=1),lambda:Indicate(graphs[2],color=PURPLE_REG,scale_factor=1))
+        selected=ValueTracker(-.2);point=always_redraw(lambda:Dot(ax.c2p(selected.get_value(),.10),radius=.085,color=RED_MODEL))
+        self.add(point);self.equation(r'\gamma_j(w)=\frac{\pi_j\mathcal N(w|\mu_j,\sigma_j^2)}{\sum_k\pi_k\mathcal N(w|\mu_k,\sigma_k^2)}',31)
+        self.label('同じ幅・同じ混合比の例。左右の山へ確率的に所属する')
+        bars=always_redraw(lambda:VGroup(*[Rectangle(width=max(.006,2*model.responsibilities(selected.get_value())[j]),height=.17,color=color,fill_opacity=.8).move_to([x,1.75,0],aligned_edge=LEFT) for j,x,color in [(0,-5,BLUE_DATA),(1,2,ORANGE_VAL)]]))
+        self.add(bars)
+        self.beat(lambda:selected.animate.set_value(-.65),lambda:selected.animate.set_value(0))
+        self.equation(r'\frac{\partial\Omega}{\partial w_i}=\sum_j\gamma_j(w_i)\frac{w_i-\mu_j}{\sigma_j^2}',32)
+        force=always_redraw(lambda:Arrow(ax.c2p(selected.get_value(),.10),ax.c2p(selected.get_value()-.18*model.soft_gradient(selected.get_value()),.10),buff=0,color=RED_MODEL))
+        self.add(force)
+        self.beat(lambda:selected.animate.set_value(.7),lambda:selected.animate.set_value(-.7))
+        self.remove(point,force,bars);rows=model.soft_history();step=ValueTracker(0)
+        def update_group():
+            w,m,s,p=rows[min(100,int(step.get_value()))];v=model.mixture_components(u,m,s,p)
+            return VGroup(curve(ax,u,v[:,0],BLUE_DATA),curve(ax,u,v[:,1],ORANGE_VAL),curve(ax,u,v.sum(1),PURPLE_REG))
+        graphs.add_updater(lambda mob:mob.become(update_group()))
+        dots.add_updater(lambda mob:[d.move_to(ax.c2p(w,.015)) for d,w in zip(mob,rows[min(100,int(step.get_value()))][0])])
+        self.equation(r'\sigma_j^2=e^{\rho_j}>0,\qquad\pi_j=\frac{e^{\eta_j}}{\sum_k e^{\eta_k}}',31)
+        self.label('自作の二次データ誤差 + Ω を共同最適化。分散の崩壊は別途注意')
+        self.beat(lambda:step.animate.set_value(50),lambda:step.animate.set_value(100))
+        graphs.clear_updaters();dots.clear_updaters()
+        self.label('重みの大きさ → 学習時刻 → 変換への感度 → 重みのまとまり',GREEN_TRUE)
+        self.equation(r'\widetilde E=E+\lambda\Omega',30)
+        self.beat(lambda:Indicate(dots,color=YELLOW_TERM,scale_factor=1),lambda:Indicate(graphs,color=GREEN_TRUE,scale_factor=1))
