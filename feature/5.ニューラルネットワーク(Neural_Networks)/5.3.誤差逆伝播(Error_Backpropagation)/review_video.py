@@ -18,9 +18,10 @@ def main():
                 if '$' in c['display']:
                     frames.append(dict(id=c['id'],time=(c['start']+c['end'])/2,kind='math',display=c['display']))
         if s['id'] in ('scene01','scene04','scene09'):
-            b=s['beats'][2]
+            b=s['beats'][1 if s['id']=='scene01' else 2 if s['id']=='scene04' else 3]
+            action=b['actions'][0]
             for phase,alpha in [('early',.1),('late',.9)]:
-                frames.append(dict(id=s['id']+'-'+phase,time=b['start']+alpha*(b['end']-b['start']),kind='sync'))
+                frames.append(dict(id=s['id']+'-'+phase,time=action['start']+alpha*(action['end']-action['start']),kind='sync'))
     for f in frames:
         subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(OUT/(f['id']+'.png'))],check=True)
     (OUT/'frames.json').write_text(json.dumps(frames,ensure_ascii=False,indent=2)+'\n')

@@ -72,6 +72,7 @@ class NarratedScene(Scene):
         ax.move_to(center)
         names=VGroup(tex(labels[0],25).next_to(ax.x_axis,RIGHT,buff=.12),tex(labels[1],25).move_to(ax.get_corner(UL)+UP*.15+RIGHT*.35))
         self.add(ax,names)
+        ax.axis_labels=names
         return ax
 
 

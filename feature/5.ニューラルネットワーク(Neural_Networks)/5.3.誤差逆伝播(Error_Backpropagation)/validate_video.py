@@ -26,13 +26,14 @@ def main():
             assert c['id']==a['id'] and c['display']==a['display']
             assert abs(c['start']-s['start']-a['start'])<1e-7
         if s['id'] in ('scene01','scene04','scene09'):
-            b=s['beats'][2]
+            b=s['beats'][1 if s['id']=='scene01' else 2 if s['id']=='scene04' else 3]
             with wave.open(str(ROOT/e['path'])) as wav:
                 rate=wav.getframerate(); data=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
-            for c in b['cues']:
+            for ci,c in enumerate(b['cues']):
                 start=round((c['start']-s['start'])*rate);end=round((c['end']-s['start'])*rate)
                 indices=np.flatnonzero(np.abs(data[start:end].astype(float))/32768>10**(-45/20))
-                sync.append(dict(id=c['id'],display=c['display'],action_start=b['start'],action_end=b['end'],
+                action=b['actions'][min(ci,len(b['actions'])-1)]
+                sync.append(dict(id=c['id'],display=c['display'],action_start=action['start'],action_end=action['end'],
                                  pcm_onset=s['start']+(start+int(indices[0]))/rate))
     assert max(errors)<1e-6
     display='\n'.join(v['display'] for s in SCENES for b in s['beats'] for v in b['segments'])

@@ -3,7 +3,7 @@ import numpy as np
 W1=np.array([[.1,.7,-.4],[-.2,-.3,.8]])
 W2=np.array([[.05,1.1,-.6],[-.1,.4,.9]])
 X=np.array([.6,-.4]); T=np.array([.3,-.2])
-DATA=[(X,T),(np.array([-.5,.7]),np.array([-.2,.5])),(np.array([.2,.3]),np.array([.1,.2]))]
+DATA=[(X,T),(np.array([-.5,.7]),np.array([-.2,.5])),(np.array([.5,.6]),np.array([-.5,.2]))]
 
 def forward(x=X,w1=W1,w2=W2):
     xb=np.r_[1.,x];a=w1@xb;z=np.tanh(a);zb=np.r_[1.,z];y=w2@zb

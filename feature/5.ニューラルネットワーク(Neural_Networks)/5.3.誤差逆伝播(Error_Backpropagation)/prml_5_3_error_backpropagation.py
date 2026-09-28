@@ -104,7 +104,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
             value.add_updater(lambda m,fn=fn,p=p:m.set_value(fn()).move_to([p,.08,0]))
             groups.add(VGroup(box,label,value))
             if j:paths.add(Arrow([coords[j-1]+.85,.35,0],[p-.85,.35,0],buff=0,color=MUTED))
-        self.add(groups,paths,knob('w=',w,.1,1.2,at=(-1,-2.5,0)))
+        slider=knob('w=',w,.1,1.2,at=(-1,-2.5,0))
+        self.add(groups,paths,slider)
         self.equation(r'a=wx+0.1,\quad z=\tanh(a),\quad y=1.2z-0.1')
         self.beat(actions=[lambda:w.animate.set_value(.65),lambda:pulse(paths,BLUE_CLASS)])
         local=VGroup(tex('x',28,BLUE_CLASS),tex('1-z^2',28,GREEN_CLASS),tex('1.2',28,BLUE_CLASS),tex('y-t',28,RED_CLASS))
@@ -122,7 +123,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.beat(actions=[lambda:x.animate.set_value(.8),lambda:Indicate(local[0])])
         self.equation(r'\delta_j\ \mathrm{fixed}:\quad z_i\mapsto-z_i\Rightarrow\delta_jz_i\mapsto-\delta_jz_i')
         # Hold downstream sensitivity fixed to isolate the multiplication's sign.
-        for m in [groups,paths,local]:self.remove(m)
+        for m in [groups,paths,local,slider]:self.remove(*m.get_family())
         axis=NumberLine(x_range=[-1,1,.5],length=8,include_numbers=True,font_size=22).move_to([0,.3,0])
         q=ValueTracker(.8);prod=always_redraw(lambda:Arrow(axis.n2p(0),axis.n2p(-.6*q.get_value()),buff=0,color=RED_CLASS))
         self.add(axis,prod,number('z_i=',q.get_value,(-2,1.3,0),BLUE_CLASS),tex(r'\delta_j=-0.6',28,RED_CLASS).move_to([2,1.3,0]))
@@ -142,6 +143,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.beat(actions=[lambda:u.animate.set_value(-.3),lambda:u.animate.set_value(.1)])
         self.equation(r'\delta_k=\frac{\partial E_n}{\partial a_k}=\frac12\cdot2(y_k-t_k)=y_k-t_k')
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(t)])
+        self.add(note('図：線形出力＋二乗和誤差',at=(3.5,1.85,0)))
         self.equation(r'\sigma+\mathrm{binary\ CE}\quad;\quad\mathrm{softmax}+\mathrm{multiclass\ CE}\quad\Rightarrow\delta_k=y_k-t_k',size=27)
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(1.1)])
         self.equation(r'\delta_k=\sum_l\frac{\partial E_n}{\partial y_l}\frac{\partial y_l}{\partial a_k}',size=37)
@@ -156,7 +158,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         reverse=VGroup(*[Line(o.get_center(),hidden.get_center(),buff=.42) for o in outs])
         self.add(hidden,outs,paths,tex('z_j',28,GREEN_CLASS).move_to(hidden))
         for k,o in enumerate(outs):
-            self.add(tex(fr'y_{k+1}',25).move_to(o),tex(fr'w_{{{k+1}j}}={v[k]:.1f}',24,YELLOW_ACC).move_to([-.4,1.65-1.3*k,0]),number(fr'\delta_{k+1}=',lambda k=k:d()[k],(4.5,1.4-1.5*k,0),RED_CLASS,size=25))
+            self.add(tex(fr'y_{k+1}',25).move_to(o),tex(fr'w_{{{k+1}j}}={v[k]:.1f}',24,YELLOW_ACC).move_to([-.4,1.65-2.1*k,0]),number(fr'\delta_{k+1}=',lambda k=k:d()[k],(4.5,1.4-1.5*k,0),RED_CLASS,size=25))
         line=NumberLine(x_range=[-1,1.5,.5],length=9,include_numbers=True,font_size=22).move_to([-.5,-1.6,0])
         self.add(line)
         self.equation(r'z_j\ \longrightarrow\ (y_1,y_2)\ \longrightarrow\ E_n')
@@ -211,7 +213,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
     def gradient_table(self,d,z,g,dl,zl):
         cols=VGroup(*[tex(f'{v:.3f}',29,BLUE_CLASS).move_to([-1.5+2.2*i,1.45,0]) for i,v in enumerate(z)])
         rows=VGroup(*[tex(f'{v:.3f}',29,RED_CLASS).move_to([-3.5,.35-1.3*i,0]) for i,v in enumerate(d)])
-        labels=VGroup(tex(zl,28,BLUE_CLASS).move_to([.7,2,0]),tex(dl,28,RED_CLASS).move_to([-4.7,-.3,0]))
+        labels=VGroup(tex(zl,28,BLUE_CLASS).move_to([.7,1.95,0]),tex(dl,28,RED_CLASS).move_to([-4.7,-.3,0]))
         entries=VGroup()
         for j in range(2):
             for i in range(3):
@@ -221,7 +223,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
 
     def dataset(self):
         bs=[backward(x,t) for x,t in DATA];vs=[b['g2'][0,1:] for b in bs];g=sum(vs)
-        ax=self.plot_axes(x=(-.15,.9,.3),y=(-.9,.15,.3),width=8.5,height=3.4,labels=('g_1','g_2'))
+        ax=self.plot_axes(x=(-.15,1.05,.3),y=(-.9,.3,.3),width=8.5,height=3.4,labels=('g_1','g_2'))
         arrows=VGroup(*[Arrow(ax.c2p(0,0),ax.c2p(*v),buff=0,color=c) for v,c in zip(vs,[BLUE_CLASS,GREEN_CLASS,PURPLE_ACC])])
         self.add(arrows,note('二成分の表示：横は出力１←隠れ１、縦は出力１←隠れ２'))
         self.equation(r'\nabla E_n\quad(n=1,2,3)')
@@ -236,10 +238,12 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.beat(actions=[lambda:Indicate(totalarrow),lambda:Transform(totalarrow,Arrow(ax.c2p(0,0),ax.c2p(*(g/3)),buff=0,color=YELLOW_ACC))])
         # Actual full 12-parameter update, with the loss recalculated along the step.
         g1,g2=batch();u=ValueTracker(0)
-        self.remove(arrows,totalarrow)
+        self.remove(*arrows.get_family(),*totalarrow.get_family())
         self.equation(r'\mathbf w_{\rm new}=\mathbf w-0.1\nabla E')
+        for label,symbol in zip(ax.axis_labels,[r'\Delta w_1',r'\Delta w_2']):
+            label.become(tex(symbol,25).move_to(label.get_center()))
         move=always_redraw(lambda:Arrow(ax.c2p(0,0),ax.c2p(*(-u.get_value()*g)),buff=0,color=RED_CLASS))
-        read=number('E=',lambda:total(W1-u.get_value()*g1,W2-u.get_value()*g2),(4.5,.8,0),YELLOW_ACC)
+        read=number('E=',lambda:total(W1-u.get_value()*g1,W2-u.get_value()*g2),(4.5,-.7,0),YELLOW_ACC)
         self.add(move,read)
         self.beat(actions=[lambda:u.animate.set_value(.1),lambda:Circumscribe(read)])
         self.remove(*[m for m in self.mobjects if m is not self.formula and m is not self.subtitle and m.get_center()[1]<3])
@@ -276,6 +280,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         u=ValueTracker(0);base=X.copy();direction=np.array([1.,-.5]);y0=forward()['y'];J=jacobian()
         f=lambda s:forward(base+s*direction)['y']
         ax=self.plot_axes(x=(.8,2.15,.3),y=(-.62,-.3,.1),width=7.4,height=3.3,center=(-1,-.15,0),labels=('y_1','y_2'))
+        # Suppress the first x tick number at the upper-left axis intersection.
+        ax.x_axis.numbers[0].set_opacity(0)
         samples=np.linspace(-.2,1.4,150)
         path=VMobject().set_points_as_corners([ax.c2p(*f(s)) for s in samples]).set_stroke(BLUE_CLASS,3)
         dot=always_redraw(lambda:Dot(ax.c2p(*f(u.get_value())),color=BLUE_CLASS,radius=.085))
@@ -284,7 +290,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.equation(r'\mathbf x=\mathbf x_0+s(1,-0.5)^T,\quad\mathbf w\ \mathrm{fixed}')
         self.beat(actions=[lambda:u.animate.set_value(.15),lambda:u.animate.set_value(0)])
         self.equation(r'J_{ki}=\frac{\partial y_k}{\partial x_i}',size=39)
-        matrix=Matrix([[f'{v:.3f}' for v in row] for row in J],h_buff=1.2,v_buff=.65).scale(.52).move_to([4.8,1.25,0])
+        matrix=Matrix([[f'{v:.3f}' for v in row] for row in J],h_buff=1.8,v_buff=.75).scale(.52).move_to([4.8,1.25,0])
         self.add(matrix)
         self.beat(actions=[lambda:Indicate(matrix.get_rows()[0]),lambda:Indicate(matrix.get_rows()[1])])
         self.equation(r'\Delta\mathbf y\simeq J(\mathbf x_0)\Delta\mathbf x',size=37)

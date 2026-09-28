@@ -1,12 +1,12 @@
 {
   "weight_derivatives": 36,
-  "max_gradient_error": 4.3416159556386447e-11,
+  "max_gradient_error": 4.787559237939831e-11,
   "jacobian_derivatives": 12,
   "max_jacobian_error": 1.8386403510817217e-11,
   "max_softmax_seed_error": 6.233596971938482e-12,
-  "max_batch_error": 1.0623946167243048e-11,
-  "loss_before": 0.5826778993532563,
-  "loss_after": 0.3174425248727682,
+  "max_batch_error": 1.3288814493250811e-11,
+  "loss_before": 0.7919647469658995,
+  "loss_after": 0.4263110968616365,
   "central_difference_errors": [
     0.0008684338483069265,
     8.761357049191787e-06,
