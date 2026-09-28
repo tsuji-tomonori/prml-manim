@@ -17,8 +17,8 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:
                     frames.append(dict(id=c['id'],time=(c['start']+c['end'])/2,kind='math',display=c['display']))
-        if s['id'] in ('scene01','scene04','scene09'):
-            b=s['beats'][1 if s['id']=='scene01' else 2 if s['id']=='scene04' else 3]
+        if s['id'] in ('scene01','scene03','scene05','scene08'):
+            b=s['beats'][{'scene01':1,'scene03':0,'scene05':1,'scene08':5}[s['id']]]
             action=b['actions'][0]
             for phase,alpha in [('early',.1),('late',.9)]:
                 frames.append(dict(id=s['id']+'-'+phase,time=action['start']+alpha*(action['end']-action['start']),kind='sync'))

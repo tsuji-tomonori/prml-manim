@@ -25,8 +25,8 @@ def main():
         for c,a in zip(cues,e['subtitle_cues']):
             assert c['id']==a['id'] and c['display']==a['display']
             assert abs(c['start']-s['start']-a['start'])<1e-7
-        if s['id'] in ('scene01','scene04','scene09'):
-            b=s['beats'][1 if s['id']=='scene01' else 2 if s['id']=='scene04' else 3]
+        if s['id'] in ('scene01','scene03','scene05','scene08'):
+            b=s['beats'][{'scene01':1,'scene03':0,'scene05':1,'scene08':5}[s['id']]]
             with wave.open(str(ROOT/e['path'])) as wav:
                 rate=wav.getframerate(); data=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
             for ci,c in enumerate(b['cues']):

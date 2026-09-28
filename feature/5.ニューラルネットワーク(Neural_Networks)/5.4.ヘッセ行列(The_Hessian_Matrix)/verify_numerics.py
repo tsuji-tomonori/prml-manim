@@ -33,6 +33,6 @@ def main():
         q=net(w);prob=1/(1+np.exp(-q['y']));return (prob-y)*q['b']
     lfd=np.column_stack([(logistic_grad(WEIGHTS+1e-5*e)-logistic_grad(WEIGHTS-1e-5*e))/2e-5 for e in np.eye(2)])
     logistic_error=float(np.max(abs(lfd-logistic_H)));assert logistic_error<1e-9
-    result=dict(seed=54,samples=40,max_function_difference_error=max(fd),max_gradient_difference_error=max(gd),max_hvp_error=max(hv),max_inverse_update_error=inverse_error,max_ellipse_level_error=ellipse_error,logistic_hessian_error=logistic_error,eigenvalues=eig.tolist(),example_H=net()['H'].tolist(),example_Hv=hvp(WEIGHTS,[.6,.8])[0].tolist(),scenes=len(entries),sentences=sum(len(b['segments']) for s in SCENES for b in s['beats']),audio_seconds=sum(e['duration'] for e in entries))
+    result=dict(seed=54,samples=40,max_function_difference_error=max(fd),max_gradient_difference_error=max(gd),max_hvp_error=max(hv),max_inverse_update_error=inverse_error,max_ellipse_level_error=ellipse_error,logistic_hessian_error=logistic_error,eigenvalues=eig.tolist(),example_H=net()['H'].tolist(),example_direction=[.6,.8],example_Hv=hvp(WEIGHTS,[.6,.8])[0].tolist(),scenes=len(entries),sentences=sum(len(b['segments']) for s in SCENES for b in s['beats']),audio_seconds=sum(e['duration'] for e in entries))
     Path('numerical_results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':main()
