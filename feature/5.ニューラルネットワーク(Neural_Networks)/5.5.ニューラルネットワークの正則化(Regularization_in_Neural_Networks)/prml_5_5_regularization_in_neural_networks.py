@@ -255,7 +255,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.label('回転の軌道を、2次元の入力空間で見る')
         self.beat(lambda:angle.animate.set_value(1.2),lambda:angle.animate.set_value(3.7))
         self.equation(r'\tau=\left.\frac{\partial s}{\partial\xi}\right|_0,\qquad \tau=(-x_2,x_1)^T')
-        self.beat(lambda:Create(tau),lambda:angle.animate.set_value(.8))
+        self.beat(lambda:Create(tau.update()),lambda:angle.animate.set_value(.8))
         self.equation(r'\frac{\partial y}{\partial\xi}=J\tau,\qquad y=x_1^2+x_2^2+c x_1')
         sens=readout(r'J\tau=',lambda:model.sensitivity(x(),c.get_value()),[3.5,.8,0],YELLOW_TERM)
         value=readout('y=',lambda:model.radial(x(),c.get_value()),[3.5,.0,0],RED_MODEL)
@@ -266,7 +266,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.equation(r'\widetilde E=E+\lambda\Omega,\qquad \Omega=\frac12\sum_{n,k}(J_{nk}\tau_n)^2')
         self.label('c = 0：円周上で y = 1、回転方向の微分は0',GREEN_TRUE)
         self.beat(lambda:angle.animate.set_value(5.4),lambda:angle.animate.set_value(.45))
-        self.remove(sens,value,coef);eps=ValueTracker(.02);base=np.array([1.,0.])
+        self.remove(sens,value,coef);angle.set_value(0);eps=ValueTracker(.02);base=np.array([1.,0.])
         approx=always_redraw(lambda:Dot(ax.c2p(*(base+eps.get_value()*model.tangent(base))),color=PURPLE_REG))
         actual=always_redraw(lambda:Dot(ax.c2p(*model.rotate(base,eps.get_value())),color=ORANGE_VAL))
         self.add(approx,actual);self.equation(r'\tau\approx\frac{s(x,\epsilon)-x}{\epsilon},\quad x+\epsilon\tau\approx s(x,\epsilon)')
@@ -275,7 +275,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
 
     def augmentation(self):
         eps=ValueTracker(.12);slope=ValueTracker(1.2);swing=ValueTracker(-1)
-        ax,g=axes((-1,1,.5),(-.7,2.7,1),center=(-2,.05,0),width=6.5,height=3.5);self.add(g)
+        ax,g=axes((-1,1,.5),(-.7,3,1),center=(-2,.05,0),width=6.5,height=3.5);self.add(g)
         u=np.linspace(-1,1,181)
         graph=always_redraw(lambda:curve(ax,u,slope.get_value()*u+u*u))
         dot=always_redraw(lambda:Dot(ax.c2p(swing.get_value()*eps.get_value(),slope.get_value()*swing.get_value()*eps.get_value()+(swing.get_value()*eps.get_value())**2),color=BLUE_DATA))
