@@ -1,0 +1,43 @@
+{
+  "bump_network_error": 4.440892098500626e-16,
+  "symmetry": {
+    "distinct_vectors": 8,
+    "max_error": 0.0
+  },
+  "output_checks": "sigmoid(0)=0.5; softmax normalization and shift invariance: 31 cases",
+  "boundary_max_probability_error": 5.112577028398846e-14,
+  "affine_composition": "passed on 401 inputs",
+  "fits": [
+    {
+      "target": 0,
+      "rms": 5.535642393058871e-06,
+      "max_error": 1.1789481781931954e-05
+    },
+    {
+      "target": 1,
+      "rms": 8.621463224312558e-05,
+      "max_error": 0.000185670826770179
+    },
+    {
+      "target": 2,
+      "rms": 0.01321948212209562,
+      "max_error": 0.05148756495697415
+    },
+    {
+      "target": 3,
+      "rms": 0.08434826566266007,
+      "max_error": 0.5
+    }
+  ],
+  "audio": {
+    "scenes": 9,
+    "beats": 58,
+    "sentences": 116,
+    "duration": 597.6666666666666
+  },
+  "captions": {
+    "count": 116,
+    "max_width": 9.377343750000001,
+    "max_height": 0.6995312499999997
+  }
+}
