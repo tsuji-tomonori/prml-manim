@@ -1,60 +1,93 @@
-# 5.3 誤差逆伝播
+# PRML 5.3 誤差逆伝播
 
-PRML Chapter 5 の 5.3 節を、誤差逆伝播を「重み更新法」ではなく「勾配評価のための局所的なメッセージパッシング」として解説する Manim アニメーションと台本です。
+「どの重みを、どちらへ動かす？」から始まる **約9分6秒・9シーン** の日本語動画です。つまみを動かし、値の変化と感度を追い、連鎖律の式で確かめます。
 
-## ファイル
+[動画（480p15）](media/videos/prml_5_3_error_backpropagation/480p15/PRML53ErrorBackpropagation.mp4) ／ [収録台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
 
-- `prml_5_3_error_backpropagation.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## 構成と原文
 
-## レンダリング
+Bishop (2006), *Pattern Recognition and Machine Learning*, 印刷 pp.241–249（手元PDF pp.261–269）、§5.3.1–5.3.4 を抽出して確認しました。図5.7・5.8を自作の数値例と配置で再構成しています。本節に表はありません。
 
-Manim は `pangocairo` などの system dependency を必要とします。`uv sync` が `No package 'pangocairo' found` で失敗する場合は、OS 側で Cairo/Pango/pkg-config 関連パッケージを入れてから再実行してください。
-`MathTex` の数式描画には LaTeX と `dvisvgm` も必要です。
+| シーン | 音声尺 | 視覚的な実験 | 原文参照 |
+|---|---:|---|---|
+| どの重みを、どちらへ動かす？ | 46.933秒 | 重み・予測・誤差曲線上の点・接線の連動 | pp.241–242、(5.44)–(5.47) |
+| まず、何を前向きに計算する？ | 64.467秒 | 二入力・二隠れ・二出力の値を流す | pp.242–245、(5.48)–(5.49)、(5.62)–(5.64) |
+| 一つの変更は、どう伝わる？ | 67.200秒 | 計算経路を拡大し、局所的な倍率を掛ける | p.243、(5.50)–(5.53) |
+| 逆向きの計算は、どこから始める？ | 60.133秒 | 同じ放物線の両側で感度の符号を比較 | pp.242–244、(5.46)–(5.47)、(5.51)、(5.54) |
+| 道が二つに分かれたら？ | 56.000秒 | 二経路の寄与を数直線で足し、目標を動かす | p.244、図5.7、(5.55)–(5.56) |
+| 活性化の傾きは、何を変える？ | 60.067秒 | tanhの接線、隠れ感度、外積の各セル | pp.245–246、(5.58)–(5.67) |
+| データが増えたら、どうまとめる？ | 47.600秒 | データごとの勾配を足し、全重みを一歩更新 | pp.242,244–245、(5.44)、(5.53)、(5.56)–(5.57) |
+| 一本ずつ試す方法では、遅い？ | 63.733秒 | 中心差分の幅を縮め、同一軸で計算量を比較 | pp.246–247、(5.68)–(5.69) |
+| 入力の小さな誤差も、伝えられる？ | 79.600秒 | 出力平面で実計算と局所近似を重ねる | pp.247–249、図5.8、(5.70)–(5.77) |
 
-ナレーション入りで再生成する場合は、VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、先に音声を生成します。
+## 数値例と成立条件
+
+- `backprop_model.py` が NumPy で前向き計算・逆伝播・ヤコビ行列を求めます。二層モデルの行列は、行が接続先、列が接続元です。先頭列がバイアスで、`x_0=z_0=1`。ネットワーク図ではバイアスの辺を省略したことを明示します。
+- 基本入力は `(0.6,-0.4)`、目標は `(0.3,-0.2)`。隠れ値は約 `(0.591519,-0.604368)`、出力は約 `(1.063292,-0.407323)`。単一経路の導入と分岐の拡大には別の小さな説明例を使います。
+- 感度 `δ_j` は誤差の **総入力** `a_j` に関する微分です。接続の勾配は `δ_j z_i`。符号を説明する単独の掛け算では、下流の感度を固定します。
+- 出力差 `y_k-t_k` は、線形出力＋二乗和、sigmoid＋二値交差エントロピー、softmax＋多クラス交差エントロピーなど、対応する組で成立します。一般の組では出力同士の依存も含む連鎖律を使います。
+- 隠れユニットの和は、そのユニットから直接接続する先すべてを対象とします。各ユニットの活性化が異なる場合も、それぞれの局所微分を使います。
+- 全誤差がデータごとの和なら、全勾配も和。平均誤差を採用する場合は勾配もデータ数で割ります。更新例は全12パラメータに学習率0.1を適用し、図では出力層の二成分を表示します。
+- 計算量は一例あたりの漸近評価です。活性化関数の評価が定数費用で、接続計算が主要な費用を占める場合を説明します。`C=W` と `C=2W²` の図は増え方の模型で、実測時間ではありません。
+- 中心差分の切り捨て誤差は滑らかな関数で `O(ε²)`。小さすぎる幅では丸め誤差が問題になります。重み・入力の両方を独立に中心差分で検証します。
+- ヤコビ行列の近似は、基準入力付近の小さな変位に対して成立します。出力平面の青点が実計算、黄点が基準点のヤコビ行列による予測です。新しい基準点では再計算します。
+- (5.75)–(5.76) の `δ_kj` はクロネッカーのデルタであり、誤差の感度とは異なります。画面で一致する添字なら1、それ以外は0と定義します。図5.8では二つの前処理が後続モジュールに合流する構造を保ちます。
+
+## 記号と用語の補足
+
+- `w`：調整する重み、`x`：元の入力、`a`：重み付きの和、`z`：活性化後の値、`y`：予測、`t`：目標、`E_n`：一例の誤差。
+- `∂`：ほかの変数を固定した微分。`∇E`：各重みに関する微分を並べた勾配。`η`：更新の一歩の大きさを決める学習率。
+- sigmoid：一つのスコアを0〜1の確率へ変換する関数。softmax：複数のスコアを合計1の確率へ変換する関数。
+- 交差エントロピー（CE）：予測した確率と目標のずれを測る誤差。対応する出力関数との詳細は前節5.2を参照。
+- `O(W)`：重み数が増えたとき、計算量の主要部分がその数に比例して増えることを表す記法。
+
+## 字幕・読み・同期
+
+53段階・106文の正本は `narration_content.py` です。字幕用 `display` と音声用 `speech` を分離し、MathTex の本体を日本語かなの実測文字高・中心線にそろえています。左右の間隔と二行への折り返しも1.1の修正済み方式を継承しました。
+
+speaker 23 の `audio_query` を全文取得し、修正前後の読みを `reading_check.md/json` に保存します。値、黄色、正、負、二乗和、二分の一、数直線、一行の誤読を修正し、再取得した106文を確認しました。
+
+各文のPCM長・開始終了時刻、台本・WAVのSHA-256を manifest に保存します。各段階は15fpsの境界に合わせ、末尾の呼吸は約0.35〜0.42秒です。音声が欠落・不一致なら描画を停止します。旧7 WAVを置き換え、scene08・09を追加しました。
+
+VOICEVOX Engine 0.25.2、WhiteCUL ノーマル（23）、話速1.08、抑揚0.95。音声クレジット：**VOICEVOX:WhiteCUL**。
+
+## 3Blue1Brown の参照
+
+[3b1b/videos](https://github.com/3b1b/videos) の次の演出を参考に、Manim CEで実装しました。
+
+- `_2017/nn/part1.py` / `NetworkMobject`：値の大きさを丸の濃さへ、接続重みの符号・大きさを辺の色・太さへ対応。
+- `_2017/nn/part3.py` / `SimplestNetworkExample`：一本の経路を拡大し、小さな重み変更が各段階へ伝わる過程を見せる。
+- 同 `ConstructGradientFromAllTrainingExamples`：データごとの寄与を集める。
+- `_2017/nn/network.py` / `backprop`：前向きの中間値保存、後ろ向きの感度、外積の数値的な対応を確認。
+- `_2017/eoc/chapter4.py` / `ThreeLinesChainRule`：入力の小さな変位を中間段階へ追い、倍率の積として連鎖律を導入。
+- `_2016/eola/chapter3.py` / `TransformJustOneVector`：行列を変位の変換として捉える。
+
+[3b1b/manim](https://github.com/3b1b/manim) の `manimlib/mobject/mobject.py` の updater の考え方を、CEの `ValueTracker`・updaterで再現しました。ManimGLのコードは取り込んでいません。
+
+## 再生成と検証
+
+対象ディレクトリで実行します。Engineが接続できない場合は停止し、コンテナは操作しません。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_5_3_error_backpropagation.py PRML53ErrorBackpropagation
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+# 全文を確認し、必要なら speech を修正して再実行
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py --captions
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_5_3_error_backpropagation.py PRML53ErrorBackpropagation
+/home/t-tsuji/project/prml-manim/.venv/bin/python review_video.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python validate_video.py
 ```
 
-生成済み動画:
+音声生成は `--from-scene scene05` などで再開できます。画像レビューは `media/review/`、時刻は `media/prml53_timeline.json` に生成します。数値検証は `numerical_results.json`、動画検証は `validation_results.json` に記録します。
 
-```text
-media/videos/prml_5_3_error_backpropagation/480p15/PRML53ErrorBackpropagation.mp4
-```
+全編の通し聴取と全フレームの人手検査は実施していません。APIの読みと抽出画像の確認範囲を、作業レポートに分けて記録します。
 
-高品質で出力する場合:
+## 最終検証
 
-```bash
-uv run manim -pqh prml_5_3_error_backpropagation.py PRML53ErrorBackpropagation
-```
+映像は H.264・854×480・15fps・545.733333秒、音声は AAC・545.770667秒です。差は0.037334秒。3秒以上の無音は0件、平均音量−26.5dB、最大−6.0dBでした。
 
-## 原文参照
+重み微分36個の最大絶対誤差は4.79×10⁻¹¹、ヤコビ行列12成分の最大差は1.84×10⁻¹¹。字幕106文と音声の対応、安全領域、全53段階・全6記号字幕・3シーン同期の計65画像を確認しました。最終修正後の再抽出では63画像の画素完全一致を照合し、変わった2画像を再度目視しています。
 
-主に `.working/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf` の以下を参照しています。
-
-- Section 5.3: Error Backpropagation
-- Section 5.3.1: Evaluation of error-function derivatives
-- Eq. (5.48), Eq. (5.49): forward propagation の局所計算
-- Eq. (5.50)-(5.53): `partial E_n / partial w_ji = delta_j z_i`
-- Eq. (5.54): 出力ユニットのデルタ
-- Eq. (5.55), Eq. (5.56): 隠れユニットの backpropagation formula
-- Fig. 5.7: 隠れユニットへのデルタ逆伝播
-- Section 5.3.2: `tanh` 隠れ層を持つ単純な例
-- Eq. (5.65)-(5.67): 出力デルタ、隠れデルタ、各層の重み微分
-- Section 5.3.3: backpropagation の計算効率と有限差分による実装確認
-
-## 制作方針
-
-- backpropagation を最適化法全体ではなく、勾配評価の手順として説明する。
-- `delta_j` の定義、重み微分の局所積、隠れユニットの逆向き集約を順に見せる。
-- 数式は画面に置き、ナレーションは式の意味を補足する。
-- PRML の図を直接複製せず、同じ構造を自作ネットワーク図と自作レイアウトで再構成する。
-
-## 音声クレジット
-
-- ナレーション: VOICEVOX:WhiteCUL
+[作業完了レポート](../../../reports/working/20260929-0130-prml-5-3-3b1b-remake.md)に原文対応、参照コード、修正内容と確認範囲をまとめています。

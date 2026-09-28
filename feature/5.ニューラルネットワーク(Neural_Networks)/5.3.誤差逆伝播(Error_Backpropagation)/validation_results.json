@@ -1,0 +1,75 @@
+{
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "545.733333"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "545.770667"
+      }
+    ],
+    "format": {
+      "duration": "545.771000"
+    }
+  },
+  "stream_difference": 0.0373339999999871,
+  "silences_over_3s": 0,
+  "mean_volume": -26.5,
+  "max_volume": -6.0,
+  "max_scene_clock_error": 2.418687472527381e-11,
+  "sync": [
+    {
+      "id": "scene01-02-01",
+      "display": "まず、黄色のつまみを右へ動かしてみます。",
+      "action_start": 10.733333333333315,
+      "action_end": 18.133333333333315,
+      "pcm_onset": 10.810708333333332
+    },
+    {
+      "id": "scene01-02-02",
+      "display": "予測も誤差も、つながった計算を通じて変わります。",
+      "action_start": 10.733333333333315,
+      "action_end": 18.133333333333315,
+      "pcm_onset": 13.983916666666667
+    },
+    {
+      "id": "scene04-03-01",
+      "display": "予測を目標より小さくすると、傾きは負になります。",
+      "action_start": 196.66666666666063,
+      "action_end": 200.66666666666063,
+      "pcm_onset": 196.738999999995
+    },
+    {
+      "id": "scene04-03-02",
+      "display": "今度は予測を少し大きくする方向で、誤差が減ります。",
+      "action_start": 200.66666666666063,
+      "action_end": 205.26666666666063,
+      "pcm_onset": 200.788499999995
+    },
+    {
+      "id": "scene09-04-01",
+      "display": "入力の変化を大きくすると、曲がり方の影響で近似がずれます。",
+      "action_start": 496.8666666666436,
+      "action_end": 501.59999999997694,
+      "pcm_onset": 496.940583333312
+    },
+    {
+      "id": "scene09-04-02",
+      "display": "ヤコビ行列は場所によって変わるので、新しい基準点では計算し直します。",
+      "action_start": 501.59999999997694,
+      "action_end": 507.5333333333103,
+      "pcm_onset": 501.6771249999787
+    }
+  ],
+  "sha256": "ab8e7663b73137978d3078c9d1002f712a6bfbcfafb617de713ecd4e731d1b28",
+  "full_listen": false
+}
