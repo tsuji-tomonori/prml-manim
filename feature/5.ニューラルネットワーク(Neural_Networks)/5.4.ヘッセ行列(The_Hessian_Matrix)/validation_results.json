@@ -1,0 +1,89 @@
+{
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "628.466011"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "628.501333"
+      }
+    ],
+    "format": {
+      "duration": "628.502000"
+    }
+  },
+  "stream_difference": 0.03532200000006469,
+  "silences_over_3s": 0,
+  "mean_volume": -26.3,
+  "max_volume": -6.2,
+  "max_scene_clock_error": 5.915978817938594e-11,
+  "sync": [
+    {
+      "id": "scene01-02-01",
+      "display": "曲がり方を強くすると、谷底は手前に移り、同じ一歩で行き過ぎます。",
+      "action_start": 10.133333333333317,
+      "action_end": 15.46666666666665,
+      "pcm_onset": 10.21225
+    },
+    {
+      "id": "scene01-02-02",
+      "display": "いまの傾きに加え、その傾きがどれだけ変わるかも知りたくなります。",
+      "action_start": 15.46666666666665,
+      "action_end": 20.733333333333317,
+      "pcm_onset": 15.553083333333333
+    },
+    {
+      "id": "scene03-01-01",
+      "display": "この斜めの谷で、対角以外の成分を、つまみでゼロにしてみましょう。",
+      "action_start": 134.86666666666414,
+      "action_end": 140.06666666666413,
+      "pcm_onset": 134.96841666666415
+    },
+    {
+      "id": "scene03-01-02",
+      "display": "二つの重みの結びつきが消え、谷の向きも形も変わってしまいます。",
+      "action_start": 140.06666666666413,
+      "action_end": 145.5333333333308,
+      "pcm_onset": 140.15391666666414
+    },
+    {
+      "id": "scene05-02-01",
+      "display": "一つ目の勾配の向きに、曲率の情報を加えます。その方向の楕円が縮みます。",
+      "action_start": 285.9999999999889,
+      "action_end": 292.26666666665557,
+      "pcm_onset": 286.08687499998956
+    },
+    {
+      "id": "scene05-02-02",
+      "display": "楕円は、増やした行列を精度とみなした、逆行列の広がりを表しています。",
+      "action_start": 292.26666666665557,
+      "action_end": 298.5333333333223,
+      "pcm_onset": 292.3889166666562
+    },
+    {
+      "id": "scene08-06-01",
+      "display": "方向を変えれば、もう一度この計算を行います。結果の矢印も連動して変わります。",
+      "action_start": 540.5999999999988,
+      "action_end": 546.9333333333321,
+      "pcm_onset": 540.7246666666441
+    },
+    {
+      "id": "scene08-06-02",
+      "display": "二階微分が対称なら、原文の横向きの積と、ここで使う縦向きの積は転置の関係です。",
+      "action_start": 546.9333333333321,
+      "action_end": 554.1333333333321,
+      "pcm_onset": 547.0027916666442
+    }
+  ],
+  "sha256": "c87c555dbb0f2f7a7cae4eb19dd0d13abb7a3a6fd9a5fba7d2d9026dada7ed31",
+  "full_listen": false
+}

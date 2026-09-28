@@ -1,0 +1,519 @@
+{
+  "video_sha256": "c87c555dbb0f2f7a7cae4eb19dd0d13abb7a3a6fd9a5fba7d2d9026dada7ed31",
+  "frame_count": 69,
+  "inspected_frames": 69,
+  "math_caption_count": 6,
+  "scene_counts": {
+    "scene01": 9,
+    "scene02": 7,
+    "scene03": 8,
+    "scene04": 7,
+    "scene05": 9,
+    "scene06": 7,
+    "scene07": 6,
+    "scene08": 10,
+    "scene09": 6
+  },
+  "inspection": "view_image: 18 original-resolution contact sheets; 854x480 pixels per frame",
+  "full_frame_inspection": false,
+  "full_listen": false,
+  "unresolved_findings_in_sample": [],
+  "notes": [
+    "完成式への切り替えによりW²字幕時の字形の崩れを解消",
+    "最小差分幅で四隅の符号を非表示にし重なりを解消",
+    "動く矢印と交差する内部の目盛り文字を除去",
+    "全6記号字幕の日本語との高さ・中心・余白を確認",
+    "scene01/03/05/08の前後画像と文PCM開始時刻を照合"
+  ],
+  "frames": [
+    {
+      "id": "scene01-beat1",
+      "time": 5.066666666666666,
+      "kind": "beat",
+      "sha256": "1b57be67f657d24d8c39aae1efe3ae6e483047ac47b30711414d9126251150b8",
+      "inspected": true
+    },
+    {
+      "id": "scene01-beat2",
+      "time": 15.433333333333316,
+      "kind": "beat",
+      "sha256": "f09278f84483b0177503d4fa512dd37ab6f219291050c0e5cee8fc43f9703035",
+      "inspected": true
+    },
+    {
+      "id": "scene01-beat3",
+      "time": 26.46666666666661,
+      "kind": "beat",
+      "sha256": "d893bae84bae702820a676f8fd705e88d7238aac255fac808efa5a55191949a1",
+      "inspected": true
+    },
+    {
+      "id": "scene01-beat4",
+      "time": 37.43333333333325,
+      "kind": "beat",
+      "sha256": "b0045a5ebfaf81f84231d14c5b06f93706c5effb9f264cb9b88c648952b9fd02",
+      "inspected": true
+    },
+    {
+      "id": "scene01-04-01",
+      "time": 34.68,
+      "kind": "math",
+      "display": "ネットワークには多くの重みとバイアスがあります。まとめて $w$ と書きます。",
+      "sha256": "7d3ca0bbb5124f639b7f848f7507ccf423f496d18415eb9018670499bd1f5c1e",
+      "inspected": true
+    },
+    {
+      "id": "scene01-beat5",
+      "time": 48.53333333333377,
+      "kind": "beat",
+      "sha256": "b03b1f2d104cd439dafed9628be7b1b1c1c32078e6c3f683d0532f561354199e",
+      "inspected": true
+    },
+    {
+      "id": "scene01-beat6",
+      "time": 60.666666666667695,
+      "kind": "beat",
+      "sha256": "d38a1ed9abfcfdaba62f5d67db52e9463d0d4ac766612788d8691437569d029f",
+      "inspected": true
+    },
+    {
+      "id": "scene01-early",
+      "time": 10.66666666666665,
+      "kind": "sync",
+      "sha256": "060c76cad7b88dd250a54a4038c629412ee1478bf3f96a99ff26c14a3fd750bf",
+      "inspected": true
+    },
+    {
+      "id": "scene01-late",
+      "time": 14.933333333333318,
+      "kind": "sync",
+      "sha256": "0760c2431599e104580afe914aa7bec2259068857e689457cc90cb657a6f03c0",
+      "inspected": true
+    },
+    {
+      "id": "scene02-beat1",
+      "time": 72.40000000000133,
+      "kind": "beat",
+      "sha256": "0b5d5c6ca93775d1b29f95dc3d9d80b9458faf3ba804a27bb1841eef5e302bbe",
+      "inspected": true
+    },
+    {
+      "id": "scene02-beat2",
+      "time": 83.03333333333404,
+      "kind": "beat",
+      "sha256": "59a249d3a9af3f702cdbeaed6e4e3bfbb6f6a66b59fa83ab70f374ac3cc29a3a",
+      "inspected": true
+    },
+    {
+      "id": "scene02-beat3",
+      "time": 93.80000000000013,
+      "kind": "beat",
+      "sha256": "55a56b8c4786c84a0f6e95148abae6affd711012bcf293a9a1887dea89f60d93",
+      "inspected": true
+    },
+    {
+      "id": "scene02-beat4",
+      "time": 105.13333333333281,
+      "kind": "beat",
+      "sha256": "d5397b07cd910dac60c8b0c1f66d6eb63b66589f799c76c8c85e87c7b4e8e9a6",
+      "inspected": true
+    },
+    {
+      "id": "scene02-beat5",
+      "time": 115.66666666666549,
+      "kind": "beat",
+      "sha256": "07b3355408b74b836646ad3d8cb602fe49092e52917c020a1ac283ff485b4237",
+      "inspected": true
+    },
+    {
+      "id": "scene02-beat6",
+      "time": 127.66666666666495,
+      "kind": "beat",
+      "sha256": "39d5b2ab9498973ff982820fe4ef35254bf2f7fad60b49eae2b308e96a50e21a",
+      "inspected": true
+    },
+    {
+      "id": "scene02-06-02",
+      "time": 131.21866666666799,
+      "kind": "math",
+      "display": "重みが $W$ 個なら、成分は $W^2$ 個。大きなネットワークでは計算が重くなります。",
+      "sha256": "c368da0a5f5e359eada07a9752ea47741c2755e717d7c8f148493be2a1bfa7a4",
+      "inspected": true
+    },
+    {
+      "id": "scene03-beat1",
+      "time": 140.1999999999975,
+      "kind": "beat",
+      "sha256": "55bb20d9bd3d3c83693448d4de7d18d3ff6bfdbd5c68e43e9c4fa8d355027a88",
+      "inspected": true
+    },
+    {
+      "id": "scene03-beat2",
+      "time": 151.19999999999686,
+      "kind": "beat",
+      "sha256": "d72bb86ba0f0fe77c1ce4075e5a1b580f5aa99e64843e74ad9462c7202a33d54",
+      "inspected": true
+    },
+    {
+      "id": "scene03-beat3",
+      "time": 162.79999999999623,
+      "kind": "beat",
+      "sha256": "2881da22e8336f40d0af642bf18b2120aba9ffcfddab37e22c252d011f0c71f2",
+      "inspected": true
+    },
+    {
+      "id": "scene03-beat4",
+      "time": 174.6333333333289,
+      "kind": "beat",
+      "sha256": "c0dc5435e378a7df51c1a0ef122f9dad1795663c132a2c296f893b2a4c15ccf7",
+      "inspected": true
+    },
+    {
+      "id": "scene03-beat5",
+      "time": 186.49999999999488,
+      "kind": "beat",
+      "sha256": "fbfdf569020b0b5b1228457eab88c08ecec37ffbe9a8c42886b6fbcc71432611",
+      "inspected": true
+    },
+    {
+      "id": "scene03-beat6",
+      "time": 198.03333333332753,
+      "kind": "beat",
+      "sha256": "58e271f509f1915a99b356f9f8328d5945be9063e7db71bd58cd9e032a6e2594",
+      "inspected": true
+    },
+    {
+      "id": "scene03-early",
+      "time": 135.38666666666415,
+      "kind": "sync",
+      "sha256": "d147cd814fde0700566f5a11f5ddedea052461d70c546dca34373d813bc2523c",
+      "inspected": true
+    },
+    {
+      "id": "scene03-late",
+      "time": 139.54666666666412,
+      "kind": "sync",
+      "sha256": "cedc49284ca91b6baf58927d7042584d46eb58bb1af465ae228d0ed3bcb01dc3",
+      "inspected": true
+    },
+    {
+      "id": "scene04-beat1",
+      "time": 209.1333333333269,
+      "kind": "beat",
+      "sha256": "692857e922f7ce11a130bb97d7ed7ae7f7e40d87fbf41ebf60c87525611e7e5e",
+      "inspected": true
+    },
+    {
+      "id": "scene04-beat2",
+      "time": 220.69999999999294,
+      "kind": "beat",
+      "sha256": "0d5c41ba6d53d3e57938cdb8f7e223d01569340772b94d6fc0f9e7cd5d625868",
+      "inspected": true
+    },
+    {
+      "id": "scene04-beat3",
+      "time": 232.79999999999225,
+      "kind": "beat",
+      "sha256": "eb4014a68d339b4af1baef58b7772e7316f09a6d78b8ec751747bb4386d656eb",
+      "inspected": true
+    },
+    {
+      "id": "scene04-beat4",
+      "time": 244.9333333333249,
+      "kind": "beat",
+      "sha256": "b9c0fac5d87032436e7b9aa613799d389a1d4e7da40eeeca57991b9fd15a85fe",
+      "inspected": true
+    },
+    {
+      "id": "scene04-beat5",
+      "time": 257.4333333333242,
+      "kind": "beat",
+      "sha256": "eed6595bd149590b018b2dfc8095572021917ce7752e356c5b0c75b67d1e55b2",
+      "inspected": true
+    },
+    {
+      "id": "scene04-beat6",
+      "time": 269.2666666666569,
+      "kind": "beat",
+      "sha256": "8d53bc456c7e2da3b629fe5bd94edd77233dacab8f9d255d7d08769440ece43d",
+      "inspected": true
+    },
+    {
+      "id": "scene04-06-02",
+      "time": 271.8933333333269,
+      "kind": "math",
+      "display": "このとき $b_n$ は、出力確率になる前の総入力の勾配です。",
+      "sha256": "f1e847f9e92bc6f936e694ac9729770730227f60a38d16b42a776954048a0910",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat1",
+      "time": 280.3333333333229,
+      "kind": "beat",
+      "sha256": "b7403d603c627ea9c21ae0896d262885579487d644f46f795179b49e8f9dc4c7",
+      "inspected": true
+    },
+    {
+      "id": "scene05-01-02",
+      "time": 283.1039999999896,
+      "kind": "math",
+      "display": "この数を $\\alpha$ と書きます。最初から逆行列を持てるようにするためです。",
+      "sha256": "b21241b679c333d8f649bc367213216b996ce77504fcf49867d0feee55654931",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat2",
+      "time": 292.2666666666556,
+      "kind": "beat",
+      "sha256": "b9981a15cd8ead4ec7a33da7f75ca127b5804af784e7add195311a266fa40de1",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat3",
+      "time": 304.1999999999882,
+      "kind": "beat",
+      "sha256": "60993618aed83c9ad71fb7a08777914dd1c376f69d4f06116ffb6f1da6587920",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat4",
+      "time": 316.16666666665424,
+      "kind": "beat",
+      "sha256": "80974e7bf15d0fa914e3afe35d8fa60f066cdc0486b87fe8993864fa841b903f",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat5",
+      "time": 328.9666666666535,
+      "kind": "beat",
+      "sha256": "0678ad1b92fbfc6e536847bacb65b6c37a00e6330919cee6ae7b20204997ae34",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat6",
+      "time": 341.2999999999861,
+      "kind": "beat",
+      "sha256": "f64a4feb03ee2d9c38b98cbd4a71bcead647cf2c7fb668e7bcba6c6ad5813395",
+      "inspected": true
+    },
+    {
+      "id": "scene05-early",
+      "time": 286.6266666666556,
+      "kind": "sync",
+      "sha256": "81cbcdf768fdf9423c743b42ff1fea387d35ec632763fba9514fd3167314b43d",
+      "inspected": true
+    },
+    {
+      "id": "scene05-late",
+      "time": 291.6399999999889,
+      "kind": "sync",
+      "sha256": "721ac3a218c3771ca1f6fab3a83dd4127482d2e2f1f4fa2c5b96232849d8e935",
+      "inspected": true
+    },
+    {
+      "id": "scene06-beat1",
+      "time": 352.7999999999854,
+      "kind": "beat",
+      "sha256": "1c09631e72f1438203db74d02ac4c542a5c171a0783728109721fbfb935bc622",
+      "inspected": true
+    },
+    {
+      "id": "scene06-beat2",
+      "time": 363.8999999999848,
+      "kind": "beat",
+      "sha256": "50a2fc02fad547a8f082d165b0447c9d0d387c7e744b3f82742f3bb3ad317a3c",
+      "inspected": true
+    },
+    {
+      "id": "scene06-beat3",
+      "time": 375.1999999999842,
+      "kind": "beat",
+      "sha256": "7d56885c36462b76bb097ebd2cdc93d10a6c80ba0b7893a917a4e4cb95989351",
+      "inspected": true
+    },
+    {
+      "id": "scene06-beat4",
+      "time": 386.43333333331685,
+      "kind": "beat",
+      "sha256": "74148a73000c0d333c1caf373a077b6cc065680ce4cf7f67e25478ab52c07cc6",
+      "inspected": true
+    },
+    {
+      "id": "scene06-beat5",
+      "time": 398.3333333333162,
+      "kind": "beat",
+      "sha256": "98ff1eefe651464acec8bcb5a034e59f5787fb5484146003a18729e11a023ee4",
+      "inspected": true
+    },
+    {
+      "id": "scene06-beat6",
+      "time": 410.5666666666488,
+      "kind": "beat",
+      "sha256": "5a9243813d105855cf31f899d5d9d330de4a187bba4f8fde6ccd60f999cfdeff",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat1",
+      "time": 422.86666666664814,
+      "kind": "beat",
+      "sha256": "5ee49a207eeea30db8adf30ba681434c503500acb3fad27aa4f3f049f2ccc34e",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat2",
+      "time": 435.1999999999807,
+      "kind": "beat",
+      "sha256": "ec17f4a8642250b2c1e0e1aa8b2622dd230880a8353cd5d900c4502b98d186a0",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat3",
+      "time": 446.9999999999801,
+      "kind": "beat",
+      "sha256": "91a19f16b7dfb90a3d6b963a349fc9cdfff262c3869901919ed426560090a39d",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat4",
+      "time": 458.63333333331275,
+      "kind": "beat",
+      "sha256": "a2f49ad327c645c89f7733ef60d4719055a623cfcd322a46d61300046b94c621",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat5",
+      "time": 469.6666666666455,
+      "kind": "beat",
+      "sha256": "76d8a4859a1adc9d8e250b15fc923e56d7c6b05c3ca6ad2b89d19074308f7fe5",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat6",
+      "time": 481.1333333333115,
+      "kind": "beat",
+      "sha256": "54da71eed271cb7e424368302089646dd75ad91621c48784615e0993899698fd",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat1",
+      "time": 492.4333333333108,
+      "kind": "beat",
+      "sha256": "24d170026f9a2a8e3982d9b975d0352e53798563c2c6baa57dcd718f0775331e",
+      "inspected": true
+    },
+    {
+      "id": "scene08-01-02",
+      "time": 494.80266666664414,
+      "kind": "math",
+      "display": "その方向を $v$ とすると、知りたい変化率は $Hv$ です。",
+      "sha256": "078d44b8deb981a4cdf9039d460809453a1e1d9dd008cd83ea9f2baec27ae248",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat2",
+      "time": 503.19999999997685,
+      "kind": "beat",
+      "sha256": "67ad5889b5c052d6636b6e5896934ba7ffacc442d8fa4033bc47cef98fe637a0",
+      "inspected": true
+    },
+    {
+      "id": "scene08-02-02",
+      "time": 505.30666666664416,
+      "kind": "math",
+      "display": "ここでは $R$ と書きます。重みに作用させると、動かす方向そのものになります。",
+      "sha256": "a59c6438564cce134ac32be3f429c140b704ade2c3ed51382e81056bf9fb10ac",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat3",
+      "time": 513.6333333333096,
+      "kind": "beat",
+      "sha256": "e186829c2fee9c303ff221f3fdf397a59af7cecd989c2bed7f454271e9beab6c",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat4",
+      "time": 524.1666666666479,
+      "kind": "beat",
+      "sha256": "8fc3caa696f196c65d46af1084d68ffe6b266d1c1d11961936ab1edaf4c7e977",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat5",
+      "time": 535.1666666666567,
+      "kind": "beat",
+      "sha256": "b7fc15c98d24a25acd7685a34de8ededf0655a87ce436cf26a106c7ee80fae8b",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat6",
+      "time": 547.3666666666654,
+      "kind": "beat",
+      "sha256": "5ca1519fe621dcba04e22e191a13552811ec36c1c45564b943a66791391909ce",
+      "inspected": true
+    },
+    {
+      "id": "scene08-early",
+      "time": 541.2333333333321,
+      "kind": "sync",
+      "sha256": "488162eb3c6cb8ea4d69c96a5946eb3d7315eb8b5c25aa6ef209da5291661c37",
+      "inspected": true
+    },
+    {
+      "id": "scene08-late",
+      "time": 546.2999999999988,
+      "kind": "sync",
+      "sha256": "973083d18fedc1589f091552898ef49f6be8a349c24c4233bc6c30a5693a0062",
+      "inspected": true
+    },
+    {
+      "id": "scene09-beat1",
+      "time": 559.1666666666763,
+      "kind": "beat",
+      "sha256": "e94d90407e6d6f9ef892282aa9a1e608f09490ec49dab81ec8256b681b519336",
+      "inspected": true
+    },
+    {
+      "id": "scene09-beat2",
+      "time": 570.4000000000176,
+      "kind": "beat",
+      "sha256": "f5bcd5889d2e3f69f2d44a836d5da50edec816598a0263ee176abc62be718c15",
+      "inspected": true
+    },
+    {
+      "id": "scene09-beat3",
+      "time": 582.9000000000274,
+      "kind": "beat",
+      "sha256": "7f46521f0b28293f6a4afeddc06fce2b0ec4d11c52a4c8f4ddafde3af2082c5f",
+      "inspected": true
+    },
+    {
+      "id": "scene09-beat4",
+      "time": 595.9333333333708,
+      "kind": "beat",
+      "sha256": "860efbcd27a1dc3c1e5530b64f6dbe5a5976ff1d327770e8f341edeefc12c235",
+      "inspected": true
+    },
+    {
+      "id": "scene09-beat5",
+      "time": 608.6333333333814,
+      "kind": "beat",
+      "sha256": "3a9c0128b88dadfdc3b0869414c9ea7c35616f9859a27f3e2152cb687e824a47",
+      "inspected": true
+    },
+    {
+      "id": "scene09-beat6",
+      "time": 621.533333333391,
+      "kind": "beat",
+      "sha256": "7c29e87daf683b39db98bdfc78385ee9603c33e282991f15aa94de23ce82311f",
+      "inspected": true
+    },
+    {
+      "id": "scene06-smallest-epsilon",
+      "time": 369.13333333331815,
+      "kind": "detail",
+      "sha256": "1fd4f34d209a6c487f985fba6c6a8ac17a2c57b541b1b475fda3f46985154664",
+      "inspected": true
+    }
+  ]
+}

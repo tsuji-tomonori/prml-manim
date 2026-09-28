@@ -22,6 +22,7 @@ def main():
             action=b['actions'][0]
             for phase,alpha in [('early',.1),('late',.9)]:
                 frames.append(dict(id=s['id']+'-'+phase,time=action['start']+alpha*(action['end']-action['start']),kind='sync'))
+    frames.append(dict(id='scene06-smallest-epsilon',time=timeline[5]['beats'][1]['end']-.2,kind='detail'))
     for f in frames:
         subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(OUT/(f['id']+'.png'))],check=True)
     (OUT/'frames.json').write_text(json.dumps(frames,ensure_ascii=False,indent=2)+'\n')
