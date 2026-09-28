@@ -54,8 +54,14 @@ class PRML54HessianMatrix(NarratedScene):
         keep=[self.title,self.subtitle,self.formula]
         self.remove(*[m for m in self.mobjects if all(m is not k for k in keep)])
 
+    def reveal_equation(self,*parts,size=31):
+        formula=self.equation(*parts,size=size)
+        return Indicate(formula,color=BLUE,scale_factor=1.04)
+
     def weight_axes(self):
-        return self.plot_axes(x=(-2,2,1),y=(-2,2,1),width=3.8,height=3.8,center=(-2.6,-.1,0),labels=('w_1','w_2'))
+        ax=self.plot_axes(x=(-2,2,1),y=(-2,2,1),width=3.8,height=3.8,center=(-2.6,-.1,0),labels=('w_1','w_2'))
+        ax.x_axis.remove(ax.x_axis.numbers);ax.y_axis.remove(ax.y_axis.numbers)
+        return ax
 
     def question(self):
         k=ValueTracker(2);s=ValueTracker(0)
@@ -107,7 +113,7 @@ class PRML54HessianMatrix(NarratedScene):
         self.equation(r'g=0:\quad E-E_0=\tfrac12\lambda s^2')
         self.beat(actions=[lambda:lam.animate.set_value(-1),lambda:Indicate(other,color=BLUE)])
         self.equation(r'g=0,\ \lambda_i>0\ \forall i\Rightarrow\text{local minimum}',size=30)
-        self.beat(actions=[lambda:lam.animate.set_value(1),lambda:Transform(self.formula,tex(r'H\in\mathbb{R}^{W\times W}:\quad W^2',36).move_to([0,2.48,0]))])
+        self.beat(actions=[lambda:lam.animate.set_value(1),lambda:self.reveal_equation(r'H\in\mathbb{R}^{W\times W}:\quad W^2',size=36)])
 
     def diagonal(self):
         ax=self.weight_axes();c=ValueTracker(2)
@@ -179,7 +185,7 @@ class PRML54HessianMatrix(NarratedScene):
 
     def differences(self):
         eps=ValueTracker(.35);ax=self.plot_axes(x=(-.5,.5,.25),y=(-.5,.5,.25),width=4,height=3.3,center=(-2.5,-.15,0),labels=(r'\Delta u',r'\Delta v'))
-        dots=always_redraw(lambda:VGroup(*[VGroup(Dot(ax.c2p(s*eps.get_value(),t*eps.get_value()),color=BLUE if s*t>0 else RED),tex('+' if s*t>0 else '-',23).move_to(ax.c2p(s*eps.get_value(),t*eps.get_value())+UP*.22)) for s,t in [(1,1),(1,-1),(-1,1),(-1,-1)]]))
+        dots=always_redraw(lambda:VGroup(*[VGroup(Dot(ax.c2p(s*eps.get_value(),t*eps.get_value()),color=BLUE if s*t>0 else RED),tex('+' if s*t>0 else '-',23).move_to(ax.c2p(s*eps.get_value(),t*eps.get_value())+UP*.22).set_opacity(np.clip((eps.get_value()-.08)/.05,0,1))) for s,t in [(1,1),(1,-1),(-1,1),(-1,-1)]]))
         self.add(dots,number(r'\widehat H_{uv}=',lambda:finite_hessian(WEIGHTS,eps.get_value())[0,1],(3,.4,0),YELLOW,places=5),tex(r'H_{uv}='+f"{net()['H'][0,1]:.5f}",28,BLUE).move_to([3,-.5,0]))
         self.equation(r'H_{uv}\simeq\frac{E_{++}-E_{+-}-E_{-+}+E_{--}}{4\epsilon^2}\quad(5.90)',size=30)
         self.beat(actions=[lambda:Create(dots),lambda:Indicate(dots,color=YELLOW)])
@@ -254,6 +260,7 @@ class PRML54HessianMatrix(NarratedScene):
         self.add(output,direct,tex('=',32).move_to([0,-.5,0]),jp('R の再帰',22,YELLOW).move_to([-2,-1.65,0]),jp('行列を作った積',22,BLUE).move_to([2,-1.65,0]))
         self.beat(actions=[lambda:Indicate(output,color=YELLOW),lambda:Indicate(self.formula,color=YELLOW)])
         self.body_clear();ax=self.plot_axes(x=(-1.2,1.2,.5),y=(-1.2,1.2,.5),width=3.6,height=3.6,center=(0,-.1,0),labels=(r'v_u',r'v_v'))
+        ax.x_axis.remove(ax.x_axis.numbers);ax.y_axis.remove(ax.y_axis.numbers)
         v=always_redraw(lambda:vector(ax,direction(),BLUE));hv=always_redraw(lambda:vector(ax,hvp(WEIGHTS,direction())[0],YELLOW))
         self.add(v,hv,note('青：方向 v　黄：勾配の変化率 Hv'))
         self.equation(r'R\{\nabla E\}=Hv,\quad (v^{\mathsf T}H)^{\mathsf T}=Hv')
