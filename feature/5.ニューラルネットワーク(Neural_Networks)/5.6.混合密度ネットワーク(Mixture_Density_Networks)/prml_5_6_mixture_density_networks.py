@@ -1,419 +1,405 @@
-from __future__ import annotations
-
-import math
-import wave
+"""PRML 5.6: linked visual experiments in Manim Community, with PCM cue timing."""
 from pathlib import Path
-
+import json
 import numpy as np
 from manim import *
-from PIL import Image
+from manim.animation.animation import prepare_animation
+from video_support import jp, tex, caption_mobject
+from narration_content import SCENES
+from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
+from mdn_model import (load_model, parameters, raw_outputs, density, normal,
+                       responsibility, robot, forward_function, mean_prediction)
+
+BG='#10141F'
+C=[ManimColor('#58B5ED'),ManimColor('#FFB45B'),ManimColor('#B793F5')]
+RED=ManimColor('#FF6B77')
+GREEN=ManimColor('#7ED5A0')
+YELLOW=ManimColor('#FFE079')
+MUTED=ManimColor('#A8B2C5')
 
 
-BLUE_DATA = BLUE_C
-GREEN_CURVE = GREEN_C
-RED_MODEL = RED_C
-ORANGE_ALT = ORANGE
-YELLOW_NOTE = YELLOW_C
-PURPLE_COMPONENT = PURPLE_C
-TEAL_DENSITY = TEAL_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def curve(ax,x,y,color=WHITE,width=3):
+    o=ax.c2p(0,0)
+    points=o+np.asarray(x)[:,None]*(ax.c2p(1,0)-o)+np.asarray(y)[:,None]*(ax.c2p(0,1)-o)
+    return VMobject().set_points_as_corners(points).set_stroke(color,width)
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def axes(xrange=(0,1,.25),yrange=(0,1,.25),width=8,height=3.5,center=(0,-.25,0),xlabel='x',ylabel='t'):
+    ax=Axes(x_range=xrange,y_range=yrange,x_length=width,y_length=height,tips=False,
+            axis_config={'color':MUTED,'stroke_width':1.4,'include_numbers':True,'font_size':19},
+            x_axis_config={'decimal_number_config':{'num_decimal_places':1}},
+            y_axis_config={'decimal_number_config':{'num_decimal_places':1}}).move_to(center)
+    labels=VGroup(tex(xlabel,24).next_to(ax.x_axis,RIGHT,buff=.13),
+                  tex(ylabel,24).next_to(ax.y_axis,UP,buff=.12))
+    return ax,labels
 
 
-def normal_pdf(x: np.ndarray | float, mu: np.ndarray | float = 0.0, sigma: np.ndarray | float = 1.0) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    return np.exp(-0.5 * ((x_array - mu) / sigma) ** 2) / (sigma * np.sqrt(2 * np.pi))
+def density_axes(getter,width=5.2,height=3.0,center=(3.25,-.25,0)):
+    """Keep the density's peak readable; tick values track the changing vertical scale."""
+    ax=Axes(x_range=(-.15,1.15,.25),y_range=(0,1,.5),x_length=width,y_length=height,tips=False,
+            axis_config={'color':MUTED,'stroke_width':1.4},
+            x_axis_config={'include_numbers':True,'font_size':19,'decimal_number_config':{'num_decimal_places':1}},
+            y_axis_config={'include_numbers':False}).move_to(center)
+    native=ax.c2p
+    grid=np.linspace(-.15,1.15,241)
+    ymax=lambda:1.2*float(np.max(density(grid,*getter())))
+    ax.c2p=lambda x,y=0,z=0:native(x,y/ymax(),z)
+    labels=VGroup(tex('t',24).next_to(ax.x_axis,RIGHT,buff=.13),tex('p',24).next_to(ax.y_axis,UP,buff=.12))
+    for ratio in [.5,1.]:
+        number=DecimalNumber(ratio*ymax(),num_decimal_places=1,font_size=18).next_to(native(0,ratio),LEFT,buff=.1)
+        number.add_updater(lambda m,r=ratio:m.set_value(r*ymax()).next_to(native(0,r),LEFT,buff=.1))
+        labels.add(number)
+    labels.add(jp('縦軸自動',15,MUTED).next_to(labels[1],RIGHT,buff=.25))
+    return ax,labels
 
 
-def softmax(values: np.ndarray) -> np.ndarray:
-    shifted = values - np.max(values, axis=0, keepdims=True)
-    exp_values = np.exp(shifted)
-    return exp_values / np.sum(exp_values, axis=0, keepdims=True)
+def readout(label,getter,pos,color=WHITE,places=2,size=25):
+    a=tex(label,size,color); b=DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
+    g=VGroup(a,b).arrange(RIGHT,buff=.13).move_to(pos)
+    anchor=b.get_left().copy()
+    b.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return g
 
 
-def branch_means(x: np.ndarray | float) -> np.ndarray:
-    x_array = np.asarray(x)
-    upper = 0.74 - 0.18 * np.cos(2 * np.pi * x_array)
-    middle = 0.50 + 0.08 * np.sin(2 * np.pi * x_array)
-    lower = 0.26 + 0.18 * np.cos(2 * np.pi * x_array)
-    return np.array([upper, middle, lower])
+def slider(tracker,low,high,pos,width=3.4,label='x',color=YELLOW):
+    line=Line(LEFT*width/2,RIGHT*width/2,color=MUTED).move_to(pos)
+    dot=Dot(radius=.065,color=color)
+    dot.add_updater(lambda m:m.move_to(line.point_from_proportion(np.clip((tracker.get_value()-low)/(high-low),0,1))))
+    name=tex(label,26,color).next_to(line,LEFT,buff=.25)
+    return VGroup(line,dot,name)
 
 
-def branch_sigmas(x: np.ndarray | float) -> np.ndarray:
-    x_array = np.asarray(x)
-    base = 0.035 + 0.018 * np.sin(np.pi * x_array) ** 2
-    return np.array([base * 1.05, base * 0.92, base * 1.12])
+def mix_graph(ax,getter,fill=False):
+    ts=np.linspace(ax.x_range[0],ax.x_range[1],241)
+    def build():
+        p,m,s=getter()
+        ys=p[None,:]*normal(ts[:,None],m,s)
+        group=VGroup()
+        for k in range(len(p)):
+            path=curve(ax,ts,ys[:,k],C[k],2.3)
+            if fill:
+                points=[ax.c2p(ts[0],0),*path.get_points()[::3],ax.c2p(ts[-1],0)]
+                area=VMobject().set_points_as_corners(points)
+                area.close_path()
+                group.add(area.set_fill(C[k],.16).set_stroke(width=0))
+            group.add(path)
+        group.add(curve(ax,ts,ys.sum(1),WHITE,3.2))
+        return group
+    return always_redraw(build)
 
 
-def branch_logits(x: np.ndarray | float) -> np.ndarray:
-    x_array = np.asarray(x)
-    middle_gate = np.exp(-((x_array - 0.5) / 0.22) ** 2)
-    left_gate = np.exp(-(x_array / 0.18) ** 2)
-    right_gate = np.exp(-((x_array - 1.0) / 0.18) ** 2)
-    return np.array([
-        1.6 * left_gate + 0.3 * middle_gate + 0.25,
-        1.35 * middle_gate + 0.2,
-        1.6 * right_gate + 0.3 * middle_gate + 0.25,
-    ])
-
-
-def branch_weights(x: np.ndarray | float) -> np.ndarray:
-    return softmax(branch_logits(x))
-
-
-def mdn_density(t: np.ndarray | float, x: np.ndarray | float) -> np.ndarray | float:
-    weights = branch_weights(x)
-    means = branch_means(x)
-    sigmas = branch_sigmas(x)
-    return np.sum(weights * normal_pdf(t, means, sigmas), axis=0)
-
-
-def mean_prediction(x: np.ndarray | float) -> np.ndarray | float:
-    return np.sum(branch_weights(x) * branch_means(x), axis=0)
-
-
-def mode_approximation(x: np.ndarray | float) -> np.ndarray | float:
-    weights = branch_weights(x)
-    means = branch_means(x)
-    return means[np.argmax(weights, axis=0), np.arange(np.asarray(x).size)] if np.asarray(x).ndim else means[int(np.argmax(weights))]
+def bars(getter,pos,width=3.6,labels=True):
+    def build():
+        values=getter(); left=np.array(pos)-RIGHT*width/2
+        g=VGroup()
+        for k,v in enumerate(values):
+            r=Rectangle(width=max(.001,width*float(v)),height=.24,stroke_width=0,fill_color=C[k],fill_opacity=.9)
+            r.move_to(left+RIGHT*r.width/2); left+=RIGHT*r.width; g.add(r)
+        return g
+    g=always_redraw(build)
+    if not labels:return g
+    nums=VGroup(*[readout(rf'\pi_{k+1}=',lambda k=k:float(getter()[k]),
+                        np.array(pos)+DOWN*.45+RIGHT*((k-1)*1.45),C[k],size=21) for k in range(3)])
+    return VGroup(g,nums)
 
 
 class PRML56MixtureDensityNetworks(Scene):
-    """PRML 5.6 overview for a high-school math audience.
+    def construct(self):
+        self.camera.background_color=BG
+        self.model=load_model(); self.w=self.model['weights'][-1]
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        self.timeline=[]
+        methods=[self.robot_scene,self.inverse_scene,self.mixture_scene,self.network_scene,
+                 self.training_scene,self.responsibility_scene,self.map_scene,self.summaries_scene,self.recap_scene]
+        for i,method in enumerate(methods):
+            self.begin(i); method()
+            assert self.beat_index==len(self.story['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        Path(config.media_dir,'prml56_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-    Render example:
-        uv run manim -pql prml_5_6_mixture_density_networks.py PRML56MixtureDensityNetworks
-    """
+    def begin(self,index):
+        self.clear(); self.story=SCENES[index]; self.beat_index=0; self.subtitle=None
+        self.add(jp(self.story['title'],32).move_to([0,3.35,0]))
+        self.add(jp(self.story['reference'],15,MUTED).move_to([0,2.83,0]))
+        entry=self.manifest[self.story['id']]
+        if not valid_entry(self.story,entry):raise RuntimeError('Missing or stale narration: '+self.story['id'])
+        self.audio_entry=entry; self.durations=entry['beat_durations']
+        self.boundaries=np.ceil(np.cumsum(self.durations)*config.frame_rate-1e-6)/config.frame_rate
+        self.scene_start=float(self.time)
+        self.add_sound(str(OUTPUT_DIR/f"{self.story['id']}.wav"))
+        self.timeline.append(dict(id=self.story['id'],title=self.story['title'],reference=self.story['reference'],
+                                  start=self.scene_start,audio=True,beats=[]))
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.inverse_problem()
-        self.conditional_mixture()
-        self.network_parameterization()
-        self.likelihood_training()
-        self.density_map_scene()
-        self.mean_and_mode()
-        self.summary_scene()
+    def beat_cues(self):
+        offset=sum(self.durations[:self.beat_index])
+        return [dict(id=c['id'],display=c['display'],start=c['start']-offset,end=c['end']-offset)
+                for c in self.audio_entry['subtitle_cues'] if c['beat_index']==self.beat_index]
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+    def beat(self,*animations,start_sentence=0):
+        if self.subtitle is not None:self.remove(self.subtitle)
+        cues=self.beat_cues(); captions=VGroup(*[caption_mobject(c['display']).set_opacity(0) for c in cues])
+        self.subtitle=captions; self.add(captions)
+        start=float(self.time); fps=config.frame_rate
+        frames=round((self.scene_start+self.boundaries[self.beat_index]-start)*fps); duration=frames/fps
+        a=cues[start_sentence]['start']; b=cues[-1]['end']
+        def caption_at(m,alpha):
+            idx=max(i for i,c in enumerate(cues) if c['start']<=alpha*duration+1e-8)
+            for i,cap in enumerate(m):cap.set_opacity(1 if i==idx else 0)
+        caption_at(captions,0)
+        self.timeline[-1]['beats'].append(dict(start=start,end=start+duration,visual=self.story['beats'][self.beat_index]['visual_note'],
+            action_start=start+a,action_end=start+b,cues=[dict(c,start=start+c['start'],end=start+c['end']) for c in cues]))
+        visual=[]
+        if a>0:visual.append(Wait(a))
+        prepared=[prepare_animation(a) for a in animations]
+        for anim in prepared:
+            if isinstance(anim,(Write,FadeIn,FadeOut,Create)) or (isinstance(anim,Transform) and isinstance(anim.mobject,MathTex)):
+                anim.set_run_time(min(1.8,(b-a)*.25))
+            else:
+                anim.set_run_time(b-a)
+        visual.append(AnimationGroup(*prepared,Wait(b-a)) if prepared else Wait(b-a))
+        visual.append(Wait(max(.001,duration-b)))
+        self.play(Succession(*visual),UpdateFromAlphaFunc(captions,caption_at,rate_func=linear),
+                  run_time=(frames-1e-5)/fps,rate_func=linear)
+        self.beat_index+=1
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def formula(self,s,pos=(0,2.2,0),size=31):
+        m=tex(s,size).move_to(pos)
+        if m.width>12:m.scale_to_fit_width(12)
+        return m
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def note(self,s,color=MUTED):
+        return jp(s,22,color).move_to([0,-2.65,0])
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def p(self,x,w=None):
+        return tuple(a[0] for a in parameters(self.w if w is None else w,[x]))
 
-    def unit_axes(self, width: float = 5.1, height: float = 3.5) -> Axes:
-        return Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[0, 1, 0.25],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
+    def arm(self,a,b,color,origin=(-3,-.4,0),scale=2):
+        e,t=robot(a,b); o=np.array(origin)
+        e=o+scale*np.r_[e,0];t=o+scale*np.r_[t,0]
+        return VGroup(Line(o,e,color=color,stroke_width=7),Line(e,t,color=color,stroke_width=7),
+                      Dot(o,color=WHITE),Dot(e,color=color),Dot(t,color=color))
 
-    def make_inverse_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        rng = np.random.default_rng(56)
-        x = np.linspace(0.04, 0.96, 72)
-        forward_t = x + 0.25 * np.sin(2 * np.pi * x) + rng.uniform(-0.055, 0.055, size=x.size)
-        forward_t = np.clip(forward_t, 0.04, 0.96)
-        return x, forward_t, rng.uniform(-0.012, 0.012, size=x.size)
+    def robot_scene(self):
+        q=ValueTracker(-.7); r=ValueTracker(.2)
+        arm=always_redraw(lambda:self.arm(q.get_value(),r.get_value(),C[0]))
+        target=Dot([-.6,-.4,0],color=YELLOW,radius=.11)
+        angle=np.arccos(.6)
+        self.add(target,arm,self.note('棒の長さ：1 ＋ 1　　目標までの距離：1.2'))
+        self.beat(q.animate.set_value(angle),r.animate.set_value(-2*angle))
+        ghost=self.arm(angle,-2*angle,C[0]).set_opacity(.3)
+        self.add(ghost)
+        self.beat(q.animate.set_value(-angle),r.animate.set_value(2*angle))
+        f=self.formula(r'(\theta_1,\theta_2)\ \longrightarrow\ (x_1,x_2)')
+        self.beat(Write(f),Indicate(target))
+        red=always_redraw(lambda:self.arm(q.get_value(),r.get_value(),RED))
+        self.remove(arm);self.add(red)
+        inv=self.formula(r'(x_1,x_2)\ \longrightarrow\ \{\mathrm{A},\mathrm{B}\}')
+        self.beat(Transform(f,inv),q.animate.set_value(0),r.animate.set_value(0))
+        error=Line(target.get_center(),[1,-.4,0],color=RED,stroke_width=5)
+        label=readout(r'\|\mathrm{error}\|=',lambda:.8,[3,1,0],RED)
+        self.beat(Create(error),FadeIn(label),Indicate(red))
+        other=self.arm(-angle,2*angle,C[1]);self.remove(red)
+        self.beat(FadeOut(error),FadeOut(label),FadeIn(other),ghost.animate.set_opacity(1))
 
-    def make_density_image(self, width: int = 360, height: int = 260) -> ImageMobject:
-        xs = np.linspace(0, 1, width)
-        ts = np.linspace(1, 0, height)
-        grid_x, grid_t = np.meshgrid(xs, ts)
-        density = mdn_density(grid_t, grid_x)
-        density = density / density.max()
-        rgba = np.zeros((height, width, 4), dtype=np.uint8)
-        rgba[..., 0] = (20 + 35 * density).astype(np.uint8)
-        rgba[..., 1] = (40 + 185 * density).astype(np.uint8)
-        rgba[..., 2] = (55 + 150 * np.sqrt(density)).astype(np.uint8)
-        rgba[..., 3] = (45 + 210 * density).astype(np.uint8)
-        return ImageMobject(Image.fromarray(rgba, mode="RGBA"))
+    def inverse_scene(self):
+        ax,lab=axes(width=8.6,height=3.8,xlabel='u',ylabel='v')
+        self.add(ax,lab)
+        x,t=self.model['x'][::3],self.model['t'][::3]
+        dots=VGroup(*[Dot(ax.c2p(u,v),radius=.032,color=C[0]) for u,v in zip(t,x)])
+        u=np.linspace(0,1,241);f=curve(ax,u,forward_function(u),GREEN)
+        self.add(self.note('自作データ：480点のうち160点を表示'))
+        self.beat(FadeIn(dots),Create(f))
+        newdots=VGroup(*[Dot(ax.c2p(v,u),radius=.032,color=C[0]) for u,v in zip(t,x)])
+        newlab=VGroup(tex('x',24).move_to(lab[0]),tex('t',24).move_to(lab[1]))
+        self.beat(Transform(dots,newdots),FadeOut(f),Transform(lab,newlab))
+        xv=ValueTracker(.14)
+        scan=always_redraw(lambda:Line(ax.c2p(xv.get_value(),0),ax.c2p(xv.get_value(),1),color=YELLOW))
+        self.add(scan,readout('x=',xv.get_value,[4.9,2,0],YELLOW))
+        self.beat(xv.animate.set_value(.5))
+        mean=curve(ax,u,mean_prediction(self.model['mean_weights'],u),RED,4)
+        formula=self.formula(r'\min_y\ \mathbb{E}[(t-y)^2\mid x]\quad\Rightarrow\quad y=\mathbb{E}[t\mid x]',size=28)
+        self.beat(Create(mean),Write(formula))
+        _,mus,_=self.p(.5)
+        marks=VGroup(*[Circle(radius=.18,color=c).move_to(ax.c2p(.5,mu)) for c,mu in zip(C,mus)])
+        self.beat(Create(marks),mean.animate.set_stroke(opacity=.3))
+        eq=self.formula(r'p(t\mid x)\quad\text{?}',size=38)
+        self.beat(Transform(formula,eq),xv.animate.set_value(.62))
 
-    def line_graph(self, axes: Axes, values: np.ndarray, color: ManimColor, width: float = 3.4) -> VMobject:
-        xs = np.linspace(0, 1, len(values))
-        points = [axes.c2p(float(x), float(y)) for x, y in zip(xs, values)]
-        graph = VMobject(color=color)
-        graph.set_points_smoothly(points)
-        graph.set_stroke(width=width)
-        return graph
+    def mixture_scene(self):
+        ax,lab=axes(xrange=(-.2,1.2,.2),yrange=(0,5,1),width=9,height=2.9,center=(0,-.1,0),xlabel='t',ylabel='p')
+        mu=ValueTracker(.45); sig=ValueTracker(.09); blend=ValueTracker(0); gate=ValueTracker(0)
+        def pars():
+            b=blend.get_value(); g=gate.get_value()
+            return np.array([1-b+b*(.25+.45*g),b*.4*(1-g),b*(.35-.05*g)]),np.array([mu.get_value(),.5,.82]),np.array([sig.get_value(),.10,.075])
+        # First single Gaussian peak needs a 5.0-high axis (peak 4.43).
+        graph=mix_graph(ax,pars,True)
+        self.add(ax,lab)
+        self.beat(FadeIn(graph),Write(self.note('確率 ＝ 区間に対応する面積',GREEN)))
+        self.add(slider(mu,.15,.85,(-3,-2.3,0),label=r'\mu',color=C[1]),readout(r'\mu=',mu.get_value,[3,-2.3,0],C[1]))
+        self.beat(mu.animate.set_value(.22))
+        self.beat(sig.animate.set_value(.16))
+        self.beat(blend.animate.set_value(1),sig.animate.set_value(.095))
+        prob=bars(lambda:pars()[0],[0,2.15,0],width=5)
+        self.add(prob)
+        self.beat(gate.animate.set_value(1))
+        self.remove(prob)
+        eq=self.formula(r'p(t\mid x)=\sum_{k=1}^{K}\pi_k(x)\,\mathcal{N}\!\left(t\mid\mu_k(x),\sigma_k^2(x)\right)',size=34)
+        eq.set_color_by_tex('p',WHITE)
+        self.beat(Write(eq),gate.animate.set_value(0))
 
-    def inverse_problem(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 5.6 / Fig. 5.18, 5.19")
-        title = self.scene_title("逆問題では、正解が一つとは限らない", font_size=33)
-        left_axes = self.unit_axes(width=4.7, height=3.35).shift(LEFT * 3.05 + DOWN * 0.15)
-        right_axes = self.unit_axes(width=4.7, height=3.35).shift(RIGHT * 3.05 + DOWN * 0.15)
-        x, forward_t, jitter = self.make_inverse_data()
-        forward_dots = VGroup(*[Dot(left_axes.c2p(float(a), float(b)), radius=0.035, color=BLUE_DATA) for a, b in zip(x, forward_t)])
-        inverse_dots = VGroup(*[Dot(right_axes.c2p(float(b), float(a + j)), radius=0.035, color=BLUE_DATA) for a, b, j in zip(x, forward_t, jitter)])
-        xs = np.linspace(0, 1, 240)
-        forward_curve = left_axes.plot(lambda z: z + 0.25 * math.sin(2 * math.pi * z), x_range=[0, 1], color=GREEN_CURVE).set_stroke(width=4)
-        single_mean = right_axes.plot(lambda z: 0.5 + 0.05 * math.sin(2 * math.pi * z), x_range=[0, 1], color=RED_MODEL).set_stroke(width=4)
-        good_branches = VGroup(
-            self.line_graph(right_axes, branch_means(xs)[0], GREEN_CURVE, width=3),
-            self.line_graph(right_axes, branch_means(xs)[1], ORANGE_ALT, width=3),
-            self.line_graph(right_axes, branch_means(xs)[2], PURPLE_COMPONENT, width=3),
-        )
-        left_name = Text("forward: x -> t", font_size=25, color=GREEN_CURVE).next_to(left_axes, DOWN, buff=0.25)
-        right_name = Text("inverse: t -> x", font_size=25, color=YELLOW_NOTE).next_to(right_axes, DOWN, buff=0.25)
-        bad_note = Text("平均だけでは谷を通る", font_size=25, color=RED_MODEL).next_to(right_axes, UP, buff=0.15)
+    def network(self,xv,origin=(-4,0,0)):
+        ox,oy,_=origin
+        inp=Circle(radius=.19,color=YELLOW).move_to([ox-1.5,oy,0])
+        hs=VGroup(*[Circle(radius=.13,color=C[0]).move_to([ox,oy+1.4-j*.4,0]) for j in range(8)])
+        outs=VGroup(*[Circle(radius=.105,color=C[j//3]).move_to([ox+1.65,oy+1.6-j*.4,0]) for j in range(9)])
+        edges=VGroup(*[Line(inp.get_right(),h.get_left(),color=MUTED,stroke_width=.7) for h in hs],
+                     *[Line(h.get_right(),o.get_left(),color=C[k//3],stroke_width=.6,stroke_opacity=.28) for h in hs for k,o in enumerate(outs)])
+        for j,h in enumerate(hs):
+            h.add_updater(lambda m,j=j:m.set_fill(C[0],float((raw_outputs(self.w,[xv.get_value()])[1][0,j]+1)/2)))
+        for j,o in enumerate(outs):
+            o.add_updater(lambda m,j=j:m.set_fill(C[j//3],float(.2+.65/(1+np.exp(-raw_outputs(self.w,[xv.get_value()])[0][0,j])))))
+        labels=VGroup(*[tex(s,23,c).move_to([ox+2.25,oy+y,0]) for s,c,y in [(r'a^\pi',C[0],1.2),(r'a^\mu',C[1],0),(r'a^\sigma',C[2],-1.2)]])
+        return VGroup(edges,inp,hs,outs,labels)
 
-        self.play(FadeIn(label), Write(title), Create(left_axes), Create(right_axes), Write(left_name), Write(right_name))
-        self.play(FadeIn(forward_dots, lag_ratio=0.01), Create(forward_curve), run_time=1.2)
-        self.play(TransformFromCopy(forward_dots, inverse_dots), run_time=1.2)
-        self.play(Create(single_mean), Write(bad_note))
-        self.play(FadeIn(good_branches), run_time=1.1)
-        self.wait(0.7)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, left_axes, right_axes, forward_dots, inverse_dots, forward_curve, single_mean, good_branches, left_name, right_name, bad_note]])
+    def network_scene(self):
+        xv=ValueTracker(.15); net=self.network(xv,origin=(-3.6,0,0))
+        ax,lab=density_axes(lambda:self.p(xv.get_value()))
+        graph=mix_graph(ax,lambda:self.p(xv.get_value()),True)
+        self.add(slider(xv,.12,.88,(-3.7,-2.2,0),label='x'),ax,lab,graph)
+        self.add(self.note('隠れ層16個のうち8個を表示　／　学習例の幅には下限0.012を加算'))
+        self.add(net)
+        self.beat(xv.animate.set_value(.4))
+        count=self.formula(r'K=3,\quad 3K=9',size=32)
+        self.beat(Write(count),Indicate(net[3]))
+        soft=self.formula(r'\pi_k={e^{a_k^\pi}\over\sum_l e^{a_l^\pi}},\quad\sum_k\pi_k=1',size=30).set_color(C[0])
+        self.beat(Transform(count,soft),xv.animate.set_value(.6))
+        sigma=self.formula(r'\sigma_k=e^{a_k^\sigma}>0,\qquad \mathrm{Var}_k=\sigma_k^2',size=31).set_color(C[2])
+        self.beat(Transform(count,sigma),Indicate(net[3][6:]))
+        mean=self.formula(r'\mu_k=a_k^\mu',size=36).set_color(C[1])
+        self.beat(Transform(count,mean),xv.animate.set_value(.85))
+        self.beat(xv.animate.set_value(.15),Transform(count,self.formula(r'x\ \longrightarrow\ (\pi_k,\mu_k,\sigma_k)\ \longrightarrow\ p(t\mid x)')))
 
-    def conditional_mixture(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("PRML 5.6 / Eq. (5.148)")
-        title = self.scene_title("p(t|x) を、入力で変わるガウス混合として表す", font_size=31)
-        formula = MathTex(
-            r"p(t|x)=\sum_{k=1}^{K}\pi_k(x)\,\mathcal{N}\left(t|\mu_k(x),\sigma_k^2(x)\right)",
-            font_size=38,
-        ).to_edge(UP).shift(DOWN * 1.2)
-        axes = Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[0, 7, 1],
-            x_length=7.0,
-            y_length=3.3,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(DOWN * 0.75)
-        x0 = 0.5
-        ts = np.linspace(0, 1, 280)
-        colors = [GREEN_CURVE, ORANGE_ALT, PURPLE_COMPONENT]
-        components = VGroup()
-        for k, color in enumerate(colors):
-            curve = axes.plot(
-                lambda z, kk=k: float(branch_weights(x0)[kk] * normal_pdf(z, branch_means(x0)[kk], branch_sigmas(x0)[kk])),
-                x_range=[0.02, 0.98],
-                color=color,
-            ).set_stroke(width=3)
-            components.add(curve)
-        mixture = axes.plot(lambda z: float(mdn_density(z, x0)), x_range=[0.02, 0.98], color=YELLOW_NOTE).set_stroke(width=5)
-        x_note = MathTex(r"x=0.5", font_size=34, color=YELLOW_NOTE).next_to(axes, RIGHT, buff=0.4).shift(UP * 0.75)
-        pi_note = MathTex(r"\pi_k(x):\ sum\ to\ 1", font_size=28, color=GREEN_CURVE).next_to(x_note, DOWN, buff=0.25)
-        mu_note = MathTex(r"\mu_k(x):\ centers", font_size=28, color=ORANGE_ALT).next_to(pi_note, DOWN, buff=0.18)
-        sigma_note = MathTex(r"\sigma_k(x):\ widths", font_size=28, color=PURPLE_COMPONENT).next_to(mu_note, DOWN, buff=0.18)
+    def training_scene(self):
+        ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,7,2),width=8.7,height=3.0,center=(0,-.2,0),xlabel='t',ylabel='p')
+        mu=ValueTracker(.30);obs=.62
+        pars=lambda:(np.array([.45,.35,.2]),np.array([mu.get_value(),.83,.13]),np.array([.085,.1,.09]))
+        graph=mix_graph(ax,pars)
+        guide=always_redraw(lambda:Line(ax.c2p(obs,0),ax.c2p(obs,float(density(obs,*pars()))),color=YELLOW,stroke_width=4))
+        self.add(ax,lab,graph,Dot(ax.c2p(obs,0),color=YELLOW))
+        self.beat(Create(guide))
+        val=readout(r'p(t_n\mid x_n)=',lambda:float(density(obs,*pars())),[0,2.08,0],YELLOW)
+        self.add(val)
+        self.beat(mu.animate.set_value(.59))
+        self.remove(val)
+        nll=readout(r'-\ln p(t_n\mid x_n)=',lambda:-float(np.log(density(obs,*pars()))),[0,2.08,0],RED)
+        self.add(nll)
+        self.beat(mu.animate.set_value(.38))
+        self.remove(nll)
+        eq=self.formula(r'E(w)=-\sum_{n=1}^{N}\ln\left[\sum_{k=1}^{K}\pi_k(x_n,w)\mathcal{N}(t_n\mid\mu_k,\sigma_k^2)\right]',size=30)
+        self.beat(Write(eq),mu.animate.set_value(.62))
+        self.remove(graph,guide)
+        step=ValueTracker(0)
+        def w_now():
+            z=np.clip(step.get_value(),0,100);i=min(int(z),99)
+            return (1-(z-i))*self.model['weights'][i]+(z-i)*self.model['weights'][i+1]
+        graph=mix_graph(ax,lambda:self.p(.5,w_now()))
+        self.add(graph,self.note('実測した50更新ごとの重みを補間　／　断面 x = 0.5'))
+        counter=readout(r'\mathrm{step}=',lambda:50*step.get_value(),[-3,-2.15,0],YELLOW,0)
+        loss=readout(r'E/N=',lambda:float(np.interp(step.get_value(),np.arange(101),self.model['losses'])),[3,-2.15,0],RED)
+        self.add(counter,loss)
+        self.beat(step.animate.set_value(100))
+        floor=self.formula(r'\sigma_k=0.012+e^{a_k^\sigma}\quad\text{(experiment)}',size=31)
+        self.beat(Transform(eq,floor),Indicate(graph))
 
-        self.play(FadeIn(label), Write(title), Write(formula), Create(axes))
-        self.play(FadeIn(components, lag_ratio=0.15), Write(x_note))
-        self.play(Create(mixture), Write(pi_note), Write(mu_note), Write(sigma_note))
-        for new_x in [0.18, 0.82, 0.5]:
-            new_components = VGroup()
-            for k, color in enumerate(colors):
-                new_components.add(axes.plot(
-                    lambda z, kk=k, xx=new_x: float(branch_weights(xx)[kk] * normal_pdf(z, branch_means(xx)[kk], branch_sigmas(xx)[kk])),
-                    x_range=[0.02, 0.98],
-                    color=color,
-                ).set_stroke(width=3))
-            new_mixture = axes.plot(lambda z, xx=new_x: float(mdn_density(z, xx)), x_range=[0.02, 0.98], color=YELLOW_NOTE).set_stroke(width=5)
-            new_note = MathTex(f"x={new_x:.2f}", font_size=34, color=YELLOW_NOTE).move_to(x_note)
-            self.play(Transform(components, new_components), Transform(mixture, new_mixture), Transform(x_note, new_note), run_time=1.25)
-        self.wait(0.6)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, formula, axes, components, mixture, x_note, pi_note, mu_note, sigma_note]])
+    def responsibility_scene(self):
+        p=np.array([.28,.42,.30]); mu=np.array([.2,.5,.8]);sig=np.array([.13,.11,.12])
+        tv=ValueTracker(.18)
+        ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,2.1,.5),width=7,height=3.0,center=(-2,-.15,0),xlabel='t',ylabel='p')
+        graph=mix_graph(ax,lambda:(p,mu,sig))
+        guide=always_redraw(lambda:Line(ax.c2p(tv.get_value(),0),ax.c2p(tv.get_value(),2),color=YELLOW))
+        self.add(ax,lab,graph,guide)
+        self.beat(tv.animate.set_value(.75))
+        gamma=lambda:responsibility(tv.get_value(),p,mu,sig)
+        bs=bars(gamma,[3.8,.6,0],width=3.1,labels=False)
+        nums=VGroup(*[readout(rf'\gamma_{k+1}=',lambda k=k:float(gamma()[k]),[3.8,-k*.45,0],C[k]) for k in range(3)])
+        eq=self.formula(r'\gamma_k={\pi_k\mathcal{N}_k\over\sum_l\pi_l\mathcal{N}_l}',size=32)
+        self.add(bs,nums)
+        self.beat(Write(eq),tv.animate.set_value(.46))
+        prior=jp('観測前',21,MUTED).move_to([3.8,1.65,0]);post=jp('観測後',21,YELLOW).move_to([3.8,1,0])
+        priorbar=bars(lambda:p,[3.8,1.35,0],width=3.1,labels=False)
+        self.beat(FadeIn(priorbar),Write(prior),Write(post),tv.animate.set_value(.3))
+        self.beat(Transform(eq,self.formula(r'{\partial E_n\over\partial a_k^\pi}=\pi_k-\gamma_k')),tv.animate.set_value(.78))
+        derivatives=VGroup(tex(r'{\partial E_n\over\partial a_k^\mu}=\gamma_k{\mu_k-t_n\over\sigma_k^2}',28,C[1]),
+                           tex(r'{\partial E_n\over\partial a_k^\sigma}=\gamma_k\left(1-{(t_n-\mu_k)^2\over\sigma_k^2}\right)',28,C[2])).arrange(RIGHT,buff=.8).move_to([0,2.08,0])
+        self.beat(Transform(eq,derivatives),tv.animate.set_value(.57))
+        arrow=Arrow([4,-2.2,0],[-4,-2.2,0],color=YELLOW)
+        self.beat(GrowArrow(arrow),Write(self.note('出力の勾配 → 共有する隠れ層 → 重みの更新',YELLOW)))
 
-    def network_parameterization(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("PRML 5.6 / Fig. 5.20 / Eq. (5.149)-(5.152)")
-        title = self.scene_title("ネットワーク出力を、分布パラメータへ変換する", font_size=32)
-        input_box = RoundedRectangle(width=1.25, height=0.75, corner_radius=0.08, color=BLUE_DATA).shift(LEFT * 5.0)
-        input_text = MathTex(r"x", font_size=38).move_to(input_box)
-        hidden = VGroup(*[Circle(radius=0.22, color=TEAL_DENSITY).shift(LEFT * 2.9 + UP * y) for y in [-1.0, -0.5, 0, 0.5, 1.0]])
-        output_boxes = VGroup()
-        specs = [
-            (r"a^\pi_k", r"\pi_k(x)=\frac{e^{a^\pi_k}}{\sum_l e^{a^\pi_l}}", GREEN_CURVE),
-            (r"a^\sigma_k", r"\sigma_k(x)=e^{a^\sigma_k}", ORANGE_ALT),
-            (r"a^\mu_{kj}", r"\mu_{kj}(x)=a^\mu_{kj}", PURPLE_COMPONENT),
-        ]
-        for i, (raw, converted, color) in enumerate(specs):
-            box = RoundedRectangle(width=2.1, height=0.65, corner_radius=0.08, color=color).shift(RIGHT * 0.3 + UP * (1.0 - i))
-            raw_text = MathTex(raw, font_size=31, color=color).move_to(box)
-            eq = MathTex(converted, font_size=29, color=color).next_to(box, RIGHT, buff=0.45)
-            output_boxes.add(VGroup(box, raw_text, eq))
-        arrows = VGroup()
-        for node in hidden:
-            arrows.add(Line(input_box.get_right(), node.get_left(), stroke_width=1.5, color=GREY_B))
-        for node in hidden:
-            for box_group in output_boxes:
-                arrows.add(Line(node.get_right(), box_group[0].get_left(), stroke_width=1.0, color=GREY_B))
-        count_note = MathTex(r"K\ components,\ L\ target\ dims\ \Rightarrow\ (L+2)K\ outputs", font_size=31, color=YELLOW_NOTE).to_edge(DOWN, buff=0.55)
+    def map_scene(self):
+        ax,lab=axes(width=6,height=3.4,center=(-3,-.2,0))
+        xs=np.linspace(0,1,260); ts=np.linspace(1,0,220)
+        p,m,s=parameters(self.w,xs)
+        z=np.sum(p[None,:,:]*normal(ts[:,None,None],m[None,:,:],s[None,:,:]),axis=2)
+        # Fixed linear color scale; top saturated at density 14, legend explicit.
+        strength=np.clip(z/14,0,1)
+        bg=np.array([16,20,31]); fg=np.array([110,218,190])
+        pixels=(bg+(fg-bg)*strength[:,:,None]).astype(np.uint8)
+        im=ImageMobject(pixels).stretch_to_fit_width(ax.x_length).stretch_to_fit_height(ax.y_length).move_to(ax.c2p(.5,.5))
+        dots=VGroup(*[Dot(ax.c2p(x,t),radius=.021,color=C[0]) for x,t in zip(self.model['x'][::4],self.model['t'][::4])])
+        self.add(im,ax,lab)
+        self.beat(FadeIn(dots),Write(self.note('密度：暗 0 → 明 14以上　／　学習例')))
+        xv=ValueTracker(.12)
+        scan=always_redraw(lambda:Line(ax.c2p(xv.get_value(),0),ax.c2p(xv.get_value(),1),color=YELLOW))
+        da,dl=density_axes(lambda:self.p(xv.get_value()),width=4.7,height=3.0,center=(3.8,-.25,0))
+        graph=mix_graph(da,lambda:self.p(xv.get_value()),True)
+        self.add(scan,da,dl,graph,slider(xv,.12,.88,(-3,-2.3,0),width=4,label='x'),readout('x=',xv.get_value,[3.7,-2.35,0],YELLOW))
+        self.beat(xv.animate.set_value(.18))
+        self.beat(xv.animate.set_value(.5))
+        self.beat(xv.animate.set_value(.88))
+        means=VGroup(*[curve(ax,xs[(p[:,k]>.02)&(m[:,k]>=0)&(m[:,k]<=1)],m[:,k][(p[:,k]>.02)&(m[:,k]>=0)&(m[:,k]<=1)],C[k],2) for k in range(3)])
+        self.beat(Create(means),xv.animate.set_value(.5))
+        self.beat(xv.animate.set_value(.25),Write(self.formula(r'\pi_k(x),\quad\mu_k(x),\quad\sigma_k(x)',size=31)))
 
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(input_box), Write(input_text), FadeIn(hidden), FadeIn(arrows), run_time=1.0)
-        for group in output_boxes:
-            self.play(FadeIn(group[0]), Write(group[1]), Write(group[2]), run_time=0.75)
-        self.play(Write(count_note))
-        self.wait(0.7)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, input_box, input_text, hidden, arrows, output_boxes, count_note]])
+    def summaries_scene(self):
+        ax,lab=axes(xrange=(-.5,1.5,.5),yrange=(0,4,1),width=9,height=2.9,center=(0,-.1,0),xlabel='t',ylabel='p')
+        sep=ValueTracker(.18);width=ValueTracker(.12);weight=ValueTracker(.5);second=ValueTracker(.12)
+        def pars():return np.array([weight.get_value(),1-weight.get_value()]),np.array([.5-sep.get_value(),.5+sep.get_value()]),np.array([width.get_value(),second.get_value()])
+        def mean():p,m,s=pars();return float(p@m)
+        def within():p,m,s=pars();return float(p@(s*s))
+        def between():p,m,s=pars();return float(p@((m-mean())**2))
+        graph=mix_graph(ax,pars)
+        meanline=always_redraw(lambda:Line(ax.c2p(mean(),0),ax.c2p(mean(),3.4),color=RED))
+        eq=self.formula(r'm=\mathbb{E}[t\mid x]=\sum_k\pi_k\mu_k',size=34)
+        self.add(ax,lab,graph)
+        self.beat(Write(eq),Create(meanline))
+        self.beat(sep.animate.set_value(.4))
+        var=VGroup(tex(r's^2=',30),tex(r'\sum_k\pi_k\underbrace{\sigma_k^2}_{\text{within}}',30,C[0]),tex('+',30),tex(r'\sum_k\pi_k\underbrace{(\mu_k-m)^2}_{\text{between}}',30,C[1])).arrange(RIGHT,buff=.15).move_to([0,2.2,0])
+        nums=VGroup(readout(r'\mathrm{within}=',within,[-3,-2.2,0],C[0],3),readout(r'\mathrm{between}=',between,[3,-2.3,0],C[1],3))
+        self.beat(Transform(eq,var),FadeIn(nums))
+        self.beat(sep.animate.set_value(.46),width.animate.set_value(.2),second.animate.set_value(.2))
+        self.remove(nums,meanline)
+        approx=always_redraw(lambda:Line(ax.c2p(pars()[1][np.argmax(pars()[0])],0),ax.c2p(pars()[1][np.argmax(pars()[0])],3.2),color=C[1]))
+        grid=np.linspace(-.5,1.5,4001)
+        mode=lambda:float(grid[np.argmax(density(grid,*pars()))])
+        modepoint=always_redraw(lambda:Dot(ax.c2p(mode(),float(density(mode(),*pars()))),color=YELLOW,radius=.08))
+        self.add(approx,modepoint,self.note('橙の線：最大の混合係数の中心　／　黄色の点：数値的なモード',YELLOW))
+        self.beat(Transform(eq,self.formula(r'\mathrm{mode}=\arg\max_t p(t\mid x),\qquad \widetilde t=\mu_{\arg\max_k\pi_k}',size=30)),weight.animate.set_value(.65))
+        self.beat(second.animate.set_value(.055),width.animate.set_value(.22))
 
-    def likelihood_training(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("PRML 5.6 / Eq. (5.153)-(5.157)")
-        title = self.scene_title("二乗誤差ではなく、混合分布の尤度を最大化する", font_size=30)
-        formula = MathTex(
-            r"E(w)=-\sum_{n=1}^{N}\ln\left\{\sum_{k=1}^{K}\pi_k(x_n,w)"
-            r"\mathcal{N}(t_n|\mu_k(x_n,w),\sigma_k^2(x_n,w))\right\}",
-            font_size=31,
-        ).to_edge(UP).shift(DOWN * 1.1)
-        axes = Axes(
-            x_range=[0, 1, 0.25],
-            y_range=[0, 8, 1],
-            x_length=5.5,
-            y_length=3.1,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        ).shift(LEFT * 2.65 + DOWN * 0.8)
-        x0 = 0.5
-        t0 = float(branch_means(x0)[0] + 0.012)
-        colors = [GREEN_CURVE, ORANGE_ALT, PURPLE_COMPONENT]
-        components = VGroup(*[
-            axes.plot(
-                lambda z, kk=k: float(branch_weights(x0)[kk] * normal_pdf(z, branch_means(x0)[kk], branch_sigmas(x0)[kk])),
-                x_range=[0.02, 0.98],
-                color=color,
-            ).set_stroke(width=3)
-            for k, color in enumerate(colors)
-        ])
-        point = Dot(axes.c2p(t0, 0), radius=0.075, color=YELLOW_NOTE)
-        point_line = DashedLine(axes.c2p(t0, 0), axes.c2p(t0, 7.5), color=YELLOW_NOTE, dash_length=0.08)
-        likelihoods = branch_weights(x0) * normal_pdf(t0, branch_means(x0), branch_sigmas(x0))
-        gamma = likelihoods / likelihoods.sum()
-        bars = VGroup()
-        for i, (g, color) in enumerate(zip(gamma, colors)):
-            base = RIGHT * 2.05 + DOWN * (0.35 + i * 0.55)
-            bar_bg = Rectangle(width=2.6, height=0.22, color=GREY_B, stroke_width=1).move_to(base)
-            bar_fg = Rectangle(width=2.6 * float(g), height=0.22, color=color, stroke_width=0).set_fill(color, opacity=0.8)
-            bar_fg.align_to(bar_bg, LEFT).move_to(bar_bg.get_left() + RIGHT * bar_fg.width / 2)
-            label_text = MathTex(rf"\gamma_{i+1}={g:.2f}", font_size=26, color=color).next_to(bar_bg, LEFT, buff=0.18)
-            bars.add(VGroup(bar_bg, bar_fg, label_text))
-        gamma_formula = MathTex(r"\gamma_k(t|x)=\frac{\pi_k\mathcal{N}_k}{\sum_l\pi_l\mathcal{N}_l}", font_size=34).next_to(bars, UP, buff=0.45)
-        backprop = Text("責務を誤差信号として逆伝播", font_size=25, color=YELLOW_NOTE).next_to(bars, DOWN, buff=0.35)
-
-        self.play(FadeIn(label), Write(title), Write(formula))
-        self.play(Create(axes), FadeIn(components, lag_ratio=0.1))
-        self.play(FadeIn(point), Create(point_line))
-        self.play(Write(gamma_formula), FadeIn(bars, lag_ratio=0.12), Write(backprop))
-        self.wait(0.7)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, formula, axes, components, point, point_line, gamma_formula, bars, backprop]])
-
-    def density_map_scene(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("PRML 5.6 / Fig. 5.21(a)-(c)")
-        title = self.scene_title("連続な出力関数から、多峰な条件付き密度が生まれる", font_size=30)
-        axes = self.unit_axes(width=7.0, height=4.0).shift(LEFT * 1.65 + DOWN * 0.2)
-        density_image = self.make_density_image()
-        density_image.set_width(axes.x_length)
-        density_image.set_height(axes.y_length)
-        density_image.move_to(axes.c2p(0.5, 0.5))
-        xs = np.linspace(0, 1, 240)
-        mean_curves = VGroup(
-            self.line_graph(axes, branch_means(xs)[0], GREEN_CURVE, width=2.4),
-            self.line_graph(axes, branch_means(xs)[1], ORANGE_ALT, width=2.4),
-            self.line_graph(axes, branch_means(xs)[2], PURPLE_COMPONENT, width=2.4),
-        )
-        slices = VGroup()
-        for x0 in [0.15, 0.5, 0.85]:
-            slices.add(DashedLine(axes.c2p(x0, 0), axes.c2p(x0, 1), color=YELLOW_NOTE, dash_length=0.08))
-        notes = VGroup(
-            Text("端: ほぼ単峰", font_size=24, color=YELLOW_NOTE).next_to(axes, RIGHT, buff=0.4).shift(UP * 0.85),
-            Text("中央: 三つの候補", font_size=24, color=YELLOW_NOTE).next_to(axes, RIGHT, buff=0.4).shift(UP * 0.35),
-            MathTex(r"\pi_k(x),\mu_k(x),\sigma_k(x)", font_size=30, color=TEXT_GREY).next_to(axes, RIGHT, buff=0.4).shift(DOWN * 0.3),
-        )
-
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(FadeIn(density_image), run_time=1.0)
-        self.play(FadeIn(mean_curves, lag_ratio=0.12), FadeIn(slices, lag_ratio=0.12), FadeIn(notes, lag_ratio=0.12))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, axes, density_image, mean_curves, slices, notes]])
-
-    def mean_and_mode(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("PRML 5.6 / Eq. (5.158)-(5.160)")
-        title = self.scene_title("分布を得たあと、用途に合う要約を選ぶ", font_size=32)
-        axes = self.unit_axes(width=7.0, height=4.0).shift(LEFT * 1.65 + DOWN * 0.2)
-        density_image = self.make_density_image()
-        density_image.set_width(axes.x_length)
-        density_image.set_height(axes.y_length)
-        density_image.move_to(axes.c2p(0.5, 0.5))
-        xs = np.linspace(0, 1, 260)
-        mean_line = self.line_graph(axes, mean_prediction(xs), RED_MODEL, width=4)
-        mode_line = self.line_graph(axes, mode_approximation(xs), YELLOW_NOTE, width=4)
-        mean_formula = MathTex(r"\mathbb{E}[t|x]=\sum_k \pi_k(x)\mu_k(x)", font_size=31, color=RED_MODEL).next_to(axes, RIGHT, buff=0.35).shift(UP * 0.85)
-        mode_note = Text("近似モード: 最大 pi の中心", font_size=24, color=YELLOW_NOTE).next_to(mean_formula, DOWN, buff=0.28)
-        valley_note = Text("平均は谷を通ることがある", font_size=24, color=RED_MODEL).next_to(mode_note, DOWN, buff=0.25)
-        sample_x = 0.5
-        mean_dot = Dot(axes.c2p(sample_x, float(mean_prediction(sample_x))), radius=0.08, color=RED_MODEL)
-        mode_dot = Dot(axes.c2p(sample_x, float(mode_approximation(sample_x))), radius=0.08, color=YELLOW_NOTE)
-        sample_line = DashedLine(axes.c2p(sample_x, 0), axes.c2p(sample_x, 1), color=TEXT_GREY, dash_length=0.08)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(density_image))
-        self.play(Create(mean_line), Write(mean_formula), FadeIn(mean_dot), Create(sample_line))
-        self.play(Create(mode_line), Write(mode_note), Write(valley_note), FadeIn(mode_dot))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, axes, density_image, mean_line, mode_line, mean_formula, mode_note, valley_note, mean_dot, mode_dot, sample_line]])
-
-    def summary_scene(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("PRML 5.6")
-        title = self.scene_title("混合密度ネットワークの要点", font_size=35)
-        bullets = VGroup(
-            Text("1. 回帰の出力を一点から p(t|x) へ拡張", font_size=29),
-            Text("2. ネットワークが pi, mu, sigma を入力ごとに出す", font_size=29),
-            Text("3. softmax と exp で分布の制約を満たす", font_size=29),
-            Text("4. 負の対数尤度を通常の逆伝播で最小化", font_size=29),
-            Text("5. 平均、分散、モードを用途に応じて選べる", font_size=29),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.34).shift(LEFT * 0.2 + DOWN * 0.1)
-        equation = MathTex(r"point\ prediction\quad\longrightarrow\quad conditional\ density", font_size=38, color=YELLOW_NOTE)
-        equation.next_to(bullets, DOWN, buff=0.55)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(FadeIn(bullets, lag_ratio=0.13), run_time=1.6)
-        self.play(Write(equation))
-        self.wait(0.8)
-        self.finish_narration(narration)
-        self.play(*[FadeOut(mob) for mob in [label, title, bullets, equation]])
+    def recap_scene(self):
+        a=np.arccos(.6)
+        upper=self.arm(a,-2*a,C[0],origin=(-4.4,0,0),scale=1.5)
+        lower=self.arm(-a,2*a,C[1],origin=(-4.4,0,0),scale=1.5)
+        self.add(Dot([-2.6,0,0],color=YELLOW))
+        self.beat(FadeIn(upper),FadeIn(lower))
+        xv=ValueTracker(.5)
+        ax,lab=density_axes(lambda:self.p(xv.get_value()),width=5.4,height=3.0,center=(3,-.25,0))
+        graph=mix_graph(ax,lambda:self.p(xv.get_value()),True)
+        eq=self.formula(r'x\longrightarrow (\pi,\mu,\sigma)\longrightarrow p(t\mid x)')
+        self.beat(Create(ax),FadeIn(lab),FadeIn(graph),Write(eq))
+        self.beat(Transform(eq,self.formula(r'E=-\sum_n\ln p(t_n\mid x_n),\qquad\gamma_k\longrightarrow\nabla_w E')),xv.animate.set_value(.6))
+        dimensions=self.formula(r't\in\mathbb{R}^{D}:\quad K(D+2)\ \text{outputs (isotropic)}',size=30)
+        self.beat(Transform(eq,dimensions),xv.animate.set_value(.3))
+        distinction=self.formula(r'p(t\mid x,w_{\mathrm{ML}})\qquad\qquad p(w\mid\mathcal{D})',size=34)
+        self.beat(Transform(eq,distinction),xv.animate.set_value(.85))
+        self.beat(Transform(eq,self.formula(r'x\quad\longrightarrow\quad p(t\mid x)',size=36)),xv.animate.set_value(.5),Indicate(upper),Indicate(lower))

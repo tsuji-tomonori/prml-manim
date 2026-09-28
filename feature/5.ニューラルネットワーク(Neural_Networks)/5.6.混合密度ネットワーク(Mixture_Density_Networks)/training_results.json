@@ -1,0 +1,9 @@
+{
+  "initial_nll": 0.1979114482471159,
+  "final_nll": -1.7128371906893303,
+  "test_nll": -1.6020574540390873,
+  "mean_train_mse": 0.027504456799355318,
+  "iterations": 5000,
+  "observations": 480,
+  "sigma_floor": 0.012
+}

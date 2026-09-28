@@ -1,57 +1,84 @@
-# 5.6 混合密度ネットワーク
+# PRML 5.6 混合密度ネットワーク
 
-PRML Chapter 5 の 5.6 節を、高校数学向けに翻訳した Manim アニメーションと台本です。
+同じ場所へ届くロボットの腕は、一通りでしょうか。二つの答えを平均すると目標を外す問いから始め、分布のつまみ、学習、責務、予測の要約へ進む **8分59.6秒・9シーン** の動画です。
 
-## ファイル
+[動画（480p15）](media/videos/prml_5_6_mixture_density_networks/480p15/PRML56MixtureDensityNetworks.mp4) ／ [収録台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
 
-- `prml_5_6_mixture_density_networks.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## 構成と原文
 
-## レンダリング
+Bishop (2006) §5.6、印刷 pp.272–277（手元 PDF pp.292–297）を `pdftotext -layout` で抽出して読みました。本節に表はありません。図は複製せず、自作の腕・データ・学習結果を使います。
 
-VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、先に音声を生成します。
+| シーン | 秒 | 視覚的な実験 | 原文参照 |
+|---|---:|---|---|
+| 同じ場所へ届く腕は、一通り？ | 55.867 | 二解の角度を平均すると手先が外れる | p.272、Fig.5.18 |
+| 点の向きを変えると、何が起きる？ | 53.933 | 同じ座標系で軸交換、学習した平均線 | pp.272–273、Fig.5.19 |
+| 山を混ぜると、答えを残せる | 63.133 | 中心・幅・面積配分を動かす | p.273、(5.148) |
+| ネットワークが動かす、三種類のつまみ | 60.533 | 活動・9出力・密度が入力に連動 | pp.273–274、Fig.5.20、(5.149)–(5.152) |
+| 当たる分布を、どう採点する？ | 59.333 | 観測位置の密度と損失、実学習の再生 | p.275、(5.153) |
+| この点は、どの山の担当？ | 65.000 | 点を動かし、寄与を責務へ正規化 | p.275、(5.154)–(5.157)、著者正誤表 |
+| 一つの入力に、いくつの山がある？ | 55.800 | 密度地図の縦断面を掃引 | p.276、Fig.5.21(a)–(c) |
+| 平均・分散・山の頂上は、何が違う？ | 61.267 | 山内・山間の分散、近似モードの反例 | pp.276–277、(5.158)–(5.160)、Fig.5.21(d) |
+| 一点から、答えの分布へ | 64.733 | 腕の二解に戻り、分布として情報を保持 | pp.272–277 |
+
+## 数学と実験の範囲
+
+- 答えを一変数として説明し、成分数を K と統一します。出力数は 3K。D 次元の等方ガウスなら K(D+2) です。
+- [著者正誤表](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/05/prml-errata-1st-20110921.pdf)の pp.273–275 の訂正を反映します。多次元の共分散は σ²I、(5.153) の内側の和の上限は K、責務の一般形は γ_nk です。画面では一つの観測 n に注目して γ_k と略記します。
+- (5.157) は σ=exp(aσ) に対する訂正済みの勾配 `γ_k [1−(t_n−μ_k)²/σ_k²]` を表示します。元 PDF の誤植をそのまま実装しません。数値微分で確認します。
+- (5.159)–(5.160) の分散を「山の中」と「中心の間」の二項へ分けます。多次元ならスカラーの総分散と共分散行列を区別する必要があるため、映像の式は一変数に限定します。
+- 最大混合係数の中心は、原文で提案される簡便なモード近似です。真のモードとの一致を保証しません。重み (0.65,0.35)、中心 (0.04,0.96)、幅 (0.22,0.055) の自作例では、近似0.04に対し数値モード0.96です。
+- 原文の補足：多次元では各成分が等方でも、混合後の同時分布が各座標に因数分解できるとは限りません。一般の共分散は Cholesky 分解で正定値性を保つ拡張が可能です。mixture of experts との構成上の違いは、全成分のパラメータと混合係数を予測する隠れ層を共有する点です。
+- 一部のつまみ操作は分布の性質を示す説明用の実験です。学習結果は scene02 の平均線、scene04・05・07・09 の MDN。入力掃引は学習後の推論です。
+
+自作データは `u ~ Uniform(0.02,0.98)`、`v=u+0.28 sin(2πu)+Uniform(−0.045,0.045)` の480点。順問題は (u,v)、逆問題は (x,t)=(v,u)。原文の係数・ノイズ幅・ネットワーク規模は再現実験の条件とは異なります。
+
+`mdn_model.py` は NumPy で 1入力→16 tanh→9出力の MDN と解析的な逆伝播を実装します。Adam 5000更新を計算し、50更新ごとの重みを `assets/mdn_training.npz` に保存します。動画の途中状態は重みを線形補間した表示です。数値を架空の学習曲線から作っていません。二乗誤差の平均予測は、同じ逆問題データへ別の tanh ネットワークを SciPy の `least_squares` で当てはめます。
+
+実験の幅は `σ=0.012+exp(aσ)`。原文の純粋な指数変換へ下限を加えた実装であり、勾配にも連鎖律の係数を入れます。訓練の平均負対数尤度は 0.197911 → −1.712837、独立な1000点では −1.602057。密度は1を超え得るため、負の対数尤度も負になり得ます。汎化性能の一般的な保証ではありません。
+
+密度地図は0〜14の固定色尺度で14以上を同色にします。断面の縦軸は山が読めるよう自動調整し、目盛りは実際の密度を表示します。地図の成分中心線は混合係数0.02以上の領域に限定します。峰数の検証では、最大密度の3%以上のprominence（周囲からの突出度）を持つ山を数えます。
+
+## 字幕・音声・同期
+
+`narration_content.py` の54 beat・108文が正本です。字幕 `display` と読み上げ `speech` を分離しています。数式は MathTex として日本語かなの実測高さ・本体中心線に合わせ、左右に余白を設けます。1.1 の修正済み CE 実装をこの節の `video_support.py` へ継承しました。
+
+全 speech を speaker 23 の `audio_query` に通し、読み列を確認してから再取得しました。「値」「生の」「負」「正」「一変数」「その間」の修正前後を `reading_check.md/json` に保存します。一括置換が「数値」「二値」へ及んだ箇所も再確認時に修正しました。APIの読み確認と、全編の通し聴取は別です。
+
+各文の PCM 尺と字幕時刻、台本・WAV の SHA-256 を manifest に記録します。映像も同じ時計を使い、欠落音声や古い台本の音声があれば停止します。旧7 WAVを置換し、新構成の9 WAVだけを残しています。
+
+## 再生成
+
+このディレクトリで実行します。VOICEVOX Engine は `http://127.0.0.1:50021`、WhiteCUL ノーマル（23）。接続できないときは停止し、コンテナを操作しません。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_5_6_mixture_density_networks.py PRML56MixtureDensityNetworks
+OPENBLAS_NUM_THREADS=1 /home/t-tsuji/project/prml-manim/.venv/bin/python mdn_model.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+# reading_check.md の全文を確認し、speech を修正したら再取得する
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py --captions
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_5_6_mixture_density_networks.py PRML56MixtureDensityNetworks
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py --output /tmp/prml56-review
 ```
 
-生成済み動画:
+音声は `--from-scene scene05` のように再開可能です。話速1.08、抑揚0.95、音量係数1.0。音声クレジット：**VOICEVOX:WhiteCUL**。
 
-```text
-media/videos/prml_5_6_mixture_density_networks/480p15/PRML56MixtureDensityNetworks.mp4
-```
+## 演出の参照
 
-高品質で出力する場合:
+[3b1b/manim](https://github.com/3b1b/manim) の `manimlib/mobject/value_tracker.py` から、状態を一つのつまみに持たせる考え方を参照。[3b1b/videos](https://github.com/3b1b/videos) の以下の構成手法を Manim CE で実装しました。ManimGL のコードは取り込んでいません。
 
-```bash
-uv run manim -pqh prml_5_6_mixture_density_networks.py PRML56MixtureDensityNetworks
-```
+- `_2017/nn/part1.py` / `NetworkMobject`：ニューロン活動と接続の可視化。
+- `_2017/nn/network.py`：順伝播と逆伝播の対応。今回の混合密度用計算は NumPy で独自実装。
+- `_2017/nn/part2.py` / `GradientNudging`：計算したパラメータ更新と予測の変化を結ぶ。
+- `_2017/nn/part3.py` / `SimplestNetworkExample`：一つの観測から出力の誤差信号を追う説明順。
+- `_2019/bayes/part1.py` / `ProbabilityBar`：事前から事後への変化を、合計一定の棒で示す。
+- `_2023/gauss_int/integral.py` / `BellCurveArea`：曲線下の面積と確率を対応させる。
 
-## 原文参照
+数値検証結果は `numerical_results.json`、動画の検証結果は `validation_results.json` に記録します。レビュー画像は `verify_video.py` で再生成できます。全編の通し聴取、全フレームの目視、高解像度レンダリングは未実施です。
 
-主に `.working/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf` の以下を参照しています。
+## 完成版の検証
 
-- Section 5.6: Mixture Density Networks
-- Fig. 5.18: ロボットアームの逆問題
-- Fig. 5.19: 順問題と逆問題に対する二乗誤差回帰
-- Fig. 5.20: MDN のネットワーク構造
-- Fig. 5.21: 混合係数、平均、条件付き密度、近似モード
-- Eq. (5.148): 入力依存のガウス混合による `p(t|x)`
-- Eq. (5.149)-(5.152): `pi_k(x)`, `sigma_k(x)`, `mu_k(x)` の制約変換
-- Eq. (5.153)-(5.157): 負の対数尤度、責務、出力活性への誤差信号
-- Eq. (5.158)-(5.160): 条件付き平均と分散
+854×480・15fps、映像539.599344秒、音声539.626667秒（差0.027323秒）。3秒以上の無音は0件、平均音量−26.5dB、最大−5.8dB。最終版から66画像を目視し、全記号字幕と3シーンの動作・PCM発声時刻を照合しました。数値微分の最大誤差は3.469×10⁻¹⁰、密度の正規化誤差は1.554×10⁻¹⁵です。
 
-## 制作方針
-
-- PRML の図を直接複製せず、同じ概念構造を自作データと自作レイアウトで再構成する。
-- 逆問題の多峰性を先に見せ、一点予測がなぜ不十分かを直感化する。
-- `p(t|x)` を、入力で変わる混合係数、平均、分散の組として表示する。
-- ネットワークの生出力から、softmax、exp、identity で確率分布の制約を満たす流れを明示する。
-- 条件付き平均と近似モードを同じ密度地図上で比較し、用途に応じた要約量選択を強調する。
-
-## 音声クレジット
-
-- ナレーション: VOICEVOX:WhiteCUL
+[作業完了レポート](../../../reports/working/20260929-0339-prml-5-6-3b1b-remake.md)に、参照した演出、原文の訂正、読みの修正、検証範囲を記録しています。
