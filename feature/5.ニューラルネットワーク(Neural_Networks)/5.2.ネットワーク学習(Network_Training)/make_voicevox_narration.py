@@ -1,214 +1,163 @@
+"""Generate WhiteCUL narration, with independently padded storyboard beats."""
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
-import time
+import math
 import urllib.parse
 import urllib.request
 import wave
 from pathlib import Path
 
+from narration_content import SCENES, SYNTHESIS_SETTINGS, estimated_duration, script_hash
 
 SCENE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCENE_DIR / "assets" / "voicevox"
-
-SPEAKERS = {
-    "main": {
-        "label": "VOICEVOX:WhiteCUL",
-        "id": 23,
-        "speed_scale": 1.08,
-        "intonation_scale": 0.96,
-    },
-    "focus": {
-        "label": "VOICEVOX:WhiteCUL",
-        "id": 23,
-        "speed_scale": 1.04,
-        "intonation_scale": 0.9,
-    },
-    "summary": {
-        "label": "VOICEVOX:WhiteCUL",
-        "id": 23,
-        "speed_scale": 1.02,
-        "intonation_scale": 0.88,
-    },
-}
-
-PAUSE_SECONDS = 0.28
-
-SCENES = [
-    {
-        "id": "scene01",
-        "title": "学習は誤差関数を下げること",
-        "lines": [
-            ("main", "ニューラルネットワークは、入力から出力を作る非線形な関数です。"),
-            ("main", "ネットワーク学習では、この関数の形を決める重みベクトル w を、訓練データに合わせて調整します。"),
-            ("main", "回帰では、出力 y と目標 t の差を二乗して足し合わせる誤差関数を使えます。"),
-            ("main", "確率モデルとして見ると、ガウス雑音を仮定した最大尤度推定が、この二乗和誤差の最小化に対応します。"),
-            ("summary", "つまり学習とは、重み空間の上で誤差 E w が小さくなる場所を探す問題です。"),
-        ],
-    },
-    {
-        "id": "scene02",
-        "title": "出力と誤差関数は組で選ぶ",
-        "lines": [
-            ("main", "PRML 5.2 では、問題の種類ごとに、出力ユニットと誤差関数を自然な組として選びます。"),
-            ("main", "実数値を予測する回帰では、線形出力と二乗和誤差を使います。"),
-            ("main", "二値分類では、シグモイド出力を確率として読み、ベルヌーイ分布の負の対数尤度、つまりクロスエントロピーを使います。"),
-            ("main", "多クラス分類では、ソフトマックス出力で確率の合計を一にそろえ、対応する多クラスクロスエントロピーを使います。"),
-            ("summary", "この組み合わせにすると、出力層の微分が y マイナス t という扱いやすい形になります。"),
-        ],
-    },
-    {
-        "id": "scene03",
-        "title": "重み空間の地形を下る",
-        "lines": [
-            ("main", "選んだ誤差関数は、重み w の関数として、重み空間の上に山や谷を作ります。"),
-            ("main", "勾配ナブラ E は、その地点で誤差が最も増える向きを指します。"),
-            ("main", "したがって、マイナス勾配の方向へ小さく進むと、誤差を下げられます。"),
-            ("main", "誤差が十分小さい場所では、勾配がゼロに近くなります。"),
-            ("summary", "ただし非線形ネットワークの誤差面は非凸なので、谷は一つとは限りません。"),
-        ],
-    },
-    {
-        "id": "scene04",
-        "title": "局所二次近似とヘッセ行列",
-        "lines": [
-            ("main", "ある点の近くでは、複雑な誤差面も、二次関数のように近似できます。"),
-            ("main", "この近似では、勾配が傾きを表し、ヘッセ行列が曲がり方を表します。"),
-            ("main", "最小点のまわりでは、等高線は楕円になり、その軸はヘッセ行列の固有ベクトルに沿います。"),
-            ("main", "固有値が大きい方向は急で、固有値が小さい方向はゆるやかです。"),
-            ("summary", "この曲がり方の違いが、単純な勾配降下をジグザグさせる原因になります。"),
-        ],
-    },
-    {
-        "id": "scene05",
-        "title": "勾配情報を使う理由",
-        "lines": [
-            ("main", "重みが W 個あるとき、関数値を一つ測るだけでは、どちらへ進むべきかの情報は少ししか得られません。"),
-            ("main", "一方で、勾配を一回計算すると、W 個の方向成分が同時に得られます。"),
-            ("main", "バックプロパゲーションを使えば、この勾配を重み数に比例する計算量で効率よく求められます。"),
-            ("main", "そのため実用的なニューラルネットワーク学習は、勾配情報を中心に組み立てられます。"),
-            ("summary", "次の節の誤差逆伝播は、この勾配をどう計算するかの話です。"),
-        ],
-    },
-    {
-        "id": "scene06",
-        "title": "バッチ更新とオンライン更新",
-        "lines": [
-            ("main", "最も単純な更新は、現在の重みから、学習率 eta 倍の勾配を引く勾配降下です。"),
-            ("main", "全データの誤差をまとめて勾配にする方法を、バッチ法と呼びます。"),
-            ("main", "一方、データ点一つ、または小さなミニバッチごとに更新する方法は、オンライン、または確率的勾配降下と呼ばれます。"),
-            ("main", "オンライン更新は大きなデータで重複を扱いやすく、全体の局所最小から抜け出す揺らぎも持ちます。"),
-            ("summary", "ネットワーク学習は、誤差関数、勾配、学習率、データの使い方を組み合わせて進める数値最適化です。"),
-        ],
-    },
-]
+MANIFEST = OUTPUT_DIR / "manifest.json"
+CACHE_DIR = SCENE_DIR.parents[2] / ".working" / "voicevox-lines"
+SPEAKER = {"label": "VOICEVOX:WhiteCUL", "id": 23, "speed_scale": 1.08}
 
 
-def post_json(base_url: str, path: str, params: dict[str, str | int], body: bytes | None = None) -> bytes:
-    url = f"{base_url.rstrip('/')}{path}?{urllib.parse.urlencode(params)}"
-    request = urllib.request.Request(url, data=body, method="POST")
-    if body is not None:
-        request.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(request, timeout=120) as response:
-        return response.read()
-
-
-def synthesize(base_url: str, speaker_key: str, text: str) -> bytes:
-    speaker = SPEAKERS[speaker_key]
-    query_bytes = post_json(base_url, "/audio_query", {"text": text, "speaker": speaker["id"]})
-    query = json.loads(query_bytes.decode("utf-8"))
-    query["speedScale"] = speaker["speed_scale"]
-    query["intonationScale"] = speaker["intonation_scale"]
-    query["prePhonemeLength"] = 0.12
-    query["postPhonemeLength"] = 0.2
-    return post_json(
-        base_url,
-        "/synthesis",
-        {"speaker": speaker["id"]},
-        json.dumps(query, ensure_ascii=False).encode("utf-8"),
-    )
-
-
-def append_wav_bytes(output: wave.Wave_write, wav_bytes: bytes, expected_params: tuple[int, int, int] | None) -> tuple[int, int, int]:
-    tmp_path = OUTPUT_DIR / "_line.wav"
-    tmp_path.write_bytes(wav_bytes)
-    try:
-        with wave.open(str(tmp_path), "rb") as source:
-            params = (source.getnchannels(), source.getsampwidth(), source.getframerate())
-            if expected_params is None:
-                output.setnchannels(params[0])
-                output.setsampwidth(params[1])
-                output.setframerate(params[2])
-            elif params != expected_params:
-                raise RuntimeError(f"Unexpected WAV params: {params}, expected {expected_params}")
-            output.writeframes(source.readframes(source.getnframes()))
-            return params
-    finally:
-        tmp_path.unlink(missing_ok=True)
-
-
-def append_silence(output: wave.Wave_write, params: tuple[int, int, int], seconds: float) -> None:
-    channels, sample_width, frame_rate = params
-    frame_count = int(frame_rate * seconds)
-    output.writeframes(b"\x00" * frame_count * channels * sample_width)
-
-
-def wav_duration(path: Path) -> float:
+def wav_duration(path):
     with wave.open(str(path), "rb") as audio:
         return audio.getnframes() / audio.getframerate()
 
 
-def generate_scene(base_url: str, scene: dict[str, object]) -> dict[str, object]:
-    scene_id = str(scene["id"])
-    output_path = OUTPUT_DIR / f"{scene_id}.wav"
-    tmp_output_path = OUTPUT_DIR / f".{scene_id}.tmp.wav"
-    params: tuple[int, int, int] | None = None
-    with wave.open(str(tmp_output_path), "wb") as output:
-        for line_number, (speaker_key, text) in enumerate(scene["lines"], start=1):  # type: ignore[index]
-            print(f"{scene_id} line {line_number}", flush=True)
-            wav_bytes = synthesize(base_url, speaker_key, text)
-            params = append_wav_bytes(output, wav_bytes, params)
-            append_silence(output, params, PAUSE_SECONDS)
-            time.sleep(0.03)
-    tmp_output_path.replace(output_path)
-    return {
-        "id": scene_id,
-        "title": scene["title"],
-        "path": str(output_path.relative_to(SCENE_DIR)),
-        "duration": round(wav_duration(output_path), 3),
-    }
+def valid_entry(scene, entry):
+    path = OUTPUT_DIR / f"{scene['id']}.wav"
+    if entry.get("status") != "generated" or entry.get("script_sha256") != script_hash(scene):
+        return False
+    if not path.exists() or entry.get("wav_sha256") != hashlib.sha256(path.read_bytes()).hexdigest():
+        return False
+    beats = entry.get("beat_durations", [])
+    if len(beats) != len(scene["beats"]) or any(d <= 0 for d in beats):
+        return False
+    cues = entry.get("subtitle_cues", [])
+    if [(c.get("id"), c.get("display"), c.get("speech")) for c in cues] != [
+            (s["id"], s["display"], s["speech"]) for b in scene["beats"] for s in b["segments"]]:
+        return False
+    if len(entry.get("beat_speech_ends", [])) != len(beats):
+        return False
+    try:
+        return abs(sum(beats) - wav_duration(path)) < 0.02
+    except (wave.Error, EOFError):
+        return False
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate PRML 5.2 narration WAV files with VOICEVOX.")
-    parser.add_argument("--base-url", default="http://127.0.0.1:50021", help="VOICEVOX Engine URL")
-    parser.add_argument("--from-scene", default="scene01", help="First scene id to regenerate")
-    args = parser.parse_args()
+def pending_entry(scene):
+    return {"id": scene["id"], "title": scene["title"], "status": "pending",
+            "path": None, "script_sha256": script_hash(scene),
+            "beat_durations": [estimated_duration(b) for b in scene["beats"]]}
 
+
+def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    start_index = next((i for i, scene in enumerate(SCENES) if scene["id"] == args.from_scene), 0)
-    manifest = {
-        "speakers": {key: {"label": value["label"], "id": value["id"]} for key, value in SPEAKERS.items()},
-        "scenes": [],
-    }
-    for scene in SCENES[:start_index]:
-        output_path = OUTPUT_DIR / f"{scene['id']}.wav"
-        result = {
-            "id": scene["id"],
-            "title": scene["title"],
-            "path": str(output_path.relative_to(SCENE_DIR)),
-            "duration": round(wav_duration(output_path), 3),
-        }
-        manifest["scenes"].append(result)
-    for scene in SCENES[start_index:]:
-        result = generate_scene(args.base_url, scene)
-        manifest["scenes"].append(result)
-        print(f"{result['id']} {result['duration']}s {result['path']}", flush=True)
+    temporary = MANIFEST.with_suffix(".tmp.json")
+    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "scenes": entries},
+                                    ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(MANIFEST)
 
-    manifest_path = OUTPUT_DIR / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"manifest {manifest_path.relative_to(SCENE_DIR)}", flush=True)
+
+def prepare_manifest():
+    previous = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
+    old = {e["id"]: e for e in previous.get("scenes", [])}
+    entries = [old[s["id"]] if valid_entry(s, old.get(s["id"], {})) else pending_entry(s)
+               for s in SCENES]
+    valid_ids = {e["id"] for e in entries if e["status"] == "generated"}
+    # Only narration assets belonging to this feature; old scene10..13 also go.
+    for path in OUTPUT_DIR.glob("scene*.wav"):
+        if path.stem not in valid_ids:
+            path.unlink()
+    save_manifest(entries)
+    return entries
+
+
+def post_json(base, endpoint, params, body=None):
+    request = urllib.request.Request(
+        f"{base.rstrip('/')}/{endpoint}?{urllib.parse.urlencode(params)}",
+        data=body, method="POST", headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=120) as response:
+        return response.read()
+
+
+def sentence_audio(base, text):
+    key = hashlib.sha256(json.dumps([base, "0.25.2", 23, SYNTHESIS_SETTINGS, text],
+                                  ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache = CACHE_DIR / f"{key}.wav"
+    if cache.exists():
+        return cache.read_bytes()
+    query = json.loads(post_json(base, "audio_query", {"speaker": 23, "text": text}))
+    query.update(SYNTHESIS_SETTINGS)
+    data = post_json(base, "synthesis", {"speaker": 23}, json.dumps(query).encode())
+    cache.write_bytes(data)
+    return data
+
+
+def generate_scene(base, scene):
+    path = OUTPUT_DIR / f"{scene['id']}.wav"
+    temporary = path.with_suffix(".tmp.wav")
+    durations, speech_ends, cues = [], [], []
+    expected = None
+    total_frames = 0
+    with wave.open(str(temporary), "wb") as output:
+        for i, beat in enumerate(scene["beats"]):
+            print(f"{scene['id']} beat {i + 1}", flush=True)
+            beat_start = total_frames
+            for segment in beat["segments"]:
+                data = sentence_audio(base, segment["speech"])
+                with wave.open(io.BytesIO(data), "rb") as source:
+                    params = (source.getnchannels(), source.getsampwidth(), source.getframerate())
+                    if expected is None:
+                        expected = params
+                        output.setnchannels(params[0])
+                        output.setsampwidth(params[1])
+                        output.setframerate(params[2])
+                    elif params != expected:
+                        raise RuntimeError("VOICEVOX changed WAV format within a scene")
+                    count = source.getnframes()
+                    cues.append({"beat_index": i, **segment,
+                                 "start": total_frames / params[2],
+                                 "end": (total_frames + count) / params[2]})
+                    output.writeframes(source.readframes(count))
+                    total_frames += count
+            speech_ends.append((total_frames - beat_start) / params[2])
+            # Only a short breath after actual speech; never pad to the old
+            # silent-storyboard duration. Align to the 15fps preview boundaries.
+            target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            target_frames = round(target_seconds * params[2])
+            padding = target_frames - (total_frames - beat_start)
+            output.writeframes(b"\0" * (padding * params[0] * params[1]))
+            total_frames += padding
+            durations.append(target_frames / params[2])
+    temporary.replace(path)
+    return {"id": scene["id"], "title": scene["title"], "status": "generated",
+            "path": str(path.relative_to(SCENE_DIR)), "script_sha256": script_hash(scene),
+            "wav_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "duration": wav_duration(path), "beat_durations": durations,
+            "beat_speech_ends": speech_ends, "subtitle_cues": cues}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base-url", default="http://127.0.0.1:50021")
+    parser.add_argument("--from-scene", choices=[s["id"] for s in SCENES], default="scene01")
+    parser.add_argument("--prepare-only", action="store_true", help="Invalidate stale audio without contacting Engine")
+    args = parser.parse_args()
+    if not args.prepare_only:
+        with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
+            print("VOICEVOX Engine", response.read().decode(), flush=True)
+    entries = prepare_manifest()
+    if args.prepare_only:
+        print("Manifest prepared. Audio not regenerated.")
+        return
+    start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
+    for i in range(start, len(SCENES)):
+        entries[i] = generate_scene(args.base_url, SCENES[i])
+        save_manifest(entries)  # Safe to resume after each completed scene.
+    print(f"Saved {MANIFEST}")
 
 
 if __name__ == "__main__":

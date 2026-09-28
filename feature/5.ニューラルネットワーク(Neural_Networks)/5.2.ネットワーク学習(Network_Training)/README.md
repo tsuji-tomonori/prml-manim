@@ -1,58 +1,91 @@
 # 5.2 ネットワーク学習
 
-PRML Chapter 5 の 5.2 節を、誤差関数、確率的な出力解釈、重み空間の最適化、局所二次近似、勾配情報、バッチ更新とオンライン更新として解説する Manim アニメーションと台本です。
+「どの重みを、どちらへ動かせばよいか」を、曲線・確率・誤差の地形から考える約9分50秒の日本語動画です。Manim Community Edition と VOICEVOX:WhiteCUL ノーマル（speaker 23）を使用します。
 
-## ファイル
+## 構成
 
-- `prml_5_2_network_training.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+| シーン | 音声尺 | 視覚実験 | PRML 原文 |
+|---|---:|---|---|
+| どの重みを、どちらへ動かす？ | 51.53秒 | 一つの重みで予測曲線・残差・誤差が連動 | pp.232–234、(5.11), (5.14) |
+| なぜ、ずれを二乗するの？ | 59.53秒 | ガウスの中心・精度・観測の密度を操作 | pp.233–234、(5.12)–(5.17) |
+| 確信した間違いには、どんな誤差？ | 56.27秒 | シグモイド上の点と交差エントロピーの値 | pp.234–235、(5.18)–(5.23) |
+| 三つの確率を、どうつなぐ？ | 61.67秒 | softmax の棒、共通シフト、独立二値への切替 | pp.235–236、(5.22)–(5.25) |
+| 誤差が小さくなる場所を探そう | 59.13秒 | 同じ断面で出発点と到達する谷を比較 | pp.236–237、図5.5、(5.26)–(5.27) |
+| 複雑な曲線を、近くで見ると？ | 55.93秒 | 接線・二次近似を基準点に追従させる | pp.237–238、(5.28)–(5.32) |
+| 谷の幅は、方向でどう違う？ | 58.07秒 | 円から楕円へ、固有方向を回転 | pp.238–239、図5.6、(5.33)–(5.40) |
+| 一つの高さと、すべての傾き | 64.33秒 | 同じ点の高さと勾配成分・矢印が連動 | pp.239–240、§5.2.3 |
+| 歩幅を大きくすれば、速く着く？ | 63.00秒 | 同じ谷と出発点で学習率のみ変更 | p.240、(5.41) |
+| 全部を見るか、一つずつ見るか？ | 60.87秒 | 同じ誤差曲線でバッチとオンラインを切替 | pp.240–241、(5.42)–(5.43) |
 
-## レンダリング
+Bishop (2006), *Pattern Recognition and Machine Learning*, §5.2（§5.2.1–5.2.4を含む）。印刷 pp.232–241 は PDF pp.252–261 に対応します。この節に表はありません。原図の画素やデータを転写せず、自作の数値例で同じ数学的な構造を描いています。
 
-Manim は `pangocairo` などの system dependency を必要とします。`uv sync` が `No package 'pangocairo' found` で失敗する場合は、OS 側で Cairo/Pango/pkg-config 関連パッケージを入れてから再実行してください。
-`MathTex` の数式描画には LaTeX と `dvisvgm` も必要です。
+## 成立条件と数値例
 
-ナレーション入りで再生成する場合は、VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、先に音声を生成します。
+- 回帰は13点、seed 52、tanh の隠れユニット二つと線形出力の小さなネットワークです。説明のため一つの出力重みだけを動かします。他の重みを固定した断面なので、この最小二乗自体は凸です。最適な重みは0.815081、残差から求めた最尤ノイズ分散は0.00203433です。
+- ガウスの精度 β は分散の逆数です。重み最適化では β>0 を固定し、共通の分散を持つ独立なノイズを仮定します。最尤分散の分母は N（複数出力なら NK）です。不偏分散推定ではありません。
+- 出力微分 y−t は一例について、対応する確率モデル・出力活性化・負の対数尤度を組み合わせた結果です。重みの勾配そのものではありません。
+- 複数の独立二値出力と、排他的な softmax 分類を区別します。条件付き独立を仮定する場合も、隠れ層の特徴は共有できます。
+- 多峰性の説明には `0.18(w²−2.2)²+0.16w+0.45` を用います。冒頭ネットワークの実際の誤差曲線とは別の教育用関数です。停留点は約 −1.53138、0.10149、1.42989です。
+- 局所二次近似は近くでの近似です。ヘッセ行列が正定値なら停留点は厳密局所最小となりますが、ゼロ固有値がある場合は高次の項の検討が必要です。
+- 勾配の計算量の比較は、原文の二次近似に基づく情報量の見積もりです。任意のネットワークの収束保証ではありません。一例あたりの逆伝播と、全データの評価を区別します。
+- 二次誤差のヘッセ行列は固有値1と9、回転角0.4ラジアン。経路は `w ← w−ηHw` を NumPy で反復計算します。更新点間の移動は表示用の線形補間です。η=0.04、0.20で20回後の誤差は0.265942、0.000250088、η=0.24では7回後に4.184303へ増えます（初期値1.88145）。
+- バッチ／オンラインは `y=w`、目標値 `[-0.9,0.1,1.4,0.6]` の明示的な例です。全体の最小値を取る重みは0.3。全体の停留点でも個別の勾配はゼロになりません。この凸の例で局所最小からの脱出そのものを実証したとは扱いません。
+
+## 字幕・読み・同期
+
+`narration_content.py` が10シーン・60段階・120文の正本です。`display` は記号を含む字幕、`speech` は読み上げ文です。字幕の MathTex は1.1で確認済みの実測文字高・数式本体の中心線・左右余白に合わせる方式を継承しています。
+
+全120文を speaker 23 の `audio_query` で取得し、`reading_check.md/json` に初回と最終の読みを保存します。「山や谷」のサン→ヤマ、「一組」のイックミ→ヒトクミを修正しました。二値・鞍点の読みは初回から正しく、speechで明示しても読み自体は同一です。API の読み一覧確認と、音声を耳で通して聴く検査は別です。
+
+文ごとのPCM実測尺と台本・WAVのハッシュを `manifest.json` に保存し、同じ時計で字幕と動作を進めます。古い音声・欠落した音声では描画を停止します。各段階の末尾だけ約0.35秒の呼吸を加えています。`media/prml52_timeline.json` は描画時に作られる同期記録です。
+
+## ファイルと再生成
+
+- `prml_5_2_network_training.py`：公開クラス `PRML52NetworkTraining` と10シーン。
+- `training_model.py`：データ、損失、勾配、ヘッセ行列、更新経路。
+- `scene_support.py` / `video_support.py`：音声時計、日本語・MathTex字幕、連動表示。
+- `narration_content.py` / `narration_script.md`：字幕・読み上げ・原文参照。
+- `make_voicevox_narration.py`：再開可能な音声合成。
+- `check_narration_readings.py` / `reading_check.md/json`：全文の読み検査。
+- `verify_numerics.py` / `numerical_results.json`：独立した数値検証7群。
+- `review_video.py` / `validate_video.py`：代表画像抽出、音響・字幕時計・同期の照合。
+- `assets/voicevox/`：新構成の10 WAVとmanifest。旧6 WAVは置換済み。
+- `media/videos/prml_5_2_network_training/480p15/PRML52NetworkTraining.mp4`：最終動画。
+
+対象ディレクトリで、次を実行します。VOICEVOX Engine は `http://127.0.0.1:50021` に事前起動してください。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_5_2_network_training.py PRML52NetworkTraining
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+# 全文を確認し、必要なら speech を修正して再取得
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_5_2_network_training.py PRML52NetworkTraining
+/home/t-tsuji/project/prml-manim/.venv/bin/python review_video.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python validate_video.py
 ```
 
-生成済み動画:
+`--from-scene scene05` のように音声合成を再開できます。高解像度版は `-qh` を使います。検証画像・TeX・partial_movie_files は一時生成物で、Gitには含めません。
 
-```text
-media/videos/prml_5_2_network_training/480p15/PRML52NetworkTraining.mp4
-```
+## 演出の参照
 
-高品質で出力する場合:
+[3b1b/manim](https://github.com/3b1b/manim) の ValueTracker / updater と、[3b1b/videos](https://github.com/3b1b/videos) の次の演出を参考に、Manim CE で実装しました。ManimGL の実装コードは持ち込んでいません。
 
-```bash
-uv run manim -pqh prml_5_2_network_training.py PRML52NetworkTraining
-```
+- `_2017/nn/part2.py`：誤差を予測のずれと結び、重みのつまみから谷の勾配へ進む。
+- `_2017/nn/part3.py`：個別データが求める変更を集めて全体の勾配へつなぐ。
+- `_2017/gradient.py`：同じ状態から数値と矢印を更新する。
+- `_2016/eola/chapter10.py`：行列の固有方向を矢印の向きで表す。
+- `_2023/gauss_int/herschel.py`：分布の点と軸へのガイドを連動する。
 
-## 原文参照
+音声クレジット：**VOICEVOX:WhiteCUL**。
 
-主に `.working/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf` の以下を参照しています。
+## 最終検証
 
-- Section 5.2: Network Training
-- Eq. (5.11) から Eq. (5.14): 回帰と二乗和誤差
-- Eq. (5.18) から Eq. (5.25): 出力活性化と誤差関数の対応
-- Figure 5.5: 重み空間上の誤差面、局所最小、大域最小、勾配
-- Eq. (5.26) から Eq. (5.27): 停留点と反復更新
-- Section 5.2.2, Figure 5.6: 局所二次近似、ヘッセ行列、楕円等高線
-- Section 5.2.3: 勾配情報を使う理由
-- Eq. (5.41) から Eq. (5.43): 勾配降下、バッチ法、オンライン勾配降下
+指定の `--disable_caching --flush_cache -ql` で全10シーン・61アニメーションを描画しました。`py_compile` と数値検証7群が成功。最終MP4は854×480・15fps、映像590.333333秒、音声590.357333秒（差0.024秒）です。3秒以上の無音0件、平均音量−26.4dB、最大−6.7dBでした。
 
-## 制作方針
+全60段階、全6数式字幕、3シーンの同期比較6枚、発散の到達点1枚の計73枚を画像で確認しました。全120文の字幕時刻とPCMを照合し、scene01・04・09は発声開始と動作の前後画像も確認しています。検証値と動画ハッシュは `validation_results.json` に保存しています。
 
-- PRML の図を直接複製せず、重み空間の等高線や誤差曲線を自作レイアウトで再構成する。
-- 誤差逆伝播の詳細計算は 5.3 に回し、この節では「なぜ勾配が必要か」までを扱う。
-- 出力活性化と誤差関数は、確率モデルから自然に対応する組として示す。
-- 単純な勾配降下だけでなく、バッチ更新とオンライン更新の違いをアニメーションで比較する。
+全編の通し聴取、全フレームの人手検査、高解像度版の描画は未実施です。
 
-## 音声クレジット
-
-- ナレーション: VOICEVOX:WhiteCUL
+原文照合・演出参照・修正記録は[作業レポート](../../../reports/working/20260929-0044-prml-5-2-3b1b-remake.md)を参照してください。
