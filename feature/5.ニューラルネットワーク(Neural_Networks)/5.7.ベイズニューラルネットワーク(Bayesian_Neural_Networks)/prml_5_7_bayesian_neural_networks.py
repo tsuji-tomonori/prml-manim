@@ -77,10 +77,10 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         dot=Dot(color=color,radius=.075).add_updater(lambda m:m.move_to(base.n2p(tracker.get_value())))
         labelmob=tex(label,24,color).next_to(base,LEFT,buff=.2)
         self.add(base,dot,labelmob);return VGroup(base,dot,labelmob)
-    def scan(self,ax,tracker,sd=True):
+    def scan(self,ax,tracker,cov_scale=lambda:1.,noise_scale=lambda:1.):
         def make():
-            x=tracker.get_value();mu=output(W,[x])[0];s=np.sqrt(variance(W,COV,[x])[0]+1/BETA)
-            return VGroup(DashedLine(ax.c2p(x,-1.9),ax.c2p(x,1.9),color=GOLD,dash_length=.08,stroke_width=1),
+            x=tracker.get_value();mu=output(W,[x])[0];s=np.sqrt(cov_scale()*variance(W,COV,[x])[0]+noise_scale()/BETA)
+            return VGroup(DashedLine(ax.c2p(x,ax.y_range[0]),ax.c2p(x,ax.y_range[1]),color=GOLD,dash_length=.08,stroke_width=1),
                           Line(ax.c2p(x,mu-2*s),ax.c2p(x,mu+2*s),color=GOLD,stroke_width=5),Dot(ax.c2p(x,mu),color=MAP,radius=.065))
         return always_redraw(make)
     def network(self,wgetter,pos=(4.6,.3,0)):
@@ -156,7 +156,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(self.eq(r'q(w\mid D)=',r'\mathcal N(w\mid w_{\rm MAP},A^{-1})'),self.note_anim('正定値の A が必要。一つの山の近似',PRIOR),angle.animate.set_value(.25))
 
     def project(self):
-        ax=self.axes(center=(-1.15,.2,0),width=8,height=3.35)
+        ax=self.axes(y=(-1.4,1.4,1),center=(-1.15,.2,0),width=8,height=3.35)
         self.legend([('元のネットワーク',DATA),('重みについて線形化',POST)])
         self.add(self.dots(ax),line(ax,GRID,MEAN,MAP))
         theta=ValueTracker(0)
@@ -170,20 +170,20 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.add(approx)
         self.beat(theta.animate.set_value(2*PI),self.eq(r'y(x,w)\simeq',r'y(x,w_{\rm MAP})',r'+g^T(w-w_{\rm MAP})'))
         self.beat(theta.animate.set_value(3*PI),self.eq(r'g=\left.\nabla_w y(x,w)\right|_{w_{\rm MAP}}'))
-        x=ValueTracker(-2.3);scan=self.scan(ax,x);self.add(scan)
+        x=ValueTracker(-2.3);scan=self.scan(ax,x,noise_scale=lambda:0);self.add(scan)
         self.beat(x.animate.set_value(2.3))
         self.beat(x.animate.set_value(0),self.eq(r'\operatorname{Var}_q[y_{\rm lin}]=',r'g^TA^{-1}g'))
         self.beat(theta.animate.set_value(4*PI),self.note_anim('① 重みの分布をガウス化　② 出力を重みについて線形化'))
 
     def two_variances(self):
-        ax=self.axes(center=(-1.3,.3,0),width=7.6,height=3.25)
+        ax=self.axes(y=(-1.4,1.4,1),center=(-1.3,.3,0),width=7.6,height=3.25)
         self.legend([('重み ±2標準偏差',POST),('観測ノイズ',NOISE),('予測全体',DATA)])
         scale=ValueTracker(1);noise=ValueTracker(0)
         b=always_redraw(lambda:band(ax,MEAN,np.sqrt(scale.get_value()*VAR+noise.get_value()/BETA),DATA if noise.get_value()>.1 else POST))
         self.add(b,self.dots(ax),line(ax,GRID,MEAN,MAP))
         self.beat(self.eq(r'y(x,w_{\rm MAP})\ \pm\ 2\sqrt{',r'g^TA^{-1}g',r'}'))
         x=ValueTracker(0)
-        self.add(self.scan(ax,x))
+        self.add(self.scan(ax,x,cov_scale=scale.get_value,noise_scale=noise.get_value))
         def bars():
             v=float(variance(W,COV,[x.get_value()])[0])*scale.get_value();a=noise.get_value()/BETA
             start=np.array([3.5,-.6,0]);unit=18
@@ -250,7 +250,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         rows.arrange(DOWN,buff=.21).move_to([0,.5,0])
         self.beat(LaggedStart(*[FadeIn(r) for r in rows],lag_ratio=.3),self.eq(r'\beta_{\rm new}^{-1}=\frac{\sum_n(y_n-t_n)^2}{N-\gamma}'))
         self.beat(Indicate(rows[-1]),self.note_anim('非線形モデルでは、固有値の変化を無視した再推定'))
-        self.remove(rows);self.note=None
+        self.remove(*rows,self.note);self.note=None
         net=self.network(lambda:W,pos=(-3,.5,0))
         net[1][1].set_color(DATA);net[1][2].set_color(NOISE)
         lab1=tex('h_1',27,DATA).next_to(net[1][1],UP);lab2=tex('h_2',27,NOISE).next_to(net[1][2],DOWN)

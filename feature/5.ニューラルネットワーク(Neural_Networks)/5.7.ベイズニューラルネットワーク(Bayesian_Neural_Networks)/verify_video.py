@@ -8,6 +8,15 @@ out=d/'media/review';out.mkdir(parents=True,exist_ok=True)
 video=d/'media/videos/prml_5_7_bayesian_neural_networks/480p15/PRML57BayesianNeuralNetworks.mp4'
 timeline=json.loads((d/'media/prml57_timeline.json').read_text())
 manifest=json.loads((d/'assets/voicevox/manifest.json').read_text())
+from narration_content import SCENES
+from make_voicevox_narration import valid_entry
+assert len(timeline)==len(manifest['scenes'])==len(SCENES)
+scene_timing_errors=[]
+for scene, entry, story in zip(timeline,manifest['scenes'],SCENES):
+ assert valid_entry(story,entry)
+ assert [(c['id'],c['display']) for b in scene['beats'] for c in b['cues']]==[(c['id'],c['display']) for c in entry['subtitle_cues']]
+ scene_timing_errors.append(abs(scene['end']-scene['start']-entry['duration']))
+assert max(scene_timing_errors)<1/15
 shots=[]
 for s in timeline:
  for j,b in enumerate(s['beats']):
@@ -28,7 +37,7 @@ for i,j,k in [(0,2,1),(4,3,0),(8,4,0)]:
  onset=scene['start']+(start+int(idx[0]))/rate
  sync.append(dict(id=cue['id'],sentence_start=cue['start'],pcm_onset=onset,
                   action_start=beat['action_start'],action_end=beat['action_end']))
- for suffix,fraction in [('early',.12),('late',.85)]:
+ for suffix,fraction in [('early',.08),('middle',.5),('late',.88)]:
   shots.append(dict(id=cue['id']+'-'+suffix,time=beat['action_start']+fraction*(beat['action_end']-beat['action_start']),display=cue['display']))
 for s in shots:
  p=out/(s['id']+'.png')
@@ -65,7 +74,7 @@ difference=abs(float(audio['duration'])-float(visual['duration']))
 silence_count=silence.count('silence_start:')
 assert difference<.1 and silence_count==0
 assert abs(float(visual['duration'])-timeline[-1]['end'])<.1
-result=dict(ffprobe=probe,stream_duration_difference=difference,
+result=dict(scene_timing_max_error=max(scene_timing_errors),ffprobe=probe,stream_duration_difference=difference,
             long_silence_count=silence_count,
             mean_volume_db=float(re.search(r'mean_volume: ([-0-9.]+)',volume)[1]),
             max_volume_db=float(re.search(r'max_volume: ([-0-9.]+)',volume)[1]),
