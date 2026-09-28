@@ -1,390 +1,287 @@
-from __future__ import annotations
-
-import math
-import wave
+"""PRML 5.4: linked curvature experiments, Manim Community Edition."""
+import json
 from pathlib import Path
-
 import numpy as np
 from manim import *
+from scene_support import *
+from hessian_model import *
 
+BLUE=BLUE_CLASS; RED=RED_CLASS; GREEN=GREEN_CLASS; YELLOW=YELLOW_ACC; PURPLE=PURPLE_ACC
 
-JAPANESE_FONT = "Noto Sans CJK JP"
-BG = "#101010"
-TEXT_GREY = GREY_B
-ACCENT_BLUE = BLUE_C
-ACCENT_GREEN = GREEN_C
-ACCENT_RED = RED_C
-ACCENT_ORANGE = ORANGE
-ACCENT_PURPLE = PURPLE_C
-ACCENT_YELLOW = YELLOW_C
+def path(ax,pts,color=BLUE,width=3):
+    return VMobject().set_points_as_corners([ax.c2p(*p) for p in pts]).set_stroke(color,width)
 
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
+def contours(ax,H,color=BLUE,levels=(.5,1.5,3)):
+    return VGroup(*[path(ax,ellipse_points(H,level),color,2) for level in levels])
 
-ManimText = Text
+def matrix(fn,at=(3,0,0),color=BLUE):
+    values=np.asarray(fn()); rows,cols=values.shape
+    cells=VGroup()
+    for i in range(rows):
+        for j in range(cols):
+            d=DecimalNumber(values[i,j],num_decimal_places=2,font_size=29,color=color)
+            anchor=np.array(at)+np.array([(j-(cols-1)/2)*1.3,((rows-1)/2-i)*.7,0])
+            d.move_to(anchor)
+            d.add_updater(lambda m,i=i,j=j,a=anchor:m.set_value(fn()[i,j]).move_to(a))
+            cells.add(d)
+    brackets=VGroup(tex('[',70,color),tex(']',70,color))
+    brackets[0].move_to(np.array(at)+LEFT*(cols*.65+.1));brackets[1].move_to(np.array(at)+RIGHT*(cols*.65+.1))
+    return VGroup(cells,brackets)
 
+def vector(ax,p,color=YELLOW,origin=(0,0)):
+    return Arrow(ax.c2p(*origin),ax.c2p(*(np.asarray(origin)+np.asarray(p))),buff=0,color=color,stroke_width=4,max_tip_length_to_length_ratio=.16)
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+class PRML54HessianMatrix(NarratedScene):
+    def construct(self):
+        self.camera.background_color=BG
+        self.entries={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        self.timeline=[]
+        for i,method in enumerate([self.question,self.directions,self.diagonal,self.outer,self.inverse,self.differences,self.exact,self.product,self.choose]):
+            self.begin(i);method()
+            assert self.bi==len(self.story['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        Path(config.media_dir,'prml54_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
+    def body_clear(self):
+        # Keep title and current captions; formulas are replaced explicitly.
+        keep=[self.title,self.subtitle,self.formula]
+        self.remove(*[m for m in self.mobjects if all(m is not k for k in keep)])
 
-def quadratic_value(x: float, y: float, h11: float = 4.0, h22: float = 0.8, h12: float = 0.0) -> float:
-    return 0.5 * (h11 * x * x + 2.0 * h12 * x * y + h22 * y * y)
+    def weight_axes(self):
+        return self.plot_axes(x=(-2,2,1),y=(-2,2,1),width=4.1,height=3.6,center=(-2.6,-.1,0),labels=('w_1','w_2'))
 
+    def question(self):
+        k=ValueTracker(1);s=ValueTracker(0)
+        ax=self.plot_axes(x=(-1.3,.6,.5),y=(0,3,1),width=8,height=3.4,labels=('s','E'))
+        fn=lambda x:1+x+.5*k.get_value()*x*x
+        baseline=curve(ax,lambda x:1+x+.5*x*x,color=MUTED)
+        graph=always_redraw(lambda:curve(ax,fn,color=BLUE))
+        dot=always_redraw(lambda:Dot(ax.c2p(s.get_value(),fn(s.get_value())),color=YELLOW))
+        tangent=always_redraw(lambda:path(ax,[(x,fn(s.get_value())+(1+k.get_value()*s.get_value())*(x-s.get_value())) for x in [s.get_value()-.18,s.get_value()+.18]],YELLOW))
+        control=knob('k=',k,1,4)
+        self.add(baseline,graph,dot,tangent,control)
+        self.equation(r'E(s)=1+s+\tfrac12ks^2',r'\quad E\prime(0)=1')
+        self.beat(actions=[lambda:Create(baseline),lambda:s.animate.set_value(-1)])
+        s.set_value(0)
+        self.beat(actions=[lambda:k.animate.set_value(4),lambda:s.animate.set_value(-1)])
+        self.equation(r'E\prime(s)=1+ks',r'\qquad E\prime\prime(s)=k')
+        self.beat(actions=[lambda:s.animate.set_value(.35),lambda:Indicate(tangent,color=YELLOW)])
+        self.body_clear()
+        self.equation(r'w=(w_1,\ldots,w_W)^{\mathsf T}',r'\quad g=\nabla E')
+        grid=Matrix([[r'\partial g_1/\partial w_1',r'\partial g_1/\partial w_2'],[r'\partial g_2/\partial w_1',r'\partial g_2/\partial w_2']],h_buff=3.4,v_buff=1.3).scale(.65).move_to([0,.2,0])
+        grid.get_entries()[0].set_color(BLUE);grid.get_entries()[3].set_color(BLUE)
+        grid.get_entries()[1].set_color(RED);grid.get_entries()[2].set_color(RED)
+        self.beat(actions=[lambda:Write(grid),lambda:Indicate(grid,color=YELLOW)])
+        self.equation(r'H_{ij}=\frac{\partial^2 E}{\partial w_i\partial w_j}',r'\quad (5.78)')
+        self.beat(actions=[lambda:Indicate(grid.get_rows()[0]),lambda:Indicate(VGroup(grid.get_entries()[1],grid.get_entries()[2]),color=RED)])
+        uses=VGroup(*[jp(t,25,c) for t,c in [('学習の一歩',BLUE),('再学習',GREEN),('刈り込み',RED),('不確かさ',PURPLE)]]).arrange(RIGHT,buff=.7).move_to([0,-1.7,0])
+        self.beat(actions=[lambda:LaggedStart(*[FadeIn(x,shift=UP*.2) for x in uses[:3]],lag_ratio=.25),lambda:FadeIn(uses[3],shift=UP*.2)])
 
-class PRML54HessianMatrix(Scene):
-    """PRML 5.4 explanatory video: The Hessian Matrix.
+    def directions(self):
+        ax=self.weight_axes();H=np.array([[3.,2.],[2.,3.]])
+        theta=ValueTracker(-PI/4)
+        direction=lambda:np.array([np.cos(theta.get_value()),np.sin(theta.get_value())])
+        rings=contours(ax,H);arrow=always_redraw(lambda:vector(ax,1.4*direction()))
+        curvature=number(r'u^{\mathsf T}Hu=',lambda:direction()@H@direction(),(3,.6,0),YELLOW)
+        self.add(rings,arrow,curvature,note('同じ距離でも、方向で増え方が変わる'))
+        self.equation(r'E(w)=\tfrac12w^{\mathsf T}Hw',r'\quad H=\begin{bmatrix}3&2\\2&3\end{bmatrix}')
+        self.beat(actions=[lambda:Create(rings),lambda:theta.animate.set_value(PI/4)])
+        self.beat(actions=[lambda:theta.animate.set_value(3*PI/4),lambda:theta.animate.set_value(PI/4)])
+        self.equation(r'Hu_i=\lambda_i u_i',r'\qquad \lambda_1=1,\ \lambda_2=5')
+        eigen=VGroup(vector(ax,[1.2,-1.2],GREEN),vector(ax,[.6,.6],RED))
+        self.beat(actions=[lambda:Create(eigen),lambda:theta.animate.set_value(-PI/4)])
+        self.equation(r'E(w+d)\simeq E(w)+g^{\mathsf T}d+\tfrac12d^{\mathsf T}Hd',size=30)
+        self.beat(actions=[lambda:Indicate(self.formula),lambda:Indicate(Dot(ax.c2p(0,0),color=GREEN))])
+        self.body_clear();lam=ValueTracker(1)
+        ax=self.plot_axes(x=(-1.5,1.5,.5),y=(-1.5,2,1),width=7,height=3.2,labels=('s',r'E-E_0'))
+        cross=always_redraw(lambda:curve(ax,lambda x:.5*lam.get_value()*x*x,color=RED))
+        other=curve(ax,lambda x:.5*x*x,color=BLUE)
+        self.add(other,cross,number(r'\lambda=',lam.get_value,(4,.2,0),RED))
+        self.equation(r'g=0:\quad E-E_0=\tfrac12\lambda s^2')
+        self.beat(actions=[lambda:lam.animate.set_value(-1),lambda:Indicate(other,color=BLUE)])
+        self.equation(r'g=0,\ \lambda_i>0\ \forall i\Rightarrow\text{local minimum}',size=30)
+        self.beat(actions=[lambda:lam.animate.set_value(1),lambda:Transform(self.formula,tex(r'H\in\mathbb{R}^{W\times W}:\quad W^2',36).move_to([0,2.48,0]))])
 
-    Render example:
-        uv run manim --disable_caching --flush_cache -ql prml_5_4_hessian_matrix.py PRML54HessianMatrix
-    """
+    def diagonal(self):
+        ax=self.weight_axes();c=ValueTracker(2)
+        H=lambda:np.array([[3,c.get_value()],[c.get_value(),3]])
+        rings=always_redraw(lambda:contours(ax,H()))
+        mat=matrix(H);self.add(rings,mat,knob('c=',c,0,2))
+        self.equation(r'H=\begin{bmatrix}3&c\\c&3\end{bmatrix}')
+        self.beat(actions=[lambda:c.animate.set_value(0),lambda:Indicate(mat,color=RED)])
+        self.beat(actions=[lambda:c.animate.set_value(2),lambda:Indicate(rings,color=YELLOW)])
+        self.equation(r'D^{-1}=\mathrm{diag}(1/D_{11},\ldots,1/D_{WW})')
+        self.beat(actions=[lambda:c.animate.set_value(0),lambda:Indicate(self.formula,color=RED)])
+        self.equation(r'\frac{\partial^2 E_n}{\partial w_{ji}^2}=z_i^2\frac{\partial^2 E_n}{\partial a_j^2}\quad(5.79)')
+        self.beat(actions=[lambda:Indicate(self.formula,color=BLUE),lambda:c.animate.set_value(1)])
+        self.equation(r'q_j\simeq[h\prime(a_j)]^2\sum_k w_{kj}^2q_k+h\prime\prime(a_j)\sum_k w_{kj}\delta_k',size=28)
+        labels=VGroup(tex(r'q_j=\partial^2E_n/\partial a_j^2',25),tex(r'\delta_k=\partial E_n/\partial a_k',25)).arrange(DOWN,buff=.25).move_to([3,-1.4,0])
+        self.add(labels)
+        self.beat(actions=[lambda:c.animate.set_value(0),lambda:Indicate(labels,color=YELLOW)])
+        self.equation(r'\text{recursive diagonal approximation}: O(W)\qquad (5.81)',size=28)
+        self.beat(actions=[lambda:c.animate.set_value(2),lambda:c.animate.set_value(0)])
 
-    def construct(self) -> None:
-        self.camera.background_color = BG
+    def outer(self):
+        r=ValueTracker(.7);w=WEIGHTS.copy();y=net(w)['y']
+        ax=self.plot_axes(x=(-1.5,1.5,.5),y=(-1.2,1.2,.5),width=7.3,height=3.2,labels=('x','y,t'))
+        graph=curve(ax,lambda x:w[1]*np.tanh(w[0]*x),color=BLUE)
+        prediction=Dot(ax.c2p(X,y),color=BLUE)
+        target=always_redraw(lambda:Dot(ax.c2p(X,y-r.get_value()),color=RED))
+        residual=always_redraw(lambda:Line(ax.c2p(X,y),ax.c2p(X,y-r.get_value()),color=RED,stroke_width=5))
+        self.add(graph,prediction,target,residual,knob('r=y-t=',r,0,.7))
+        self.equation(r'z=\tanh(ux),\ y=vz,\quad E=\tfrac12(y-t)^2\quad(5.82)',size=30)
+        self.beat(actions=[lambda:Create(graph),lambda:Indicate(residual,color=RED)])
+        self.beat(actions=[lambda:r.animate.set_value(.03),lambda:Indicate(target,color=RED)])
+        self.body_clear();r.set_value(.7)
+        outer=matrix(lambda:net(w)['outer'],(-2.8,.2,0),BLUE)
+        residual_matrix=matrix(lambda:net(w,t=y-r.get_value())['residual'],(2.8,.2,0),RED)
+        self.add(outer,residual_matrix,tex('+',48).move_to([0,.2,0]),knob('r=',r,0,.7))
+        self.add(jp('勾配の外積',25,BLUE).move_to([-2.8,1.35,0]),jp('残差 × 出力の二階微分',23,RED).move_to([2.8,1.35,0]))
+        eq=self.equation(r'H=',r'\sum_n b_nb_n^{\mathsf T}',r'+',r'\sum_n r_n\nabla^2y_n',r'\quad b_n=\nabla y_n',size=30)
+        eq[1].set_color(BLUE);eq[3].set_color(RED)
+        self.beat(actions=[lambda:Indicate(outer,color=BLUE),lambda:r.animate.set_value(0)])
+        self.beat(actions=[lambda:Indicate(eq[1],color=BLUE),lambda:r.animate.set_value(.7)])
+        self.beat(actions=[lambda:r.animate.set_value(0),lambda:r.animate.set_value(.18)])
+        self.body_clear();p=ValueTracker(.05)
+        self.equation(r'H\simeq\sum_n y_n(1-y_n)b_nb_n^{\mathsf T}',r'\quad b_n=\nabla a_n\quad(5.85)',size=29)
+        ax=self.plot_axes(x=(0,1,.25),y=(0,.3,.1),height=3,width=7,labels=('y','y(1-y)'))
+        graph=curve(ax,lambda x:x*(1-x),color=BLUE)
+        dot=always_redraw(lambda:Dot(ax.c2p(p.get_value(),p.get_value()*(1-p.get_value())),color=YELLOW))
+        self.add(graph,dot,note('sigmoid ＋ 二値交差エントロピー'))
+        self.beat(actions=[lambda:p.animate.set_value(.5),lambda:p.animate.set_value(.95)])
 
-        self.opening()
-        self.local_quadratic_model()
-        self.eigenvalue_geometry()
-        self.why_hessian_matters()
-        self.approximation_methods()
-        self.inverse_and_finite_difference()
-        self.exact_and_hessian_vector()
+    def inverse(self):
+        n=ValueTracker(0);ax=self.weight_axes()
+        rings=always_redraw(lambda:contours(ax,precision(n.get_value()),levels=(.3,.6,1)))
+        mat=matrix(lambda:inverse_update(n.get_value()),(3,.1,0),PURPLE)
+        arrow=always_redraw(lambda:vector(ax,B[min(int(n.get_value()),2)],YELLOW))
+        self.add(rings,mat,arrow,knob('L=',n,0,3),jp('逆行列',25,PURPLE).move_to([3,1.35,0]))
+        self.equation(r'H_0=\alpha I,\quad H_0^{-1}=\alpha^{-1}I,\quad\alpha=0.3')
+        self.beat(actions=[lambda:Create(rings),lambda:Indicate(mat,color=PURPLE)])
+        self.equation(r'H_{L+1}=H_L+b_{L+1}b_{L+1}^{\mathsf T}\quad(5.87)')
+        self.beat(actions=[lambda:n.animate.set_value(1),lambda:Indicate(rings,color=PURPLE)])
+        self.beat(actions=[lambda:n.animate.set_value(2),lambda:n.animate.set_value(2.3)])
+        self.equation(r'C_{L+1}=C_L-\frac{C_Lbb^{\mathsf T}C_L}{1+b^{\mathsf T}C_Lb},\quad C_L=H_L^{-1}\quad(5.89)',size=29)
+        self.beat(actions=[lambda:n.animate.set_value(3),lambda:Indicate(mat,color=PURPLE)])
+        self.equation(r'C_N=\left(\alpha I+\sum_{n=1}^N b_nb_n^{\mathsf T}\right)^{-1}')
+        self.beat(actions=[lambda:Indicate(self.formula,color=YELLOW),lambda:Indicate(mat,color=PURPLE)])
+        scan=ValueTracker(0)
+        point=always_redraw(lambda:Dot(ax.c2p(*ellipse_points(precision(3),1,181)[int(scan.get_value())%181]),color=YELLOW))
+        self.add(point)
+        self.beat(actions=[lambda:scan.animate.set_value(90),lambda:scan.animate.set_value(180)])
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+    def differences(self):
+        eps=ValueTracker(.35);ax=self.plot_axes(x=(-.5,.5,.25),y=(-.5,.5,.25),width=4,height=3.3,center=(-2.5,-.15,0),labels=(r'\Delta u',r'\Delta v'))
+        dots=always_redraw(lambda:VGroup(*[VGroup(Dot(ax.c2p(s*eps.get_value(),t*eps.get_value()),color=BLUE if s*t>0 else RED),tex('+' if s*t>0 else '-',23).move_to(ax.c2p(s*eps.get_value(),t*eps.get_value())+UP*.22)) for s,t in [(1,1),(1,-1),(-1,1),(-1,-1)]]))
+        self.add(dots,number(r'\widehat H_{uv}=',lambda:finite_hessian(WEIGHTS,eps.get_value())[0,1],(3,.4,0),YELLOW,places=5),tex(r'H_{uv}='+f"{net()['H'][0,1]:.5f}",28,BLUE).move_to([3,-.5,0]))
+        self.equation(r'H_{uv}\simeq\frac{E_{++}-E_{+-}-E_{-+}+E_{--}}{4\epsilon^2}\quad(5.90)',size=30)
+        self.beat(actions=[lambda:Create(dots),lambda:Indicate(dots,color=YELLOW)])
+        self.beat(actions=[lambda:eps.animate.set_value(.04),lambda:eps.animate.set_value(.015)])
+        self.body_clear()
+        ax=self.plot_axes(x=(-8,-1,1),y=(-10,0,2),width=8.2,height=3.1,labels=(r'\log_{10}\epsilon',r'\log_{10}|\mathrm{error}|'))
+        powers=np.linspace(-8,-1,100)
+        errors=np.array([max(abs(finite_hessian(WEIGHTS,10**p)[0,1]-net()['H'][0,1]),1e-11) for p in powers])
+        points=np.column_stack([powers,np.log10(errors)])
+        line=path(ax,points,RED);self.add(line,note('実際の浮動小数点計算：小さすぎる幅で誤差が増える'))
+        scan=ValueTracker(99)
+        dot=always_redraw(lambda:Dot(ax.c2p(*points[int(scan.get_value())]),color=YELLOW));self.add(dot)
+        self.beat(actions=[lambda:scan.animate.set_value(0),lambda:scan.animate.set_value(58)])
+        self.equation(r'H_{:j}\simeq\frac{g(w+\epsilon e_j)-g(w-\epsilon e_j)}{2\epsilon}\quad(5.91)',size=30)
+        self.beat(actions=[lambda:Indicate(self.formula,color=BLUE),lambda:scan.animate.set_value(70)])
+        self.body_clear();self.cost_plot(cubic=True)
+        self.beat(actions=[lambda:self.cost_tracker.animate.set_value(9),lambda:Indicate(self.cost_lines[1],color=BLUE)])
+        self.equation(r'\epsilon=10^{-4}:\quad H_{uv}\approx '+f"{finite_hessian(WEIGHTS)[0,1]:.6f}"+r',\quad H_{uv}='+f"{net()['H'][0,1]:.6f}",size=30)
+        self.beat(actions=[lambda:Indicate(self.formula,color=GREEN),lambda:self.cost_tracker.animate.set_value(3)])
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def network(self):
+        nodes=VGroup(*[Circle(.31,color=c,fill_color=c,fill_opacity=.12).move_to([x,.75,0]) for x,c in [(-4,BLUE),(-1.3,GREEN),(1.5,PURPLE),(4,RED)]])
+        labels=VGroup(*[tex(t,26,c).move_to(n) for n,t,c in zip(nodes,['x','a','z','y'],[BLUE,GREEN,PURPLE,RED])])
+        edges=VGroup(*[Arrow(a.get_right(),b.get_left(),buff=.06,color=MUTED) for a,b in zip(nodes,nodes[1:])])
+        edge_labels=VGroup(*[tex(t,25,c).next_to(e,UP,buff=.12) for e,t,c in zip(edges,['u',r'h=\tanh','v'],[BLUE,GREEN,RED])])
+        return VGroup(edges,nodes,labels,edge_labels)
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def exact(self):
+        u=ValueTracker(.7);w=lambda:np.array([u.get_value(),1.2])
+        network=self.network();self.add(network)
+        self.equation(r'a=ux,\quad z=h(a),\quad y=vz,\quad E=\tfrac12(y-t)^2',size=30)
+        mat=matrix(lambda:net(w())['H'],(0,-1.05,0),BLUE)
+        self.add(mat,jp('行・列の順序：u, v',21,MUTED).move_to([3.7,-1.1,0]),knob('u=',u,.2,1.2))
+        self.beat(actions=[lambda:ShowPassingFlash(network[0].copy().set_color(YELLOW),time_width=.8),lambda:Indicate(network[3][1],color=GREEN)])
+        self.equation(r'\delta=y-t,\ M=1:\quad H_{vv}=z^2 M=z^2\quad(5.92),(5.93)',size=29)
+        self.beat(actions=[lambda:Indicate(network[3][2],color=RED),lambda:Indicate(mat[0][3],color=RED)])
+        self.equation(r'H_{uu}=x^2\left[(vh\prime)^2+\delta v h\prime\prime\right]\quad(5.94)',size=30)
+        self.beat(actions=[lambda:Indicate(network[3][0],color=BLUE),lambda:Indicate(mat[0][0],color=BLUE)])
+        self.equation(r'H_{uv}=H_{vu}=xh\prime(vz+\delta)\quad(5.95)',size=32)
+        self.beat(actions=[lambda:Indicate(network[0],color=YELLOW),lambda:Indicate(VGroup(mat[0][1],mat[0][2]),color=YELLOW)])
+        self.equation(r'H=bb^{\mathsf T}+r\nabla^2 y,\quad b=\nabla y')
+        self.beat(actions=[lambda:u.animate.set_value(.2),lambda:u.animate.set_value(1.1)])
+        self.equation(r'\text{bias}: x_0=z_0=1,\qquad H\ \text{full}:O(W^2)',size=30)
+        self.beat(actions=[lambda:u.animate.set_value(.7),lambda:Indicate(mat,color=GREEN)])
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size, color=WHITE)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def product(self):
+        angle=ValueTracker(.7);direction=lambda:np.array([np.cos(angle.get_value()),np.sin(angle.get_value())])
+        step=ValueTracker(0);ax=self.plot_axes(x=(-.6,1,.5),y=(-.6,.8,.5),width=4.2,height=3.2,center=(-2.7,-.2,0),labels=(r'g_u',r'g_v'))
+        old=net()['g'];arrow=always_redraw(lambda:vector(ax,net(WEIGHTS+step.get_value()*direction())['g'],BLUE))
+        fixed=vector(ax,old,MUTED);delta=always_redraw(lambda:vector(ax,net(WEIGHTS+step.get_value()*direction())['g']-old,YELLOW,origin=old))
+        self.add(fixed,arrow,delta,note('青：移動後の勾配　黄：勾配の変化'))
+        self.equation(r'g(w+\epsilon v)-g(w)\simeq\epsilon Hv\quad(5.96)')
+        self.beat(actions=[lambda:step.animate.set_value(.3),lambda:step.animate.set_value(.05)])
+        self.equation(r'R\{f\}=\left.\frac{d f(w+\epsilon v)}{d\epsilon}\right|_{\epsilon=0},\quad R\{w\}=v\quad(5.97)',size=29)
+        self.beat(actions=[lambda:step.animate.set_value(.2),lambda:step.animate.set_value(.01)])
+        self.body_clear();network=self.network();self.add(network)
+        d=direction();result,vals=hvp(WEIGHTS,d)
+        forward=VGroup(*[VGroup(tex(k,27,GREEN),DecimalNumber(vals[k],num_decimal_places=3,font_size=27,color=GREEN)).arrange(RIGHT,buff=.15) for k in ['Ra','Rz','Ry']]).arrange(RIGHT,buff=.65).move_to([0,-.35,0])
+        self.equation(r'Ra=v_u x,\quad Rz=h\prime Ra,\quad Ry=v_vz+vRz\quad(5.101)\text{–}(5.103)',size=28)
+        self.add(note('方向の成分は v_u, v_v。出力重みは v。'))
+        self.beat(actions=[lambda:AnimationGroup(Write(forward),ShowPassingFlash(network[0].copy().set_color(GREEN),time_width=.7)),lambda:Indicate(forward,color=GREEN)])
+        self.remove(forward)
+        backward=VGroup(tex(r'R\delta=Ry='+f"{vals['Rdelta']:.3f}",28,RED),tex(r'R\delta_h='+f"{vals['Rhidden']:.3f}",28,RED)).arrange(RIGHT,buff=1).move_to([0,-.35,0])
+        self.equation(r'R\delta_h=h\prime\prime Ra\,v\delta+h\prime v_v\delta+h\prime vR\delta',size=29)
+        self.beat(actions=[lambda:AnimationGroup(Write(backward),ShowPassingFlash(network[0].copy().reverse_points().set_color(RED),time_width=.7)),lambda:Indicate(self.formula,color=RED)])
+        self.remove(backward)
+        self.equation(r'(Hv)_u=xR\delta_h,\quad(Hv)_v=R\delta\,z+\delta Rz\quad(5.110),(5.111)',size=29)
+        output=matrix(lambda:hvp(WEIGHTS,direction())[0][:,None],(0,-.4,0),YELLOW)
+        self.add(output,jp('R の再帰で計算した Hv',23,YELLOW).move_to([3.5,-.4,0]))
+        self.beat(actions=[lambda:Indicate(output,color=YELLOW),lambda:Indicate(self.formula,color=YELLOW)])
+        self.body_clear();ax=self.plot_axes(x=(-1.2,1.2,.5),y=(-1.2,1.2,.5),width=4.5,height=3.4,labels=(r'v_u',r'v_v'))
+        v=always_redraw(lambda:vector(ax,direction(),BLUE));hv=always_redraw(lambda:vector(ax,hvp(WEIGHTS,direction())[0],YELLOW))
+        self.add(v,hv,note('青：方向 v　黄：勾配の変化率 Hv'))
+        self.equation(r'R\{\nabla E\}=Hv,\quad (v^{\mathsf T}H)^{\mathsf T}=Hv')
+        self.beat(actions=[lambda:angle.animate.set_value(PI),lambda:angle.animate.set_value(2*PI+.7)])
 
-    def clear_scene(self) -> None:
-        if self.mobjects:
-            self.play(FadeOut(Group(*self.mobjects)), run_time=0.45)
-        self.clear()
+    def cost_plot(self,cubic=False):
+        ax=self.plot_axes(x=(1,10,3),y=(0,3 if cubic else 2,1),width=7.6,height=3,labels=('W',r'\log_{10}(\mathrm{cost})'))
+        powers=[3,2] if cubic else [2,1]
+        lines=VGroup(*[curve(ax,lambda w,p=p:p*np.log10(w),color=c) for p,c in zip(powers,[RED,BLUE])])
+        t=ValueTracker(2);dots=always_redraw(lambda:VGroup(*[Dot(ax.c2p(t.get_value(),p*np.log10(t.get_value())),color=c) for p,c in zip(powers,[RED,BLUE])]))
+        names=VGroup(*[tex(f'O(W^{p})' if p>1 else 'O(W)',26,c) for p,c in zip(powers,[RED,BLUE])]).arrange(DOWN,buff=.4).move_to([5,.2,0])
+        self.add(lines,dots,names,note('一例あたりの計算量：実測時間ではない'))
+        self.cost_tracker=t;self.cost_lines=lines
 
-    def make_weight_axes(self, width: float = 5.8, height: float = 4.0) -> Axes:
-        return Axes(
-            x_range=[-2.5, 2.5, 1],
-            y_range=[-1.8, 1.8, 1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def contour_ellipse(self, axes: Axes, level: float, h11: float, h22: float, angle: float, color: ManimColor) -> Ellipse:
-        width = abs(axes.c2p(math.sqrt(2.0 * level / h11), 0)[0] - axes.c2p(-math.sqrt(2.0 * level / h11), 0)[0])
-        height = abs(axes.c2p(0, math.sqrt(2.0 * level / h22))[1] - axes.c2p(0, -math.sqrt(2.0 * level / h22))[1])
-        return Ellipse(width=width, height=height, color=color, stroke_width=2.4).rotate(angle).move_to(axes.c2p(0, 0))
-
-    def matrix_grid(self, size: int = 5, mode: str = "full", color: ManimColor = ACCENT_BLUE) -> VGroup:
-        cells = VGroup()
-        for r in range(size):
-            for c in range(size):
-                active = mode == "full" or (mode == "diagonal" and r == c) or (mode == "outer" and (r in (1, 3) or c in (1, 3)))
-                cell = Square(side_length=0.42, stroke_color=GREY_D, stroke_width=1.0)
-                cell.set_fill(color if active else GREY_E, opacity=0.68 if active else 0.12)
-                cells.add(cell)
-        cells.arrange_in_grid(rows=size, cols=size, buff=0.035)
-        return cells
-
-    def method_card(self, title: str, subtitle: str, formula: Mobject, color: ManimColor) -> VGroup:
-        box = RoundedRectangle(width=3.55, height=2.1, corner_radius=0.1, stroke_color=color, stroke_width=2.2)
-        heading = Text(title, font_size=24, color=color)
-        sub = Text(subtitle, font_size=18, color=TEXT_GREY)
-        body = VGroup(heading, sub, formula).arrange(DOWN, buff=0.16)
-        body.move_to(box)
-        return VGroup(box, body)
-
-    def opening(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 5.4 The Hessian Matrix")
-        title = Text("ヘッセ行列", font_size=46, color=WHITE).to_edge(UP, buff=0.75)
-        subtitle = Text("勾配の次に、誤差面の曲がり方を見る", font_size=28, color=TEXT_GREY)
-        subtitle.next_to(title, DOWN, buff=0.22)
-
-        grad = MathTex(r"\nabla E(w)", font_size=52, color=ACCENT_BLUE)
-        arrow = Arrow(LEFT, RIGHT, color=TEXT_GREY, stroke_width=5)
-        hessian = MathTex(r"H=\nabla\nabla E(w)", font_size=52, color=ACCENT_ORANGE)
-        row = VGroup(grad, arrow, hessian).arrange(RIGHT, buff=0.42).shift(UP * 0.4)
-
-        matrix = MathTex(
-            r"H_{ij}=\frac{\partial^2 E}{\partial w_i\,\partial w_j}",
-            font_size=43,
-            color=WHITE,
-        ).next_to(row, DOWN, buff=0.55)
-
-        use_cases = VGroup(
-            Text("最適化", font_size=25, color=ACCENT_GREEN),
-            Text("刈り込み", font_size=25, color=ACCENT_RED),
-            Text("ラプラス近似", font_size=25, color=ACCENT_PURPLE),
-        ).arrange(RIGHT, buff=0.6).to_edge(DOWN, buff=0.85)
-
-        self.play(FadeIn(label), Write(title), FadeIn(subtitle), run_time=1.2)
-        self.play(Write(grad), GrowArrow(arrow), Write(hessian), run_time=1.6)
-        self.play(Write(matrix), run_time=1.4)
-        self.play(LaggedStart(*[FadeIn(item, shift=UP * 0.15) for item in use_cases], lag_ratio=0.2), run_time=1.5)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def local_quadratic_model(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("Local quadratic approximation")
-        title = self.scene_title("小さな範囲では、誤差面を二次式で近似する")
-
-        axes = self.make_weight_axes().shift(LEFT * 3.0 + DOWN * 0.25)
-        contours = VGroup(
-            self.contour_ellipse(axes, 0.35, 3.6, 0.7, 0.0, ACCENT_BLUE),
-            self.contour_ellipse(axes, 0.75, 3.6, 0.7, 0.0, ACCENT_BLUE),
-            self.contour_ellipse(axes, 1.25, 3.6, 0.7, 0.0, ACCENT_BLUE),
-        )
-        center = Dot(axes.c2p(0, 0), radius=0.08, color=ACCENT_GREEN)
-        point = Dot(axes.c2p(1.55, 0.95), radius=0.08, color=ACCENT_ORANGE)
-        delta = Arrow(axes.c2p(0, 0), axes.c2p(1.55, 0.95), color=ACCENT_ORANGE, buff=0.1)
-        delta_label = MathTex(r"w-\widehat{w}", font_size=30, color=ACCENT_ORANGE).next_to(delta, UP, buff=0.08)
-
-        formula = MathTex(
-            r"E(w)\simeq E(\widehat{w})+(w-\widehat{w})^{\mathrm T}b"
-            r"+\frac{1}{2}(w-\widehat{w})^{\mathrm T}H(w-\widehat{w})",
-            font_size=34,
-        ).shift(RIGHT * 2.15 + UP * 1.05)
-        grad_formula = MathTex(r"\nabla E \simeq b+H(w-\widehat{w})", font_size=39, color=WHITE)
-        min_formula = MathTex(r"\nabla E(\widehat{w})=0 \Rightarrow b=0", font_size=36, color=ACCENT_GREEN)
-        simplified = MathTex(
-            r"E(w)=E(\widehat{w})+\frac{1}{2}(w-\widehat{w})^{\mathrm T}H(w-\widehat{w})",
-            font_size=35,
-            color=ACCENT_YELLOW,
-        )
-        equations = VGroup(grad_formula, min_formula, simplified).arrange(DOWN, aligned_edge=LEFT, buff=0.32)
-        equations.next_to(formula, DOWN, buff=0.55).shift(LEFT * 0.1)
-
-        self.play(FadeIn(label), Write(title), Create(axes), run_time=1.5)
-        self.play(Create(contours), FadeIn(center), run_time=1.5)
-        self.play(FadeIn(point), GrowArrow(delta), Write(delta_label), run_time=1.3)
-        self.play(Write(formula), run_time=2.1)
-        self.play(LaggedStart(Write(grad_formula), Write(min_formula), Write(simplified), lag_ratio=0.35), run_time=2.6)
-        self.play(Indicate(contours[0], color=ACCENT_YELLOW), run_time=1.0)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def eigenvalue_geometry(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("Eigenvalues and curvature")
-        title = self.scene_title("固有ベクトルは向き、固有値は曲がりの強さ")
-
-        axes = self.make_weight_axes(width=7.0, height=4.7).shift(DOWN * 0.25)
-        contours = VGroup(
-            self.contour_ellipse(axes, 0.4, 4.2, 0.55, 0.45, ACCENT_BLUE),
-            self.contour_ellipse(axes, 0.9, 4.2, 0.55, 0.45, ACCENT_BLUE),
-            self.contour_ellipse(axes, 1.55, 4.2, 0.55, 0.45, ACCENT_BLUE),
-        )
-        u1 = Arrow(axes.c2p(0, 0), axes.c2p(1.3, 0.62), color=ACCENT_RED, buff=0, stroke_width=5)
-        u2 = Arrow(axes.c2p(0, 0), axes.c2p(-0.38, 1.45), color=ACCENT_GREEN, buff=0, stroke_width=5)
-        u1_label = MathTex(r"u_1,\ \lambda_1\ \mathrm{large}", font_size=29, color=ACCENT_RED).next_to(u1, RIGHT, buff=0.1)
-        u2_label = MathTex(r"u_2,\ \lambda_2\ \mathrm{small}", font_size=29, color=ACCENT_GREEN).next_to(u2, UP, buff=0.1)
-        formula = MathTex(
-            r"H u_i=\lambda_i u_i,\qquad "
-            r"E=E(\widehat{w})+\frac{1}{2}\sum_i \lambda_i \alpha_i^2",
-            font_size=37,
-        ).to_edge(DOWN, buff=0.45)
-        length_note = Text("等高線の幅は 1/sqrt(lambda) に比例", font_size=24, color=TEXT_GREY)
-        length_note.next_to(formula, UP, buff=0.18)
-
-        tests = VGroup(
-            Text("全て正: 局所最小", font_size=24, color=ACCENT_GREEN),
-            Text("負を含む: 鞍点または最大", font_size=24, color=ACCENT_RED),
-            Text("ゼロに近い: 平坦で不安定", font_size=24, color=ACCENT_YELLOW),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).to_corner(UR).shift(DOWN * 0.75 + LEFT * 0.15)
-
-        self.play(FadeIn(label), Write(title), Create(axes), run_time=1.5)
-        self.play(Create(contours), run_time=1.4)
-        self.play(GrowArrow(u1), GrowArrow(u2), Write(u1_label), Write(u2_label), run_time=1.8)
-        self.play(Write(formula), FadeIn(length_note), run_time=1.7)
-        self.play(LaggedStart(*[FadeIn(item, shift=LEFT * 0.2) for item in tests], lag_ratio=0.2), run_time=1.8)
-        self.play(Indicate(tests[0], color=ACCENT_GREEN), run_time=0.9)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def why_hessian_matters(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("Why use H")
-        title = self.scene_title("ヘッセ行列は、訓練後の判断にも使われる")
-
-        center = self.matrix_grid(size=5, mode="full", color=ACCENT_ORANGE).scale(1.05).shift(UP * 0.2)
-        h_label = MathTex(r"H\in\mathbb{R}^{W\times W}", font_size=35, color=ACCENT_ORANGE).next_to(center, UP, buff=0.25)
-
-        items = [
-            ("二次の最適化", "曲率でステップを調整", ACCENT_GREEN, LEFT * 4.25 + UP * 1.2),
-            ("再学習の近似", "データが少し変わった時", ACCENT_BLUE, RIGHT * 4.1 + UP * 1.2),
-            ("重みの刈り込み", "影響の小さい重みを探す", ACCENT_RED, LEFT * 4.15 + DOWN * 1.55),
-            ("ベイズ推論", "ラプラス近似と証拠", ACCENT_PURPLE, RIGHT * 4.0 + DOWN * 1.55),
-        ]
-        cards = VGroup()
-        arrows = VGroup()
-        for heading, desc, color, pos in items:
-            box = RoundedRectangle(width=3.25, height=1.2, corner_radius=0.1, stroke_color=color, stroke_width=2.2)
-            text = VGroup(Text(heading, font_size=24, color=color), Text(desc, font_size=18, color=TEXT_GREY)).arrange(DOWN, buff=0.08)
-            card = VGroup(box, text).move_to(pos)
-            cards.add(card)
-            arrows.add(Arrow(center.get_center(), card.get_center(), color=color, buff=1.25, stroke_width=3.2))
-
-        complexity = Text("W 個のパラメータなら H は W x W、扱いは O(W^2) 規模", font_size=25, color=ACCENT_YELLOW)
-        complexity.to_edge(DOWN, buff=0.65)
-
-        self.play(FadeIn(label), Write(title), FadeIn(center), Write(h_label), run_time=1.7)
-        self.play(LaggedStart(*[GrowArrow(a) for a in arrows], lag_ratio=0.14), run_time=1.5)
-        self.play(LaggedStart(*[FadeIn(card, scale=0.95) for card in cards], lag_ratio=0.15), run_time=2.1)
-        self.play(Write(complexity), run_time=1.3)
-        self.play(Indicate(center, color=ACCENT_YELLOW), run_time=1.0)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def approximation_methods(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("Approximations")
-        title = self.scene_title("近似は、何を捨てるかを意識して使う")
-
-        diag_grid = self.matrix_grid(mode="diagonal", color=ACCENT_GREEN).scale(0.75)
-        diag_formula = MathTex(r"H\simeq \mathrm{diag}(H)", font_size=30, color=WHITE)
-        diag_card = self.method_card("Diagonal", "逆行列は簡単 / 非対角を捨てる", VGroup(diag_grid, diag_formula).arrange(DOWN, buff=0.18), ACCENT_GREEN)
-
-        outer_grid = self.matrix_grid(mode="outer", color=ACCENT_ORANGE).scale(0.75)
-        outer_formula = MathTex(r"H\simeq\sum_n b_n b_n^{\mathrm T}", font_size=30, color=WHITE)
-        outer_card = self.method_card("Outer product", "訓練後の残差が小さい時", VGroup(outer_grid, outer_formula).arrange(DOWN, buff=0.18), ACCENT_ORANGE)
-
-        exact_grid = self.matrix_grid(mode="full", color=ACCENT_BLUE).scale(0.75)
-        exact_formula = MathTex(r"H=\nabla\nabla E", font_size=32, color=WHITE)
-        exact_card = self.method_card("Exact", "二階の backprop で O(W^2)", VGroup(exact_grid, exact_formula).arrange(DOWN, buff=0.18), ACCENT_BLUE)
-
-        cards = VGroup(diag_card, outer_card, exact_card).arrange(RIGHT, buff=0.32).shift(UP * 0.25)
-        residual = MathTex(
-            r"\nabla\nabla E=\sum_n\nabla y_n\nabla y_n^{\mathrm T}"
-            r"+\sum_n(y_n-t_n)\nabla\nabla y_n",
-            font_size=34,
-        ).to_edge(DOWN, buff=0.8)
-        brace = Brace(residual[0][21:], UP, color=ACCENT_RED)
-        brace_text = Text("ここを小さいとみなす", font_size=21, color=ACCENT_RED).next_to(brace, UP, buff=0.08)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(LaggedStart(*[FadeIn(card, shift=UP * 0.25) for card in cards], lag_ratio=0.18), run_time=2.0)
-        self.play(Write(residual), run_time=1.8)
-        self.play(GrowFromCenter(brace), FadeIn(brace_text), run_time=1.0)
-        self.play(Indicate(diag_card[0], color=ACCENT_YELLOW), Indicate(outer_card[0], color=ACCENT_YELLOW), run_time=1.1)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def inverse_and_finite_difference(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("Inverse Hessian and finite differences")
-        title = self.scene_title("逆ヘッセ行列は逐次更新でき、差分は検査に使う")
-
-        left_title = Text("Outer product を 1 点ずつ足す", font_size=26, color=ACCENT_ORANGE)
-        matrices = VGroup(
-            MathTex(r"H_L^{-1}", font_size=39, color=ACCENT_BLUE),
-            MathTex(r"\rightarrow", font_size=36, color=TEXT_GREY),
-            MathTex(r"H_{L+1}^{-1}", font_size=39, color=ACCENT_GREEN),
-        ).arrange(RIGHT, buff=0.25)
-        update = MathTex(
-            r"H_{L+1}^{-1}=H_L^{-1}-"
-            r"\frac{H_L^{-1}bb^{\mathrm T}H_L^{-1}}{1+b^{\mathrm T}H_L^{-1}b}",
-            font_size=32,
-        )
-        left = VGroup(left_title, matrices, update).arrange(DOWN, buff=0.28).move_to(LEFT * 3.05 + UP * 0.45)
-
-        right_title = Text("有限差分は実装チェック向き", font_size=26, color=ACCENT_PURPLE)
-        stencil = VGroup()
-        positions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-        signs = ["+", "-", "-", "+"]
-        for (x, y), sign in zip(positions, signs):
-            dot = Dot([x * 0.55, y * 0.38, 0], radius=0.08, color=ACCENT_YELLOW)
-            sign_text = Text(sign, font_size=24, color=WHITE).next_to(dot, UP, buff=0.04)
-            stencil.add(VGroup(dot, sign_text))
-        square = DashedVMobject(Rectangle(width=1.1, height=0.76, color=ACCENT_PURPLE), num_dashes=16)
-        stencil.add(square)
-        diff = MathTex(
-            r"\frac{\partial^2E}{\partial w_i\partial w_j}"
-            r"\approx \frac{E_{++}-E_{+-}-E_{-+}+E_{--}}{4\epsilon^2}",
-            font_size=31,
-        )
-        cost = Text("全要素を直接差分: O(W^3) / 勾配差分: O(W^2)", font_size=21, color=TEXT_GREY)
-        right = VGroup(right_title, stencil, diff, cost).arrange(DOWN, buff=0.28).move_to(RIGHT * 3.1 + UP * 0.25)
-
-        divider = Line(UP * 2.3, DOWN * 2.4, color=GREY_D)
-
-        self.play(FadeIn(label), Write(title), Create(divider), run_time=1.3)
-        self.play(LaggedStart(Write(left_title), FadeIn(matrices), Write(update), lag_ratio=0.25), run_time=2.2)
-        self.play(LaggedStart(Write(right_title), FadeIn(stencil), Write(diff), Write(cost), lag_ratio=0.2), run_time=2.3)
-        self.play(Indicate(matrices[-1], color=ACCENT_GREEN), Indicate(stencil, color=ACCENT_YELLOW), run_time=1.1)
-        self.finish_narration(narration)
-        self.clear_scene()
-
-    def exact_and_hessian_vector(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("Exact Hessian and Hessian-vector product")
-        title = self.scene_title("実用上は、H 全体より H とベクトルの積が欲しいことも多い")
-
-        network = VGroup()
-        xs = [-3.4, -1.2, 1.2, 3.3]
-        layer_sizes = [3, 4, 3, 2]
-        colors = [ACCENT_BLUE, ACCENT_GREEN, ACCENT_ORANGE, ACCENT_RED]
-        layers: list[VGroup] = []
-        for x, count, color in zip(xs, layer_sizes, colors):
-            nodes = VGroup(*[Circle(radius=0.16, color=color, fill_color=color, fill_opacity=0.35).move_to([x, (i - (count - 1) / 2) * 0.58, 0]) for i in range(count)])
-            layers.append(nodes)
-            network.add(nodes)
-        edges = VGroup()
-        for left, right in zip(layers[:-1], layers[1:]):
-            for a in left:
-                for b in right:
-                    edges.add(Line(a.get_center(), b.get_center(), color=GREY_D, stroke_width=1.0))
-        network.add_to_back(edges)
-        network.shift(UP * 0.9)
-
-        forward = Arrow(LEFT * 3.7 + DOWN * 1.03, RIGHT * 3.7 + DOWN * 1.03, color=ACCENT_BLUE, stroke_width=5)
-        backward = Arrow(RIGHT * 3.7 + DOWN * 1.45, LEFT * 3.7 + DOWN * 1.45, color=ACCENT_ORANGE, stroke_width=5)
-        forward_label = Text("forward: activations と R{activations}", font_size=20, color=ACCENT_BLUE).next_to(forward, UP, buff=0.05)
-        backward_label = Text("backward: errors と R{errors}", font_size=20, color=ACCENT_ORANGE).next_to(backward, DOWN, buff=0.05)
-
-        equations = VGroup(
-            MathTex(r"v^{\mathrm T}H=v^{\mathrm T}\nabla(\nabla E)", font_size=30, color=WHITE),
-            MathTex(r"R\{w\}=v", font_size=30, color=ACCENT_YELLOW),
-            MathTex(r"H\ \mathrm{full}: O(W^2),\qquad Hv: O(W)", font_size=29, color=ACCENT_GREEN),
-        ).arrange(DOWN, buff=0.11).to_edge(DOWN, buff=0.22)
-
-        summary = VGroup(
-            Text("曲率を読む", font_size=24, color=ACCENT_GREEN),
-            Text("近似の前提を確認する", font_size=24, color=ACCENT_YELLOW),
-            Text("必要なら Hv だけ計算する", font_size=24, color=ACCENT_BLUE),
-        ).arrange(RIGHT, buff=0.55).to_corner(UR).shift(DOWN * 0.75)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(FadeIn(network), run_time=1.8)
-        self.play(GrowArrow(forward), FadeIn(forward_label), run_time=1.2)
-        self.play(GrowArrow(backward), FadeIn(backward_label), run_time=1.2)
-        self.play(LaggedStart(*[Write(eq) for eq in equations], lag_ratio=0.25), run_time=2.1)
-        self.play(LaggedStart(*[FadeIn(item, shift=LEFT * 0.15) for item in summary], lag_ratio=0.18), run_time=1.3)
-        self.finish_narration(narration)
-        self.clear_scene()
+    def choose(self):
+        count=ValueTracker(2)
+        def cells():
+            n=int(round(count.get_value()));size=2.8/n
+            full=VGroup(*[Square(size*.85,color=BLUE,fill_opacity=.3).move_to([-2.5+(j-(n-1)/2)*size,.2+(i-(n-1)/2)*size,0]) for i in range(n) for j in range(n)])
+            vec=VGroup(*[Square(size*.85,color=YELLOW,fill_opacity=.4).move_to([3,.2+(i-(n-1)/2)*size,0]) for i in range(n)])
+            return VGroup(full,vec)
+        grid=always_redraw(cells);self.add(grid,number('W=',count.get_value,(0,-2.2,0),places=0))
+        self.equation(r'H:W^2\ \text{entries}',r'\qquad Hv:W\ \text{entries}')
+        self.beat(actions=[lambda:count.animate.set_value(8),lambda:Indicate(grid,color=YELLOW)])
+        self.body_clear();self.cost_plot()
+        self.equation(r'H:O(W^2),\qquad Hv:O(W)')
+        self.beat(actions=[lambda:self.cost_tracker.animate.set_value(9),lambda:Indicate(self.cost_lines[0],color=RED)])
+        self.body_clear();H=net()['H'];mat=matrix(lambda:H,(2.4,-.1,0));self.add(mat)
+        self.equation(r'He_j=H_{:j},\qquad j=1,\ldots,W')
+        v1=tex(r'e_1=\begin{bmatrix}1\\0\end{bmatrix}',36,YELLOW).move_to([-2,-.1,0]);self.add(v1)
+        self.beat(actions=[lambda:Indicate(VGroup(mat[0][0],mat[0][2]),color=YELLOW),lambda:AnimationGroup(Transform(v1,tex(r'e_2=\begin{bmatrix}0\\1\end{bmatrix}',36,YELLOW).move_to(v1)),Indicate(VGroup(mat[0][1],mat[0][3]),color=YELLOW))])
+        self.equation(r'\mathrm{diag}(H),\quad \sum_n b_nb_n^{\mathsf T},\quad R\{\nabla E\}',size=35)
+        self.beat(actions=[lambda:Indicate(VGroup(mat[0][1],mat[0][2]),color=RED),lambda:Indicate(mat,color=GREEN)])
+        self.body_clear();k=ValueTracker(1)
+        ax=self.plot_axes(x=(-1.3,.6,.5),y=(0,3,1),width=7.5,height=3.2,labels=('s','E'))
+        graph=always_redraw(lambda:curve(ax,lambda x:1+x+.5*k.get_value()*x*x,color=BLUE))
+        self.add(graph,knob('k=',k,1,4))
+        self.equation(r'E\prime(0)=1,\qquad E\prime\prime(0)=k')
+        self.beat(actions=[lambda:k.animate.set_value(4),lambda:k.animate.set_value(1)])
+        self.equation(r'\text{gradient}\quad\longrightarrow\quad\text{curvature}\quad\longrightarrow\quad Hv',size=34)
+        self.beat(actions=[lambda:k.animate.set_value(4),lambda:k.animate.set_value(2)])
