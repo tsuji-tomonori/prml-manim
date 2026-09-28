@@ -1,4 +1,5 @@
 {
+  "contour_linear_error": 1.6653345369377348e-16,
   "jacobian_max_error": 4.404832054660801e-11,
   "hessian_direction_error": 1.5686824781369069e-06,
   "minimum_regression_curvature": 1.698266703792263,
