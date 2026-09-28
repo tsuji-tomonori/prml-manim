@@ -54,6 +54,9 @@ def main():
             times=[b['start']+.15*(b['end']-b['start']),b['start']+.85*(b['end']-b['start'])]
             for j,t in enumerate(times):frames.append(dict(label=f"sync-{s['id']}-{j}",time=t))
             sync.append(dict(scene=s['id'],beat=bi+1,note=b['note'],start=b['start'],end=b['end'],speech_onset=onset,frames=times))
+    swap=timeline[8]['beats'][4]['cues'][0]
+    for q in [.2,.5,.8]:
+        frames.append(dict(label=f'swap-{q}',time=swap['start']+q*(swap['end']-swap['start'])))
     for i,f in enumerate(frames):
         f['file']=f'{i:03}-{f["label"]}.png'
         run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(dest/f['file'])])
