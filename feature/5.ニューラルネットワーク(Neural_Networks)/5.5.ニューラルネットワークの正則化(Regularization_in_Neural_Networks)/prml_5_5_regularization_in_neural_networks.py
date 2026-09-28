@@ -1,6 +1,7 @@
 """PRML 5.5: linked numerical experiments in Manim Community."""
 from pathlib import Path
 import json
+import re
 import numpy as np
 from manim import *
 import regularization_model as model
@@ -77,7 +78,8 @@ class PRML55RegularizationInNeuralNetworks(Scene):
 
     def equation(self,expression,size=31):
         if self.formula is not None:self.remove(self.formula)
-        self.formula=MathTex(expression,font_size=size,substrings_to_isolate=[r'\lambda',r'\alpha',r'\Omega',r'\tau']).move_to([0,2.53,0])
+        parts=[p for p in re.split(r'(\\lambda|\\alpha|\\Omega|\\tau)',expression) if p]
+        self.formula=MathTex(*parts,font_size=size,arg_separator='').move_to([0,2.53,0])
         self.formula.set_color_by_tex_to_color_map({r'\lambda':PURPLE_REG,r'\alpha':PURPLE_REG,r'\Omega':PURPLE_REG,r'\tau':YELLOW_TERM})
         if self.formula.width>12.4:raise ValueError('Equation too wide: '+expression)
         self.add(self.formula)
@@ -115,12 +117,13 @@ class PRML55RegularizationInNeuralNetworks(Scene):
 
     def question(self):
         w=model.fit(1);ax,group,data,pred=self.regression(lambda:w)
+        m_count=ValueTracker(1);self.add(readout('M=',m_count.get_value,[4.6,1.0,0],YELLOW_TERM,0))
         self.remove(pred);self.label('青：訓練データ　緑：生成関数（答え合わせ用）　赤：予測')
         self.beat(lambda:LaggedStart(*[Indicate(d,color=BLUE_DATA) for d in data],lag_ratio=.15),lambda:Create(pred))
         pred.clear_updaters();self.remove(pred);pred=curve(ax,model.GRID,model.predict(w,model.GRID));self.add(pred)
         self.equation(r'y(x)=\sum_{j=1}^{M}v_j\tanh(a_jx+b_j)+c')
         self.label('同じ座標系で比較：隠れユニット数 1 → 3 → 10')
-        self.beat(lambda:Transform(pred,curve(ax,model.GRID,model.predict(model.fit(3),model.GRID))),lambda:Transform(pred,curve(ax,model.GRID,model.predict(model.fit(10),model.GRID))))
+        self.beat(lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(3),model.GRID))),UpdateFromAlphaFunc(m_count,lambda m,a:m.set_value(3))),lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(10),model.GRID))),UpdateFromAlphaFunc(m_count,lambda m,a:m.set_value(10))))
         validation=VGroup(*[Dot(ax.c2p(x,t),radius=.025,color=ORANGE_VAL) for x,t in zip(model.XV,model.TV)])
         self.beat(lambda:Create(validation),lambda:Indicate(pred,color=ORANGE_VAL,scale_factor=1))
         self.label('M = 10 を固定。初期値だけを変更')
@@ -163,7 +166,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:scale.animate.set_value(1.5),lambda:scale.animate.set_value(2))
         self.beat(lambda:scale.animate.set_value(1),lambda:scale.animate.set_value(2))
         self.equation(r'\widetilde x=ax+b,\quad \widetilde w=w/a,\quad \widetilde b_0=b_0-wb/a',29)
-        self.beat(lambda:Indicate(self.formula,color=BLUE_DATA),lambda:Indicate(bar,color=PURPLE_REG))
+        self.beat(lambda:Indicate(self.formula,color=BLUE_DATA),lambda:Indicate(self.equation(r'\frac{\lambda_1}{2}\sum_{w\in W_1}w^2+\frac{\lambda_2}{2}\sum_{w\in W_2}w^2\quad\text{(bias excluded)}',30),color=PURPLE_REG))
         self.remove(*[m for m in self.mobjects if m not in [self.caption,self.formula,self.note] and m.get_center()[1]<2.9])
         alpha=ValueTracker(1);ax,g=axes((-3,3,1),(0,1.3,.5),center=(-3,.1,0),width=5,height=3)
         gaussian=always_redraw(lambda:curve(ax,np.linspace(-3,3,161),np.sqrt(alpha.get_value()/(2*np.pi))*np.exp(-.5*alpha.get_value()*np.linspace(-3,3,161)**2),PURPLE_REG))
@@ -172,12 +175,12 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:alpha.animate.set_value(2),lambda:alpha.animate.set_value(8))
         a1=ValueTracker(1);a2=ValueTracker(1);rng=np.random.default_rng(5511)
         samples=rng.normal(size=(3,3*12+1));fx=np.linspace(-1,1,121)
-        bx,bg=axes((-1,1,1),(-6,6,3),center=(3.35,.15,0),width=5.1,height=3,xlabel='x',ylabel='y')
+        bx,bg=axes((-1,1,1),(-3,3,1),center=(3.35,.15,0),width=5.1,height=3,xlabel='x',ylabel='y')
         colors=[BLUE_DATA,GREEN_TRUE,ORANGE_VAL]
         def sample(j):
             w=samples[j].copy();w[:12]/=np.sqrt(a1.get_value());w[24:36]/=np.sqrt(a2.get_value());return model.predict(w,fx)
         curves=always_redraw(lambda:VGroup(*[curve(bx,fx,sample(j),colors[j]) for j in range(3)]))
-        self.add(bg,curves)
+        self.add(bg,curves,readout(r'\alpha_1^w=',a1.get_value,[2,-2.05,0],PURPLE_REG,1),readout(r'\alpha_2^w=',a2.get_value,[4.8,-2.05,0],PURPLE_REG,1))
         self.label('同じ標準正規乱数を使用。入力側と出力側の精度を別々に操作')
         self.beat(lambda:a2.animate.set_value(16),lambda:a1.animate.set_value(16))
         self.equation(r'p(\mathbf w)\propto\exp\!\left(-\frac12\sum_k\alpha_k\|\mathbf w\|_k^2\right)',31)
@@ -224,6 +227,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:digit.animate.shift(RIGHT*.7),lambda:Indicate(output,color=GREEN_TRUE))
         self.beat(lambda:Rotate(digit,.15),lambda:digit.animate.scale(.85))
         copies=VGroup(*[digit.copy().scale(.55).move_to([x,-.1,0]) for x in [-4.5,-2.7,-.9]])
+        arrow.put_start_and_end_on([-.3,.1,0],[1.7,.1,0])
         self.beat(lambda:Transform(digit,copies),lambda:Indicate(output,color=GREEN_TRUE))
         self.remove(digit,arrow,output)
         ax,g=axes((-1,1,1),(0,1,.5),center=(0,.1,0),width=8,height=3.2,xlabel=r'\xi',ylabel='y')
@@ -242,7 +246,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
 
     def tangent(self):
         angle=ValueTracker(.45);c=ValueTracker(1)
-        ax,g=axes((-1.5,1.5,1),(-1.5,1.5,1),center=(-2.65,.0,0),width=4.5,height=3.7,xlabel='x_1',ylabel='x_2');self.add(g)
+        ax,g=axes((-1.5,1.5,1),(-1.5,1.5,1),center=(-2.65,.0,0),width=3.7,height=3.7,xlabel='x_1',ylabel='x_2');self.add(g)
         th=np.linspace(0,2*np.pi,181);circle=curve(ax,np.cos(th),np.sin(th),BLUE_DATA);self.add(circle)
         x=lambda:np.array([np.cos(angle.get_value()),np.sin(angle.get_value())])
         dot=always_redraw(lambda:Dot(ax.c2p(*x()),color=BLUE_DATA))
@@ -282,7 +286,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         approx=readout(r'E_{\rm approx}=',lambda:model.noise_example(eps.get_value(),slope.get_value())[1],[3.9,.0,0],PURPLE_REG,4)
         self.add(exact,approx)
         self.beat(lambda:slope.animate.set_value(1.8),lambda:slope.animate.set_value(.3))
-        self.equation(r'\mathbb E[E_\xi]\approx\frac{r^2}{2}+\frac{\epsilon^2}{2}\left[(y\prime)^2+r\,y\prime\prime\right]',30)
+        self.equation(r'\mathbb E[E_\xi]\approx\frac{r^2}{2}+\frac{\epsilon^2}{2}\left[(y\prime)^2+r\,y\prime\prime\right],\quad r=y-t',28)
         self.beat(lambda:slope.animate.set_value(1.2),lambda:eps.animate.set_value(.5))
         self.equation(r'\Omega\simeq\frac12\int(\tau^T\nabla y)^2p(x)\,dx\quad\left[y\approx\mathbb E[t|x]\right]',29)
         self.label('無限データ極限・小さい平均0の変換・条件付き平均に近い解')
@@ -300,7 +304,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.add(image,kernel)
         labels=VGroup(jp('入力 10×10',20).move_to([-4.5,2,0]),jp('共有する重み',20,YELLOW_TERM).move_to([-1.8,1.2,0]),jp('応答 8×8',20).move_to([.7,2,0]))
         self.add(labels);self.label('橙：−1　青：+1　黒：0　　縦の変化を検出する自作フィルタ')
-        self.equation(r'z_{r,c}=\sigma\!\left(\sum_{i,j}K_{ij}x_{r+i,c+j}+b\right)',30)
+        self.equation(r'z_{r,c}=\sigma\!(\sum_{i,j}K_{ij}x_{r+i,c+j}+b)',30)
         scan=ValueTracker(0)
         def patchpos():
             k=min(63,int(scan.get_value()));r,c=divmod(k,8)
@@ -320,17 +324,18 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.label('入力を右へ1画素 → 応答も右へ1画素（境界の影響を除く）')
         self.beat(lambda:Transform(image,pixels(shifted,.31,(-4.5,.25,0))),lambda:Transform(feature,pixels(sf,.31,(.7,.25,0))))
         pooled=model.subsample(sf);pool=pixels(pooled,.45,(4.7,.25,0))
-        self.equation(r'u=\sigma\!\left(a\cdot\frac14\sum_{i,j\in 2\times2}z_{ij}+b\right),\quad a=1,\ b=0',29)
+        self.equation(r'u=\sigma\!(a\cdot\frac14\sum_{i,j\in 2\times2}z_{ij}+b),\quad a=1,\ b=0',29)
         window=Square(.62,color=GREEN_TRUE).move_to(feature[0].get_center()+[.155,-.155,0]);self.add(window)
+        self.add(jp('4×4',20).move_to([4.7,1.5,0]))
         self.label('原文のサブサンプリング：平均 → 学習可能な重みとバイアス → 非線形')
         self.beat(lambda:Create(pool),lambda:window.animate.shift(RIGHT*.62+DOWN*.62))
         self.equation(r'\frac{\partial E}{\partial K_{ij}}=\sum_{r,c}\frac{\partial E}{\partial a_{r,c}}x_{r+i,c+j}',31)
         self.label('平均しても境界をまたぐ移動で値は変わる。重みへの勾配は全位置から合計')
         sf2=model.sigmoid(model.convolution(np.roll(img,2,axis=1)))
-        self.beat(lambda:Transform(pool,pixels(model.subsample(sf2),.45,(4.7,.25,0))),lambda:LaggedStart(*[Indicate(kernel[i],color=YELLOW_TERM) for i in range(9)],lag_ratio=.12))
+        self.beat(lambda:AnimationGroup(Transform(image,pixels(np.roll(img,2,axis=1),.31,(-4.5,.25,0))),Transform(feature,pixels(sf2,.31,(.7,.25,0))),Transform(pool,pixels(model.subsample(sf2),.45,(4.7,.25,0)))),lambda:LaggedStart(*[Indicate(kernel[i],color=YELLOW_TERM) for i in range(9)],lag_ratio=.12))
 
     def soft_sharing(self):
-        ax,g=axes((-3,3,1),(0,.55,.2),center=(0,.15,0),width=10.5,height=3.1,xlabel='w',ylabel='p(w)');self.add(g)
+        ax,g=axes((-3,3,1),(0,.55,.2),center=(0,.15,0),width=10.5,height=3.1,xlabel='w',ylabel='p(w)');g[1][1].move_to([-5.9,1.65,0]);self.add(g)
         u=np.linspace(-3,3,241);mu=np.array([-1.2,1.2]);sigma=np.array([.6,.6]);pi=np.array([.5,.5])
         comps=model.mixture_components(u);graphs=VGroup(curve(ax,u,comps[:,0],BLUE_DATA),curve(ax,u,comps[:,1],ORANGE_VAL),curve(ax,u,comps.sum(1),PURPLE_REG))
         weights=model.soft_history()[0][0];dots=VGroup(*[Dot(ax.c2p(w,.015),radius=.055,color=YELLOW_TERM) for w in weights]);self.add(dots)
@@ -338,7 +343,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.label('黄：重み　青・橙：混合成分　紫：合計の密度')
         self.beat(lambda:Create(graphs),lambda:Indicate(dots,color=YELLOW_TERM,scale_factor=1))
         self.equation(r'\Omega=-\sum_i\ln\!\left[\sum_j\pi_j\mathcal N(w_i|\mu_j,\sigma_j^2)\right]',31)
-        self.beat(lambda:Indicate(graphs[0],color=BLUE_DATA),lambda:Indicate(graphs[2],color=PURPLE_REG))
+        self.beat(lambda:Indicate(graphs[0],color=BLUE_DATA,scale_factor=1),lambda:Indicate(graphs[2],color=PURPLE_REG,scale_factor=1))
         selected=ValueTracker(-.2);point=always_redraw(lambda:Dot(ax.c2p(selected.get_value(),.10),radius=.085,color=RED_MODEL))
         self.add(point);self.equation(r'\gamma_j(w)=\frac{\pi_j\mathcal N(w|\mu_j,\sigma_j^2)}{\sum_k\pi_k\mathcal N(w|\mu_k,\sigma_k^2)}',31)
         self.label('同じ幅・同じ混合比の例。左右の山へ確率的に所属する')
@@ -360,5 +365,5 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:step.animate.set_value(50),lambda:step.animate.set_value(100))
         graphs.clear_updaters();dots.clear_updaters()
         self.label('重みの大きさ → 学習時刻 → 変換への感度 → 重みのまとまり',GREEN_TRUE)
-        self.equation(r'\text{data fit}\quad+\quad\text{prior knowledge}\quad\longrightarrow\quad\text{generalization}',30)
+        self.equation(r'\widetilde E=E+\lambda\Omega',30)
         self.beat(lambda:Indicate(dots,color=YELLOW_TERM,scale_factor=1),lambda:Indicate(graphs,color=GREEN_TRUE,scale_factor=1))
