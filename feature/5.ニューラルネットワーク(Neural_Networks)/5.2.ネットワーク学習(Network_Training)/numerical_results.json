@@ -1,0 +1,37 @@
+{
+  "check_groups": 7,
+  "regression_optimum": 0.8150810126641046,
+  "noise_variance_ml": 0.002034328997895098,
+  "binary_gradient_max_error": 1.9409696072614224e-11,
+  "stationary_points": [
+    -1.531376102127529,
+    0.10148520149555725,
+    1.429890900631972
+  ],
+  "hessian_eigenvalues": [
+    0.9999999999999999,
+    9.000000000000002
+  ],
+  "descent": {
+    "0.04": {
+      "initial": 1.88145,
+      "final": 0.2659421829958181,
+      "steps": 20
+    },
+    "0.2": {
+      "initial": 1.88145,
+      "final": 0.0002500876012669541,
+      "steps": 20
+    },
+    "0.24": {
+      "initial": 1.88145,
+      "final": 4.184303181777036,
+      "steps": 7
+    }
+  },
+  "batch_final": 0.29999194475172486,
+  "online_final": 0.5208715633389208,
+  "scalar_optimum": 0.29999999999999993,
+  "audio_seconds": 590.3333333333334,
+  "sentences": 120
+}
