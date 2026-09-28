@@ -81,7 +81,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         eq=self.equation(r'y(x,\mathbf w)=f\!\left(\sum_j',r'w_j',r'\phi_j(x;\theta_j)',r'\right)')
         eq[1].set_color(OUT); eq[2].set_color(C2)
         self.beat(c.animate.set_value(.30))
-        self.beat(c.animate.set_value(.43),pulse(h1,color=C1))
+        self.beat(c.animate.set_value(.43))
 
     def unit(self):
         ax=self.plot_axes(x=(-1,1,.5),y=(-1.5,1.5,1),height=3.2,center=(-1,-.15,0),labels=('x',r'a,\ z'))
@@ -184,7 +184,8 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(t.animate.set_value(1),a.animate.set_value(-2))
         self.remove(ax,axis_names)
         ax=self.plot_axes(x=(-3,3,1),y=(0,1,.5),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
-        self.beat(a.animate.set_value(0),pulse(dot,color=OUT))
+        dot.update(0)
+        self.beat(a.animate.set_value(0))
         # Reuse a single bar coordinate system for independent binary outputs and softmax.
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         scores=[ValueTracker(1.3),ValueTracker(.7),ValueTracker(-.6)]; mode=ValueTracker(0)
@@ -310,11 +311,13 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         for m in list(self.mobjects):
             if isinstance(m,Text) and m.get_center()[1]<-2: self.remove(m)
         self.add(left,right)
-        self.beat(actions=[lambda:Succession(
-            AnimationGroup(left.animate.shift(UP*.42),right.animate.shift(DOWN*.42)),
-            AnimationGroup(left.animate.shift(RIGHT*6),right.animate.shift(LEFT*6)),
-            AnimationGroup(left.animate.shift(DOWN*.42),right.animate.shift(UP*.42))),
-            lambda:pulse(total,color=YELLOW_ACC,scale_factor=1.02)])
+        def exchange_terms(mob, alpha):
+            lift=max(0.,min(alpha/.2,1.,(1-alpha)/.2))
+            horizontal=smooth(np.clip((alpha-.2)/.6,0,1))
+            mob[0].move_to([-3+6*horizontal,-2.1+.47*lift,0])
+            mob[1].move_to([3-6*horizontal,-2.1-.47*lift,0])
+        self.beat(actions=[lambda:UpdateFromAlphaFunc(VGroup(left,right),exchange_terms,rate_func=linear),
+                           lambda:pulse(total,color=YELLOW_ACC)])
         self.equation(r'2^M M!\qquad M=2:\quad 2^2\cdot2!=8')
         self.beat(pulse(self.formula,color=YELLOW_ACC))
         self.remove(left,right)
