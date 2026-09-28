@@ -123,10 +123,11 @@ class PRML52NetworkTraining(NarratedScene):
         mid=Dot(ax.c2p(STATIONARY[1],landscape(STATIONARY[1])),color=PURPLE,radius=.1)
         self.add(mid);self.beat(Indicate(mid,scale_factor=2))
         self.equation(r'w^{(\tau+1)}=w^{(\tau)}+\Delta w^{(\tau)}')
-        self.beat(Indicate(VGroup(dot.copy(),rd.copy()),color=YELLOW,scale_factor=1.2))
+        q.set_value(-2.1);r.set_value(2.1)
+        self.beat(q.animate.set_value(STATIONARY[0]),r.animate.set_value(STATIONARY[2]))
 
     def quadratic(self):
-        ax=self.plot_axes(x=(-2.3,2.3,1),y=(0,2.7,1),width=9,height=3.3,center=(-.5,-.1,0),labels=('w','E'))
+        ax=self.plot_axes(x=(-2.3,2.3,1),y=(-.3,2.7,1),width=9,height=3.3,center=(-.5,-.1,0),labels=('w','E'))
         q=ValueTracker(-1.2); span=ValueTracker(.35)
         g=curve(ax,landscape,color=BLUE)
         linear=lambda x:landscape(q.get_value())+landscape_grad(q.get_value())*(x-q.get_value())
@@ -163,7 +164,12 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(Create(lines))
         self.beat(lam.animate.set_value(9))
         vectors=always_redraw(lambda:VGroup(*[Arrow(ax.c2p(0,0),ax.c2p(*(rotation(theta.get_value())[:,k]*1.8)),buff=0,color=co,stroke_width=3) for k,co in enumerate([GREEN,PURPLE])]))
-        self.add(vectors);self.equation(r'Hu_i=\lambda_i u_i',r'\qquad u_i^T u_j=\delta_{ij}')
+        self.add(vectors)
+        for k,co in enumerate([GREEN,PURPLE]):
+            label=tex(f'u_{k+1}',25,co)
+            label.add_updater(lambda m,k=k:m.move_to(ax.c2p(*(rotation(theta.get_value())[:,k]*2.1))))
+            self.add(label)
+        self.equation(r'Hu_i=\lambda_i u_i',r'\qquad u_i^T u_j=\delta_{ij}')
         self.beat(theta.animate.set_value(.6))
         self.equation(r'w-w^*=\sum_i\alpha_i u_i',r'\quad E-E^*\approx\frac12\sum_i\lambda_i\alpha_i^2',size=27)
         self.add(tex(r'r_i\propto\lambda_i^{-1/2}',30,YELLOW).move_to([4,-1,0]))
@@ -171,7 +177,10 @@ class PRML52NetworkTraining(NarratedScene):
         self.equation(r'v^THv>0\ (v\ne0)\quad\Longleftrightarrow\quad\lambda_i>0\ \forall i',size=29)
         self.beat(theta.animate.set_value(.25))
         self.equation(r'\lambda_i=0:\quad\text{higher-order terms matter}',size=29)
-        self.beat(lam.animate.set_value(9))
+        def narrow_valley():
+            self.equation(r'0<\lambda_1\ll\lambda_2',size=37)
+            return lam.animate.set_value(9)
+        self.beat(actions=[lambda:Indicate(self.formula,scale_factor=1.02),narrow_valley])
 
     def information(self):
         ax=self.plot_axes(x=(-2.3,2.3,1),y=(-2.3,2.3,1),width=3.9,height=3.9,center=(-2,-.15,0),labels=('w_1','w_2'))
@@ -181,7 +190,7 @@ class PRML52NetworkTraining(NarratedScene):
         self.add(self.contour(ax),dot,number('E=',lambda:.5*pos()@H@pos(),[4,.7,0],YELLOW))
         self.equation(r'w\longmapsto E(w)\quad\text{(one value)}')
         self.beat(q.animate.set_value(.2))
-        arrow=always_redraw(lambda:Arrow(ax.c2p(*pos()),ax.c2p(*(pos()+.18*H@pos())),buff=0,color=GREEN))
+        arrow=always_redraw(lambda:Arrow(ax.c2p(*pos()),ax.c2p(*(pos()+.45*H@pos())),buff=0,color=GREEN))
         self.add(arrow,number(r'g_1=',lambda:(H@pos())[0],[4,0,0],GREEN),number(r'g_2=',lambda:(H@pos())[1],[4,-.7,0],PURPLE))
         self.equation(r'\nabla E=\begin{pmatrix}\partial E/\partial w_1\\\partial E/\partial w_2\end{pmatrix}',size=31)
         self.beat(q.animate.set_value(.6))
