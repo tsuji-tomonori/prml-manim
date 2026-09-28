@@ -22,6 +22,8 @@ class PRML52NetworkTraining(NarratedScene):
 
     def regression(self):
         ax=self.plot_axes(x=(-1.8,1.8,.6),y=(-1.2,1.2,.6),width=8,height=3.35,center=(-1,-.15,0),labels=('x',r't,\ y'))
+        for label in ax.x_axis.numbers:
+            label.set_y(ax.c2p(0,-1.2)[1]-.2)
         w=ValueTracker(.2)
         dots=VGroup(*[Dot(ax.c2p(x,t),radius=.065,color=BLUE) for x,t in zip(X,T)])
         g=always_redraw(lambda:curve(ax,lambda x:prediction(x,w.get_value()),color=RED))
@@ -89,14 +91,19 @@ class PRML52NetworkTraining(NarratedScene):
         self.add(bars,Line([-4,-1.6,0],[4,-1.6,0],color=MUTED))
         for k,x in enumerate([-3,0,3]):
             self.add(tex(f'C_{k+1}',29,colors[k]).move_to([x,-1.95,0]),number('y=',lambda k=k:probs()[k],[x,.95,0],colors[k]),number('a=',lambda k=k:scores()[k],[x,1.65,0],colors[k]))
-        self.add(knob('a_1=',a,-1,3,at=(-1,-2.6,0)),number(r'\sum y_k=',lambda:probs().sum(),[5,.1,0],YELLOW))
+        slider=knob('a_1=',a,-1,3,at=(-1,-2.6,0))
+        self.add(slider,number(r'\sum y_k=',lambda:probs().sum(),[5,.1,0],YELLOW))
         self.equation(r'y_k=\frac{e^{a_k}}{\sum_j e^{a_j}}',size=34)
         self.beat(a.animate.set_value(0))
         self.beat(a.animate.set_value(2))
         self.equation(r'E=-\sum_n\sum_k t_{nk}\ln y_k(x_n,w)',size=31)
         self.beat(a.animate.set_value(3))
         self.equation(r'\operatorname{softmax}(a+c\mathbf1)=\operatorname{softmax}(a)',size=31)
+        self.remove(*slider.get_family())
+        shift_slider=knob('c=',c,0,1.5,at=(-1,-2.6,0))
+        self.add(shift_slider)
         self.beat(c.animate.set_value(1.5))
+        self.remove(*shift_slider.get_family());self.add(slider)
         mode.set_value(1);c.set_value(0)
         self.equation(r'y_k=\sigma(a_k),\quad p(\mathbf t\mid x,w)=\prod_k y_k^{t_k}(1-y_k)^{1-t_k}',size=28)
         self.beat(a.animate.set_value(.5))
@@ -167,7 +174,7 @@ class PRML52NetworkTraining(NarratedScene):
         self.add(vectors)
         for k,co in enumerate([GREEN,PURPLE]):
             label=tex(f'u_{k+1}',25,co)
-            label.add_updater(lambda m,k=k:m.move_to(ax.c2p(*(rotation(theta.get_value())[:,k]*2.1))))
+            label.add_updater(lambda m,k=k:m.move_to(ax.c2p(*(rotation(theta.get_value())[:,k]*2.1))+(LEFT*.6 if k==1 else RIGHT*.15)))
             self.add(label)
         self.equation(r'Hu_i=\lambda_i u_i',r'\qquad u_i^T u_j=\delta_{ij}')
         self.beat(theta.animate.set_value(.6))
@@ -230,7 +237,7 @@ class PRML52NetworkTraining(NarratedScene):
     def online(self):
         ax=self.plot_axes(x=(-1.6,1.8,.8),y=(0,10,2),width=8.4,height=3.2,center=(-.7,-.1,0),labels=('w','E'))
         total=curve(ax,scalar_error,color=BLUE)
-        pieces=VGroup(*[curve(ax,lambda w,t=t:.5*(w-t)**2,color=co) for t,co in zip(TARGETS,[RED,GREEN,PURPLE,YELLOW])])
+        pieces=VGroup(*[curve(ax,lambda w,t=t:.5*(w-t)**2,color=co).set_stroke(width=1.6) for t,co in zip(TARGETS,[RED,GREEN,PURPLE,YELLOW])])
         self.add(total,pieces,note('青：全体の和　細い曲線：一例の誤差'))
         self.equation(r'y(x_n,w)=w',r'\quad E_n=\frac12(w-t_n)^2',r'\quad E=\sum_nE_n',size=30)
         self.beat(LaggedStart(*[Indicate(p,scale_factor=1.02) for p in pieces],lag_ratio=.2))

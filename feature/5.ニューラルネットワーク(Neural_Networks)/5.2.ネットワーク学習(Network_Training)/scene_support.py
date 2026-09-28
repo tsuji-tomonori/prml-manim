@@ -59,10 +59,10 @@ class NarratedScene(Scene):
                 dt=end-elapsed
                 anim=factory()
                 record['actions'].append(dict(sentence=cues[i]['id'],start=start+elapsed,end=start+end))
-                self.play(anim,UpdateFromAlphaFunc(captions,lambda m,a,e=elapsed,d=dt: cap(m,(e+a*d)/duration)),run_time=dt-1e-7,rate_func=linear)
+                self.play(anim,UpdateFromAlphaFunc(captions,lambda m,a,e=elapsed,d=dt: cap(m,(e+a*d)/duration),rate_func=linear),run_time=dt-1e-7)
                 elapsed=end
         else:
-            self.play(*animations,UpdateFromAlphaFunc(captions,cap),run_time=duration-1e-7,rate_func=linear)
+            self.play(*animations,UpdateFromAlphaFunc(captions,cap,rate_func=linear),run_time=duration-1e-7)
             record['actions'].append(dict(sentence='beat',start=start,end=start+duration))
         self.timeline[-1]['beats'].append(record); self.bi+=1
 

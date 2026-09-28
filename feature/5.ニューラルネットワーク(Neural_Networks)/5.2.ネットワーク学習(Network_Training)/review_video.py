@@ -17,6 +17,9 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:
                     frames.append(dict(id=c['id'],time=(c['start']+c['end'])/2,kind='math',display=c['display']))
+        if s['id']=='scene09':
+            b=s['beats'][3]
+            frames.append(dict(id='scene09-divergence-end',time=b['end']-.15,kind='endpoint'))
         if s['id'] in ('scene01','scene04','scene09'):
             b=s['beats'][2]
             for phase,alpha in [('early',.1),('late',.9)]:
