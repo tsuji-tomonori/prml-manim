@@ -9,7 +9,9 @@ from hessian_model import *
 BLUE=BLUE_CLASS; RED=RED_CLASS; GREEN=GREEN_CLASS; YELLOW=YELLOW_ACC; PURPLE=PURPLE_ACC
 
 def path(ax,pts,color=BLUE,width=3):
-    return VMobject().set_points_as_corners([ax.c2p(*p) for p in pts]).set_stroke(color,width)
+    points=np.asarray(pts);o=ax.c2p(0,0)
+    coords=o+points[:,0,None]*(ax.c2p(1,0)-o)+points[:,1,None]*(ax.c2p(0,1)-o)
+    return VMobject().set_points_as_corners(coords).set_stroke(color,width)
 
 def contours(ax,H,color=BLUE,levels=(.5,1.5,3)):
     return VGroup(*[path(ax,ellipse_points(H,level),color,2) for level in levels])
@@ -27,6 +29,11 @@ def matrix(fn,at=(3,0,0),color=BLUE):
     brackets=VGroup(tex('[',70,color),tex(']',70,color))
     brackets[0].move_to(np.array(at)+LEFT*(cols*.65+.1));brackets[1].move_to(np.array(at)+RIGHT*(cols*.65+.1))
     return VGroup(cells,brackets)
+
+def flow(edges,color,reverse=False):
+    ordered=list(edges)[::-1] if reverse else list(edges)
+    traces=[Line(e.get_end(),e.get_start(),color=color,stroke_width=5) if reverse else Line(e.get_start(),e.get_end(),color=color,stroke_width=5) for e in ordered]
+    return LaggedStart(*[ShowPassingFlash(e,time_width=.55) for e in traces],lag_ratio=.5)
 
 def vector(ax,p,color=YELLOW,origin=(0,0)):
     return Arrow(ax.c2p(*origin),ax.c2p(*(np.asarray(origin)+np.asarray(p))),buff=0,color=color,stroke_width=4,max_tip_length_to_length_ratio=.16)
@@ -48,10 +55,10 @@ class PRML54HessianMatrix(NarratedScene):
         self.remove(*[m for m in self.mobjects if all(m is not k for k in keep)])
 
     def weight_axes(self):
-        return self.plot_axes(x=(-2,2,1),y=(-2,2,1),width=4.1,height=3.6,center=(-2.6,-.1,0),labels=('w_1','w_2'))
+        return self.plot_axes(x=(-2,2,1),y=(-2,2,1),width=3.8,height=3.8,center=(-2.6,-.1,0),labels=('w_1','w_2'))
 
     def question(self):
-        k=ValueTracker(1);s=ValueTracker(0)
+        k=ValueTracker(2);s=ValueTracker(0)
         ax=self.plot_axes(x=(-1.3,.6,.5),y=(0,3,1),width=8,height=3.4,labels=('s','E'))
         fn=lambda x:1+x+.5*k.get_value()*x*x
         baseline=curve(ax,lambda x:1+x+.5*x*x,color=MUTED)
@@ -68,12 +75,12 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:s.animate.set_value(.35),lambda:Indicate(tangent,color=YELLOW)])
         self.body_clear()
         self.equation(r'w=(w_1,\ldots,w_W)^{\mathsf T}',r'\quad g=\nabla E')
-        grid=Matrix([[r'\partial g_1/\partial w_1',r'\partial g_1/\partial w_2'],[r'\partial g_2/\partial w_1',r'\partial g_2/\partial w_2']],h_buff=3.4,v_buff=1.3).scale(.65).move_to([0,.2,0])
+        grid=Matrix([[r'\partial g_1/\partial w_1',r'\partial g_1/\partial w_2'],[r'\partial g_2/\partial w_1',r'\partial g_2/\partial w_2']],h_buff=3.8,v_buff=1.3,bracket_h_buff=.45).scale(.65).move_to([0,.2,0])
         grid.get_entries()[0].set_color(BLUE);grid.get_entries()[3].set_color(BLUE)
         grid.get_entries()[1].set_color(RED);grid.get_entries()[2].set_color(RED)
         self.beat(actions=[lambda:Write(grid),lambda:Indicate(grid,color=YELLOW)])
         self.equation(r'H_{ij}=\frac{\partial^2 E}{\partial w_i\partial w_j}',r'\quad (5.78)')
-        self.beat(actions=[lambda:Indicate(grid.get_rows()[0]),lambda:Indicate(VGroup(grid.get_entries()[1],grid.get_entries()[2]),color=RED)])
+        self.beat(actions=[lambda:Indicate(grid.get_rows()[0],scale_factor=1.04),lambda:Indicate(VGroup(grid.get_entries()[1],grid.get_entries()[2]),color=RED)])
         uses=VGroup(*[jp(t,25,c) for t,c in [('学習の一歩',BLUE),('再学習',GREEN),('刈り込み',RED),('不確かさ',PURPLE)]]).arrange(RIGHT,buff=.7).move_to([0,-1.7,0])
         self.beat(actions=[lambda:LaggedStart(*[FadeIn(x,shift=UP*.2) for x in uses[:3]],lag_ratio=.25),lambda:FadeIn(uses[3],shift=UP*.2)])
 
@@ -206,13 +213,13 @@ class PRML54HessianMatrix(NarratedScene):
         self.equation(r'a=ux,\quad z=h(a),\quad y=vz,\quad E=\tfrac12(y-t)^2',size=30)
         mat=matrix(lambda:net(w())['H'],(0,-1.05,0),BLUE)
         self.add(mat,jp('行・列の順序：u, v',21,MUTED).move_to([3.7,-1.1,0]),knob('u=',u,.2,1.2))
-        self.beat(actions=[lambda:ShowPassingFlash(network[0].copy().set_color(YELLOW),time_width=.8),lambda:Indicate(network[3][1],color=GREEN)])
+        self.beat(actions=[lambda:flow(network[0],YELLOW),lambda:Indicate(network[3][1],color=GREEN)])
         self.equation(r'\delta=y-t,\ M=1:\quad H_{vv}=z^2 M=z^2\quad(5.92),(5.93)',size=29)
         self.beat(actions=[lambda:Indicate(network[3][2],color=RED),lambda:Indicate(mat[0][3],color=RED)])
         self.equation(r'H_{uu}=x^2\left[(vh\prime)^2+\delta v h\prime\prime\right]\quad(5.94)',size=30)
         self.beat(actions=[lambda:Indicate(network[3][0],color=BLUE),lambda:Indicate(mat[0][0],color=BLUE)])
         self.equation(r'H_{uv}=H_{vu}=xh\prime(vz+\delta)\quad(5.95)',size=32)
-        self.beat(actions=[lambda:Indicate(network[0],color=YELLOW),lambda:Indicate(VGroup(mat[0][1],mat[0][2]),color=YELLOW)])
+        self.beat(actions=[lambda:Indicate(network[0],color=YELLOW,scale_factor=1),lambda:Indicate(VGroup(mat[0][1],mat[0][2]),color=YELLOW)])
         self.equation(r'H=bb^{\mathsf T}+r\nabla^2 y,\quad b=\nabla y')
         self.beat(actions=[lambda:u.animate.set_value(.2),lambda:u.animate.set_value(1.1)])
         self.equation(r'\text{bias}: x_0=z_0=1,\qquad H\ \text{full}:O(W^2)',size=30)
@@ -220,10 +227,10 @@ class PRML54HessianMatrix(NarratedScene):
 
     def product(self):
         angle=ValueTracker(.7);direction=lambda:np.array([np.cos(angle.get_value()),np.sin(angle.get_value())])
-        step=ValueTracker(0);ax=self.plot_axes(x=(-.6,1,.5),y=(-.6,.8,.5),width=4.2,height=3.2,center=(-2.7,-.2,0),labels=(r'g_u',r'g_v'))
+        step=ValueTracker(0);ax=self.plot_axes(x=(0,.6,.2),y=(0,.6,.2),width=3.6,height=3.6,center=(-2.1,-.1,0),labels=(r'g_u',r'g_v'))
         old=net()['g'];arrow=always_redraw(lambda:vector(ax,net(WEIGHTS+step.get_value()*direction())['g'],BLUE))
         fixed=vector(ax,old,MUTED);delta=always_redraw(lambda:vector(ax,net(WEIGHTS+step.get_value()*direction())['g']-old,YELLOW,origin=old))
-        self.add(fixed,arrow,delta,note('青：移動後の勾配　黄：勾配の変化'))
+        self.add(fixed,arrow,delta,note('青：移動後の勾配　黄：勾配の変化'),number(r'\epsilon=',step.get_value,(3,.5,0),YELLOW),number(r'\|\Delta g\|=',lambda:np.linalg.norm(net(WEIGHTS+step.get_value()*direction())['g']-old),(3,-.4,0),YELLOW,places=3))
         self.equation(r'g(w+\epsilon v)-g(w)\simeq\epsilon Hv\quad(5.96)')
         self.beat(actions=[lambda:step.animate.set_value(.3),lambda:step.animate.set_value(.05)])
         self.equation(r'R\{f\}=\left.\frac{d f(w+\epsilon v)}{d\epsilon}\right|_{\epsilon=0},\quad R\{w\}=v\quad(5.97)',size=29)
@@ -232,18 +239,21 @@ class PRML54HessianMatrix(NarratedScene):
         d=direction();result,vals=hvp(WEIGHTS,d)
         forward=VGroup(*[VGroup(tex(k,27,GREEN),DecimalNumber(vals[k],num_decimal_places=3,font_size=27,color=GREEN)).arrange(RIGHT,buff=.15) for k in ['Ra','Rz','Ry']]).arrange(RIGHT,buff=.65).move_to([0,-.35,0])
         self.equation(r'Ra=v_u x,\quad Rz=h\prime Ra,\quad Ry=v_vz+vRz\quad(5.101)\text{–}(5.103)',size=28)
-        self.add(note('方向の成分は v_u, v_v。出力重みは v。'))
-        self.beat(actions=[lambda:AnimationGroup(Write(forward),ShowPassingFlash(network[0].copy().set_color(GREEN),time_width=.7)),lambda:Indicate(forward,color=GREEN)])
+        self.add(VGroup(jp('方向の成分',22),tex(r'v_u,v_v',27),jp('出力重み',22),tex('v',27)).arrange(RIGHT,buff=.25).move_to([0,-2.45,0]))
+        self.beat(actions=[lambda:AnimationGroup(Write(forward),flow(network[0],GREEN)),lambda:Indicate(forward,color=GREEN)])
         self.remove(forward)
+        delta_definition=tex(r'\delta=y-t,\quad\delta_h=h\prime v\delta',27,RED).move_to([0,-1.5,0])
+        self.add(delta_definition)
         backward=VGroup(tex(r'R\delta=Ry='+f"{vals['Rdelta']:.3f}",28,RED),tex(r'R\delta_h='+f"{vals['Rhidden']:.3f}",28,RED)).arrange(RIGHT,buff=1).move_to([0,-.35,0])
         self.equation(r'R\delta_h=h\prime\prime Ra\,v\delta+h\prime v_v\delta+h\prime vR\delta',size=29)
-        self.beat(actions=[lambda:AnimationGroup(Write(backward),ShowPassingFlash(network[0].copy().reverse_points().set_color(RED),time_width=.7)),lambda:Indicate(self.formula,color=RED)])
-        self.remove(backward)
+        self.beat(actions=[lambda:AnimationGroup(Write(backward),flow(network[0],RED,reverse=True)),lambda:Indicate(self.formula,color=RED)])
+        self.remove(backward,delta_definition)
         self.equation(r'(Hv)_u=xR\delta_h,\quad(Hv)_v=R\delta\,z+\delta Rz\quad(5.110),(5.111)',size=29)
-        output=matrix(lambda:hvp(WEIGHTS,direction())[0][:,None],(0,-.4,0),YELLOW)
-        self.add(output,jp('R の再帰で計算した Hv',23,YELLOW).move_to([3.5,-.4,0]))
+        output=matrix(lambda:hvp(WEIGHTS,direction())[0][:,None],(-2,-.5,0),YELLOW)
+        direct=matrix(lambda:(net()['H']@direction())[:,None],(2,-.5,0),BLUE)
+        self.add(output,direct,tex('=',32).move_to([0,-.5,0]),jp('R の再帰',22,YELLOW).move_to([-2,-1.65,0]),jp('行列を作った積',22,BLUE).move_to([2,-1.65,0]))
         self.beat(actions=[lambda:Indicate(output,color=YELLOW),lambda:Indicate(self.formula,color=YELLOW)])
-        self.body_clear();ax=self.plot_axes(x=(-1.2,1.2,.5),y=(-1.2,1.2,.5),width=4.5,height=3.4,labels=(r'v_u',r'v_v'))
+        self.body_clear();ax=self.plot_axes(x=(-1.2,1.2,.5),y=(-1.2,1.2,.5),width=3.6,height=3.6,center=(0,-.1,0),labels=(r'v_u',r'v_v'))
         v=always_redraw(lambda:vector(ax,direction(),BLUE));hv=always_redraw(lambda:vector(ax,hvp(WEIGHTS,direction())[0],YELLOW))
         self.add(v,hv,note('青：方向 v　黄：勾配の変化率 Hv'))
         self.equation(r'R\{\nabla E\}=Hv,\quad (v^{\mathsf T}H)^{\mathsf T}=Hv')
