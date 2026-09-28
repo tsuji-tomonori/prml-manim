@@ -332,7 +332,7 @@ class PRML56MixtureDensityNetworks(Scene):
         derivatives=VGroup(tex(r'{\partial E_n\over\partial a_k^\mu}=\gamma_k{\mu_k-t_n\over\sigma_k^2}',28,C[1]),
                            tex(r'{\partial E_n\over\partial a_k^\sigma}=\gamma_k\left(1-{(t_n-\mu_k)^2\over\sigma_k^2}\right)',28,C[2])).arrange(RIGHT,buff=.8).move_to([0,2.08,0])
         self.beat(Transform(eq,derivatives),tv.animate.set_value(.57))
-        arrow=Arrow([4,-1.8,0],[-4,-1.8,0],color=YELLOW)
+        arrow=Arrow([4,-2.2,0],[-4,-2.2,0],color=YELLOW)
         self.beat(GrowArrow(arrow),Write(self.note('出力の勾配 → 共有する隠れ層 → 重みの更新',YELLOW)))
 
     def map_scene(self):
