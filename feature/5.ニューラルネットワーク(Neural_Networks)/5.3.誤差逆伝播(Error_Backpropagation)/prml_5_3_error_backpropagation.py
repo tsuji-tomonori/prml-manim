@@ -71,7 +71,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         tan=always_redraw(lambda:tangent(ax,w.get_value(),scalar(w.get_value())['E'],scalar(w.get_value())['g']))
         self.add(tan)
         self.beat(w.animate.set_value(.6))
-        self.equation(r'\nabla E\quad\longrightarrow\quad\mathbf{w}_{\rm new}=\mathbf{w}-\eta\nabla E')
+        self.equation(r'\nabla E\quad\longrightarrow\quad\Delta\mathbf{w}')
+        self.add(note('勾配を計算 → 重みを更新',at=(3.8,-.9,0)))
         self.beat(actions=[lambda:Circumscribe(tan),lambda:w.animate.set_value(.8)])
 
     def forward_pass(self):
@@ -145,6 +146,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(t)])
         self.add(note('図：線形出力＋二乗和誤差',at=(3.5,1.85,0)))
         self.equation(r'\sigma+\mathrm{binary\ CE}\quad;\quad\mathrm{softmax}+\mathrm{multiclass\ CE}\quad\Rightarrow\delta_k=y_k-t_k',size=27)
+        glossary=VGroup(jp('σ：一つの確率',19),jp('softmax：確率の和が１',19),jp('CE：確率予測の誤差',19)).arrange(DOWN,buff=.2).move_to([5,-.5,0])
+        self.add(glossary)
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(1.1)])
         self.equation(r'\delta_k=\sum_l\frac{\partial E_n}{\partial y_l}\frac{\partial y_l}{\partial a_k}',size=37)
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(.7)])
@@ -166,7 +169,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         a1=always_redraw(lambda:Arrow(line.n2p(0)+UP*.2,line.n2p(con()[0])+UP*.2,buff=0,color=RED_CLASS))
         self.equation(r'w_{1j}\delta_1',size=37);self.add(a1)
         self.beat(actions=[lambda:pulse(reverse[:1]),lambda:Circumscribe(a1)])
-        a2=always_redraw(lambda:Arrow(line.n2p(0)+DOWN*.25,line.n2p(con()[1])+DOWN*.25,buff=0,color=PURPLE_ACC))
+        a2=always_redraw(lambda:Arrow(line.n2p(0)+DOWN*.6,line.n2p(con()[1])+DOWN*.6,buff=0,color=PURPLE_ACC))
         self.equation(r'w_{2j}\delta_2',size=37);self.add(a2)
         self.beat(actions=[lambda:pulse(reverse[1:],PURPLE_ACC),lambda:Circumscribe(a2)])
         self.remove(a2)
