@@ -1,476 +1,325 @@
-from __future__ import annotations
-
-import math
-import wave
+"""PRML 5.1 — linked visual experiments, implemented in Manim Community."""
+import json
 from pathlib import Path
-
 import numpy as np
 from manim import *
+from scene_support import *
+from network_model import (sigmoid, softmax, bump, network, targets, fitted_weights,
+                           class_hidden, class_score, decision_boundary, X)
+
+C1=BLUE_CLASS
+C2=PURPLE_ACC
+C3=GREEN_CLASS
+OUT=RED_CLASS
+COLOR_TEMPLATE=TexTemplate()
+COLOR_TEMPLATE.add_to_preamble(r"\usepackage{xcolor}")
 
 
-INPUT_BLUE = BLUE_C
-HIDDEN_PURPLE = PURPLE_C
-OUTPUT_GREEN = GREEN_C
-MODEL_RED = RED_C
-ACCENT_ORANGE = ORANGE
-TARGET_YELLOW = YELLOW
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
-
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
-
-ManimText = Text
+def pulse(mobject, color=YELLOW_ACC, scale_factor=1):
+    """Emphasize color while preserving plotted coordinates and edge endpoints."""
+    return Indicate(mobject, color=color, scale_factor=1)
 
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+def nodespec(label, at, color, getter=None):
+    circle=Circle(.31,color=color,stroke_width=2.5).move_to(at)
+    if getter:
+        circle.add_updater(lambda m:m.set_fill(color,opacity=.10+.30*min(1,abs(getter()))))
+    text=tex(label,27,WHITE).move_to(at)
+    g=VGroup(circle,text)
+    if getter:
+        anchor=np.array(at)+DOWN*.57
+        value=DecimalNumber(getter(),num_decimal_places=2,font_size=22,color=color).move_to(anchor)
+        value.add_updater(lambda m:m.set_value(getter()).move_to(anchor))
+        g.add(value)
+    return g
 
 
-def sigmoid(x: np.ndarray | float) -> np.ndarray | float:
-    return 1.0 / (1.0 + np.exp(-np.asarray(x)))
+def edge(a,b,color=MUTED):
+    return Arrow(a[0].get_center(),b[0].get_center(),buff=.35,color=color,stroke_width=2,
+                 max_tip_length_to_length_ratio=.06)
 
 
-def tanh_unit(x: np.ndarray, weight: float, bias: float) -> np.ndarray:
-    return np.tanh(weight * x + bias)
+class PRML51FeedForwardNetworkFunctions(NarratedScene):
+    def construct(self):
+        self.camera.background_color=BG
+        self.entries={s['id']:s for s in json.loads(MANIFEST.read_text())['scenes']}
+        self.timeline=[]
+        for i,method in enumerate([self.ingredients,self.unit,self.combine,self.nonlinear,
+                                    self.outputs,self.classification,self.topology,self.approximation,self.symmetry]):
+            self.begin(i)
+            method()
+            assert self.bi==len(self.story['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        Path(config.media_dir,'prml51_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
+    def legend(self, entries):
+        g=VGroup(*[VGroup(Line(LEFT*.16,RIGHT*.16,color=c),jp(s,19,c)).arrange(RIGHT,buff=.1)
+                   for s,c in entries]).arrange(RIGHT,buff=.4).move_to([0,1.85,0])
+        self.add(g)
+        return g
 
-class PRML51FeedForwardNetworkFunctions(Scene):
-    """PRML 5.1 feed-forward network functions overview.
+    def ingredients(self):
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1,1.5,.5),height=3.15,center=(-.7,-.2,0))
+        c=ValueTracker(.18); v=ValueTracker(.35)
+        pts=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.05) for x,y in zip(X[::2],bump(X[::2],.43)+.025*np.sin(37*X[::2]))])
+        question=jp('材料の形も、変えられる？',29).move_to([0,2.48,0])
+        self.add(question)
+        self.legend([('観測',C1),('材料１',C1),('材料２',C2),('予測',OUT)])
+        self.beat(LaggedStart(*[FadeIn(d) for d in pts],lag_ratio=.04))
+        h1=always_redraw(lambda:curve(ax,lambda x:np.tanh(3*(x+c.get_value())),color=C1).set_stroke(width=2))
+        h2=always_redraw(lambda:curve(ax,lambda x:np.tanh(3*(x-c.get_value())),color=C2).set_stroke(width=2))
+        self.beat(Create(h1),Create(h2))
+        total=always_redraw(lambda:curve(ax,lambda x:bump(x,c.get_value(),v.get_value()),color=OUT))
+        self.add(total,knob('v=',v,0,1,color=OUT))
+        self.beat(v.animate.set_value(.85))
+        # Replace only the explicitly owned control, not the plotted data or title.
+        for m in list(self.mobjects):
+            if isinstance(m,VGroup) and len(m)==3 and any(isinstance(z,NumberLine) for z in m): self.remove(m)
+        self.add(knob('c=',c,0,.65,color=C2))
+        self.beat(c.animate.set_value(.43),v.animate.set_value(.65))
+        self.remove(question)
+        self.equation(r'y(x,\mathbf w)=f\bigl(\sum_j{\color[HTML]{FF7687}w_j}{\color[HTML]{C5A1FF}\phi_j(x;\theta_j)}\bigr)',tex_template=COLOR_TEMPLATE)
+        self.beat(c.animate.set_value(.30))
+        self.beat(c.animate.set_value(.43))
 
-    Render example:
-        uv run manim -pql prml_5_1_feed_forward_network_functions.py PRML51FeedForwardNetworkFunctions
-    """
+    def unit(self):
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.5,1.5,1),height=3.2,center=(-1,-.15,0),labels=('x',r'a,\ z'))
+        w=ValueTracker(.7); b=ValueTracker(0); mix=ValueTracker(0); x=ValueTracker(-.7)
+        fn=lambda u:(1-mix.get_value())*(w.get_value()*u+b.get_value())+mix.get_value()*np.tanh(w.get_value()*u+b.get_value())
+        g=always_redraw(lambda:curve(ax,fn,color=C2))
+        eq=self.equation('a=','w','x+','b'); eq[1].set_color(C1); eq[3].set_color(YELLOW_ACC)
+        self.add(g,number('w=',w.get_value,[5,.9,0],C1),number('b=',b.get_value,[5,.2,0],YELLOW_ACC))
+        self.beat(Create(g))
+        control=knob('b=',b,-1,1,color=YELLOW_ACC); self.add(control)
+        self.beat(b.animate.set_value(.4))
+        eq=self.equation('z=',r'\tanh','(wx+b)'); eq[1].set_color(C2)
+        self.beat(actions=[lambda:mix.animate.set_value(1),lambda:pulse(g)])
+        self.remove(control); control=knob('w=',w,.5,4,color=C1); self.add(control)
+        self.beat(w.animate.set_value(3))
+        self.remove(control); control=knob('b=',b,-1,1,color=YELLOW_ACC); self.add(control)
+        zero=always_redraw(lambda:Dot(ax.c2p(-b.get_value()/w.get_value(),0),color=YELLOW_ACC,radius=.07))
+        self.add(zero)
+        self.beat(b.animate.set_value(.9))
+        self.remove(control,zero)
+        dot=always_redraw(lambda:Dot(ax.c2p(x.get_value(),fn(x.get_value())),radius=.08,color=OUT))
+        self.add(dot,knob('x=',x,-1,1,color=OUT),number('a=',lambda:w.get_value()*x.get_value()+b.get_value(),[5,-.55,0],YELLOW_ACC),number('z=',lambda:fn(x.get_value()),[5,-1.2,0],C2))
+        self.beat(x.animate.set_value(.7))
+        eq=self.equation(r'a_j=\sum_{i=1}^{D}w_{ji}^{(1)}x_i+w_{j0}^{(1)},',r'\quad z_j=h(a_j)',size=30)
+        eq[0].set_color(YELLOW_ACC); eq[1].set_color(C2)
+        self.beat(x.animate.set_value(-.4))
 
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.grid = np.linspace(-1.0, 1.0, 500)
+    def combine(self):
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.3,1.3,1),height=3.15,center=(-.6,-.15,0))
+        x=ValueTracker(-.8)
+        h=lambda u:np.tanh(3*(np.asarray(u)[...,None]+np.array([.4,-.4])))
+        g1=curve(ax,lambda u:h(u)[:,0],color=C1)
+        g2=curve(ax,lambda u:h(u)[:,1],color=C2)
+        self.equation(r'z_1=\tanh(3x+1.2),\quad z_2=\tanh(3x-1.2)')
+        self.beat(Create(g1),Create(g2))
+        eq=self.equation('y=',r'0.65z_1',r'-0.65z_2'); eq[1].set_color(C1); eq[2].set_color(C2)
+        g=curve(ax,lambda u:bump(u),color=OUT)
+        self.beat(Transform(g1,curve(ax,lambda u:.65*h(u)[:,0],color=C1)),Transform(g2,curve(ax,lambda u:-.65*h(u)[:,1],color=C2)),Create(g))
+        stack=always_redraw(lambda:VGroup(
+            Line(ax.c2p(x.get_value(),0),ax.c2p(x.get_value(),.65*h(x.get_value())[0]),color=C1,stroke_width=6),
+            Line(ax.c2p(x.get_value(),.65*h(x.get_value())[0]),ax.c2p(x.get_value(),bump(x.get_value())),color=C2,stroke_width=6),
+            Dot(ax.c2p(x.get_value(),bump(x.get_value())),color=OUT)))
+        self.add(stack)
+        self.equation(r'a_k=\sum_{j=1}^{M}w_{kj}^{(2)}z_j+w_{k0}^{(2)},\quad y_k=f(a_k)\qquad(5.4)',size=30)
+        self.beat(x.animate.set_value(.8))
+        self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
+        x.set_value(.25)
+        ins=nodespec('x',[-4.4,.1,0],C1,x.get_value)
+        hs=[nodespec('z_1',[0,1,0],C1,lambda:h(x.get_value())[0]),nodespec('z_2',[0,-.8,0],C2,lambda:h(x.get_value())[1])]
+        mode=ValueTracker(0)
+        out=nodespec('y',[4.3,.1,0],OUT,lambda:(1-mode.get_value())*bump(x.get_value())+mode.get_value()*sigmoid(bump(x.get_value())))
+        e1=VGroup(*[edge(ins,z) for z in hs]); e2=VGroup(*[edge(z,out) for z in hs])
+        net=VGroup(e1,e2,ins,*hs,out)
+        self.beat(actions=[lambda:FadeIn(net),lambda:LaggedStart(*[pulse(m,color=YELLOW_ACC) for m in [ins,e1,VGroup(*hs),e2,out]],lag_ratio=.35)])
+        bias=nodespec('1',[-3.3,-1.65,0],YELLOW_ACC)
+        be=VGroup(*[edge(bias,z,YELLOW_ACC) for z in hs])
+        self.equation(r'x_0=1:\quad a_j=\sum_{i=0}^{D}w_{ji}^{(1)}x_i\qquad (5.8)')
+        self.beat(FadeIn(bias),Create(be))
+        self.remove(bias,be)
+        mode.set_value(1)
+        # Use TeX colors without nested substring SVG groups (CE 0.20.1 drops ungrouped glyphs).
+        self.equation(r'{\color[HTML]{FF7687}y_k}=\sigma\!\left(\sum_{j=1}^{M}{\color[HTML]{FF7687}w_{kj}^{(2)}}h\!\left(\sum_{i=1}^{D}{\color[HTML]{62B7EE}w_{ji}^{(1)}}x_i+{\color[HTML]{FFE184}w_{j0}^{(1)}}\right)+{\color[HTML]{FFE184}w_{k0}^{(2)}}\right)',size=28,tex_template=COLOR_TEMPLATE)
+        compact=tex(r'x_0=z_0=1:\quad y_k=\sigma\!\left(\sum_{j=0}^{M}w_{kj}^{(2)}z_j\right),\quad z_j=h\!\left(\sum_{i=0}^{D}w_{ji}^{(1)}x_i\right)\ (j\geq1)',24).move_to([0,-2.2,0])
+        self.add(compact)
+        self.beat(actions=[lambda:pulse(e1,color=C1),lambda:pulse(e2,color=OUT)])
+        self.remove(compact)
+        self.add(note('重みの層を数える：第１層 → 第２層'))
+        self.beat(actions=[lambda:pulse(VGroup(ins,*hs,out),color=C2),lambda:LaggedStart(pulse(e1,color=C1),pulse(e2,color=OUT),lag_ratio=.5)])
 
-        self.fixed_to_adaptive_basis()
-        self.forward_propagation_function()
-        self.hidden_units_as_basis()
-        self.output_activation_by_task()
-        self.nonlinearity_is_essential()
-        self.feed_forward_topology()
-        self.universal_approximation_view()
-        self.weight_space_symmetry()
+    def nonlinear(self):
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.8,1.8,1),height=3.2,center=(-.7,-.15,0))
+        w=ValueTracker(.65); v=ValueTracker(.8); t=ValueTracker(0)
+        fn=lambda x:v.get_value()*((1-t.get_value())*(w.get_value()*x+.2)+t.get_value()*np.tanh(w.get_value()*x+.2))-.15
+        g=always_redraw(lambda:curve(ax,fn,color=OUT))
+        self.equation(r'x\ \longrightarrow\ wx+b\ \longrightarrow\ v(wx+b)+c')
+        self.add(g,knob('w=',w,.5,2,color=C1),number('v=',v.get_value,[5,1,0],C2))
+        self.beat(Create(g))
+        self.beat(actions=[lambda:w.animate.set_value(1.5),lambda:v.animate.set_value(.6)])
+        eq=self.equation('y=',r'(vw)x',r'+(vb+c)'); eq[1].set_color(C1); eq[2].set_color(YELLOW_ACC)
+        self.beat(w.animate.set_value(.65))
+        self.equation(r'y=v\,',r'\tanh(wx+b)',r'+c'); self.formula[1].set_color(C2)
+        self.beat(actions=[lambda:t.animate.set_value(1),lambda:w.animate.set_value(2)])
+        self.equation(r'y=v\,h(wx+b)+c,\qquad h(a):\ a\leftrightarrow\tanh(a)')
+        self.beat(actions=[lambda:t.animate.set_value(0),lambda:t.animate.set_value(1)])
+        self.equation(r'y=v\tanh(wx+b)+c')
+        q=ValueTracker(-.8)
+        tangent=always_redraw(lambda:Line(ax.c2p(q.get_value()-.15,fn(q.get_value())-.15*v.get_value()*w.get_value()*(1-np.tanh(w.get_value()*q.get_value()+.2)**2)),ax.c2p(q.get_value()+.15,fn(q.get_value())+.15*v.get_value()*w.get_value()*(1-np.tanh(w.get_value()*q.get_value()+.2)**2)),color=YELLOW_ACC,stroke_width=4))
+        self.add(tangent)
+        self.beat(q.animate.set_value(.8))
 
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
+    def outputs(self):
+        ax=self.plot_axes(x=(-3,3,1),y=(-3,3,1),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
+        axis_names=self.mobjects[-1]
+        t=ValueTracker(0); a=ValueTracker(-2)
+        fn=lambda x:(1-t.get_value())*x+t.get_value()*sigmoid(x)
+        g=always_redraw(lambda:curve(ax,fn,color=OUT))
+        dot=always_redraw(lambda:Dot(ax.c2p(a.get_value(),fn(a.get_value())),color=YELLOW_ACC,radius=.09))
+        self.equation('y=a'); self.add(g,dot,number('a=',a.get_value,[5,.7,0],YELLOW_ACC),number('y=',lambda:fn(a.get_value()),[5,0,0],OUT))
+        self.beat(a.animate.set_value(2))
+        self.equation(r'y=\sigma(a)=\frac{1}{1+\exp(-a)}\qquad(5.5),(5.6)')
+        self.beat(actions=[lambda:t.animate.set_value(1),lambda:a.animate.set_value(-2)])
+        self.remove(ax,axis_names)
+        ax=self.plot_axes(x=(-3,3,1),y=(0,1,.5),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
+        dot.update(0)
+        self.beat(a.animate.set_value(0))
+        # Reuse a single bar coordinate system for independent binary outputs and softmax.
+        self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
+        scores=[ValueTracker(1.3),ValueTracker(.7),ValueTracker(-.6)]; mode=ValueTracker(0)
+        probs=lambda:(1-mode.get_value())*sigmoid([v.get_value() for v in scores])+mode.get_value()*softmax([v.get_value() for v in scores])
+        bars=always_redraw(lambda:VGroup(*[Rectangle(width=1.35,height=max(.01,2.5*p),fill_color=c,fill_opacity=.8,stroke_width=0).move_to([-3.2+i*3.2,-1.65+1.25*p,0]) for i,(p,c) in enumerate(zip(probs(),[C1,C2,C3]))]))
+        labels=VGroup(*[tex('C_'+str(i+1),25,c).move_to([-3.2+i*3.2,-1.98,0]) for i,c in enumerate([C1,C2,C3])])
+        numbers=VGroup(*[number('y_'+str(i+1)+'=',lambda i=i:probs()[i],[-3.2+i*3.2,1.3,0],c) for i,c in enumerate([C1,C2,C3])])
+        self.equation(r'y_k=\sigma(a_k)\qquad\sum_k y_k\ \text{need not equal}\ 1')
+        self.add(labels,numbers,number(r'\sum_k y_k=',lambda:probs().sum(),[0,-2.55,0],YELLOW_ACC))
+        self.beat(FadeIn(bars),scores[0].animate.set_value(2.2))
+        self.equation(r'y_k=\frac{e^{a_k}}{\sum_l e^{a_l}},\qquad\sum_k y_k=1\quad(4.62)')
+        self.beat(actions=[lambda:mode.animate.set_value(1),lambda:pulse(numbers)])
+        self.beat(scores[2].animate.set_value(3.2))
 
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
+    def classification(self):
+        ax=self.plot_axes(x=(-1.6,1.6,1),y=(-1.6,1.6,1),width=5.7,height=3.5,center=(-1.6,-.2,0),labels=('x_1','x_2'))
+        w=ValueTracker(2.)
+        rng=np.random.default_rng(512); xy=rng.uniform(-1.5,1.5,(64,2)); labels=class_score(xy)>0
+        pts=VGroup(*[Dot(ax.c2p(*p),radius=.045,color=C1 if c else ORANGE) for p,c in zip(xy,labels)])
+        self.equation(r'(x_1,x_2)\longrightarrow(z_1,z_2)\longrightarrow y')
+        self.beat(LaggedStart(*[FadeIn(d) for d in pts],lag_ratio=.01))
+        def iso(j):
+            xx=np.linspace(-1.6,1.6,161)
+            yy=(np.arctanh(.5)-.3-w.get_value()*xx) if j==0 else (np.arctanh(.5)+.4+xx)/2
+            mask=abs(yy)<=1.6
+            line=VMobject().set_points_as_corners([ax.c2p(a,b) for a,b in zip(xx[mask],yy[mask])]).set_stroke([C2,C3][j],2.2)
+            return DashedVMobject(line,num_dashes=25)
+        l1=always_redraw(lambda:iso(0)); l2=always_redraw(lambda:iso(1))
+        self.add(tex(r'z_1=0.5',27,C2).move_to([4,1.15,0]),tex(r'z_2=0.5',27,C3).move_to([4,.55,0]),tex(r'y=0.5',27,OUT).move_to([4,-.05,0]))
+        self.beat(Create(l1))
+        self.beat(Create(l2))
+        bound=always_redraw(lambda:VMobject().set_points_as_corners([ax.c2p(*p) for p in decision_boundary(w.get_value())]).set_stroke(OUT,4))
+        self.equation(r'y=\sigma(2z_1+1.3z_2-0.35)',size=32)
+        self.beat(Create(bound))
+        self.add(knob(r'w_{11}^{(1)}=',w,.6,2.2,color=C2))
+        self.beat(w.animate.set_value(.7))
+        self.beat(w.animate.set_value(2.))
 
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
+    def topology(self):
+        x=ValueTracker(.4); skip=ValueTracker(0); dense=ValueTracker(1)
+        z1=lambda:np.tanh(1.5*x.get_value()+dense.get_value()*(-.4)+.2)
+        z2=lambda:np.tanh(-x.get_value()+.8*(-.4)-.1)
+        y=lambda:sigmoid(1.2*z1()-.7*z2()+skip.get_value()*x.get_value())
+        ns=[nodespec('x_1',[-4.5,.95,0],C1,x.get_value),nodespec('x_2',[-4.5,-.85,0],C1,lambda:-.4),
+            nodespec('z_1',[-.3,.95,0],C2,z1),nodespec('z_2',[-.3,-.85,0],C2,z2),nodespec('y',[4.2,.05,0],OUT,y)]
+        links=VGroup(*[edge(ns[i],ns[j]) for i,j in [(0,2),(1,2),(0,3),(1,3),(2,4),(3,4)]])
+        self.equation(r'\mathbf x\longrightarrow\mathbf z\longrightarrow y')
+        self.add(links,*ns)
+        self.beat(LaggedStart(*[pulse(n,color=YELLOW_ACC) for n in ns],lag_ratio=.3))
+        se=CurvedArrow(ns[0][0].get_top()+UP*.08,ns[4][0].get_top()+UP*.08,angle=-.45,color=YELLOW_ACC,stroke_width=2)
+        self.beat(Create(se),skip.animate.set_value(.8))
+        self.beat(FadeOut(links[1]),dense.animate.set_value(0))
+        self.equation(r'z_k=h\!\left(\sum_{j\to k}w_{kj}z_j\right)\qquad(5.10)')
+        self.beat(pulse(VGroup(links[4],links[5],se),color=YELLOW_ACC))
+        self.add(note('閉路なし → 必要な値がそろった順に計算'))
+        self.beat(LaggedStart(*[pulse(n,color=YELLOW_ACC) for n in ns],lag_ratio=.4))
+        self.beat(actions=[lambda:x.animate.set_value(-.6),lambda:x.animate.set_value(.4)])
 
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.35)
-        return title
+    def approximation(self):
+        weights=fitted_weights()
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.3,1.3,1),height=3.15,center=(-.6,-.15,0))
+        self.legend([('観測',C1),('隠れ出力',C2),('予測',OUT)])
+        self.equation(r'y(x)=\sum_{j=1}^{3}v_j\tanh(w_jx+b_j)+c')
+        def objects(index):
+            w=weights[index]
+            dots=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.035) for x,y in zip(X,targets(index,X))])
+            hs=VGroup(*[curve(ax,lambda x,j=j:np.tanh(w[j]*x+w[j+3]),color=c).set_stroke(width=1.4,opacity=.45) for j,c in enumerate([C1,C2,C3])])
+            out=curve(ax,lambda x:network(x,w),color=OUT)
+            return VGroup(dots,hs,out)
+        group=objects(0)
+        name=tex('t=x^2',29,YELLOW_ACC).move_to([5,.8,0])
+        self.add(name)
+        self.beat(FadeIn(group))
+        nxt=objects(1)
+        nxt_name=tex(r't=\sin(\pi x)',27,YELLOW_ACC).move_to([5,.8,0])
+        self.beat(actions=[lambda:AnimationGroup(FadeOut(group),FadeOut(name)),lambda:AnimationGroup(FadeIn(nxt),FadeIn(nxt_name))])
+        group=nxt; name=nxt_name
+        nxt=objects(2)
+        nxt_name=tex(r't=|x|',29,YELLOW_ACC).move_to([5,.8,0])
+        self.beat(actions=[lambda:AnimationGroup(FadeOut(group),FadeOut(name)),lambda:AnimationGroup(FadeIn(nxt),FadeIn(nxt_name))])
+        group=nxt; name=nxt_name
+        self.remove(group)
+        sharp=ValueTracker(2.)
+        stepdots=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.04) for x,y in zip(X,targets(3,X))])
+        g=always_redraw(lambda:curve(ax,lambda x:.5+.5*np.tanh(sharp.get_value()*x),color=OUT))
+        self.add(stepdots,g,knob('w=',sharp,2,18,color=C2))
+        self.remove(name)
+        self.add(tex('t=H(x)',29,YELLOW_ACC).move_to([5,.8,0]))
+        self.beat(sharp.animate.set_value(18))
+        err=Line(ax.c2p(0,.5),ax.c2p(0,1),color=YELLOW_ACC,stroke_width=6)
+        self.add(tex(r'|y(0)-t(0)|=0.5',25,YELLOW_ACC).move_to([4.65,-.1,0]))
+        self.beat(pulse(err,color=YELLOW_ACC),pulse(g,color=OUT))
+        self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
+        self.equation(r'\sup_{x\in[a,b]}|y(x)-f(x)|<\varepsilon')
+        self.add(jp('左辺：区間全体の最大誤差',22,MUTED).move_to([0,1.65,0]))
+        conditions=VGroup(jp('閉じた有限区間',29,C1),jp('連続な目標関数',29,C2),jp('適切な活性化 ＋ 十分な隠れユニット',29,C3)).arrange(DOWN,buff=.5).move_to([0,.3,0])
+        self.beat(LaggedStart(*[FadeIn(c,shift=UP*.15) for c in conditions],lag_ratio=.5))
+        self.add(note('よい重みの存在 → データから探す学習へ',color=YELLOW_ACC))
+        self.beat(pulse(conditions[2],color=YELLOW_ACC))
 
-    def make_axes(self, width: float = 5.2, height: float = 3.0) -> Axes:
-        return Axes(
-            x_range=[-1, 1, 0.5],
-            y_range=[-1.4, 1.4, 0.7],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def curve_from_values(
-        self,
-        axes: Axes,
-        values: np.ndarray,
-        color: ManimColor,
-        width: float = 3.2,
-        opacity: float = 1.0,
-        dashed: bool = False,
-    ) -> VMobject:
-        curve = VMobject(color=color)
-        points = [axes.c2p(float(x), float(y)) for x, y in zip(self.grid, values)]
-        curve.set_points_smoothly(points)
-        curve.set_stroke(width=width, opacity=opacity)
-        if dashed:
-            return DashedVMobject(curve, num_dashes=46)
-        return curve
-
-    def node(self, label: str, position: np.ndarray, color: ManimColor, radius: float = 0.24) -> VGroup:
-        circle = Circle(radius=radius, stroke_color=color, fill_color=color, fill_opacity=0.2, stroke_width=3)
-        circle.move_to(position)
-        text = Text(label, font_size=22, color=WHITE).move_to(circle)
-        return VGroup(circle, text)
-
-    def arrow_between(self, source: Mobject, target: Mobject, color: ManimColor = GREY_B, width: float = 2.0) -> Arrow:
-        return Arrow(
-            source.get_center(),
-            target.get_center(),
-            buff=0.28,
-            color=color,
-            stroke_width=width,
-            max_tip_length_to_length_ratio=0.08,
-        )
-
-    def fixed_to_adaptive_basis(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 5.1 Feed-forward Network Functions")
-        title = self.scene_title("固定基底を、学習される基底へ変える", font_size=33)
-
-        fixed_eq = MathTex(r"y(x,\mathbf{w})=f\!\left(\sum_j w_j\phi_j(x)\right)", font_size=34)
-        fixed_caption = Text("fixed basis", font_size=24, color=TEXT_GREY).next_to(fixed_eq, DOWN, buff=0.15)
-        adaptive_eq = MathTex(r"y(x,\mathbf{w})=f\!\left(\sum_j w_j\phi_j(x;\theta_j)\right)", font_size=34)
-        adaptive_caption = Text("adaptive hidden units", font_size=24, color=HIDDEN_PURPLE).next_to(adaptive_eq, DOWN, buff=0.15)
-        left_card = VGroup(fixed_eq, fixed_caption).move_to(LEFT * 3.2 + UP * 1.0)
-        right_card = VGroup(adaptive_eq, adaptive_caption).move_to(RIGHT * 3.0 + UP * 1.0)
-        arrow = Arrow(left_card.get_right(), right_card.get_left(), buff=0.3, color=ACCENT_ORANGE)
-
-        axes = self.make_axes(width=7.5, height=2.5).to_edge(DOWN).shift(UP * 0.25)
-        fixed_curves = VGroup(
-            self.curve_from_values(axes, np.exp(-18 * (self.grid + 0.55) ** 2), BLUE_B, width=2.2, opacity=0.55, dashed=True),
-            self.curve_from_values(axes, np.exp(-18 * self.grid**2), BLUE_B, width=2.2, opacity=0.55, dashed=True),
-            self.curve_from_values(axes, np.exp(-18 * (self.grid - 0.55) ** 2), BLUE_B, width=2.2, opacity=0.55, dashed=True),
-        )
-        adaptive_curves = VGroup(
-            self.curve_from_values(axes, tanh_unit(self.grid, 4.0, 1.3) * 0.55, HIDDEN_PURPLE, width=2.5, opacity=0.7, dashed=True),
-            self.curve_from_values(axes, tanh_unit(self.grid, -4.0, 0.2) * 0.45, HIDDEN_PURPLE, width=2.5, opacity=0.7, dashed=True),
-            self.curve_from_values(axes, tanh_unit(self.grid, 3.0, -1.4) * 0.5, HIDDEN_PURPLE, width=2.5, opacity=0.7, dashed=True),
-        )
-        note = Text("特徴への変換も、重みとバイアスで動かす", font_size=25, color=ACCENT_ORANGE)
-        note.next_to(axes, UP, buff=0.25)
-
-        self.play(FadeIn(label), Write(title), run_time=1.3)
-        self.play(Write(left_card), Create(axes), Create(fixed_curves), run_time=2.0)
-        self.play(Create(arrow), Write(right_card), run_time=1.5)
-        self.play(ReplacementTransform(fixed_curves, adaptive_curves), Write(note), run_time=2.2)
-        self.play(Indicate(adaptive_caption, color=TARGET_YELLOW), run_time=1.0)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, left_card, right_card, arrow, axes, adaptive_curves, note)), run_time=0.8)
-
-    def make_layered_network(self) -> tuple[VGroup, VGroup, VGroup, VGroup]:
-        inputs = VGroup(
-            self.node("x1", LEFT * 4.4 + UP * 1.15, INPUT_BLUE),
-            self.node("x2", LEFT * 4.4, INPUT_BLUE),
-            self.node("x0", LEFT * 4.4 + DOWN * 1.15, GREY_B, radius=0.2),
-        )
-        hidden = VGroup(
-            self.node("z1", LEFT * 0.65 + UP * 1.35, HIDDEN_PURPLE),
-            self.node("z2", LEFT * 0.65, HIDDEN_PURPLE),
-            self.node("z3", LEFT * 0.65 + DOWN * 1.35, HIDDEN_PURPLE),
-        )
-        outputs = VGroup(
-            self.node("y1", RIGHT * 3.7 + UP * 0.55, OUTPUT_GREEN),
-            self.node("y2", RIGHT * 3.7 + DOWN * 0.55, OUTPUT_GREEN),
-        )
-        arrows = VGroup()
-        for source in inputs:
-            for target in hidden:
-                arrows.add(self.arrow_between(source, target, GREY_C, width=1.6))
-        for source in hidden:
-            for target in outputs:
-                arrows.add(self.arrow_between(source, target, GREY_C, width=1.8))
-        return inputs, hidden, outputs, arrows
-
-    def forward_propagation_function(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("Forward propagation")
-        title = self.scene_title("左から右へ、活性を順に計算する", font_size=34)
-        inputs, hidden, outputs, arrows = self.make_layered_network()
-        network = VGroup(arrows, inputs, hidden, outputs).shift(DOWN * 0.05)
-        equations = VGroup(
-            MathTex(r"a_j=\sum_i w_{ji}^{(1)}x_i+w_{j0}^{(1)}", font_size=31, color=HIDDEN_PURPLE),
-            MathTex(r"z_j=h(a_j)", font_size=31, color=HIDDEN_PURPLE),
-            MathTex(r"a_k=\sum_j w_{kj}^{(2)}z_j+w_{k0}^{(2)}", font_size=31, color=OUTPUT_GREEN),
-            MathTex(r"y_k=\sigma(a_k)", font_size=31, color=OUTPUT_GREEN),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15)
-        equations.to_corner(DR).shift(UP * 0.25 + LEFT * 0.15)
-        flow_text = Text("forward propagation", font_size=25, color=ACCENT_ORANGE).next_to(network, DOWN, buff=0.25)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(FadeIn(inputs), Create(arrows[: len(arrows) // 2]), run_time=1.6)
-        self.play(FadeIn(hidden), Write(equations[0]), Write(equations[1]), run_time=1.8)
-        self.play(Create(arrows[len(arrows) // 2 :]), FadeIn(outputs), run_time=1.5)
-        self.play(Write(equations[2]), Write(equations[3]), run_time=1.7)
-        self.play(
-            LaggedStart(
-                *[Indicate(group, color=ACCENT_ORANGE, scale_factor=1.08) for group in [inputs, hidden, outputs]],
-                lag_ratio=0.35,
-            ),
-            Write(flow_text),
-            run_time=2.0,
-        )
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, network, equations, flow_text)), run_time=0.8)
-
-    def hidden_units_as_basis(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("Hidden units as adaptive basis functions")
-        title = self.scene_title("単純な隠れユニットを足して、複雑な形を作る", font_size=32)
-        axes = self.make_axes(width=8.2, height=4.0).shift(DOWN * 0.2)
-        target = 0.65 * np.sin(math.pi * self.grid) + 0.15 * self.grid
-        h1 = 0.55 * tanh_unit(self.grid, 4.2, 1.25)
-        h2 = -0.95 * tanh_unit(self.grid, 4.0, 0.0)
-        h3 = 0.55 * tanh_unit(self.grid, 4.2, -1.25)
-        combined = 0.88 * (h1 + h2 + h3)
-        initial = 0.45 * tanh_unit(self.grid, 1.4, 0.0)
-
-        target_curve = self.curve_from_values(axes, target, TARGET_YELLOW, width=3.5, opacity=0.8)
-        hidden_curves = VGroup(
-            self.curve_from_values(axes, h1, BLUE_B, width=2.1, opacity=0.55, dashed=True),
-            self.curve_from_values(axes, h2, PURPLE_B, width=2.1, opacity=0.55, dashed=True),
-            self.curve_from_values(axes, h3, GREEN_B, width=2.1, opacity=0.55, dashed=True),
-        )
-        initial_curve = self.curve_from_values(axes, initial, MODEL_RED, width=3.4)
-        combined_curve = self.curve_from_values(axes, combined, MODEL_RED, width=3.8)
-        formula = MathTex(r"y(x)=\sum_j w_j^{(2)}\,h(w_j^{(1)}x+b_j)", font_size=30)
-        formula.to_corner(DR).shift(UP * 0.45 + LEFT * 0.15)
-        legend = VGroup(
-            Line(LEFT * 0.3, RIGHT * 0.3, color=TARGET_YELLOW, stroke_width=4),
-            Text("target", font_size=19),
-            Line(LEFT * 0.3, RIGHT * 0.3, color=MODEL_RED, stroke_width=4),
-            Text("network", font_size=19),
-            DashedLine(LEFT * 0.3, RIGHT * 0.3, color=HIDDEN_PURPLE, stroke_width=3),
-            Text("hidden units", font_size=19),
-        ).arrange_in_grid(rows=3, cols=2, col_alignments="lr", buff=(0.18, 0.12))
-        legend.to_corner(UL).shift(DOWN * 0.9 + RIGHT * 0.1)
-
-        self.play(FadeIn(label), Write(title), Create(axes), Write(formula), run_time=1.8)
-        self.play(Create(target_curve), FadeIn(legend[0:2]), run_time=1.3)
-        self.play(Create(initial_curve), FadeIn(legend[2:4]), run_time=1.4)
-        self.play(Create(hidden_curves), FadeIn(legend[4:6]), run_time=1.8)
-        self.play(ReplacementTransform(initial_curve, combined_curve), run_time=2.1)
-        self.play(Indicate(hidden_curves, color=TARGET_YELLOW), run_time=1.3)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, formula, target_curve, hidden_curves, combined_curve, legend)), run_time=0.8)
-
-    def output_activation_by_task(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("Output activations")
-        title = self.scene_title("最後の活性化は、予測したい量に合わせる", font_size=33)
-
-        cards = VGroup()
-        names = ["Regression", "Multiple binary", "Multiclass"]
-        colors = [OUTPUT_GREEN, INPUT_BLUE, ACCENT_ORANGE]
-        formulas = [
-            MathTex(r"y_k=a_k", font_size=30, color=OUTPUT_GREEN),
-            MathTex(r"y_k=\sigma(a_k)", font_size=30, color=INPUT_BLUE),
-            MathTex(r"y_k=\frac{\exp(a_k)}{\sum_l\exp(a_l)}", font_size=30, color=ACCENT_ORANGE),
-        ]
-        subtitles = ["real value", "0 <= y <= 1", "sum y_k = 1"]
-        for name, color, formula, subtitle in zip(names, colors, formulas, subtitles):
-            box = RoundedRectangle(width=3.5, height=4.2, corner_radius=0.08, stroke_color=color, fill_color=color, fill_opacity=0.08)
-            heading = Text(name, font_size=25, color=color).move_to(box.get_top() + DOWN * 0.45)
-            formula.move_to(box.get_center() + UP * 0.75)
-            sub = Text(subtitle, font_size=22, color=TEXT_GREY).next_to(formula, DOWN, buff=0.25)
-            if name == "Regression":
-                axis = NumberLine(x_range=[-2, 2, 1], length=2.4, color=GREY_B, include_numbers=False)
-                marker = Dot(axis.n2p(1.25), color=OUTPUT_GREEN, radius=0.08)
-                visual = VGroup(axis, marker).move_to(box.get_center() + DOWN * 1.15)
-            elif name == "Multiple binary":
-                mini_axes = Axes(x_range=[-4, 4, 2], y_range=[0, 1, 0.5], x_length=2.4, y_length=1.25, tips=False, axis_config={"color": GREY_B})
-                xs = np.linspace(-4, 4, 200)
-                curve = VMobject(color=INPUT_BLUE)
-                curve.set_points_smoothly([mini_axes.c2p(float(x), float(sigmoid(x))) for x in xs])
-                visual = VGroup(mini_axes, curve).move_to(box.get_center() + DOWN * 1.15)
-            else:
-                bars = VGroup()
-                for value, bar_color in zip([0.18, 0.55, 0.27], [BLUE_C, ORANGE, GREEN_C]):
-                    bar = Rectangle(width=0.42, height=1.7 * value, fill_color=bar_color, fill_opacity=0.75, stroke_width=0)
-                    bars.add(bar)
-                bars.arrange(RIGHT, buff=0.22, aligned_edge=DOWN)
-                visual = bars.move_to(box.get_center() + DOWN * 1.1)
-            cards.add(VGroup(box, heading, formula, sub, visual))
-        cards.arrange(RIGHT, buff=0.35).shift(DOWN * 0.25)
-        pointer = Text("output activation", font_size=25, color=TARGET_YELLOW).next_to(cards, DOWN, buff=0.2)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(LaggedStart(*[FadeIn(card, shift=UP * 0.2) for card in cards], lag_ratio=0.2), run_time=2.4)
-        self.play(Write(pointer), run_time=1.0)
-        self.play(LaggedStart(*[Indicate(card[2], color=TARGET_YELLOW) for card in cards], lag_ratio=0.25), run_time=2.1)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, cards, pointer)), run_time=0.8)
-
-    def nonlinearity_is_essential(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("Why nonlinear hidden units matter")
-        title = self.scene_title("線形だけなら、層を重ねても一つの線形変換", font_size=32)
-
-        left_box = RoundedRectangle(width=5.1, height=4.4, corner_radius=0.08, stroke_color=GREY_B, fill_color=GREY_E, fill_opacity=0.08)
-        left_box.shift(LEFT * 3.0 + DOWN * 0.15)
-        right_box = RoundedRectangle(width=5.1, height=4.4, corner_radius=0.08, stroke_color=HIDDEN_PURPLE, fill_color=HIDDEN_PURPLE, fill_opacity=0.07)
-        right_box.shift(RIGHT * 3.0 + DOWN * 0.15)
-
-        left_title = Text("linear hidden units", font_size=24, color=TEXT_GREY).move_to(left_box.get_top() + DOWN * 0.4)
-        right_title = Text("with tanh", font_size=24, color=HIDDEN_PURPLE).move_to(right_box.get_top() + DOWN * 0.4)
-        chain = MathTex(r"\mathbf{x}\to W^{(1)}\mathbf{x}\to W^{(2)}W^{(1)}\mathbf{x}", font_size=30)
-        collapse = MathTex(r"=\,W\mathbf{x}", font_size=38, color=TARGET_YELLOW).next_to(chain, DOWN, buff=0.35)
-        chain_group = VGroup(chain, collapse).move_to(left_box.get_center() + UP * 0.3)
-        left_axes = Axes(x_range=[-1, 1, 1], y_range=[-1, 1, 1], x_length=3.2, y_length=1.45, tips=False, axis_config={"color": GREY_B})
-        line = self.curve_from_values(left_axes, 0.8 * self.grid, MODEL_RED, width=3.0)
-        left_plot = VGroup(left_axes, line).move_to(left_box.get_center() + DOWN * 1.15)
-
-        right_axes = Axes(x_range=[-1, 1, 1], y_range=[-1.1, 1.1, 1], x_length=3.2, y_length=1.45, tips=False, axis_config={"color": GREY_B})
-        bend = self.curve_from_values(right_axes, 0.85 * np.tanh(4 * self.grid), HIDDEN_PURPLE, width=3.2)
-        right_formula = MathTex(r"\mathbf{x}\to W^{(1)}\mathbf{x}\to h(\cdot)\to W^{(2)}\mathbf{z}", font_size=29)
-        right_formula.move_to(right_box.get_center() + UP * 0.45)
-        right_plot = VGroup(right_axes, bend).move_to(right_box.get_center() + DOWN * 1.15)
-        note = Text("linear + nonlinear を交互に組む", font_size=26, color=ACCENT_ORANGE)
-        note.to_edge(DOWN).shift(UP * 0.2)
-
-        self.play(FadeIn(label), Write(title), run_time=1.1)
-        self.play(FadeIn(left_box), Write(left_title), Write(chain), run_time=1.6)
-        self.play(Write(collapse), Create(left_plot), run_time=1.7)
-        self.play(FadeIn(right_box), Write(right_title), Write(right_formula), Create(right_plot), run_time=2.2)
-        self.play(Indicate(bend, color=TARGET_YELLOW), Write(note), run_time=1.5)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, left_box, right_box, left_title, right_title, chain_group, left_plot, right_formula, right_plot, note)), run_time=0.8)
-
-    def feed_forward_topology(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("General feed-forward topology")
-        title = self.scene_title("閉路なしなら、順番に値を計算できる", font_size=34)
-
-        positions = {
-            "x1": LEFT * 4.2 + UP * 0.95,
-            "x2": LEFT * 4.2 + DOWN * 0.95,
-            "z1": LEFT * 1.35 + UP * 1.2,
-            "z2": LEFT * 1.0 + DOWN * 0.55,
-            "z3": RIGHT * 1.2 + UP * 0.25,
-            "y1": RIGHT * 4.0 + UP * 0.75,
-            "y2": RIGHT * 4.0 + DOWN * 0.75,
-        }
-        colors = {"x1": INPUT_BLUE, "x2": INPUT_BLUE, "z1": HIDDEN_PURPLE, "z2": HIDDEN_PURPLE, "z3": HIDDEN_PURPLE, "y1": OUTPUT_GREEN, "y2": OUTPUT_GREEN}
-        nodes = {name: self.node(name, pos, colors[name]) for name, pos in positions.items()}
-        edge_specs = [
-            ("x1", "z1", GREY_C), ("x1", "z2", GREY_C), ("x2", "z2", GREY_C),
-            ("z1", "z3", GREY_C), ("z2", "z3", GREY_C), ("z3", "y1", GREY_C),
-            ("z2", "y2", GREY_C), ("x1", "y1", ACCENT_ORANGE),
-        ]
-        edges = VGroup(*[self.arrow_between(nodes[a], nodes[b], color, 2.0 if color == ACCENT_ORANGE else 1.7) for a, b, color in edge_specs])
-        node_group = VGroup(*nodes.values())
-        formula = MathTex(r"z_k=h\!\left(\sum_{j\to k} w_{kj}z_j\right)", font_size=35)
-        formula.to_corner(DR).shift(UP * 0.2 + LEFT * 0.15)
-        tags = VGroup(
-            Text("skip", font_size=23, color=ACCENT_ORANGE).next_to(edges[-1], UP, buff=0.05),
-            Text("sparse", font_size=23, color=TEXT_GREY).to_corner(DL).shift(UP * 0.55 + RIGHT * 0.2),
-            Text("no directed cycle", font_size=25, color=TARGET_YELLOW).to_edge(DOWN).shift(UP * 0.22),
-        )
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(FadeIn(node_group), run_time=1.2)
-        self.play(Create(edges[:-1]), Write(formula), run_time=2.0)
-        self.play(Create(edges[-1]), Write(tags[0]), Write(tags[1]), run_time=1.4)
-        ordered = [nodes["x1"], nodes["x2"], nodes["z1"], nodes["z2"], nodes["z3"], nodes["y1"], nodes["y2"]]
-        self.play(LaggedStart(*[Indicate(item, color=TARGET_YELLOW, scale_factor=1.08) for item in ordered], lag_ratio=0.16), Write(tags[2]), run_time=2.5)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, node_group, edges, formula, tags)), run_time=0.8)
-
-    def make_function_panel(self, title: str, target_values: np.ndarray, approx_values: np.ndarray, color: ManimColor) -> VGroup:
-        axes = Axes(
-            x_range=[-1, 1, 1],
-            y_range=[-1.1, 1.1, 1],
-            x_length=2.45,
-            y_length=1.65,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 1.6},
-        )
-        panel_title = Text(title, font_size=21, color=color).next_to(axes, UP, buff=0.12)
-        target = self.curve_from_values(axes, target_values, TARGET_YELLOW, width=2.2, opacity=0.65, dashed=True)
-        approx = self.curve_from_values(axes, approx_values, MODEL_RED, width=2.8)
-        sample_x = np.linspace(-0.9, 0.9, 11)
-        sample_y = np.interp(sample_x, self.grid, target_values)
-        dots = VGroup(*[Dot(axes.c2p(float(x), float(y)), radius=0.035, color=INPUT_BLUE) for x, y in zip(sample_x, sample_y)])
-        return VGroup(axes, target, approx, dots, panel_title)
-
-    def universal_approximation_view(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("Approximation properties")
-        title = self.scene_title("広い関数族を近似できる。ただし学習は別問題", font_size=32)
-
-        x = self.grid
-        panels = VGroup(
-            self.make_function_panel("x^2", 1.6 * x**2 - 0.8, 1.55 * x**2 - 0.75 + 0.04 * np.sin(3 * math.pi * x), BLUE_B),
-            self.make_function_panel("sin(x)", 0.8 * np.sin(math.pi * x), 0.78 * np.sin(math.pi * x) + 0.05 * np.sin(3 * math.pi * x), PURPLE_B),
-            self.make_function_panel("|x|", 1.6 * np.abs(x) - 0.85, 1.55 * np.sqrt(x**2 + 0.015) - 0.82, GREEN_B),
-            self.make_function_panel("step", np.where(x >= 0, 0.75, -0.75), 1.55 * sigmoid(16 * x) - 0.78, ACCENT_ORANGE),
-        ).arrange_in_grid(rows=2, cols=2, buff=(0.45, 0.55))
-        panels.shift(DOWN * 0.2)
-        legend = VGroup(
-            Dot(radius=0.05, color=INPUT_BLUE),
-            Text("data", font_size=19),
-            DashedLine(LEFT * 0.25, RIGHT * 0.25, color=TARGET_YELLOW, stroke_width=3),
-            Text("target", font_size=19),
-            Line(LEFT * 0.25, RIGHT * 0.25, color=MODEL_RED, stroke_width=4),
-            Text("network", font_size=19),
-        ).arrange(RIGHT, buff=0.12)
-        legend.to_corner(UR).shift(DOWN * 0.75 + LEFT * 0.1)
-        note = Text("存在定理は安心材料。実際の重みを見つけるには学習が必要。", font_size=24, color=TARGET_YELLOW)
-        note.to_edge(DOWN).shift(UP * 0.18)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(LaggedStart(*[FadeIn(panel, shift=UP * 0.15) for panel in panels], lag_ratio=0.12), FadeIn(legend), run_time=3.0)
-        self.play(Write(note), run_time=1.5)
-        self.play(LaggedStart(*[Indicate(panel[2], color=TARGET_YELLOW) for panel in panels], lag_ratio=0.14), run_time=2.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, panels, legend, note)), run_time=0.8)
-
-    def weight_space_symmetry(self) -> None:
-        narration = self.start_narration("scene08")
-        label = self.section_label("Weight-space symmetries")
-        title = self.scene_title("違う重みでも、同じ関数を表せる", font_size=34)
-
-        inputs = VGroup(self.node("x", LEFT * 4.0, INPUT_BLUE))
-        hidden = VGroup(self.node("z1", LEFT * 0.8 + UP * 0.85, HIDDEN_PURPLE), self.node("z2", LEFT * 0.8 + DOWN * 0.85, HIDDEN_PURPLE))
-        output = VGroup(self.node("y", RIGHT * 3.0, OUTPUT_GREEN))
-        arrows = VGroup(
-            self.arrow_between(inputs[0], hidden[0], GREY_C),
-            self.arrow_between(inputs[0], hidden[1], GREY_C),
-            self.arrow_between(hidden[0], output[0], GREY_C),
-            self.arrow_between(hidden[1], output[0], GREY_C),
-        )
-        network = VGroup(arrows, inputs, hidden, output).shift(UP * 0.2)
-        sign_box = VGroup(
-            Text("sign flip", font_size=25, color=TARGET_YELLOW),
-            MathTex(r"w_{\mathrm{in}}\to-w_{\mathrm{in}}", font_size=27),
-            MathTex(r"w_{\mathrm{out}}\to-w_{\mathrm{out}}", font_size=27),
-            Text("product contribution unchanged", font_size=20, color=TEXT_GREY),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
-        sign_box.to_corner(DL).shift(UP * 0.35 + RIGHT * 0.15)
-        perm_box = VGroup(
-            Text("permutation", font_size=25, color=ACCENT_ORANGE),
-            Text("z1 と z2 を入れ替える", font_size=22),
-            Text("足し合わせる順番だけが変わる", font_size=20, color=TEXT_GREY),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
-        perm_box.to_corner(DR).shift(UP * 0.45 + LEFT * 0.15)
-        same_function = Text("different weights, same mapping x -> y", font_size=26, color=OUTPUT_GREEN)
-        same_function.to_edge(DOWN).shift(UP * 0.18)
-
-        self.play(FadeIn(label), Write(title), run_time=1.2)
-        self.play(FadeIn(inputs), FadeIn(hidden), FadeIn(output), Create(arrows), run_time=1.8)
-        self.play(Write(sign_box), run_time=1.8)
-        self.play(Indicate(VGroup(arrows[0], arrows[2], hidden[0]), color=TARGET_YELLOW), run_time=1.4)
-        self.play(
-            hidden[0].animate.move_to(hidden[1].get_center()),
-            hidden[1].animate.move_to(hidden[0].get_center()),
-            Write(perm_box),
-            run_time=1.6,
-        )
-        self.play(Write(same_function), run_time=1.2)
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, network, sign_box, perm_box, same_function)), run_time=0.8)
+    def symmetry(self):
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.4,1.4,1),height=2.4,center=(-.7,.35,0))
+        ins=ValueTracker(1); outs=ValueTracker(1)
+        h1=lambda x:np.tanh(ins.get_value()*(3*x+1.2))
+        contribution=lambda x:.65*outs.get_value()*h1(x)
+        y=lambda x:contribution(x)-.65*np.tanh(3*x-1.2)
+        one=always_redraw(lambda:curve(ax,contribution,color=C1).set_stroke(width=2))
+        two=curve(ax,lambda x:-.65*np.tanh(3*x-1.2),color=C2).set_stroke(width=2)
+        total=always_redraw(lambda:curve(ax,y,color=OUT))
+        ghost=curve(ax,bump,color=MUTED).set_stroke(width=5,opacity=.35)
+        self.equation(r'y=0.65\tanh(3x+1.2)-0.65\tanh(3x-1.2)')
+        self.add(ghost,one,two,total,number(r's_{\rm in}=',ins.get_value,[5,.75,0],C1,places=2),number(r's_{\rm out}=',outs.get_value,[5,0,0],C2,places=2))
+        self.beat(Create(total))
+        self.equation(r'\tanh(-a)=-\tanh(a)')
+        self.beat(ins.animate.set_value(-1))
+        self.equation(r'(-v)\tanh(-wx-b)=v\tanh(wx+b)')
+        self.beat(outs.animate.set_value(-1))
+        self.add(note('灰色の元の曲線と、赤い曲線が一致',color=YELLOW_ACC))
+        self.beat(pulse(total,color=YELLOW_ACC))
+        # Swap complete labeled summands; the actual output is permutation invariant.
+        left=VGroup(tex(r'(-0.65)\tanh(-3x-1.2)',26,C1),jp('ユニット１',20,C1)).arrange(DOWN,buff=.15).move_to([-3,-2.1,0])
+        right=VGroup(tex(r'(-0.65)\tanh(3x-1.2)',26,C2),jp('ユニット２',20,C2)).arrange(DOWN,buff=.15).move_to([3,-2.1,0])
+        for m in list(self.mobjects):
+            if isinstance(m,Text) and m.get_center()[1]<-2: self.remove(m)
+        self.add(left,right)
+        def exchange_terms(mob, alpha):
+            lift=max(0.,min(alpha/.2,1.,(1-alpha)/.2))
+            horizontal=smooth(np.clip((alpha-.2)/.6,0,1))
+            mob[0].move_to([-3+6*horizontal,-2.1+.47*lift,0])
+            mob[1].move_to([3-6*horizontal,-2.1-.47*lift,0])
+        self.beat(actions=[lambda:UpdateFromAlphaFunc(VGroup(left,right),exchange_terms,rate_func=linear),
+                           lambda:pulse(total,color=YELLOW_ACC)])
+        self.equation(r'2^M M!\qquad M=2:\quad 2^2\cdot2!=8')
+        self.beat(pulse(self.formula,color=YELLOW_ACC))
+        self.remove(left,right)
+        self.equation(r'\mathbf x\ \xrightarrow{\ W^{(1)},\,h\ }\ \mathbf z\ \xrightarrow{\ W^{(2)},\,f\ }\ \mathbf y')
+        self.beat(pulse(one,color=C1),pulse(two,color=C2))

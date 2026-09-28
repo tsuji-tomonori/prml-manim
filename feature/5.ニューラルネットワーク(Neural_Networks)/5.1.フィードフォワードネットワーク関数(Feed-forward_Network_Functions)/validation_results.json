@@ -1,0 +1,441 @@
+{
+  "video_sha256": "dde3c2fa337a62f9699946c08f72b9cd66f9abefaa88eb0fad7a4d350f7e566c",
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "597.666667"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "597.696000"
+      }
+    ],
+    "format": {
+      "duration": "597.696000"
+    }
+  },
+  "stream_gap": 0.029333000000065113,
+  "silence_intervals": 0,
+  "mean_volume": -26.4,
+  "max_volume": -5.3,
+  "scenes": 9,
+  "cues": 116,
+  "max_scene_duration_gap": 6.207301339600235e-11,
+  "frames": [
+    {
+      "label": "scene01-beat01",
+      "time": 6.206666666666667,
+      "file": "000-scene01-beat01.png"
+    },
+    {
+      "label": "scene01-beat02",
+      "time": 14.839999999999987,
+      "file": "001-scene01-beat02.png"
+    },
+    {
+      "label": "scene01-beat03",
+      "time": 23.466666666666626,
+      "file": "002-scene01-beat03.png"
+    },
+    {
+      "label": "scene01-beat04",
+      "time": 32.41333333333326,
+      "file": "003-scene01-beat04.png"
+    },
+    {
+      "label": "scene01-beat05",
+      "time": 41.62000000000006,
+      "file": "004-scene01-beat05.png"
+    },
+    {
+      "label": "math-scene01-05-01",
+      "time": 36.97866666666667,
+      "file": "005-math-scene01-05-01.png"
+    },
+    {
+      "label": "scene01-beat06",
+      "time": 50.88666666666719,
+      "file": "006-scene01-beat06.png"
+    },
+    {
+      "label": "scene02-beat01",
+      "time": 60.760000000000986,
+      "file": "007-scene02-beat01.png"
+    },
+    {
+      "label": "scene02-beat02",
+      "time": 69.12000000000148,
+      "file": "008-scene02-beat02.png"
+    },
+    {
+      "label": "scene02-beat03",
+      "time": 79.3333333333344,
+      "file": "009-scene02-beat03.png"
+    },
+    {
+      "label": "scene02-beat04",
+      "time": 89.59333333333376,
+      "file": "010-scene02-beat04.png"
+    },
+    {
+      "label": "math-scene02-04-01",
+      "time": 85.36266666666765,
+      "file": "011-math-scene02-04-01.png"
+    },
+    {
+      "label": "scene02-beat05",
+      "time": 99.20666666666654,
+      "file": "012-scene02-beat05.png"
+    },
+    {
+      "label": "scene02-beat06",
+      "time": 109.29999999999933,
+      "file": "013-scene02-beat06.png"
+    },
+    {
+      "label": "scene02-beat07",
+      "time": 118.8866666666654,
+      "file": "014-scene02-beat07.png"
+    },
+    {
+      "label": "sync-scene02-0",
+      "time": 84.20333333333376,
+      "file": "015-sync-scene02-0.png"
+    },
+    {
+      "label": "sync-scene02-1",
+      "time": 91.06333333333376,
+      "file": "016-sync-scene02-1.png"
+    },
+    {
+      "label": "scene03-beat01",
+      "time": 128.24666666666488,
+      "file": "017-scene03-beat01.png"
+    },
+    {
+      "label": "scene03-beat02",
+      "time": 137.64666666666437,
+      "file": "018-scene03-beat02.png"
+    },
+    {
+      "label": "scene03-beat03",
+      "time": 146.90666666666382,
+      "file": "019-scene03-beat03.png"
+    },
+    {
+      "label": "scene03-beat04",
+      "time": 157.69333333332997,
+      "file": "020-scene03-beat04.png"
+    },
+    {
+      "label": "scene03-beat05",
+      "time": 167.619999999996,
+      "file": "021-scene03-beat05.png"
+    },
+    {
+      "label": "math-scene03-05-02",
+      "time": 167.69333333333157,
+      "file": "022-math-scene03-05-02.png"
+    },
+    {
+      "label": "scene03-beat06",
+      "time": 177.7733333333288,
+      "file": "023-scene03-beat06.png"
+    },
+    {
+      "label": "scene03-beat07",
+      "time": 188.07333333332818,
+      "file": "024-scene03-beat07.png"
+    },
+    {
+      "label": "scene04-beat01",
+      "time": 198.8333333333276,
+      "file": "025-scene04-beat01.png"
+    },
+    {
+      "label": "scene04-beat02",
+      "time": 208.5266666666603,
+      "file": "026-scene04-beat02.png"
+    },
+    {
+      "label": "scene04-beat03",
+      "time": 218.35999999999314,
+      "file": "027-scene04-beat03.png"
+    },
+    {
+      "label": "scene04-beat04",
+      "time": 227.69999999999257,
+      "file": "028-scene04-beat04.png"
+    },
+    {
+      "label": "scene04-beat05",
+      "time": 238.37999999999204,
+      "file": "029-scene04-beat05.png"
+    },
+    {
+      "label": "scene04-beat06",
+      "time": 249.40666666665808,
+      "file": "030-scene04-beat06.png"
+    },
+    {
+      "label": "scene05-beat01",
+      "time": 260.50666666665745,
+      "file": "031-scene05-beat01.png"
+    },
+    {
+      "label": "scene05-beat02",
+      "time": 270.86666666665684,
+      "file": "032-scene05-beat02.png"
+    },
+    {
+      "label": "scene05-beat03",
+      "time": 279.6999999999896,
+      "file": "033-scene05-beat03.png"
+    },
+    {
+      "label": "math-scene05-03-02",
+      "time": 279.5039999999908,
+      "file": "034-math-scene05-03-02.png"
+    },
+    {
+      "label": "scene05-beat04",
+      "time": 288.35999999998916,
+      "file": "035-scene05-beat04.png"
+    },
+    {
+      "label": "scene05-beat05",
+      "time": 299.353333333322,
+      "file": "036-scene05-beat05.png"
+    },
+    {
+      "label": "scene05-beat06",
+      "time": 311.1933333333213,
+      "file": "037-scene05-beat06.png"
+    },
+    {
+      "label": "scene06-beat01",
+      "time": 321.0799999999873,
+      "file": "038-scene06-beat01.png"
+    },
+    {
+      "label": "scene06-beat02",
+      "time": 330.33333333332007,
+      "file": "039-scene06-beat02.png"
+    },
+    {
+      "label": "scene06-beat03",
+      "time": 341.1599999999862,
+      "file": "040-scene06-beat03.png"
+    },
+    {
+      "label": "scene06-beat04",
+      "time": 352.48666666665224,
+      "file": "041-scene06-beat04.png"
+    },
+    {
+      "label": "scene06-beat05",
+      "time": 363.0533333333183,
+      "file": "042-scene06-beat05.png"
+    },
+    {
+      "label": "scene06-beat06",
+      "time": 374.57999999998435,
+      "file": "043-scene06-beat06.png"
+    },
+    {
+      "label": "sync-scene06-0",
+      "time": 357.40666666665163,
+      "file": "044-sync-scene06-0.png"
+    },
+    {
+      "label": "sync-scene06-1",
+      "time": 364.59333333331824,
+      "file": "045-sync-scene06-1.png"
+    },
+    {
+      "label": "scene07-beat01",
+      "time": 384.453333333317,
+      "file": "046-scene07-beat01.png"
+    },
+    {
+      "label": "scene07-beat02",
+      "time": 394.5533333333165,
+      "file": "047-scene07-beat02.png"
+    },
+    {
+      "label": "scene07-beat03",
+      "time": 405.01333333331587,
+      "file": "048-scene07-beat03.png"
+    },
+    {
+      "label": "scene07-beat04",
+      "time": 415.9733333333153,
+      "file": "049-scene07-beat04.png"
+    },
+    {
+      "label": "scene07-beat05",
+      "time": 426.51999999998134,
+      "file": "050-scene07-beat05.png"
+    },
+    {
+      "label": "scene07-beat06",
+      "time": 437.20666666664744,
+      "file": "051-scene07-beat06.png"
+    },
+    {
+      "label": "scene08-beat01",
+      "time": 448.3066666666468,
+      "file": "052-scene08-beat01.png"
+    },
+    {
+      "label": "scene08-beat02",
+      "time": 459.4599999999795,
+      "file": "053-scene08-beat02.png"
+    },
+    {
+      "label": "scene08-beat03",
+      "time": 469.0533333333122,
+      "file": "054-scene08-beat03.png"
+    },
+    {
+      "label": "scene08-beat04",
+      "time": 478.546666666645,
+      "file": "055-scene08-beat04.png"
+    },
+    {
+      "label": "scene08-beat05",
+      "time": 490.0533333333111,
+      "file": "056-scene08-beat05.png"
+    },
+    {
+      "label": "scene08-beat06",
+      "time": 503.06666666664375,
+      "file": "057-scene08-beat06.png"
+    },
+    {
+      "label": "scene08-beat07",
+      "time": 515.886666666643,
+      "file": "058-scene08-beat07.png"
+    },
+    {
+      "label": "scene09-beat01",
+      "time": 526.4799999999822,
+      "file": "059-scene09-beat01.png"
+    },
+    {
+      "label": "scene09-beat02",
+      "time": 537.2399999999899,
+      "file": "060-scene09-beat02.png"
+    },
+    {
+      "label": "scene09-beat03",
+      "time": 548.0666666666654,
+      "file": "061-scene09-beat03.png"
+    },
+    {
+      "label": "scene09-beat04",
+      "time": 559.4333333333406,
+      "file": "062-scene09-beat04.png"
+    },
+    {
+      "label": "scene09-beat05",
+      "time": 569.9800000000166,
+      "file": "063-scene09-beat05.png"
+    },
+    {
+      "label": "scene09-beat06",
+      "time": 581.2600000000245,
+      "file": "064-scene09-beat06.png"
+    },
+    {
+      "label": "math-scene09-06-01",
+      "time": 575.3466666666488,
+      "file": "065-math-scene09-06-01.png"
+    },
+    {
+      "label": "scene09-beat07",
+      "time": 593.8066666667006,
+      "file": "066-scene09-beat07.png"
+    },
+    {
+      "label": "sync-scene09-0",
+      "time": 542.1999999999988,
+      "file": "067-sync-scene09-0.png"
+    },
+    {
+      "label": "sync-scene09-1",
+      "time": 549.6666666666654,
+      "file": "068-sync-scene09-1.png"
+    },
+    {
+      "label": "swap-0.2",
+      "time": 564.0085333333154,
+      "file": "069-swap-0.2.png"
+    },
+    {
+      "label": "swap-0.5",
+      "time": 565.6213333333154,
+      "file": "070-swap-0.5.png"
+    },
+    {
+      "label": "swap-0.8",
+      "time": 567.2341333333154,
+      "file": "071-swap-0.8.png"
+    }
+  ],
+  "sync": [
+    {
+      "scene": "scene02",
+      "beat": 4,
+      "note": "重みを増やして傾きを急に",
+      "start": 82.73333333333376,
+      "end": 92.53333333333376,
+      "speech_onset": 82.82958333333431,
+      "frames": [
+        84.20333333333376,
+        91.06333333333376
+      ]
+    },
+    {
+      "scene": "scene06",
+      "beat": 5,
+      "note": "一つの重みで等高線と境界を連動",
+      "start": 355.8666666666516,
+      "end": 366.13333333331826,
+      "speech_onset": 355.94999999998726,
+      "frames": [
+        357.40666666665163,
+        364.59333333331824
+      ]
+    },
+    {
+      "scene": "scene09",
+      "beat": 3,
+      "note": "出力重みも反転して寄与を復元",
+      "start": 540.5999999999988,
+      "end": 551.2666666666654,
+      "speech_onset": 540.6849999999821,
+      "frames": [
+        542.1999999999988,
+        549.6666666666654
+      ]
+    }
+  ],
+  "visual_review": "Reviewed by the agent: all 72 extracted final-video frames, including every beat, all five mathematical subtitle sentences, early/late states in three scenes, and three in-motion swap frames. No unresolved overlap, clipping, missing formula glyphs, or mismatched values found in these frames.",
+  "full_listening": false,
+  "visual_review_notes": [
+    "Scene 01 equation and legend have separate vertical space.",
+    "Scene 03 output is 0.71 after the sigmoid formula appears.",
+    "Scene 05 sigmoid values match the curve; softmax sums to 1.00 during its explanation.",
+    "Scene 02 weight changes from 0.76 to 2.95, scene 06 from 1.97 to 0.73, and scene 09 outgoing sign from 0.95 to -0.95 during their spoken intervals.",
+    "The exchanging summands stay separated above the subtitle."
+  ]
+}
