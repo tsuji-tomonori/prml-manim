@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import numpy as np
 from manim import *
+from manim.animation.animation import prepare_animation
 from video_support import jp, tex, caption_mobject
 from narration_content import SCENES
 from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
@@ -33,7 +34,7 @@ def axes(xrange=(0,1,.25),yrange=(0,1,.25),width=8,height=3.5,center=(0,-.25,0),
     return ax,labels
 
 
-def density_axes(getter,width=5.2,height=3.2,center=(3.25,0,0)):
+def density_axes(getter,width=5.2,height=3.0,center=(3.25,-.25,0)):
     """Keep the density's peak readable; tick values track the changing vertical scale."""
     ax=Axes(x_range=(-.15,1.15,.25),y_range=(0,1,.5),x_length=width,y_length=height,tips=False,
             axis_config={'color':MUTED,'stroke_width':1.4},
@@ -48,7 +49,7 @@ def density_axes(getter,width=5.2,height=3.2,center=(3.25,0,0)):
         number=DecimalNumber(ratio*ymax(),num_decimal_places=1,font_size=18).next_to(native(0,ratio),LEFT,buff=.1)
         number.add_updater(lambda m,r=ratio:m.set_value(r*ymax()).next_to(native(0,r),LEFT,buff=.1))
         labels.add(number)
-    labels.add(jp('縦軸は自動調整',16,MUTED).next_to(ax,DOWN,buff=.38))
+    labels.add(jp('縦軸自動',15,MUTED).next_to(labels[1],RIGHT,buff=.25))
     return ax,labels
 
 
@@ -149,13 +150,19 @@ class PRML56MixtureDensityNetworks(Scene):
             action_start=start+a,action_end=start+b,cues=[dict(c,start=start+c['start'],end=start+c['end']) for c in cues]))
         visual=[]
         if a>0:visual.append(Wait(a))
-        visual.append(AnimationGroup(*animations,run_time=b-a) if animations else Wait(b-a))
+        prepared=[prepare_animation(a) for a in animations]
+        for anim in prepared:
+            if isinstance(anim,(Write,FadeIn,FadeOut,Create)) or (isinstance(anim,Transform) and isinstance(anim.mobject,MathTex)):
+                anim.set_run_time(min(1.8,(b-a)*.25))
+            else:
+                anim.set_run_time(b-a)
+        visual.append(AnimationGroup(*prepared,Wait(b-a)) if prepared else Wait(b-a))
         visual.append(Wait(max(.001,duration-b)))
         self.play(Succession(*visual),UpdateFromAlphaFunc(captions,caption_at,rate_func=linear),
                   run_time=(frames-1e-5)/fps,rate_func=linear)
         self.beat_index+=1
 
-    def formula(self,s,pos=(0,2.1,0),size=31):
+    def formula(self,s,pos=(0,2.2,0),size=31):
         m=tex(s,size).move_to(pos)
         if m.width>12:m.scale_to_fit_width(12)
         return m
@@ -190,7 +197,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(Transform(f,inv),q.animate.set_value(0),r.animate.set_value(0))
         error=Line(target.get_center(),[1,-.4,0],color=RED,stroke_width=5)
         label=readout(r'\|\mathrm{error}\|=',lambda:.8,[3,1,0],RED)
-        self.beat(Create(error),Write(label),Indicate(red))
+        self.beat(Create(error),FadeIn(label),Indicate(red))
         other=self.arm(-angle,2*angle,C[1]);self.remove(red)
         self.beat(FadeOut(error),FadeOut(label),FadeIn(other),ghost.animate.set_opacity(1))
 
@@ -219,7 +226,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(Transform(formula,eq),xv.animate.set_value(.62))
 
     def mixture_scene(self):
-        ax,lab=axes(xrange=(-.2,1.2,.2),yrange=(0,5,1),width=9,height=3.4,xlabel='t',ylabel='p')
+        ax,lab=axes(xrange=(-.2,1.2,.2),yrange=(0,5,1),width=9,height=2.9,center=(0,-.1,0),xlabel='t',ylabel='p')
         mu=ValueTracker(.45); sig=ValueTracker(.09); blend=ValueTracker(0); gate=ValueTracker(0)
         def pars():
             b=blend.get_value(); g=gate.get_value()
@@ -228,11 +235,11 @@ class PRML56MixtureDensityNetworks(Scene):
         graph=mix_graph(ax,pars,True)
         self.add(ax,lab)
         self.beat(FadeIn(graph),Write(self.note('確率 ＝ 区間に対応する面積',GREEN)))
-        self.add(slider(mu,.15,.85,(-3,-2.2,0),label=r'\mu',color=C[1]),readout(r'\mu=',mu.get_value,[3,-2.2,0],C[1]))
+        self.add(slider(mu,.15,.85,(-3,-2.3,0),label=r'\mu',color=C[1]),readout(r'\mu=',mu.get_value,[3,-2.3,0],C[1]))
         self.beat(mu.animate.set_value(.22))
         self.beat(sig.animate.set_value(.16))
         self.beat(blend.animate.set_value(1),sig.animate.set_value(.095))
-        prob=bars(lambda:pars()[0],[0,1.95,0],width=5)
+        prob=bars(lambda:pars()[0],[0,2.15,0],width=5)
         self.add(prob)
         self.beat(gate.animate.set_value(1))
         self.remove(prob)
@@ -257,10 +264,11 @@ class PRML56MixtureDensityNetworks(Scene):
     def network_scene(self):
         xv=ValueTracker(.15); net=self.network(xv,origin=(-3.6,0,0))
         ax,lab=density_axes(lambda:self.p(xv.get_value()))
-        graph=mix_graph(ax,lambda:self.p(xv.get_value()))
+        graph=mix_graph(ax,lambda:self.p(xv.get_value()),True)
         self.add(slider(xv,.12,.88,(-3.7,-2.2,0),label='x'),ax,lab,graph)
         self.add(self.note('隠れ層16個のうち8個を表示　／　学習例の幅には下限0.012を加算'))
-        self.beat(FadeIn(net),xv.animate.set_value(.4))
+        self.add(net)
+        self.beat(xv.animate.set_value(.4))
         count=self.formula(r'K=3,\quad 3K=9',size=32)
         self.beat(Write(count),Indicate(net[3]))
         soft=self.formula(r'\pi_k={e^{a_k^\pi}\over\sum_l e^{a_l^\pi}},\quad\sum_k\pi_k=1',size=30).set_color(C[0])
@@ -272,7 +280,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(xv.animate.set_value(.15),Transform(count,self.formula(r'x\ \longrightarrow\ (\pi_k,\mu_k,\sigma_k)\ \longrightarrow\ p(t\mid x)')))
 
     def training_scene(self):
-        ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,7,2),width=8.7,height=3.3,xlabel='t',ylabel='p')
+        ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,7,2),width=8.7,height=3.0,center=(0,-.2,0),xlabel='t',ylabel='p')
         mu=ValueTracker(.30);obs=.62
         pars=lambda:(np.array([.45,.35,.2]),np.array([mu.get_value(),.83,.13]),np.array([.085,.1,.09]))
         graph=mix_graph(ax,pars)
@@ -306,7 +314,7 @@ class PRML56MixtureDensityNetworks(Scene):
     def responsibility_scene(self):
         p=np.array([.28,.42,.30]); mu=np.array([.2,.5,.8]);sig=np.array([.13,.11,.12])
         tv=ValueTracker(.18)
-        ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,2.1,.5),width=7,height=3.2,center=(-2,.1,0),xlabel='t',ylabel='p')
+        ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,2.1,.5),width=7,height=3.0,center=(-2,-.15,0),xlabel='t',ylabel='p')
         graph=mix_graph(ax,lambda:(p,mu,sig))
         guide=always_redraw(lambda:Line(ax.c2p(tv.get_value(),0),ax.c2p(tv.get_value(),2),color=YELLOW))
         self.add(ax,lab,graph,guide)
@@ -315,7 +323,8 @@ class PRML56MixtureDensityNetworks(Scene):
         bs=bars(gamma,[3.8,.6,0],width=3.1,labels=False)
         nums=VGroup(*[readout(rf'\gamma_{k+1}=',lambda k=k:float(gamma()[k]),[3.8,-k*.45,0],C[k]) for k in range(3)])
         eq=self.formula(r'\gamma_k={\pi_k\mathcal{N}_k\over\sum_l\pi_l\mathcal{N}_l}',size=32)
-        self.beat(Write(eq),FadeIn(bs),FadeIn(nums),tv.animate.set_value(.46))
+        self.add(bs,nums)
+        self.beat(Write(eq),tv.animate.set_value(.46))
         prior=jp('観測前',21,MUTED).move_to([3.8,1.65,0]);post=jp('観測後',21,YELLOW).move_to([3.8,1,0])
         priorbar=bars(lambda:p,[3.8,1.35,0],width=3.1,labels=False)
         self.beat(FadeIn(priorbar),Write(prior),Write(post),tv.animate.set_value(.3))
@@ -327,7 +336,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(GrowArrow(arrow),Write(self.note('出力の勾配 → 共有する隠れ層 → 重みの更新',YELLOW)))
 
     def map_scene(self):
-        ax,lab=axes(width=6,height=3.7,center=(-3,-.05,0))
+        ax,lab=axes(width=6,height=3.4,center=(-3,-.2,0))
         xs=np.linspace(0,1,260); ts=np.linspace(1,0,220)
         p,m,s=parameters(self.w,xs)
         z=np.sum(p[None,:,:]*normal(ts[:,None,None],m[None,:,:],s[None,:,:]),axis=2)
@@ -341,8 +350,8 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(FadeIn(dots),Write(self.note('密度：暗 0 → 明 14以上　／　学習例')))
         xv=ValueTracker(.12)
         scan=always_redraw(lambda:Line(ax.c2p(xv.get_value(),0),ax.c2p(xv.get_value(),1),color=YELLOW))
-        da,dl=density_axes(lambda:self.p(xv.get_value()),width=4.7,height=3.2,center=(3.8,0,0))
-        graph=mix_graph(da,lambda:self.p(xv.get_value()))
+        da,dl=density_axes(lambda:self.p(xv.get_value()),width=4.7,height=3.0,center=(3.8,-.25,0))
+        graph=mix_graph(da,lambda:self.p(xv.get_value()),True)
         self.add(scan,da,dl,graph,slider(xv,.12,.88,(-3,-2.3,0),width=4,label='x'),readout('x=',xv.get_value,[3.7,-2.35,0],YELLOW))
         self.beat(xv.animate.set_value(.18))
         self.beat(xv.animate.set_value(.5))
@@ -352,7 +361,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(xv.animate.set_value(.25),Write(self.formula(r'\pi_k(x),\quad\mu_k(x),\quad\sigma_k(x)',size=31)))
 
     def summaries_scene(self):
-        ax,lab=axes(xrange=(-.5,1.5,.5),yrange=(0,4,1),width=9,height=3.3,xlabel='t',ylabel='p')
+        ax,lab=axes(xrange=(-.5,1.5,.5),yrange=(0,4,1),width=9,height=2.9,center=(0,-.1,0),xlabel='t',ylabel='p')
         sep=ValueTracker(.18);width=ValueTracker(.12);weight=ValueTracker(.5);second=ValueTracker(.12)
         def pars():return np.array([weight.get_value(),1-weight.get_value()]),np.array([.5-sep.get_value(),.5+sep.get_value()]),np.array([width.get_value(),second.get_value()])
         def mean():p,m,s=pars();return float(p@m)
@@ -364,8 +373,8 @@ class PRML56MixtureDensityNetworks(Scene):
         self.add(ax,lab,graph)
         self.beat(Write(eq),Create(meanline))
         self.beat(sep.animate.set_value(.4))
-        var=self.formula(r's^2=\sum_k\pi_k\underbrace{\sigma_k^2}_{\text{within}}+\sum_k\pi_k\underbrace{(\mu_k-m)^2}_{\text{between}}',size=30)
-        nums=VGroup(readout(r'\mathrm{within}=',within,[-3,-2.2,0],C[0],3),readout(r'\mathrm{between}=',between,[3,-2.2,0],C[1],3))
+        var=VGroup(tex(r's^2=',30),tex(r'\sum_k\pi_k\underbrace{\sigma_k^2}_{\text{within}}',30,C[0]),tex('+',30),tex(r'\sum_k\pi_k\underbrace{(\mu_k-m)^2}_{\text{between}}',30,C[1])).arrange(RIGHT,buff=.15).move_to([0,2.2,0])
+        nums=VGroup(readout(r'\mathrm{within}=',within,[-3,-2.2,0],C[0],3),readout(r'\mathrm{between}=',between,[3,-2.3,0],C[1],3))
         self.beat(Transform(eq,var),FadeIn(nums))
         self.beat(sep.animate.set_value(.46),width.animate.set_value(.2),second.animate.set_value(.2))
         self.remove(nums,meanline)
@@ -384,8 +393,8 @@ class PRML56MixtureDensityNetworks(Scene):
         self.add(Dot([-2.6,0,0],color=YELLOW))
         self.beat(FadeIn(upper),FadeIn(lower))
         xv=ValueTracker(.5)
-        ax,lab=density_axes(lambda:self.p(xv.get_value()),width=5.4,height=3.1,center=(3,0,0))
-        graph=mix_graph(ax,lambda:self.p(xv.get_value()))
+        ax,lab=density_axes(lambda:self.p(xv.get_value()),width=5.4,height=3.0,center=(3,-.25,0))
+        graph=mix_graph(ax,lambda:self.p(xv.get_value()),True)
         eq=self.formula(r'x\longrightarrow (\pi,\mu,\sigma)\longrightarrow p(t\mid x)')
         self.beat(Create(ax),FadeIn(lab),FadeIn(graph),Write(eq))
         self.beat(Transform(eq,self.formula(r'E=-\sum_n\ln p(t_n\mid x_n),\qquad\gamma_k\longrightarrow\nabla_w E')),xv.animate.set_value(.6))
@@ -393,4 +402,4 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(Transform(eq,dimensions),xv.animate.set_value(.3))
         distinction=self.formula(r'p(t\mid x,w_{\mathrm{ML}})\qquad\qquad p(w\mid\mathcal{D})',size=34)
         self.beat(Transform(eq,distinction),xv.animate.set_value(.85))
-        self.beat(Transform(eq,self.formula(r'\text{one input}\quad\longrightarrow\quad\text{a distribution}',size=36)),xv.animate.set_value(.5),Indicate(upper),Indicate(lower))
+        self.beat(Transform(eq,self.formula(r'x\quad\longrightarrow\quad p(t\mid x)',size=36)),xv.animate.set_value(.5),Indicate(upper),Indicate(lower))
