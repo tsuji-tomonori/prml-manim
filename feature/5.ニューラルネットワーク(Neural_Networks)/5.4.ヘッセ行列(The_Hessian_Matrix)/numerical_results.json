@@ -1,0 +1,35 @@
+{
+  "seed": 54,
+  "samples": 40,
+  "max_function_difference_error": 2.1810926731369307e-08,
+  "max_gradient_difference_error": 9.547584944868959e-11,
+  "max_hvp_error": 4.440892098500626e-16,
+  "max_inverse_update_error": 6.661338147750939e-16,
+  "max_ellipse_level_error": 6.661338147750939e-16,
+  "logistic_hessian_error": 1.75092509935304e-11,
+  "eigenvalues": [
+    0.9999999999999998,
+    5.0
+  ],
+  "example_H": [
+    [
+      0.29918112041058575,
+      0.5752531259387442
+    ],
+    [
+      0.5752531259387442,
+      0.2580410723335365
+    ]
+  ],
+  "example_direction": [
+    0.6,
+    0.8
+  ],
+  "example_Hv": [
+    0.6397111729973469,
+    0.5515847334300757
+  ],
+  "scenes": 9,
+  "sentences": 108,
+  "audio_seconds": 628.4666666666667
+}
