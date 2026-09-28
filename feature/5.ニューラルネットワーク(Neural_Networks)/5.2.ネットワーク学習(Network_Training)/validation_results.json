@@ -1,0 +1,83 @@
+{
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "590.333333"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "590.357333"
+      }
+    ],
+    "format": {
+      "duration": "590.358000"
+    }
+  },
+  "stream_difference": 0.02400000000000091,
+  "silences_over_3s": 0,
+  "mean_volume": -26.4,
+  "max_volume": -6.7,
+  "max_scene_clock_error": 4.843769829676603e-11,
+  "sync": [
+    {
+      "id": "scene01-03-01",
+      "display": "黄色い線は、予測と観測のずれを示します。",
+      "action_start": 17.266666666666627,
+      "action_end": 25.533333333333296,
+      "pcm_onset": 17.35375
+    },
+    {
+      "id": "scene01-03-02",
+      "display": "一つの点に近づいても、別の点から離れるかもしれません。",
+      "action_start": 17.266666666666627,
+      "action_end": 25.533333333333296,
+      "pcm_onset": 20.880583333333334
+    },
+    {
+      "id": "scene04-03-01",
+      "display": "一つが増えると、ほかの確率は減り、合計は一のままです。",
+      "action_start": 185.79999999999458,
+      "action_end": 195.5999999999946,
+      "pcm_onset": 185.8874166666623
+    },
+    {
+      "id": "scene04-03-02",
+      "display": "正解クラスの確率の対数にマイナスを付けて、誤差を作ります。",
+      "action_start": 185.79999999999458,
+      "action_end": 195.5999999999946,
+      "pcm_onset": 190.63462499999562
+    },
+    {
+      "id": "scene09-03-01",
+      "display": "同じ出発点に戻り、学習率だけを大きくします。",
+      "action_start": 486.4666666666442,
+      "action_end": 495.99999999997755,
+      "pcm_onset": 486.53062499997867
+    },
+    {
+      "id": "scene09-03-02",
+      "display": "細い谷では、向こう岸を越えて戻る、ジグザグの動きが見えてきます。",
+      "action_start": 486.4666666666442,
+      "action_end": 495.99999999997755,
+      "pcm_onset": 490.61987499997866
+    }
+  ],
+  "sha256": "cc66ee37832aa904cbbc00199356a83b3ecac4eae4c52f31bd2a7b0f648c5a01",
+  "full_listen": false,
+  "visual_review": {
+    "inspected_frames": 73,
+    "beat_frames": 60,
+    "math_caption_frames": 6,
+    "sync_frames": 6,
+    "divergence_endpoint_frames": 1,
+    "unresolved_findings": []
+  }
+}
