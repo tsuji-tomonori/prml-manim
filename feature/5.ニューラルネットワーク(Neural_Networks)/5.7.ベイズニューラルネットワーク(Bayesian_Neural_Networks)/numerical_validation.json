@@ -1,0 +1,54 @@
+{
+  "contour_linear_error": 1.6653345369377348e-16,
+  "jacobian_max_error": 4.404832054660801e-11,
+  "hessian_direction_error": 1.5686824781369069e-06,
+  "minimum_regression_curvature": 1.698266703792263,
+  "map_gradient_norm": 2.8819078967414625e-05,
+  "projection_relative_error": 0.0028722112999703953,
+  "evidence_quadrature_error": 2.65898414397725e-14,
+  "hyperparameter_update_error": 0.0,
+  "permutation_error": 1.1102230246251565e-16,
+  "class_alpha": 0.6,
+  "class_log_evidence": [
+    -28.649883426760965,
+    -28.128394172984535,
+    -20.479763076036853,
+    -20.465492975061483,
+    -21.365986768242315
+  ],
+  "minimum_classification_curvature": 0.0743126138448425,
+  "class_gradient_max": 8.619139700665934e-08,
+  "sigmoid_integral": 0.7174240012578377,
+  "sigmoid_quadrature_difference": 1.5362161209786507e-08,
+  "sigmoid_kappa": 0.7189455412933526,
+  "sigmoid_kappa_error": 0.0015215400355149677,
+  "erratum_5190_difference": 2.113850896678744,
+  "regression_variance_at_x": {
+    "-2.4": 0.051688263430402503,
+    "0.0": 0.006631605162996518,
+    "2.4": 0.05208045143211135
+  },
+  "band_min": -1.1840791680796756,
+  "band_max": 1.205477273038384,
+  "alpha_updates": [
+    0.8,
+    0.9756920306252158,
+    1.0985359908505752,
+    1.1264883723166585,
+    1.1334566768928938
+  ],
+  "beta_updates": [
+    64.0,
+    40.66845501235762,
+    38.4720008795722,
+    37.77645847513113,
+    37.585916688607554
+  ],
+  "gamma_updates": [
+    5.976827123355126,
+    5.650954452090362,
+    5.5567085721312806,
+    5.533124264567703,
+    5.527019306201077
+  ]
+}

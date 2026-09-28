@@ -1,440 +1,320 @@
-from __future__ import annotations
-
-import math
-import wave
+"""PRML 5.7 — linked experiments in weights, predictions and probability (CE)."""
+import json
 from pathlib import Path
-
 import numpy as np
 from manim import *
+from scipy.special import expit
+from contour_lines import contours as contour_segments
+from scene_support import NarratedScene, jp, tex
+from make_voicevox_narration import MANIFEST
+from narration_content import SCENES
+from bayesian_model import X,T,GRID,ALPHA,BETA,output,jacobian,variance,gaussian,kappa,integrated_sigmoid,evidence_example,objective
 
+DATA=ManimColor('#58B5ED'); POST=ManimColor('#70DBA5'); PRIOR=ManimColor('#C29AFF')
+NOISE=ManimColor('#FFB45B'); MAP=ManimColor('#FF6B77'); GOLD=ManimColor('#FFE079'); MUTED=ManimColor('#A8B2C5')
+D=np.load(Path(__file__).with_name('model_data.npz'))
+W=D['w']; COV=D['cov']; A=D['A']; EIG,U=np.linalg.eigh(A)
+MEAN=output(W,GRID); VAR=variance(W,COV,GRID)
 
-BLUE_DATA = BLUE_C
-GREEN_POSTERIOR = GREEN_C
-RED_MAP = RED_C
-ORANGE_LIKELIHOOD = ORANGE
-YELLOW_EVIDENCE = YELLOW_C
-PURPLE_PRIOR = PURPLE_C
-TEAL_PREDICTIVE = TEAL_C
-TEXT_GREY = GREY_B
-JAPANESE_FONT = "Noto Sans CJK JP"
+def line(ax,x,y,color=POST,width=3,opacity=1):
+    origin=ax.c2p(0,0)
+    pts=origin+np.asarray(x)[:,None]*(ax.c2p(1,0)-origin)+np.asarray(y)[:,None]*(ax.c2p(0,1)-origin)
+    return VMobject().set_points_as_corners(pts).set_stroke(color,width,opacity)
 
-SCENE_DIR = Path(__file__).resolve().parent
-VOICEOVER_DIR = SCENE_DIR / "assets" / "voicevox"
+def band(ax,mean,sd,color=POST):
+    pts=[ax.c2p(x,y) for x,y in zip(GRID,mean+2*sd)]
+    pts += [ax.c2p(x,y) for x,y in zip(GRID[::-1],(mean-2*sd)[::-1])]
+    return Polygon(*pts,stroke_width=0,fill_color=color,fill_opacity=.23)
 
-ManimText = Text
+def readout(label,getter,pos,color=WHITE):
+    lab=tex(label,25,color);num=DecimalNumber(getter(),num_decimal_places=3,font_size=25,color=color)
+    group=VGroup(lab,num).arrange(RIGHT,buff=.12).move_to(pos)
+    anchor=num.get_left().copy()
+    num.add_updater(lambda m:m.set_value(getter()).move_to(anchor,aligned_edge=LEFT))
+    return group
 
+class PRML57BayesianNeuralNetworks(NarratedScene):
+    def construct(self):
+        self.camera.background_color='#10141F'
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        self.timeline=[]
+        for i,method in enumerate([self.question,self.update,self.laplace,self.project,self.two_variances,self.evidence,self.hyper,self.classification,self.marginal]):
+            self.begin(i);self.formula=None;self.note=None
+            method()
+            assert self.beat_index==len(SCENES[i]['beats'])
+            self.timeline[-1]['end']=float(self.time)
+        (Path(config.media_dir)/'prml57_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
 
-def Text(*args, **kwargs) -> ManimText:
-    kwargs.setdefault("font", JAPANESE_FONT)
-    return ManimText(*args, **kwargs)
+    def axes(self,x=(-2.6,2.6,1),y=(-2,2,1),center=(0,.25,0),width=9,height=3.4,xlabel='x',ylabel=r't,\ y'):
+        ax=Axes(x_range=x,y_range=y,x_length=width,y_length=height,tips=False,
+                axis_config=dict(color=MUTED,stroke_width=1.3,include_ticks=False)).move_to(center)
+        labs=VGroup()
+        for v in np.arange(np.ceil(x[0]/x[2])*x[2],x[1]+.001,x[2]):
+            labs.add(tex(f'{v:g}',18,MUTED).move_to(ax.c2p(v,y[0])+DOWN*.22))
+        for v in np.arange(np.ceil(y[0]/y[2])*y[2],y[1]+.001,y[2]):
+            labs.add(tex(f'{v:g}',18,MUTED).next_to(ax.c2p(x[0],v),LEFT,buff=.12))
+        labs.add(tex(xlabel,23).next_to(ax.c2p(x[1],y[0]),RIGHT,buff=.22))
+        labs.add(tex(ylabel,23).next_to(ax.c2p(x[0],y[1]),UP,buff=.15))
+        self.add(ax,labs);return ax
 
+    def dots(self,ax):return VGroup(*[Dot(ax.c2p(x,t),radius=.05,color=DATA) for x,t in zip(X[:,0],T)])
+    def legend(self,items):
+        mob=VGroup(*[VGroup(Line(ORIGIN,RIGHT*.3,color=c),jp(s,18,c)).arrange(RIGHT,buff=.1) for s,c in items]).arrange(RIGHT,buff=.45).move_to([0,2.65,0])
+        self.add(mob);return mob
+    def eq(self,*parts,colors=None):
+        m=MathTex(*parts,font_size=29).move_to([0,-2.35,0])
+        if m.width>12.4:m.scale_to_fit_width(12.4)
+        colors=colors or [WHITE,POST,NOISE,PRIOR,GOLD]
+        if len(parts)>1:
+            for i,p in enumerate(m):p.set_color(colors[i%len(colors)])
+        old=self.formula;self.formula=m
+        if old is not None:self.remove(old)
+        return FadeIn(m,rate_func=lambda t:smooth(min(1.,6*t)))
+    def note_anim(self,text,color=MUTED):
+        m=jp(text,21,color).move_to([0,2.12,0]);old=self.note;self.note=m
+        if old is not None:self.remove(old)
+        return FadeIn(m,rate_func=lambda t:smooth(min(1.,6*t)))
+    def slider(self,tracker,lo,hi,label,pos=(0,-1.9,0),width=5,color=GOLD):
+        base=NumberLine(x_range=[lo,hi],length=width,include_ticks=False,color=MUTED).move_to(pos)
+        dot=Dot(color=color,radius=.075).add_updater(lambda m:m.move_to(base.n2p(tracker.get_value())))
+        labelmob=tex(label,24,color).next_to(base,LEFT,buff=.2)
+        self.add(base,dot,labelmob);return VGroup(base,dot,labelmob)
+    def scan(self,ax,tracker,cov_scale=lambda:1.,noise_scale=lambda:1.):
+        def make():
+            x=tracker.get_value();mu=output(W,[x])[0];s=np.sqrt(cov_scale()*variance(W,COV,[x])[0]+noise_scale()/BETA)
+            return VGroup(DashedLine(ax.c2p(x,ax.y_range[0]),ax.c2p(x,ax.y_range[1]),color=GOLD,dash_length=.08,stroke_width=1),
+                          Line(ax.c2p(x,mu-2*s),ax.c2p(x,mu+2*s),color=GOLD,stroke_width=5),Dot(ax.c2p(x,mu),color=MAP,radius=.065))
+        return always_redraw(make)
+    def network(self,wgetter,pos=(4.6,.3,0)):
+        pts=[np.array([-1,0,0]),np.array([0,.6,0]),np.array([0,-.6,0]),np.array([1,0,0])]
+        pts=[p+np.array(pos) for p in pts]
+        nodes=VGroup(*[Circle(radius=.13,stroke_color=WHITE,fill_color='#10141F',fill_opacity=1).move_to(p) for p in pts])
+        def edges():
+            w=wgetter();return VGroup(*[Line(nodes[i].get_center(),nodes[j].get_center(),buff=.14,color=POST if v>=0 else MAP,stroke_width=1+2*abs(v)) for i,j,v in [(0,1,w[0]),(0,2,w[1]),(1,3,w[4]),(2,3,w[5])]])
+        return VGroup(always_redraw(edges),nodes)
 
-def gaussian(x: np.ndarray | float, mean: float = 0.0, sigma: float = 1.0) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    return np.exp(-0.5 * ((x_array - mean) / sigma) ** 2) / (sigma * np.sqrt(2.0 * np.pi))
+    def question(self):
+        ax=self.axes(center=(-1.2,.2,0),width=8,height=3.5)
+        dots=self.dots(ax);curve=line(ax,GRID,MEAN,MAP)
+        self.legend([('観測',DATA),('代表の予測',MAP),('重みの候補',POST)])
+        self.beat(FadeIn(dots),Create(curve))
+        x=ValueTracker(0);scan=self.scan(ax,x);self.add(scan)
+        self.beat(x.animate.set_value(2.35))
+        tweak=ValueTracker(0);getter=lambda:W+np.eye(7)[0]*tweak.get_value()
+        curve.add_updater(lambda m:m.become(line(ax,GRID,output(getter(),GRID),MAP)))
+        net=self.network(getter);self.add(net);self.slider(tweak,-.14,.14,r'\Delta w_1',pos=(4.2,-.9,0),width=1.8)
+        self.beat(tweak.animate.set_value(.14).set_rate_func(there_and_back))
+        samples=VGroup(*[line(ax,GRID,output(w,GRID),POST,1.5,.48) for w in D['samples']])
+        self.beat(LaggedStart(*[Create(m) for m in samples],lag_ratio=.12))
+        self.beat(x.animate.set_value(-2.35))
+        self.beat(x.animate.set_value(.5),self.eq(r'p(t\mid x,D)=',r'\int p(t\mid x,w)',r'p(w\mid D)\,dw'))
 
+    def update(self):
+        ax=self.axes(x=(-3,3,1),y=(0,1.5,.5),height=3.1,center=(0,.35,0),xlabel=r'w_\parallel',ylabel=r'\mathrm{density}')
+        self.legend([('事前',PRIOR),('尤度（最大値を1へ換算）',NOISE),('条件付き事後',POST)])
+        grid=np.linspace(-3,3,501);direction=U[:,0];coordinate=float(W@direction);mu=0.
+        precision=ValueTracker(.8)
+        prior=always_redraw(lambda:line(ax,grid,gaussian(grid,mu,1/precision.get_value()),PRIOR))
+        self.add(prior)
+        self.beat(precision.animate.set_value(3),self.eq(r'p(w\mid\alpha)=',r'\mathcal N(w\mid0,\alpha^{-1}I)',colors=[WHITE,PRIOR]))
+        self.beat(precision.animate.set_value(ALPHA),self.eq(r'p(t\mid x,w,\beta)=',r'\mathcal N(t\mid y(x,w),',r'\beta^{-1})'))
+        energies=np.array([BETA*np.sum((output(W+(s-coordinate)*direction,X)-T)**2)/2 for s in grid]);like=np.exp(-energies+energies.min())
+        lc=line(ax,grid,like,NOISE)
+        self.beat(Create(lc),self.eq(r'p(D\mid w,\beta)=\prod_n\mathcal N(t_n\mid y(x_n,w),\beta^{-1})'),self.note_anim('他の座標を固定した、重み空間の一本の軸'))
+        power=ValueTracker(0)
+        full=np.linspace(-12,12,2401)
+        efull=np.array([BETA*np.sum((output(W+(s-coordinate)*direction,X)-T)**2)/2 for s in full])
+        def density():
+            log=-ALPHA*full**2/2-power.get_value()*efull
+            v=np.exp(log-log.max());v/=np.trapezoid(v,full)
+            return np.interp(grid,full,v)
+        post=always_redraw(lambda:line(ax,grid,density(),POST));self.add(post)
+        self.beat(power.animate.set_value(1),self.eq(r'p(w\mid D)\propto',r'p(D\mid w)',r'p(w)',colors=[WHITE,NOISE,PRIOR]))
+        self.beat(Indicate(post,color=POST,scale_factor=1),self.eq(r'E(w)=',r'\frac{\beta}{2}\sum_n[y(x_n,w)-t_n]^2',r'+\frac{\alpha}{2}w^Tw',colors=[WHITE,NOISE,PRIOR]))
+        mode=Dot(ax.c2p(coordinate,float(np.interp(coordinate,grid,density()))),color=MAP)
+        self.beat(FadeIn(mode),Indicate(post,scale_factor=1),self.eq(r'w_{\mathrm{MAP}}=\operatorname*{arg\,min}_w E(w)'))
 
-def target_function(x: np.ndarray | float) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    return np.sin(1.35 * x_array) + 0.18 * x_array
+    def laplace(self):
+        ax=self.axes(x=(-.32,.32,.2),y=(0,3.5,1),height=3.2,center=(-2,.3,0),width=6.5,xlabel='s',ylabel=r'E(w)-E(w_{\rm MAP})')
+        self.legend([('実際の断面',DATA),('局所二次近似',GOLD)])
+        angle=ValueTracker(0);grid=np.linspace(-.32,.32,181)
+        def direction():return np.cos(angle.get_value())*U[:,2]+np.sin(angle.get_value())*U[:,4]
+        e0=objective(W,X,T,ALPHA,BETA)[0]
+        def actual():return np.array([objective(W+s*direction(),X,T,ALPHA,BETA)[0]-e0 for s in grid])
+        actual_curve=always_redraw(lambda:line(ax,grid,actual(),DATA))
+        self.add(actual_curve)
+        self.beat(Create(Dot(ax.c2p(0,0),color=MAP)),self.note_anim('谷底を通る断面。横軸の s は重みの変位'))
+        quad=always_redraw(lambda:line(ax,grid,.5*(direction()@A@direction())*grid**2,GOLD))
+        self.add(quad)
+        self.beat(self.eq(r'E(w)\simeq E(w_{\rm MAP})+',r'\frac12\Delta w^TA\Delta w'))
+        # Keep the true nonquadratic curve inside the chart while rotating.
+        bell_ax=self.axes(x=(-1.2,1.2,1),y=(0,3,1),height=2.8,center=(4.6,.3,0),width=2.5,xlabel='s',ylabel='q(s)')
+        sg=np.linspace(-1.2,1.2,161)
+        bell=always_redraw(lambda:line(bell_ax,sg,gaussian(sg,0,1/(direction()@A@direction())),POST))
+        self.add(bell)
+        self.beat(angle.animate.set_value(.55),self.note_anim('曲がり方が大きい方向 → 幅が狭い',GOLD))
+        self.beat(angle.animate.set_value(0),self.note_anim('曲がり方が小さい方向 → 幅が広い',POST))
+        self.beat(Indicate(quad,scale_factor=1),self.eq(r'A=',r'\alpha I',r'+\beta H',r',\quad H=\nabla\nabla\frac12\sum_n(y_n-t_n)^2'))
+        self.beat(self.eq(r'q(w\mid D)=',r'\mathcal N(w\mid w_{\rm MAP},A^{-1})'),self.note_anim('正定値の A が必要。一つの山の近似',PRIOR),angle.animate.set_value(.25))
 
+    def project(self):
+        ax=self.axes(y=(-1.4,1.4,1),center=(-1.15,.2,0),width=8,height=3.35)
+        self.legend([('元のネットワーク',DATA),('重みについて線形化',POST)])
+        self.add(self.dots(ax),line(ax,GRID,MEAN,MAP))
+        theta=ValueTracker(0)
+        delta=lambda:.16*(np.cos(theta.get_value())*U[:,0]/np.sqrt(EIG[0])+np.sin(theta.get_value())*U[:,1]/np.sqrt(EIG[1]))
+        exact=always_redraw(lambda:line(ax,GRID,output(W+delta(),GRID),DATA))
+        approx=always_redraw(lambda:line(ax,GRID,MEAN+jacobian(W,GRID)@delta(),POST,2))
+        circle=Ellipse(width=1.6,height=1.6*np.sqrt(EIG[0]/EIG[1]),color=PRIOR).move_to([4.75,.4,0]);dot=Dot(color=GOLD).add_updater(lambda m:m.move_to(circle.point_at_angle(theta.get_value())))
+        lab=jp('重みの小さな変化',19,PRIOR).next_to(circle,DOWN,buff=.3)
+        self.add(circle,dot,lab,exact)
+        self.beat(theta.animate.set_value(PI),self.eq(r'p(t\mid x,D)\simeq\int p(t\mid x,w)q(w\mid D)\,dw'))
+        self.add(approx)
+        self.beat(theta.animate.set_value(2*PI),self.eq(r'y(x,w)\simeq',r'y(x,w_{\rm MAP})',r'+g^T(w-w_{\rm MAP})'))
+        self.beat(theta.animate.set_value(3*PI),self.eq(r'g=\left.\nabla_w y(x,w)\right|_{w_{\rm MAP}}'))
+        x=ValueTracker(-2.3);scan=self.scan(ax,x,noise_scale=lambda:0);self.add(scan)
+        self.beat(x.animate.set_value(2.3))
+        self.beat(x.animate.set_value(0),self.eq(r'\operatorname{Var}_q[y_{\rm lin}]=',r'g^TA^{-1}g'))
+        self.beat(theta.animate.set_value(4*PI),self.note_anim('① 重みの分布をガウス化　② 出力を重みについて線形化'))
 
-def prior_function(x: np.ndarray | float, w1: float, w2: float, w3: float, w4: float) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    return 0.9 * np.tanh(w1 * x_array + w2) + 0.45 * np.tanh(w3 * x_array + w4)
+    def two_variances(self):
+        ax=self.axes(y=(-1.4,1.4,1),center=(-1.3,.3,0),width=7.6,height=3.25)
+        self.legend([('重み ±2標準偏差',POST),('観測ノイズ',NOISE),('予測全体',DATA)])
+        scale=ValueTracker(1);noise=ValueTracker(0)
+        b=always_redraw(lambda:band(ax,MEAN,np.sqrt(scale.get_value()*VAR+noise.get_value()/BETA),DATA if noise.get_value()>.1 else POST))
+        self.add(b,self.dots(ax),line(ax,GRID,MEAN,MAP))
+        self.beat(self.eq(r'y(x,w_{\rm MAP})\ \pm\ 2\sqrt{',r'g^TA^{-1}g',r'}'))
+        x=ValueTracker(0)
+        self.add(self.scan(ax,x,cov_scale=scale.get_value,noise_scale=noise.get_value))
+        def bars():
+            v=float(variance(W,COV,[x.get_value()])[0])*scale.get_value();a=noise.get_value()/BETA
+            start=np.array([3.5,-.6,0]);unit=18
+            first=Rectangle(width=.65,height=max(.001,a*unit),fill_color=NOISE,fill_opacity=.85,stroke_width=0).move_to(start+UP*a*unit/2)
+            second=Rectangle(width=.65,height=max(.001,v*unit),fill_color=POST,fill_opacity=.85,stroke_width=0).move_to(start+UP*(a+v/2)*unit)
+            return VGroup(first,second)
+        bar=always_redraw(bars);self.add(bar,jp('分散の和',21).move_to([3.5,1.5,0]),readout(r'\sigma^2=',lambda:noise.get_value()/BETA+scale.get_value()*variance(W,COV,[x.get_value()])[0],(4.35,-1.25,0)))
+        self.beat(noise.animate.set_value(1),self.eq(r'p(t\mid x,D)\simeq\mathcal N(t\mid y(x,w_{\rm MAP}),\sigma^2(x))'))
+        self.beat(self.eq(r'\sigma^2(x)=',r'g^TA^{-1}g',r'+\beta^{-1}'),Indicate(bar,scale_factor=1))
+        self.slider(x,-2.4,2.4,'x',pos=(-1.3,-1.85,0),width=4.5)
+        self.beat(x.animate.set_value(2.4))
+        self.beat(scale.animate.set_value(.03),self.note_anim('思考実験：重みの共分散だけを縮める'))
+        self.beat(x.animate.set_value(-2.4),self.note_anim('±2標準偏差は、近似ガウス予測の約95%の範囲'))
 
+    def evidence(self):
+        ax=self.axes(x=(-3,4,1),y=(0,1.7,.5),height=3.1,center=(0,.3,0),xlabel='w',ylabel=r'\mathrm{density}')
+        self.legend([('事前',PRIOR),('尤度',NOISE),('積と面積',POST)])
+        sd=ValueTracker(1.1);end=ValueTracker(-3);grid=np.linspace(-3,4,401)
+        like=gaussian(1.2,grid,.35**2)
+        prior=always_redraw(lambda:line(ax,grid,gaussian(grid,0,sd.get_value()**2),PRIOR))
+        lc=line(ax,grid,like,NOISE);self.add(prior,lc)
+        self.beat(self.eq(r'p(D\mid\alpha,\beta)=',r'\int p(D\mid w,\beta)p(w\mid\alpha)\,dw'),self.note_anim('積分を見るための一変数の説明例'))
+        prod=lambda:like*gaussian(grid,0,sd.get_value()**2)
+        product=always_redraw(lambda:line(ax,grid,prod(),POST))
+        def area():
+            xx=grid[grid<=end.get_value()];yy=prod()[:len(xx)]
+            if len(xx)<2:return VMobject()
+            return Polygon(ax.c2p(xx[0],0),*[ax.c2p(x,y) for x,y in zip(xx,yy)],ax.c2p(xx[-1],0),stroke_width=0,fill_color=POST,fill_opacity=.4)
+        ar=always_redraw(area);self.add(product,ar)
+        value=readout(r'p(D)=',lambda:evidence_example(sd.get_value()),(4.35,1.7,0),POST);self.add(value)
+        self.beat(end.animate.set_value(4))
+        self.beat(sd.animate.set_value(2.8))
+        self.beat(phases=[('狭すぎる事前',self.sentence_duration(0),lambda:sd.animate.set_value(.25)),
+                          ('中間の幅へ',self.sentence_duration(1),lambda:sd.animate.set_value(1.1))])
+        self.remove(prior,lc,product,ar,value,ax)
+        # Preserve graph labels only until this transition; full clearing avoids stray ticks.
+        for m in list(self.mobjects):
+            if m not in [self.subtitle,self.formula]: self.remove(m)
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
+        formula=MathTex(r'\log p(D\mid\alpha,\beta)\simeq',r'-E(w_{\rm MAP})',r'-\frac12\log|A|',r'+\frac W2\log\alpha+\frac N2\log\beta-\frac N2\log(2\pi)',font_size=29).arrange(DOWN,buff=.3).move_to([0,.6,0])
+        formula[1].set_color(MAP);formula[2].set_color(POST);formula[3].set_color(PRIOR)
+        self.beat(FadeIn(formula,rate_func=lambda t:smooth(min(1.,6*t))),self.eq(r'W:\ \mathrm{weights},\qquad N:\ \mathrm{observations}'))
+        self.beat(Indicate(formula[2]),self.eq(r'\log|A|=\sum_i\log a_i',r'\qquad(a_i>0)'))
 
-def posterior_function(x: np.ndarray | float, phase: float, slope: float, offset: float) -> np.ndarray | float:
-    x_array = np.asarray(x)
-    return np.sin(1.35 * x_array + phase) + slope * x_array + offset
+    def hyper(self):
+        alpha=ValueTracker(1);lam=np.array([.1,1,10,100]);base=-.8
+        def bars():
+            vals=lam/(alpha.get_value()+lam)
+            return VGroup(*[Rectangle(width=.85,height=2*v,fill_color=POST,fill_opacity=.8,stroke_width=0).move_to([-3+2*i,base+v,0]) for i,v in enumerate(vals)])
+        bar=always_redraw(bars);self.add(bar)
+        for i,l in enumerate(lam):self.add(tex(r'\lambda='+f'{l:g}',21).move_to([-3+2*i,-1.15,0]))
+        self.legend([('データで決まる寄与',POST),('4方向の説明例',MUTED)])
+        self.beat(self.eq(r'\beta Hu_i=\lambda_i u_i'),self.note_anim('ここでは非負の固有値を使う説明例'))
+        self.slider(alpha,.1,10,r'\alpha',pos=(0,-1.75,0))
+        val=readout(r'\gamma=',lambda:np.sum(lam/(alpha.get_value()+lam)),(4.9,1.6,0),POST);self.add(val)
+        self.beat(alpha.animate.set_value(10),self.eq(r'\gamma=\sum_{i=1}^W',r'\frac{\lambda_i}{\alpha+\lambda_i}'))
+        self.beat(alpha.animate.set_value(.3),self.eq(r'\alpha_{\rm new}=\frac{\gamma}{w_{\rm MAP}^Tw_{\rm MAP}}'))
+        for m in list(self.mobjects):
+            if m not in [self.subtitle,self.formula]:self.remove(m)
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
+        # Actual alternating updates, displayed one row per computed iterate.
+        rows=VGroup(tex(r'k\qquad\alpha\qquad\beta\qquad\gamma',27))
+        for i,(a,b,g) in enumerate(zip(D['history_alpha'],D['history_beta'],D['history_gamma'])):
+            rows.add(tex(f'{i}\\qquad {a:.3f}\\qquad {b:.2f}\\qquad {g:.3f}',25,POST if i else MUTED))
+        rows.arrange(DOWN,buff=.21).move_to([0,.5,0])
+        self.beat(LaggedStart(*[FadeIn(r) for r in rows],lag_ratio=.3),self.eq(r'\beta_{\rm new}^{-1}=\frac{\sum_n(y_n-t_n)^2}{N-\gamma}'))
+        self.beat(Indicate(rows[-1],scale_factor=1),self.note_anim('非線形モデルでは、固有値の変化を無視した再推定'))
+        self.remove(*rows,self.note);self.note=None
+        net=self.network(lambda:W,pos=(-3,.5,0))
+        net[1][1].set_color(DATA);net[1][2].set_color(NOISE)
+        lab1=tex('h_1',27,DATA).next_to(net[1][1],UP);lab2=tex('h_2',27,NOISE).next_to(net[1][2],DOWN)
+        self.add(net,lab1,lab2)
+        ax=self.axes(center=(3.25,.2,0),width=4.5,height=2.8)
+        self.add(line(ax,GRID,MEAN,POST),jp("関数は同じ",22,POST).move_to([3.25,1.95,0]))
+        self.beat(Swap(VGroup(net[1][1],lab1),VGroup(net[1][2],lab2)),self.eq(r'\text{tanh}:\quad M!\,2^M\ \text{equivalent modes}'))
 
+    def class_axes(self):
+        ax=self.axes(x=(-2.2,2.2,1),y=(-2.2,2.2,1),height=3.55,width=6.2,center=(-2,.2,0),xlabel='x_1',ylabel='x_2')
+        dots=VGroup(*[Dot(ax.c2p(*p),radius=.045,color=NOISE if t else DATA) for p,t in zip(D['cx'],D['ct'])]);self.add(dots)
+        return ax
+    def contours(self,ax,w,scale=0,levels=(.1,.3,.5,.7,.9)):
+        xy=np.linspace(-2.2,2.2,81);xx,yy=np.meshgrid(xy,xy);points=np.c_[xx.ravel(),yy.ravel()]
+        a=output(w,points);base_activation=a.reshape(xx.shape)
+        if scale: a=a*kappa(scale*variance(w,D['ccov'],points))
+        p=expit(a).reshape(xx.shape)
+        
+        group=VGroup()
+        for level in levels:
+            curve=VMobject().set_stroke(POST if level==.5 else GOLD,3 if level==.5 else 1.5)
+            for segment in contour_segments(xy,xy,base_activation if level==.5 else p,0 if level==.5 else level):
+                curve.start_new_path(ax.c2p(*segment[0]));curve.add_line_to(ax.c2p(*segment[1]))
+            group.add(curve)
+        return group
 
-class PRML57BayesianNeuralNetworks(Scene):
-    """PRML 5.7 Bayesian Neural Networks overview.
+    def classification(self):
+        ax=self.class_axes();self.legend([('クラス0',DATA),('クラス1',NOISE),('確率0.5',POST)])
+        weak=self.contours(ax,D['weak'],levels=(.5,));self.add(weak)
+        tag=jp('弱い正則化',23,MAP).move_to([3.4,1.4,0]);self.add(tag)
+        self.beat(Create(weak),self.eq(r'y_n=\sigma(a(x_n,w)),\quad t_n\in\{0,1\}'))
+        chosen=self.contours(ax,D['cw'],levels=(.5,))
+        self.beat(ReplacementTransform(weak,chosen),Transform(tag,jp('エビデンスで選択',23,POST).move_to(tag)))
+        self.beat(self.eq(r'\log p(D\mid w)=\sum_n[t_n\log y_n+(1-t_n)\log(1-y_n)]'),self.note_anim('ベルヌーイ尤度：回帰の β は使わない'))
+        self.beat(self.eq(r'E(w)=-\log p(D\mid w)+\frac\alpha2 w^Tw'),Indicate(chosen,scale_factor=1))
+        evidence=VGroup(*[tex(r'\alpha='+f'{a:g}'+r'\ :\ '+f'{v:.2f}',23,POST if a==D['calpha'] else MUTED) for a,v in zip(D['class_alphas'],D['class_evidence'])]).arrange(DOWN,buff=.18).move_to([3.45,-.25,0])
+        self.add(tex(r'\log p(D\mid\alpha)',23).move_to([3.45,.95,0]))
+        self.beat(FadeIn(evidence),self.eq(r'\log p(D\mid\alpha)\simeq-E(w_{\rm MAP})-\frac12\log|A|+\frac W2\log\alpha'))
+        extra=self.contours(ax,D['cw'],levels=(.1,.3,.7,.9))
+        self.beat(Create(extra),self.note_anim('緑：0.5　黄：0.1、0.3、0.7、0.9（MAP予測）'))
 
-    Render example:
-        uv run manim -ql prml_5_7_bayesian_neural_networks.py PRML57BayesianNeuralNetworks
-    """
-
-    def construct(self) -> None:
-        self.camera.background_color = "#101010"
-        self.x_data = np.array([-1.7, -1.25, -0.8, -0.35, 0.05, 0.45, 0.95, 1.35, 1.75])
-        noise = np.array([0.09, -0.07, 0.05, -0.04, 0.02, 0.08, -0.05, 0.04, -0.07])
-        self.t_data = target_function(self.x_data) + noise
-
-        self.point_estimate_to_distribution()
-        self.weight_prior()
-        self.likelihood_reweights_candidates()
-        self.posterior_distribution()
-        self.predictive_distribution()
-        self.laplace_approximation()
-        self.evidence_and_complexity()
-        self.summary()
-
-    def start_narration(self, scene_id: str) -> tuple[float, float | None]:
-        audio_path = VOICEOVER_DIR / f"{scene_id}.wav"
-        start_time = float(getattr(self, "time", 0.0))
-        if not audio_path.exists():
-            return start_time, None
-        self.add_sound(str(audio_path))
-        with wave.open(str(audio_path), "rb") as audio:
-            duration = audio.getnframes() / audio.getframerate()
-        return start_time, duration
-
-    def finish_narration(self, narration: tuple[float, float | None], pad: float = 0.2) -> None:
-        start_time, duration = narration
-        if duration is None:
-            return
-        elapsed = float(getattr(self, "time", 0.0)) - start_time
-        remaining = duration - elapsed + pad
-        if remaining > 0:
-            self.wait(remaining)
-
-    def section_label(self, text: str) -> Text:
-        label = Text(text, font_size=18, color=TEXT_GREY)
-        label.to_corner(UL)
-        return label
-
-    def scene_title(self, text: str, font_size: int = 34) -> Text:
-        title = Text(text, font_size=font_size)
-        title.to_edge(UP).shift(DOWN * 0.34)
-        return title
-
-    def function_axes(self, width: float = 7.4, height: float = 3.65) -> Axes:
-        return Axes(
-            x_range=[-3, 3, 1],
-            y_range=[-2.0, 2.0, 1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def density_axes(self, width: float = 4.4, height: float = 2.45) -> Axes:
-        return Axes(
-            x_range=[-3.0, 3.0, 1],
-            y_range=[0.0, 0.55, 0.2],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def parameter_plane(self, width: float = 4.0, height: float = 3.3) -> Axes:
-        return Axes(
-            x_range=[-2.4, 2.4, 1],
-            y_range=[-2.0, 2.0, 1],
-            x_length=width,
-            y_length=height,
-            tips=False,
-            axis_config={"color": GREY_B, "stroke_width": 2},
-        )
-
-    def data_dots(self, axes: Axes, radius: float = 0.055) -> VGroup:
-        return VGroup(
-            *[
-                Dot(axes.c2p(float(x), float(t)), radius=radius, color=BLUE_DATA)
-                for x, t in zip(self.x_data, self.t_data)
-            ]
-        )
-
-    def make_network(self, weights: list[float] | None = None, scale: float = 1.0) -> VGroup:
-        if weights is None:
-            weights = [0.4, -0.8, 1.1, -0.55, 0.75, 0.25, -0.35, 0.9, -0.65]
-        layers = [
-            [LEFT * 2.3 + UP * 0.85, LEFT * 2.3 + DOWN * 0.85],
-            [LEFT * 0.55 + UP * 1.15, LEFT * 0.55, LEFT * 0.55 + DOWN * 1.15],
-            [RIGHT * 1.25 + UP * 0.75, RIGHT * 1.25 + DOWN * 0.75],
-            [RIGHT * 2.75],
-        ]
-        nodes = VGroup()
-        for layer in layers:
-            for point in layer:
-                nodes.add(Circle(radius=0.16 * scale, color=WHITE, fill_color="#202020", fill_opacity=1).move_to(point * scale))
-        edges = VGroup()
-        weight_index = 0
-        for left_layer, right_layer in zip(layers, layers[1:]):
-            for start in left_layer:
-                for end in right_layer:
-                    value = weights[weight_index % len(weights)]
-                    color = GREEN_POSTERIOR if value >= 0 else RED_MAP
-                    line = Line(start * scale, end * scale, color=color, stroke_width=1.2 + 2.2 * min(abs(value), 1.2))
-                    line.set_opacity(0.72)
-                    edges.add(line)
-                    weight_index += 1
-        return VGroup(edges, nodes)
-
-    def candidate_curves(self, axes: Axes, kind: str) -> list[VMobject]:
-        xs = np.linspace(-3, 3, 180)
-        curves: list[VMobject] = []
-        if kind == "prior":
-            params = [
-                (0.6, -1.0, 1.6, 0.5),
-                (1.4, 0.25, -0.8, 1.1),
-                (-0.9, 1.2, 1.0, -0.7),
-                (1.9, -0.2, 0.55, -1.3),
-                (-1.4, -0.6, -1.1, 0.8),
-            ]
-            for parameter in params:
-                curve = axes.plot(lambda u, p=parameter: float(prior_function(u, *p)), x_range=[-3, 3], color=PURPLE_PRIOR, use_smoothing=False)
-                curve.set_stroke(width=3, opacity=0.58)
-                curves.append(curve)
-        else:
-            params = [
-                (-0.16, 0.10, 0.06),
-                (0.05, 0.18, -0.04),
-                (0.16, 0.12, 0.03),
-                (-0.04, 0.21, -0.08),
-                (0.11, 0.14, 0.00),
-            ]
-            for parameter in params:
-                curve = axes.plot(lambda u, p=parameter: float(posterior_function(u, *p)), x_range=[-3, 3], color=GREEN_POSTERIOR, use_smoothing=False)
-                curve.set_stroke(width=3, opacity=0.6)
-                curves.append(curve)
-        return curves
-
-    def point_estimate_to_distribution(self) -> None:
-        narration = self.start_narration("scene01")
-        label = self.section_label("PRML 5.7 Bayesian Neural Networks")
-        title = self.scene_title("重みを一点ではなく、分布として扱う", font_size=33)
-        axes = self.function_axes(width=7.4, height=3.55).shift(DOWN * 0.45)
-        dots = self.data_dots(axes)
-        map_curve = axes.plot(lambda u: float(target_function(u) + 0.02 * u), x_range=[-3, 3], color=RED_MAP)
-        map_curve.set_stroke(width=4)
-        posterior_curves = VGroup(*self.candidate_curves(axes, "posterior"))
-        point_label = Text("従来: 一組の重み", font_size=24, color=RED_MAP).next_to(axes, RIGHT, buff=0.25).shift(UP * 0.65)
-        dist_label = Text("ベイズ: 重みの分布", font_size=24, color=GREEN_POSTERIOR).next_to(point_label, DOWN, buff=0.28)
-        equation = MathTex(r"w^\ast \quad \longrightarrow \quad p(w\mid D)", font_size=42).to_edge(DOWN, buff=0.36)
-
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(FadeIn(dots, shift=UP * 0.1), Create(map_curve), FadeIn(point_label))
-        self.play(TransformFromCopy(map_curve, posterior_curves[0]), FadeIn(VGroup(*posterior_curves[1:]), lag_ratio=0.12), FadeIn(dist_label), Write(equation))
-        self.play(Indicate(posterior_curves, color=GREEN_POSTERIOR))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, dots, map_curve, posterior_curves, point_label, dist_label, equation)))
-
-    def weight_prior(self) -> None:
-        narration = self.start_narration("scene02")
-        label = self.section_label("重みの事前分布")
-        title = self.scene_title("学習前に、重みのありやすさを決める", font_size=33)
-        density = self.density_axes(width=4.4, height=2.35).shift(LEFT * 3.0 + UP * 0.1)
-        prior = density.plot(lambda w: gaussian(w, 0, 0.9), x_range=[-3, 3], color=PURPLE_PRIOR)
-        prior.set_stroke(width=4)
-        formula = MathTex(r"p(w)=\mathcal{N}(w\mid 0,\alpha^{-1}I)", font_size=35, color=PURPLE_PRIOR).next_to(density, DOWN, buff=0.35)
-        net_soft = self.make_network(scale=0.8).shift(RIGHT * 2.45 + UP * 0.85)
-        net_strong = self.make_network([1.25, -1.15, 1.0, -0.9, 0.8, -1.25, 1.1], scale=0.8).move_to(net_soft)
-        axes = self.function_axes(width=5.2, height=2.35).shift(RIGHT * 2.45 + DOWN * 1.55)
-        curves = VGroup(*self.candidate_curves(axes, "prior"))
-        note = Text("大きすぎる重みは起きにくい", font_size=23, color=TEXT_GREY).next_to(formula, DOWN, buff=0.2)
-
-        self.play(FadeIn(label), Write(title))
-        self.play(Create(density), Create(prior), Write(formula), FadeIn(note))
-        self.play(FadeIn(net_soft), Create(axes))
-        self.play(Transform(net_soft, net_strong), LaggedStart(*[Create(curve) for curve in curves], lag_ratio=0.12), run_time=1.6)
-        self.play(Indicate(prior, color=PURPLE_PRIOR), Indicate(curves, color=PURPLE_PRIOR))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, density, prior, formula, note, net_soft, axes, curves)))
-
-    def likelihood_reweights_candidates(self) -> None:
-        narration = self.start_narration("scene03")
-        label = self.section_label("尤度")
-        title = self.scene_title("データは、重み候補の重み付けを変える", font_size=32)
-        axes = self.function_axes(width=7.4, height=3.65).shift(LEFT * 1.0 + DOWN * 0.28)
-        dots = self.data_dots(axes)
-        bad = axes.plot(lambda u: float(-0.55 * np.sin(1.2 * u) + 0.55), x_range=[-3, 3], color=TEXT_GREY, use_smoothing=False)
-        mid = axes.plot(lambda u: float(np.sin(1.15 * u - 0.35) + 0.12 * u - 0.18), x_range=[-3, 3], color=ORANGE_LIKELIHOOD, use_smoothing=False)
-        good = axes.plot(lambda u: float(posterior_function(u, 0.03, 0.17, 0.01)), x_range=[-3, 3], color=GREEN_POSTERIOR, use_smoothing=False)
-        for curve in [bad, mid, good]:
-            curve.set_stroke(width=4)
-        residuals = VGroup()
-        for x, t in zip(self.x_data[::2], self.t_data[::2]):
-            y_bad = -0.55 * math.sin(1.2 * float(x)) + 0.55
-            residuals.add(Line(axes.c2p(float(x), float(t)), axes.c2p(float(x), y_bad), color=ORANGE_LIKELIHOOD, stroke_width=3))
-        scores = VGroup(
-            Text("低い尤度", font_size=22, color=TEXT_GREY),
-            Text("中くらい", font_size=22, color=ORANGE_LIKELIHOOD),
-            Text("高い尤度", font_size=22, color=GREEN_POSTERIOR),
-        ).arrange(DOWN, buff=0.28).next_to(axes, RIGHT, buff=0.35)
-        formula = MathTex(r"p(D\mid w)=\prod_n p(t_n\mid x_n,w)", font_size=35, color=ORANGE_LIKELIHOOD).to_edge(DOWN, buff=0.42)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(dots))
-        self.play(Create(bad), FadeIn(scores[0]))
-        self.play(Create(residuals), Write(formula))
-        mid_trace = bad.copy()
-        self.play(Transform(mid_trace, mid), FadeIn(scores[1]))
-        self.play(Create(good), FadeIn(scores[2]), FadeOut(residuals))
-        self.play(Indicate(good, color=GREEN_POSTERIOR), Indicate(scores[2], color=GREEN_POSTERIOR))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, dots, bad, mid_trace, good, residuals, scores, formula)))
-
-    def posterior_distribution(self) -> None:
-        narration = self.start_narration("scene04")
-        label = self.section_label("Bayes rule")
-        title = self.scene_title("事前分布と尤度から、事後分布へ", font_size=33)
-        formula = MathTex(
-            r"p(w\mid D)=\frac{p(D\mid w)p(w)}{p(D)}",
-            font_size=45,
-        ).to_edge(UP).shift(DOWN * 1.05)
-        prior_axes = self.density_axes(width=3.2, height=2.0).shift(LEFT * 4.0 + DOWN * 0.45)
-        like_axes = self.density_axes(width=3.2, height=2.0).shift(DOWN * 0.45)
-        post_axes = self.density_axes(width=3.2, height=2.0).shift(RIGHT * 4.0 + DOWN * 0.45)
-        prior = prior_axes.plot(lambda w: gaussian(w, 0, 1.0), x_range=[-3, 3], color=PURPLE_PRIOR)
-        likelihood = like_axes.plot(lambda w: 0.8 * gaussian(w, 0.75, 0.55), x_range=[-3, 3], color=ORANGE_LIKELIHOOD)
-        posterior = post_axes.plot(lambda w: gaussian(w, 0.55, 0.42), x_range=[-3, 3], color=GREEN_POSTERIOR)
-        for curve in [prior, likelihood, posterior]:
-            curve.set_stroke(width=4)
-        labels = VGroup(
-            Text("事前分布", font_size=23, color=PURPLE_PRIOR).next_to(prior_axes, DOWN, buff=0.18),
-            Text("尤度", font_size=23, color=ORANGE_LIKELIHOOD).next_to(like_axes, DOWN, buff=0.18),
-            Text("事後分布", font_size=23, color=GREEN_POSTERIOR).next_to(post_axes, DOWN, buff=0.18),
-        )
-        arrows = VGroup(
-            Arrow(prior_axes.get_right(), like_axes.get_left(), buff=0.25, color=TEXT_GREY),
-            Arrow(like_axes.get_right(), post_axes.get_left(), buff=0.25, color=TEXT_GREY),
-        )
-        evidence = MathTex(r"p(D)=\int p(D\mid w)p(w)\,dw", font_size=33, color=YELLOW_EVIDENCE).to_edge(DOWN, buff=0.42)
-        width_note = Text("幅が残る = 不確かさが残る", font_size=25, color=TEXT_GREY).next_to(posterior, UP, buff=0.16)
-
-        self.play(FadeIn(label), Write(title), Write(formula))
-        self.play(Create(prior_axes), Create(prior), FadeIn(labels[0]))
-        self.play(Create(like_axes), Create(likelihood), FadeIn(labels[1]), GrowArrow(arrows[0]))
-        self.play(Create(post_axes), Create(posterior), FadeIn(labels[2]), GrowArrow(arrows[1]))
-        self.play(Write(evidence), FadeIn(width_note))
-        self.play(Indicate(posterior, color=GREEN_POSTERIOR), Indicate(evidence, color=YELLOW_EVIDENCE))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, formula, prior_axes, like_axes, post_axes, prior, likelihood, posterior, labels, arrows, evidence, width_note)))
-
-    def predictive_band(self, axes: Axes) -> tuple[Polygon, VMobject, VGroup]:
-        xs = np.linspace(-3, 3, 160)
-        mean = target_function(xs) + 0.02 * xs
-        uncertainty = 0.12 + 0.10 * np.maximum(np.abs(xs) - 1.75, 0) ** 2
-        upper = mean + uncertainty
-        lower = mean - uncertainty
-        points = [axes.c2p(float(x), float(y)) for x, y in zip(xs, upper)]
-        points += [axes.c2p(float(x), float(y)) for x, y in zip(xs[::-1], lower[::-1])]
-        band = Polygon(*points, color=TEAL_PREDICTIVE, fill_color=TEAL_PREDICTIVE, fill_opacity=0.18, stroke_width=0)
-        mean_curve = axes.plot(lambda u: float(target_function(u) + 0.02 * u), x_range=[-3, 3], color=TEAL_PREDICTIVE)
-        mean_curve.set_stroke(width=4)
-        curves = VGroup(*self.candidate_curves(axes, "posterior"))
-        return band, mean_curve, curves
-
-    def predictive_distribution(self) -> None:
-        narration = self.start_narration("scene05")
-        label = self.section_label("予測分布")
-        title = self.scene_title("重みの分布を平均して、新しい入力を予測する", font_size=31)
-        axes = self.function_axes(width=7.5, height=3.6).shift(DOWN * 0.35)
-        dots = self.data_dots(axes)
-        band, mean_curve, curves = self.predictive_band(axes)
-        formula = MathTex(r"p(t\mid x,D)=\int p(t\mid x,w)p(w\mid D)\,dw", font_size=36).to_edge(DOWN, buff=0.38)
-        inside = Text("データ付近: 狭い", font_size=23, color=GREEN_POSTERIOR).next_to(axes.c2p(0.0, 1.45), UP, buff=0.1)
-        outside = Text("外側: 広い", font_size=23, color=YELLOW_EVIDENCE).next_to(axes.c2p(2.35, 1.45), UP, buff=0.1)
-        x_mark = DashedLine(axes.c2p(2.45, -1.75), axes.c2p(2.45, 1.65), color=YELLOW_EVIDENCE, dash_length=0.12)
-
-        self.play(FadeIn(label), Write(title), Create(axes), FadeIn(dots))
-        self.play(LaggedStart(*[Create(curve) for curve in curves], lag_ratio=0.1), run_time=1.4)
-        self.play(FadeIn(band), Create(mean_curve), Write(formula))
-        self.play(FadeIn(inside), FadeIn(outside), Create(x_mark))
-        self.play(Indicate(band, color=TEAL_PREDICTIVE), Indicate(outside, color=YELLOW_EVIDENCE))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, dots, band, mean_curve, curves, formula, inside, outside, x_mark)))
-
-    def ellipse_on_axes(self, axes: Axes, center: tuple[float, float], width: float, height: float, angle: float, color: ManimColor) -> Ellipse:
-        x0, y0 = center
-        p_center = axes.c2p(x0, y0)
-        p_width = axes.c2p(x0 + width, y0)
-        p_height = axes.c2p(x0, y0 + height)
-        ellipse = Ellipse(
-            width=abs(p_width[0] - p_center[0]) * 2,
-            height=abs(p_height[1] - p_center[1]) * 2,
-            color=color,
-            stroke_width=4,
-        )
-        ellipse.move_to(p_center).rotate(angle)
-        return ellipse
-
-    def laplace_approximation(self) -> None:
-        narration = self.start_narration("scene06")
-        label = self.section_label("Laplace approximation")
-        title = self.scene_title("MAP 解の近くをガウス分布で近似する", font_size=32)
-        axes = self.parameter_plane(width=4.2, height=3.4).shift(LEFT * 3.0 + DOWN * 0.05)
-        ellipses = VGroup(
-            self.ellipse_on_axes(axes, (0.45, -0.2), 1.45, 0.86, -0.45, PURPLE_PRIOR),
-            self.ellipse_on_axes(axes, (0.45, -0.2), 0.95, 0.52, -0.45, ORANGE_LIKELIHOOD),
-            self.ellipse_on_axes(axes, (0.45, -0.2), 0.48, 0.25, -0.45, GREEN_POSTERIOR),
-        )
-        map_dot = Dot(axes.c2p(0.45, -0.2), radius=0.08, color=RED_MAP)
-        map_label = MathTex(r"w_{\mathrm{MAP}}", font_size=30, color=RED_MAP).next_to(map_dot, RIGHT, buff=0.12)
-        surface = VGroup(
-            MathTex(r"E(w)\simeq E(w_{\mathrm{MAP}})", font_size=34),
-            MathTex(r"+\frac{1}{2}(w-w_{\mathrm{MAP}})^T H (w-w_{\mathrm{MAP}})", font_size=32),
-            MathTex(r"p(w\mid D)\approx \mathcal{N}(w_{\mathrm{MAP}},H^{-1})", font_size=34, color=GREEN_POSTERIOR),
-        ).arrange(DOWN, buff=0.32).to_edge(RIGHT).shift(LEFT * 0.45 + DOWN * 0.05)
-        notes = VGroup(
-            Text("中心: MAP", font_size=23, color=RED_MAP),
-            Text("幅: Hessian の逆行列", font_size=23, color=GREEN_POSTERIOR),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).next_to(surface, DOWN, buff=0.35)
-
-        self.play(FadeIn(label), Write(title), Create(axes))
-        self.play(Create(ellipses[0]), Create(ellipses[1]))
-        self.play(FadeIn(map_dot), FadeIn(map_label), Create(ellipses[2]))
-        self.play(Write(surface[0]), Write(surface[1]))
-        self.play(Write(surface[2]), FadeIn(notes))
-        self.play(Indicate(ellipses[2], color=GREEN_POSTERIOR), Indicate(surface[2], color=GREEN_POSTERIOR))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, axes, ellipses, map_dot, map_label, surface, notes)))
-
-    def evidence_and_complexity(self) -> None:
-        narration = self.start_narration("scene07")
-        label = self.section_label("Evidence")
-        title = self.scene_title("当てはまりだけでなく、複雑さも見る", font_size=32)
-        bars = VGroup()
-        labels = VGroup()
-        values = [0.58, 0.88, 0.62]
-        names = ["単純すぎる", "ちょうどよい", "複雑すぎる"]
-        colors = [TEXT_GREY, GREEN_POSTERIOR, ORANGE_LIKELIHOOD]
-        for index, (value, name, color) in enumerate(zip(values, names, colors)):
-            rect = Rectangle(width=1.3, height=3.0 * value, color=color, fill_color=color, fill_opacity=0.72)
-            rect.move_to(LEFT * 2.6 + RIGHT * index * 2.6 + DOWN * (1.25 - 1.5 * value))
-            bars.add(rect)
-            labels.add(Text(name, font_size=22, color=color).next_to(rect, DOWN, buff=0.18))
-        chart_title = MathTex(r"p(D\mid \mathcal{M})", font_size=38, color=YELLOW_EVIDENCE).next_to(bars, UP, buff=0.35)
-        fit = Text("当てはまり", font_size=24, color=GREEN_POSTERIOR).to_edge(RIGHT).shift(UP * 0.85 + LEFT * 0.8)
-        complexity = Text("複雑さの広がり", font_size=24, color=ORANGE_LIKELIHOOD).next_to(fit, DOWN, buff=0.28)
-        arrow1 = Arrow(fit.get_left() + LEFT * 0.15, bars[1].get_top(), buff=0.1, color=GREEN_POSTERIOR)
-        arrow2 = Arrow(complexity.get_left() + LEFT * 0.15, bars[2].get_top(), buff=0.1, color=ORANGE_LIKELIHOOD)
-        formula = MathTex(r"p(D\mid \mathcal{M})=\int p(D\mid w,\mathcal{M})p(w\mid\mathcal{M})\,dw", font_size=33).to_edge(DOWN, buff=0.42)
-        brace = Brace(bars[2], UP, color=ORANGE_LIKELIHOOD)
-        narrow_note = Text("よく合う領域が狭い", font_size=22, color=ORANGE_LIKELIHOOD).next_to(brace, UP, buff=0.14)
-
-        self.play(FadeIn(label), Write(title), Write(chart_title))
-        self.play(LaggedStart(*[GrowFromEdge(bar, DOWN) for bar in bars], lag_ratio=0.18), FadeIn(labels))
-        self.play(FadeIn(fit), GrowArrow(arrow1), Write(formula))
-        self.play(FadeIn(complexity), GrowArrow(arrow2), Create(brace), FadeIn(narrow_note))
-        self.play(Indicate(bars[1], color=GREEN_POSTERIOR), Indicate(formula, color=YELLOW_EVIDENCE))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, bars, labels, chart_title, fit, complexity, arrow1, arrow2, formula, brace, narrow_note)))
-
-    def summary(self) -> None:
-        narration = self.start_narration("scene08")
-        label = self.section_label("まとめ")
-        title = self.scene_title("一本の答えではなく、ありそうな答えの分布を見る", font_size=30)
-        left = self.make_network(scale=0.78).shift(LEFT * 3.2 + DOWN * 0.1)
-        right_axes = self.function_axes(width=5.1, height=2.85).shift(RIGHT * 2.4 + DOWN * 0.25)
-        dots = self.data_dots(right_axes, radius=0.045)
-        band, mean_curve, curves = self.predictive_band(right_axes)
-        bullets = VGroup(
-            Text("1. 重みに事前分布を置く", font_size=24, color=PURPLE_PRIOR),
-            Text("2. データで事後分布へ更新する", font_size=24, color=GREEN_POSTERIOR),
-            Text("3. 予測では重みを平均する", font_size=24, color=TEAL_PREDICTIVE),
-            Text("4. 近似推論で計算可能にする", font_size=24, color=YELLOW_EVIDENCE),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.24).to_edge(DOWN, buff=0.45)
-        equation = MathTex(r"p(w)\rightarrow p(w\mid D)\rightarrow p(t\mid x,D)", font_size=38).next_to(title, DOWN, buff=0.28)
-        arrow = Arrow(left.get_right(), right_axes.get_left(), buff=0.3, color=TEXT_GREY)
-
-        self.play(FadeIn(label), Write(title), Write(equation))
-        self.play(FadeIn(left), Create(right_axes), GrowArrow(arrow))
-        self.play(FadeIn(dots), LaggedStart(*[Create(curve) for curve in curves], lag_ratio=0.08), FadeIn(band), Create(mean_curve), run_time=1.6)
-        self.play(FadeIn(bullets, shift=UP * 0.15))
-        self.play(Indicate(equation, color=YELLOW_EVIDENCE), Indicate(band, color=TEAL_PREDICTIVE))
-        self.finish_narration(narration)
-        self.play(FadeOut(VGroup(label, title, equation, left, right_axes, dots, curves, band, mean_curve, arrow, bullets)))
+    def marginal(self):
+        ax=self.axes(x=(-7,9,2),y=(0,1,.5),width=9,height=3.15,center=(0,.35,0),xlabel='a',ylabel=r'\sigma(a)')
+        grid=np.linspace(-7,9,321);sig=line(ax,grid,expit(grid),DATA);self.add(sig)
+        self.legend([('シグモイド',DATA),('活性の密度',PRIOR),('平均した確率',POST)])
+        self.beat(self.eq(r'a(x,w)\simeq a_{\rm MAP}+b^T(w-w_{\rm MAP}),\quad b=\nabla_w a'))
+        var=ValueTracker(.2)
+        density=always_redraw(lambda:line(ax,grid,gaussian(grid,2,var.get_value()),PRIOR))
+        self.add(density)
+        meanline=always_redraw(lambda:line(ax,[-7,9],[integrated_sigmoid(2,var.get_value())]*2,POST,2))
+        self.add(meanline)
+        self.beat(self.eq(r'p(t=1\mid x,D)=\int\sigma(a)\mathcal N(a\mid a_{\rm MAP},\sigma_a^2)\,da'))
+        self.slider(var,.2,9,r'\sigma_a^2',pos=(0,-1.85,0))
+        self.add(readout(r'p=',lambda:integrated_sigmoid(2,var.get_value()),(4.5,1.55,0),POST))
+        self.beat(var.animate.set_value(9))
+        self.beat(self.eq(r'p(t=1\mid x,D)\simeq\sigma(\kappa(\sigma_a^2)a_{\rm MAP}),\quad',r'\kappa(v)=(1+\pi v/8)^{-1/2}'),self.note_anim('中心を固定：代表値 0.881 → 分布で平均 約0.717'))
+        for m in list(self.mobjects):
+            if m not in [self.subtitle,self.formula]:self.remove(m)
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]));self.note=None
+        ax=self.class_axes();scale=ValueTracker(0)
+        contours=always_redraw(lambda:self.contours(ax,D['cw'],scale.get_value()));self.add(contours)
+        self.add(jp('緑：0.5の境界',23,POST).move_to([3.8,1.2,0]),jp('黄：周囲の確率',23,GOLD).move_to([3.8,.65,0]))
+        self.beat(scale.animate.set_value(1),self.note_anim('同じ MAP を固定し、共分散を0倍から1倍へ'))
+        self.beat(Indicate(contours,scale_factor=1),self.eq(r'D\ \longrightarrow\ p(w\mid D)\ \longrightarrow\ p(t\mid x,D)'),self.note_anim('代表値とともに、不確かさを予測へ渡す',POST))
