@@ -1,0 +1,20 @@
+{
+  "gradient_max_absolute_error": 3.4689876665661146e-10,
+  "corrected_5_157_max_error": 4.734233838288304e-11,
+  "normalization_max_error": 1.5543122344752192e-15,
+  "moment_max_error": 2.220446049250313e-16,
+  "slice_mode_counts": [
+    1,
+    3,
+    1
+  ],
+  "averaged_arm_target_error": 0.8,
+  "mode_counterexample": {
+    "largest_weight_center": 0.04,
+    "numeric_mode": 0.96
+  },
+  "audio_scenes": 9,
+  "sentences": 108,
+  "caption_max_width": 9.34765625,
+  "caption_max_height": 0.70265625
+}
