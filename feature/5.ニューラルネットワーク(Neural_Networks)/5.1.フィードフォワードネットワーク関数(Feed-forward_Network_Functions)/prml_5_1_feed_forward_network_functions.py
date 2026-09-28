@@ -11,6 +11,13 @@ C1=BLUE_CLASS
 C2=PURPLE_ACC
 C3=GREEN_CLASS
 OUT=RED_CLASS
+COLOR_TEMPLATE=TexTemplate()
+COLOR_TEMPLATE.add_to_preamble(r"\usepackage{xcolor}")
+
+
+def pulse(mobject, color=YELLOW_ACC, scale_factor=1):
+    """Emphasize color while preserving plotted coordinates and edge endpoints."""
+    return Indicate(mobject, color=color, scale_factor=1)
 
 
 def nodespec(label, at, color, getter=None):
@@ -74,7 +81,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         eq=self.equation(r'y(x,\mathbf w)=f\!\left(\sum_j',r'w_j',r'\phi_j(x;\theta_j)',r'\right)')
         eq[1].set_color(OUT); eq[2].set_color(C2)
         self.beat(c.animate.set_value(.30))
-        self.beat(c.animate.set_value(.43),Indicate(h1,color=C1))
+        self.beat(c.animate.set_value(.43),pulse(h1,color=C1))
 
     def unit(self):
         ax=self.plot_axes(x=(-1,1,.5),y=(-1.5,1.5,1),height=3.2,center=(-1,-.15,0),labels=('x',r'a,\ z'))
@@ -128,24 +135,20 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         out=nodespec('y',[4.3,.1,0],OUT,lambda:(1-mode.get_value())*bump(x.get_value())+mode.get_value()*sigmoid(bump(x.get_value())))
         e1=VGroup(*[edge(ins,z) for z in hs]); e2=VGroup(*[edge(z,out) for z in hs])
         net=VGroup(e1,e2,ins,*hs,out)
-        self.beat(actions=[lambda:FadeIn(net),lambda:LaggedStart(*[Indicate(m,color=YELLOW_ACC) for m in [ins,e1,VGroup(*hs),e2,out]],lag_ratio=.35)])
+        self.beat(actions=[lambda:FadeIn(net),lambda:LaggedStart(*[pulse(m,color=YELLOW_ACC) for m in [ins,e1,VGroup(*hs),e2,out]],lag_ratio=.35)])
         bias=nodespec('1',[-3.3,-1.65,0],YELLOW_ACC)
         be=VGroup(*[edge(bias,z,YELLOW_ACC) for z in hs])
         self.equation(r'x_0=1:\quad a_j=\sum_{i=0}^{D}w_{ji}^{(1)}x_i\qquad (5.8)')
         self.beat(FadeIn(bias),Create(be))
         self.remove(bias,be)
-        self.equation(r'y_k=\sigma\!\left(\sum_{j=1}^{M}w_{kj}^{(2)}h\!\left(\sum_{i=1}^{D}w_{ji}^{(1)}x_i+w_{j0}^{(1)}\right)+w_{k0}^{(2)}\right)',size=28,substrings_to_isolate=[r'w_{kj}^{(2)}',r'w_{ji}^{(1)}',r'w_{j0}^{(1)}',r'w_{k0}^{(2)}','y_k'])
-        self.formula.set_color_by_tex('y_k',OUT)
-        self.formula.set_color_by_tex(r'w_{ji}^{(1)}',C1)
-        self.formula.set_color_by_tex(r'w_{kj}^{(2)}',OUT)
-        self.formula.set_color_by_tex(r'w_{j0}^{(1)}',YELLOW_ACC)
-        self.formula.set_color_by_tex(r'w_{k0}^{(2)}',YELLOW_ACC)
+        # Use TeX colors without nested substring SVG groups (CE 0.20.1 drops ungrouped glyphs).
+        self.equation(r'{\color[HTML]{FF7687}y_k}=\sigma\!\left(\sum_{j=1}^{M}{\color[HTML]{FF7687}w_{kj}^{(2)}}h\!\left(\sum_{i=1}^{D}{\color[HTML]{62B7EE}w_{ji}^{(1)}}x_i+{\color[HTML]{FFE184}w_{j0}^{(1)}}\right)+{\color[HTML]{FFE184}w_{k0}^{(2)}}\right)',size=28,tex_template=COLOR_TEMPLATE)
         compact=tex(r'x_0=z_0=1:\quad y_k=\sigma\!\left(\sum_{j=0}^{M}w_{kj}^{(2)}z_j\right),\quad z_j=h\!\left(\sum_{i=0}^{D}w_{ji}^{(1)}x_i\right)\ (j\geq1)',24).move_to([0,-2.2,0])
         self.add(compact)
-        self.beat(actions=[lambda:Indicate(e1,color=C1),lambda:AnimationGroup(Indicate(e2,color=OUT),mode.animate.set_value(1))])
+        self.beat(actions=[lambda:pulse(e1,color=C1),lambda:AnimationGroup(pulse(e2,color=OUT),mode.animate.set_value(1))])
         self.remove(compact)
         self.add(note('重みの層を数える：第１層 → 第２層'))
-        self.beat(actions=[lambda:Indicate(VGroup(ins,*hs,out),color=C2),lambda:LaggedStart(Indicate(e1,color=C1),Indicate(e2,color=OUT),lag_ratio=.5)])
+        self.beat(actions=[lambda:pulse(VGroup(ins,*hs,out),color=C2),lambda:LaggedStart(pulse(e1,color=C1),pulse(e2,color=OUT),lag_ratio=.5)])
 
     def nonlinear(self):
         ax=self.plot_axes(x=(-1,1,.5),y=(-1.8,1.8,1),height=3.2,center=(-.7,-.15,0))
@@ -181,7 +184,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(t.animate.set_value(1),a.animate.set_value(-2))
         self.remove(ax,axis_names)
         ax=self.plot_axes(x=(-3,3,1),y=(0,1,.5),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
-        self.beat(a.animate.set_value(0),Indicate(dot,color=OUT))
+        self.beat(a.animate.set_value(0),pulse(dot,color=OUT))
         # Reuse a single bar coordinate system for independent binary outputs and softmax.
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         scores=[ValueTracker(1.3),ValueTracker(.7),ValueTracker(-.6)]; mode=ValueTracker(0)
@@ -230,14 +233,14 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         links=VGroup(*[edge(ns[i],ns[j]) for i,j in [(0,2),(1,2),(0,3),(1,3),(2,4),(3,4)]])
         self.equation(r'\mathbf x\longrightarrow\mathbf z\longrightarrow y')
         self.add(links,*ns)
-        self.beat(LaggedStart(*[Indicate(n,color=YELLOW_ACC) for n in ns],lag_ratio=.3))
+        self.beat(LaggedStart(*[pulse(n,color=YELLOW_ACC) for n in ns],lag_ratio=.3))
         se=CurvedArrow(ns[0][0].get_top()+UP*.08,ns[4][0].get_top()+UP*.08,angle=-.45,color=YELLOW_ACC,stroke_width=2)
         self.beat(Create(se),skip.animate.set_value(.8))
         self.beat(FadeOut(links[1]),dense.animate.set_value(0))
         self.equation(r'z_k=h\!\left(\sum_{j\to k}w_{kj}z_j\right)\qquad(5.10)')
-        self.beat(Indicate(VGroup(links[4],links[5],se),color=YELLOW_ACC))
+        self.beat(pulse(VGroup(links[4],links[5],se),color=YELLOW_ACC))
         self.add(note('閉路なし → 必要な値がそろった順に計算'))
-        self.beat(LaggedStart(*[Indicate(n,color=YELLOW_ACC) for n in ns],lag_ratio=.4))
+        self.beat(LaggedStart(*[pulse(n,color=YELLOW_ACC) for n in ns],lag_ratio=.4))
         self.beat(actions=[lambda:x.animate.set_value(-.6),lambda:x.animate.set_value(.4)])
 
     def approximation(self):
@@ -273,14 +276,14 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(sharp.animate.set_value(18))
         err=Line(ax.c2p(0,.5),ax.c2p(0,1),color=YELLOW_ACC,stroke_width=6)
         self.add(tex(r'|y(0)-t(0)|=0.5',25,YELLOW_ACC).move_to([4.65,-.1,0]))
-        self.beat(Indicate(err,color=YELLOW_ACC),Indicate(g,color=OUT))
+        self.beat(pulse(err,color=YELLOW_ACC),pulse(g,color=OUT))
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         self.equation(r'\sup_{x\in[a,b]}|y(x)-f(x)|<\varepsilon')
         self.add(jp('左辺：区間全体の最大誤差',22,MUTED).move_to([0,1.65,0]))
         conditions=VGroup(jp('閉じた有限区間',29,C1),jp('連続な目標関数',29,C2),jp('適切な活性化 ＋ 十分な隠れユニット',29,C3)).arrange(DOWN,buff=.5).move_to([0,.3,0])
         self.beat(LaggedStart(*[FadeIn(c,shift=UP*.15) for c in conditions],lag_ratio=.5))
         self.add(note('よい重みの存在 → データから探す学習へ',color=YELLOW_ACC))
-        self.beat(Indicate(conditions[2],color=YELLOW_ACC))
+        self.beat(pulse(conditions[2],color=YELLOW_ACC))
 
     def symmetry(self):
         ax=self.plot_axes(x=(-1,1,.5),y=(-1.4,1.4,1),height=2.4,center=(-.7,.35,0))
@@ -300,7 +303,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.equation(r'(-v)\tanh(-wx-b)=v\tanh(wx+b)')
         self.beat(outs.animate.set_value(-1))
         self.add(note('灰色の元の曲線と、赤い曲線が一致',color=YELLOW_ACC))
-        self.beat(Indicate(total,color=YELLOW_ACC))
+        self.beat(pulse(total,color=YELLOW_ACC))
         # Swap complete labeled summands; the actual output is permutation invariant.
         left=VGroup(tex(r'(-0.65)\tanh(-3x-1.2)',26,C1),jp('ユニット１',20,C1)).arrange(DOWN,buff=.15).move_to([-3,-2.1,0])
         right=VGroup(tex(r'(-0.65)\tanh(3x-1.2)',26,C2),jp('ユニット２',20,C2)).arrange(DOWN,buff=.15).move_to([3,-2.1,0])
@@ -311,9 +314,9 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
             AnimationGroup(left.animate.shift(UP*.42),right.animate.shift(DOWN*.42)),
             AnimationGroup(left.animate.shift(RIGHT*6),right.animate.shift(LEFT*6)),
             AnimationGroup(left.animate.shift(DOWN*.42),right.animate.shift(UP*.42))),
-            lambda:Indicate(total,color=YELLOW_ACC,scale_factor=1.02)])
+            lambda:pulse(total,color=YELLOW_ACC,scale_factor=1.02)])
         self.equation(r'2^M M!\qquad M=2:\quad 2^2\cdot2!=8')
-        self.beat(Indicate(self.formula,color=YELLOW_ACC))
+        self.beat(pulse(self.formula,color=YELLOW_ACC))
         self.remove(left,right)
         self.equation(r'\mathbf x\ \xrightarrow{\ W^{(1)},\,h\ }\ \mathbf z\ \xrightarrow{\ W^{(2)},\,f\ }\ \mathbf y')
-        self.beat(Indicate(one,color=C1),Indicate(two,color=C2))
+        self.beat(pulse(one,color=C1),pulse(two,color=C2))
