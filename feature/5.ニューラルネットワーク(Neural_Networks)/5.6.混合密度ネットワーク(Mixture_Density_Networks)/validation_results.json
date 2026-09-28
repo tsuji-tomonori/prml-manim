@@ -1,0 +1,321 @@
+{
+  "video_sha256": "e59dce7201b0025c7a34c5243635460a454a159b08284103ea71b055e91b3c9b",
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "r_frame_rate": "15/1",
+        "duration": "539.599344"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "539.626667"
+      }
+    ],
+    "format": {
+      "duration": "539.627000"
+    }
+  },
+  "long_silences": 0,
+  "mean_volume_db": -26.5,
+  "peak_volume_db": -5.8,
+  "timeline_max_error": 1.0544454198679887e-11,
+  "sync": [
+    {
+      "scene": "scene02",
+      "visual": "軸を交換する",
+      "action_start": 64.13333333333482,
+      "action_end": 71.65333333333481,
+      "pcm_onset": 64.23116666666776
+    },
+    {
+      "scene": "scene03",
+      "visual": "中心を動かす",
+      "action_start": 120.99999999999825,
+      "action_end": 129.82133333333158,
+      "pcm_onset": 121.09808333333223
+    },
+    {
+      "scene": "scene07",
+      "visual": "中央の断面",
+      "action_start": 375.93333333331714,
+      "action_end": 384.4026666666505,
+      "pcm_onset": 376.0027916666515
+    }
+  ],
+  "frames": [
+    {
+      "name": "scene01-beat01",
+      "time": 6.16
+    },
+    {
+      "name": "scene01-beat02",
+      "time": 15.099999999999989
+    },
+    {
+      "name": "scene01-beat03",
+      "time": 23.586666666666623
+    },
+    {
+      "name": "scene01-beat04",
+      "time": 32.08666666666659
+    },
+    {
+      "name": "scene01-beat05",
+      "time": 41.90000000000004
+    },
+    {
+      "name": "scene01-beat06",
+      "time": 52.606666666667216
+    },
+    {
+      "name": "scene02-beat01",
+      "time": 61.65333333333443
+    },
+    {
+      "name": "scene02-beat02",
+      "time": 69.68666666666815
+    },
+    {
+      "name": "scene02-beat03",
+      "time": 78.97333333333435
+    },
+    {
+      "name": "scene02-03-01-math",
+      "time": 74.60533333333436
+    },
+    {
+      "name": "scene02-beat04",
+      "time": 88.65333333333379
+    },
+    {
+      "name": "scene02-beat05",
+      "time": 97.36666666666659
+    },
+    {
+      "name": "scene02-beat06",
+      "time": 106.81999999999945
+    },
+    {
+      "name": "scene03-beat01",
+      "time": 117.63999999999888
+    },
+    {
+      "name": "scene03-beat02",
+      "time": 127.43999999999825
+    },
+    {
+      "name": "scene03-02-01-math",
+      "time": 123.55466666666493
+    },
+    {
+      "name": "scene03-beat03",
+      "time": 137.89999999999773
+    },
+    {
+      "name": "scene03-03-01-math",
+      "time": 132.95199999999772
+    },
+    {
+      "name": "scene03-beat04",
+      "time": 146.98666666666378
+    },
+    {
+      "name": "scene03-beat05",
+      "time": 157.67999999999662
+    },
+    {
+      "name": "scene03-05-01-math",
+      "time": 152.52799999999667
+    },
+    {
+      "name": "scene03-beat06",
+      "time": 169.4133333333293
+    },
+    {
+      "name": "scene04-beat01",
+      "time": 179.32666666666196
+    },
+    {
+      "name": "scene04-beat02",
+      "time": 189.62666666666146
+    },
+    {
+      "name": "scene04-beat03",
+      "time": 200.3333333333275
+    },
+    {
+      "name": "scene04-beat04",
+      "time": 211.65333333332688
+    },
+    {
+      "name": "scene04-beat05",
+      "time": 220.9199999999929
+    },
+    {
+      "name": "scene04-beat06",
+      "time": 230.4466666666591
+    },
+    {
+      "name": "scene05-beat01",
+      "time": 239.20666666665852
+    },
+    {
+      "name": "scene05-beat02",
+      "time": 248.0599999999914
+    },
+    {
+      "name": "scene05-beat03",
+      "time": 258.49999999999085
+    },
+    {
+      "name": "scene05-beat04",
+      "time": 268.6599999999903
+    },
+    {
+      "name": "scene05-beat05",
+      "time": 278.7399999999897
+    },
+    {
+      "name": "scene05-beat06",
+      "time": 289.49999999998914
+    },
+    {
+      "name": "scene06-beat01",
+      "time": 298.8666666666552
+    },
+    {
+      "name": "scene06-beat02",
+      "time": 308.6066666666547
+    },
+    {
+      "name": "scene06-02-02-math",
+      "time": 308.127999999988
+    },
+    {
+      "name": "scene06-beat03",
+      "time": 318.9933333333208
+    },
+    {
+      "name": "scene06-beat04",
+      "time": 332.4466666666535
+    },
+    {
+      "name": "scene06-04-01-definition",
+      "time": 326.4533333333202
+    },
+    {
+      "name": "scene06-beat05",
+      "time": 344.659999999986
+    },
+    {
+      "name": "scene06-beat06",
+      "time": 354.8599999999854
+    },
+    {
+      "name": "scene07-beat01",
+      "time": 364.4733333333181
+    },
+    {
+      "name": "scene07-beat02",
+      "time": 373.3533333333176
+    },
+    {
+      "name": "scene07-beat03",
+      "time": 382.1399999999838
+    },
+    {
+      "name": "scene07-beat04",
+      "time": 390.6333333333166
+    },
+    {
+      "name": "scene07-beat05",
+      "time": 400.36666666664945
+    },
+    {
+      "name": "scene07-beat06",
+      "time": 410.5599999999822
+    },
+    {
+      "name": "scene08-beat01",
+      "time": 420.4599999999816
+    },
+    {
+      "name": "scene08-beat02",
+      "time": 430.77333333331444
+    },
+    {
+      "name": "scene08-beat03",
+      "time": 441.3066666666472
+    },
+    {
+      "name": "scene08-beat04",
+      "time": 451.2333333333132
+    },
+    {
+      "name": "scene08-beat05",
+      "time": 460.6199999999793
+    },
+    {
+      "name": "scene08-beat06",
+      "time": 471.4266666666455
+    },
+    {
+      "name": "scene09-beat01",
+      "time": 483.17333333331146
+    },
+    {
+      "name": "scene09-beat02",
+      "time": 494.05999999997744
+    },
+    {
+      "name": "scene09-beat03",
+      "time": 503.9666666666435
+    },
+    {
+      "name": "scene09-beat04",
+      "time": 514.7066666666431
+    },
+    {
+      "name": "scene09-beat05",
+      "time": 524.9733333333141
+    },
+    {
+      "name": "scene09-beat06",
+      "time": 536.0999999999887
+    },
+    {
+      "name": "scene02-sync-0.15",
+      "time": 65.26133333333482
+    },
+    {
+      "name": "scene02-sync-0.85",
+      "time": 70.52533333333481
+    },
+    {
+      "name": "scene03-sync-0.15",
+      "time": 122.32319999999825
+    },
+    {
+      "name": "scene03-sync-0.85",
+      "time": 128.4981333333316
+    },
+    {
+      "name": "scene07-sync-0.15",
+      "time": 377.20373333331713
+    },
+    {
+      "name": "scene07-sync-0.85",
+      "time": 383.1322666666505
+    }
+  ],
+  "visual_review": "66 final frames inspected; all symbolic captions and three motion pairs checked",
+  "full_listen": false,
+  "av_duration_difference": 0.027323000000023967
+}

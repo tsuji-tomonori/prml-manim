@@ -35,6 +35,7 @@ def main():
             image_rows.append(dict(name=f"{scene['id']}-beat{j+1:02}",time=.3*b['start']+.7*b['end']))
             for c in b['cues']:
                 if '$' in c['display']:image_rows.append(dict(name=c['id']+'-math',time=(c['start']+c['end'])/2))
+                if c['id']=='scene06-04-01':image_rows.append(dict(name=c['id']+'-definition',time=(c['start']+c['end'])/2))
     for scene_index,beat_index in [(1,1),(2,1),(6,2)]:
         scene=tl[scene_index];beat=scene['beats'][beat_index];entry=manifest['scenes'][scene_index]
         with wave.open(str(ROOT/entry['path'])) as wav:
