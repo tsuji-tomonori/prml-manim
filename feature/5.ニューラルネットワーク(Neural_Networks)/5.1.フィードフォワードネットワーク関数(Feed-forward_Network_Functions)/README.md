@@ -1,60 +1,70 @@
-# 5.1 フィードフォワードネットワーク関数
+# PRML 5.1 フィードフォワードネットワーク関数
 
-PRML Chapter 5 の 5.1 節を、固定基底関数モデルから多層パーセプトロンへ拡張する流れとして解説する Manim アニメーションと台本です。
+「曲線の材料も動かせる？」から始まる、約9分58秒・9シーンの日本語動画です。基底曲線を動かす実験から、順伝播、非線形、出力関数、分類境界、接続の自由度、関数近似、重みの対称性へ進みます。
 
-## ファイル
+[動画（480p15）](media/videos/prml_5_1_feed_forward_network_functions/480p15/PRML51FeedForwardNetworkFunctions.mp4) ／ [台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
 
-- `prml_5_1_feed_forward_network_functions.py`: Manim アニメーション実装
-- `narration_script.md`: 原文参照付きの日本語台本
-- `make_voicevox_narration.py`: VOICEVOX Engine からシーン別ナレーション WAV を生成するスクリプト
-- `assets/voicevox/`: 生成済みナレーション WAV と `manifest.json`
+## シーンと原文対応
 
-## レンダリング
+Bishop (2006), *Pattern Recognition and Machine Learning*, §5.1–§5.1.1、印刷 pp.227–232（手元の PDF pp.247–252）を `pdftotext -layout` で抽出して確認しました。該当節に表はありません。
 
-Manim は `pangocairo` などの system dependency を必要とします。`uv sync` が `No package 'pangocairo' found` で失敗する場合は、OS 側で Cairo/Pango/pkg-config 関連パッケージを入れてから再実行してください。
-`MathTex` の数式描画には LaTeX と `dvisvgm` も必要です。
+| シーン | 秒 | 視覚的な実験 | 原文 |
+|---|---:|---|---|
+| 曲線の「材料」も動かせる？ | 53.667 | 基底の位置と出力重みのつまみ、合成曲線 | p.227、(5.1)、Fig.5.3 |
+| 一つのユニットは、何を計算する？ | 68.000 | 重み・バイアス・入力と tanh 曲線の連動 | p.227、(5.2)–(5.3) |
+| 二つの材料から、山を作る | 69.467 | 符号付きの高さを足し、ネットワーク図へ | pp.227–229、(5.2)–(5.9)、Fig.5.1 |
+| なぜ、途中で曲げるの？ | 61.533 | 同じ座標でアフィン合成と非線形を比較 | p.229 |
+| 最後の出力を、何に合わせる？ | 62.067 | 恒等関数→シグモイド、独立二値→softmax | p.228、(5.5)–(5.7)、(4.62) |
+| 直線の材料から、曲がる境界へ | 63.467 | 隠れ出力の等高線と最終境界を連動 | pp.231–232、Fig.5.4 |
+| 矢印を増やしても、計算できる？ | 62.267 | スキップ接続、疎な接続、評価順序 | pp.229–230、(5.10)、Fig.5.2 |
+| 三つの材料で、どこまで近づける？ | 79.200 | 同じ座標で二乗・波・絶対値・段差 | pp.230–231、Fig.5.3 |
+| 同じ関数を作る重みは、一つ？ | 78.000 | 符号反転の前後とユニット交換 | pp.231–232、§5.1.1 |
 
-ナレーション入りで再生成する場合は、VOICEVOX Engine を `http://127.0.0.1:50021` で起動してから、先に音声を生成します。
+## 数値例と成立条件
+
+- 描画と数値表示は `network_model.py` の NumPy 計算に基づきます。冒頭の山、分類、接続変更は仕組みを見るための手動パラメータ実験です。学習アルゴリズムの反復とは扱いません。
+- Fig.5.3 の三隠れユニット・tanh・線形出力という構造を、自作41点で再構成しました。二乗、sin(πx)、絶対値の重みは SciPy の非線形最小二乗で求め、`network_fits.json` に保存しています。図の波の周期やデータ点は原図と異なります。比較時には同一座標上で解を切り替え、遷移を学習過程として説明しません。
+- 段差は `0.5 + 0.5 tanh(wx)` という実際のネットワークです。段差の高さを1、H(0)=1とするため、原点の誤差は0.5のままです。連続関数に関する一様近似の保証と区別します。万能近似は適切な活性化・十分なユニット数・コンパクト領域などの条件付きです。
+- Fig.5.4 は64点の自作分類例です。破線は `z₁=0.5`、`z₂=0.5`、赤線は `y=0.5`。tanh の入力がゼロとなる線とは異なります。生成分布の最適境界を再現した図ではありません。
+- バイアス込みの線形合成はアフィン変換として説明します。隠れ層が狭い線形ネットワークの自由度の制約にも触れます。
+- (5.7) はシグモイド出力の場合です。回帰の山の例からこの式へ移る際、出力数値もシグモイドへ切り替えます。(5.9) に相当するコンパクトな式では、`z₀=1` を別に固定し、非線形変換を行う `j≥1` と区別します。
+- tanh の符号反転は、入る重み・バイアス・出る重みをすべて反転した後に成立します。連続補間の途中は同じ関数ではありません。一般的な全結合二層ネットワークの対称性因子は `2^M M!`。特別な重みでは同一のベクトルになる重複があり得ます。
+
+## 字幕・読み・同期
+
+`narration_content.py` の58 beat・116文が正本です。字幕の `display` と音声の `speech` を分離しました。1.1 の修正済み実装に従い、MathTex 本体を日本語かなの高さ・中心線へ合わせ、前後に余白を設けます。3.1 と4.3の教材構成・同期実装も参照しました。
+
+すべての speech を WhiteCUL（speaker 23）の `audio_query` で取得し、全文の読みを確認・再取得しました。「正→まさ」「値→ね」「節→ふし」「角→かく」「割る→われる」を修正しています。修正前後は `reading_check.md/json` に保存しています。API の音素列確認と、音声の通し聴取は別の検証です。
+
+文ごとの PCM 長から字幕時刻とアニメーション尺を決め、台本・WAV のハッシュを manifest と照合します。不整合な音声では描画を停止します。旧8 WAVは新構成で置換し、scene09を追加しました。
+
+## 再生成
+
+対象ディレクトリで実行します。
 
 ```bash
-python3 make_voicevox_narration.py
-uv run manim --disable_caching --flush_cache -ql prml_5_1_feed_forward_network_functions.py PRML51FeedForwardNetworkFunctions
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+# reading_check.md の全行を確認し、speech を直した場合は再取得
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py --captions
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_5_1_feed_forward_network_functions.py PRML51FeedForwardNetworkFunctions
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py --output /tmp/prml51-review
 ```
 
-生成済み動画:
+数値例を再フィットする場合は `python network_model.py`。保存済み重みを使う通常の描画には不要です。音声生成は `--from-scene scene08` などで再開できます。Manim CE、Noto Sans CJK JP、既存 venv を使用。Engine は `http://127.0.0.1:50021`、WhiteCUL ノーマル（23）、話速1.08、抑揚0.95です。
 
-```text
-media/videos/prml_5_1_feed_forward_network_functions/480p15/PRML51FeedForwardNetworkFunctions.mp4
-```
+音声クレジット：**VOICEVOX:WhiteCUL**。
 
-高品質で出力する場合:
+## 3Blue1Brown の参照
 
-```bash
-uv run manim -pqh prml_5_1_feed_forward_network_functions.py PRML51FeedForwardNetworkFunctions
-```
+[3b1b/videos](https://github.com/3b1b/videos) の `_2017/nn/part1.py`（活性と順伝播、バイアス）、`part2.py`（重みと結果の連動）、`part3.py`（一つのユニットへ焦点を絞り、辺と式の項を対応）、`network.py`（数値計算の順序）、`_2016/eola/chapter3.py`（同じ座標で線形と非線形を比較）を読みました。[3b1b/manim](https://github.com/3b1b/manim) の ValueTracker / updater の考え方を Manim CE で実装し、ManimGL のコードは取り込んでいません。
 
-## 原文参照
+## 検証
 
-主に `.working/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf` の以下を参照しています。
+数値検証結果は `numerical_results.json`、動画・音声・同期の実測値と画像抽出時刻は `validation_results.json` に保存します。画像抽出だけで目視済みとはせず、実際に確認した範囲を結果へ記録します。全編の通し聴取、全フレームの人手検査、高解像度版のレンダリングは未実施です。
 
-- Section 5.1: Feed-forward Network Functions
-- Eq. (5.1): 固定基底関数の線形結合
-- Eq. (5.2) から Eq. (5.4): 入力から隠れユニット、隠れユニットから出力活性への変換
-- Eq. (5.5) から Eq. (5.7): 出力活性化と全体のネットワーク関数
-- Eq. (5.8) から Eq. (5.10): バイアスの吸収と一般的な feed-forward topology
-- Figure 5.1: 2 層ネットワークの構造
-- Figure 5.2: 一般的な feed-forward topology
-- Figure 5.3: 多層パーセプトロンの関数近似能力
-- Section 5.1.1: Weight-space symmetries
+最終MP4は映像597.666667秒、音声597.696000秒、差0.029333秒です。3秒以上の無音0件、平均-26.4dB、最大-5.3dB。全58beat・記号字幕全5文・3シーンの同期前後・交換途中を含む72画像を確認しました。
 
-## 制作方針
-
-- PRML の図を直接複製せず、同じ構造を自作レイアウトで再構成する。
-- 固定基底関数モデルとの連続性を最初に示し、隠れユニットを「学習される基底関数」として説明する。
-- feed-forward は確率的グラフィカルモデルではなく、閉路のない決定的な関数評価であることを明示する。
-- 出力活性化は、回帰・複数二値分類・多クラス分類の用途別に整理する。
-- 5.1.1 の重み空間対称性は、同じ入出力関数を表す重みが複数あるという直感に絞って扱う。
-
-## 音声クレジット
-
-- ナレーション: VOICEVOX:WhiteCUL
+[作業完了レポート](../../../reports/working/20260929-0007-prml-5-1-3b1b-remake.md)に原文対応・修正記録・実測値をまとめています。
