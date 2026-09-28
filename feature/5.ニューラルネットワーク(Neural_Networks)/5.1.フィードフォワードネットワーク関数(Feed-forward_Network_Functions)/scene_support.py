@@ -28,9 +28,9 @@ class NarratedScene(Scene):
         self.add_sound(str(OUTPUT_DIR/(self.story['id']+'.wav')))
         self.timeline.append(dict(id=self.story['id'],start=self.start,reference=self.story['reference'],beats=[]))
 
-    def equation(self,*parts,size=31):
+    def equation(self,*parts,size=31,**kwargs):
         if self.formula is not None: self.remove(*self.formula.get_family())
-        self.formula=MathTex(*parts,font_size=size).move_to([0,2.48,0])
+        self.formula=MathTex(*parts,font_size=size,**kwargs).move_to([0,2.48,0])
         if self.formula.width>12.5: self.formula.scale_to_fit_width(12.5)
         self.add(self.formula)
         return self.formula
@@ -59,10 +59,10 @@ class NarratedScene(Scene):
                 dt=end-elapsed
                 anim=factory()
                 record['actions'].append(dict(sentence=cues[i]['id'],start=start+elapsed,end=start+end))
-                self.play(anim,UpdateFromAlphaFunc(captions,lambda m,a,e=elapsed,d=dt: cap(m,(e+a*d)/duration)),run_time=dt-1e-7,rate_func=linear)
+                self.play(anim,UpdateFromAlphaFunc(captions,lambda m,a,e=elapsed,d=dt: cap(m,(e+a*d)/duration),rate_func=linear),run_time=dt-1e-7)
                 elapsed=end
         else:
-            self.play(*animations,UpdateFromAlphaFunc(captions,cap),run_time=duration-1e-7,rate_func=linear)
+            self.play(*animations,UpdateFromAlphaFunc(captions,cap,rate_func=linear),run_time=duration-1e-7)
             record['actions'].append(dict(sentence='beat',start=start,end=start+duration))
         self.timeline[-1]['beats'].append(record); self.bi+=1
 

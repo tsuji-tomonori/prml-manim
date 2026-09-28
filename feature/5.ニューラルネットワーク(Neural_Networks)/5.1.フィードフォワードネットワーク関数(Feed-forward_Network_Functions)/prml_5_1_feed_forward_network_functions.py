@@ -16,11 +16,14 @@ OUT=RED_CLASS
 def nodespec(label, at, color, getter=None):
     circle=Circle(.31,color=color,stroke_width=2.5).move_to(at)
     if getter:
-        circle.add_updater(lambda m:m.set_fill(color,opacity=.12+.65*min(1,abs(getter()))))
-    text=tex(label,27,color).move_to(at)
+        circle.add_updater(lambda m:m.set_fill(color,opacity=.10+.30*min(1,abs(getter()))))
+    text=tex(label,27,WHITE).move_to(at)
     g=VGroup(circle,text)
     if getter:
-        g.add(number('',getter,np.array(at)+DOWN*.57,color,places=2,size=22))
+        anchor=np.array(at)+DOWN*.57
+        value=DecimalNumber(getter(),num_decimal_places=2,font_size=22,color=color).move_to(anchor)
+        value.add_updater(lambda m:m.set_value(getter()).move_to(anchor))
+        g.add(value)
     return g
 
 
@@ -54,6 +57,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         pts=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.05) for x,y in zip(X[::2],bump(X[::2],.43)+.025*np.sin(37*X[::2]))])
         question=jp('材料の形も、変えられる？',29).move_to([0,2.48,0])
         self.add(question)
+        self.legend([('観測',C1),('材料１',C1),('材料２',C2),('予測',OUT)])
         self.beat(LaggedStart(*[FadeIn(d) for d in pts],lag_ratio=.04))
         h1=always_redraw(lambda:curve(ax,lambda x:np.tanh(3*(x+c.get_value())),color=C1).set_stroke(width=2))
         h2=always_redraw(lambda:curve(ax,lambda x:np.tanh(3*(x-c.get_value())),color=C2).set_stroke(width=2))
@@ -114,6 +118,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
             Line(ax.c2p(x.get_value(),.65*h(x.get_value())[0]),ax.c2p(x.get_value(),bump(x.get_value())),color=C2,stroke_width=6),
             Dot(ax.c2p(x.get_value(),bump(x.get_value())),color=OUT)))
         self.add(stack)
+        self.equation(r'a_k=\sum_{j=1}^{M}w_{kj}^{(2)}z_j+w_{k0}^{(2)},\quad y_k=f(a_k)\qquad(5.4)',size=30)
         self.beat(x.animate.set_value(.8))
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         x.set_value(.25)
@@ -129,8 +134,12 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.equation(r'x_0=1:\quad a_j=\sum_{i=0}^{D}w_{ji}^{(1)}x_i\qquad (5.8)')
         self.beat(FadeIn(bias),Create(be))
         self.remove(bias,be)
-        self.equation(r'y_k=\sigma\!\left(\sum_{j=1}^{M}w_{kj}^{(2)}h\!\left(\sum_{i=1}^{D}w_{ji}^{(1)}x_i+w_{j0}^{(1)}\right)+w_{k0}^{(2)}\right)',size=28)
+        self.equation(r'y_k=\sigma\!\left(\sum_{j=1}^{M}w_{kj}^{(2)}h\!\left(\sum_{i=1}^{D}w_{ji}^{(1)}x_i+w_{j0}^{(1)}\right)+w_{k0}^{(2)}\right)',size=28,substrings_to_isolate=[r'w_{kj}^{(2)}',r'w_{ji}^{(1)}',r'w_{j0}^{(1)}',r'w_{k0}^{(2)}','y_k'])
         self.formula.set_color_by_tex('y_k',OUT)
+        self.formula.set_color_by_tex(r'w_{ji}^{(1)}',C1)
+        self.formula.set_color_by_tex(r'w_{kj}^{(2)}',OUT)
+        self.formula.set_color_by_tex(r'w_{j0}^{(1)}',YELLOW_ACC)
+        self.formula.set_color_by_tex(r'w_{k0}^{(2)}',YELLOW_ACC)
         compact=tex(r'x_0=z_0=1:\quad y_k=\sigma\!\left(\sum_{j=0}^{M}w_{kj}^{(2)}z_j\right),\quad z_j=h\!\left(\sum_{i=0}^{D}w_{ji}^{(1)}x_i\right)\ (j\geq1)',24).move_to([0,-2.2,0])
         self.add(compact)
         self.beat(actions=[lambda:Indicate(e1,color=C1),lambda:AnimationGroup(Indicate(e2,color=OUT),mode.animate.set_value(1))])
@@ -151,7 +160,9 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(w.animate.set_value(.65))
         self.equation(r'y=v\,',r'\tanh(wx+b)',r'+c'); self.formula[1].set_color(C2)
         self.beat(actions=[lambda:t.animate.set_value(1),lambda:w.animate.set_value(2)])
+        self.equation(r'y=v\,h(wx+b)+c,\qquad h(a):\ a\leftrightarrow\tanh(a)')
         self.beat(actions=[lambda:t.animate.set_value(0),lambda:t.animate.set_value(1)])
+        self.equation(r'y=v\tanh(wx+b)+c')
         q=ValueTracker(-.8)
         tangent=always_redraw(lambda:Line(ax.c2p(q.get_value()-.15,fn(q.get_value())-.15*v.get_value()*w.get_value()*(1-np.tanh(w.get_value()*q.get_value()+.2)**2)),ax.c2p(q.get_value()+.15,fn(q.get_value())+.15*v.get_value()*w.get_value()*(1-np.tanh(w.get_value()*q.get_value()+.2)**2)),color=YELLOW_ACC,stroke_width=4))
         self.add(tangent)
@@ -159,6 +170,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
 
     def outputs(self):
         ax=self.plot_axes(x=(-3,3,1),y=(-3,3,1),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
+        axis_names=self.mobjects[-1]
         t=ValueTracker(0); a=ValueTracker(-2)
         fn=lambda x:(1-t.get_value())*x+t.get_value()*sigmoid(x)
         g=always_redraw(lambda:curve(ax,fn,color=OUT))
@@ -167,7 +179,9 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(a.animate.set_value(2))
         self.equation(r'y=\sigma(a)=\frac{1}{1+\exp(-a)}\qquad(5.5),(5.6)')
         self.beat(t.animate.set_value(1),a.animate.set_value(-2))
-        self.beat(a.animate.set_value(0),Indicate(g,color=OUT))
+        self.remove(ax,axis_names)
+        ax=self.plot_axes(x=(-3,3,1),y=(0,1,.5),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
+        self.beat(a.animate.set_value(0),Indicate(dot,color=OUT))
         # Reuse a single bar coordinate system for independent binary outputs and softmax.
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         scores=[ValueTracker(1.3),ValueTracker(.7),ValueTracker(-.6)]; mode=ValueTracker(0)
@@ -242,29 +256,34 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.add(name)
         self.beat(FadeIn(group))
         nxt=objects(1)
-        self.beat(actions=[lambda:FadeOut(group),lambda:AnimationGroup(FadeIn(nxt),Transform(name,tex(r't=\sin(\pi x)',27,YELLOW_ACC).move_to([5,.8,0])))])
-        group=nxt
+        nxt_name=tex(r't=\sin(\pi x)',27,YELLOW_ACC).move_to([5,.8,0])
+        self.beat(actions=[lambda:AnimationGroup(FadeOut(group),FadeOut(name)),lambda:AnimationGroup(FadeIn(nxt),FadeIn(nxt_name))])
+        group=nxt; name=nxt_name
         nxt=objects(2)
-        self.beat(actions=[lambda:FadeOut(group),lambda:AnimationGroup(FadeIn(nxt),Transform(name,tex(r't=|x|',29,YELLOW_ACC).move_to([5,.8,0])))])
-        group=nxt
+        nxt_name=tex(r't=|x|',29,YELLOW_ACC).move_to([5,.8,0])
+        self.beat(actions=[lambda:AnimationGroup(FadeOut(group),FadeOut(name)),lambda:AnimationGroup(FadeIn(nxt),FadeIn(nxt_name))])
+        group=nxt; name=nxt_name
         self.remove(group)
         sharp=ValueTracker(2.)
         stepdots=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.04) for x,y in zip(X,targets(3,X))])
         g=always_redraw(lambda:curve(ax,lambda x:.5+.5*np.tanh(sharp.get_value()*x),color=OUT))
         self.add(stepdots,g,knob('w=',sharp,2,18,color=C2))
-        self.beat(sharp.animate.set_value(18),Transform(name,tex('t=H(x)',29,YELLOW_ACC).move_to([5,.8,0])))
+        self.remove(name)
+        self.add(tex('t=H(x)',29,YELLOW_ACC).move_to([5,.8,0]))
+        self.beat(sharp.animate.set_value(18))
         err=Line(ax.c2p(0,.5),ax.c2p(0,1),color=YELLOW_ACC,stroke_width=6)
         self.add(tex(r'|y(0)-t(0)|=0.5',25,YELLOW_ACC).move_to([4.65,-.1,0]))
         self.beat(Indicate(err,color=YELLOW_ACC),Indicate(g,color=OUT))
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         self.equation(r'\sup_{x\in[a,b]}|y(x)-f(x)|<\varepsilon')
+        self.add(jp('左辺：区間全体の最大誤差',22,MUTED).move_to([0,1.65,0]))
         conditions=VGroup(jp('閉じた有限区間',29,C1),jp('連続な目標関数',29,C2),jp('適切な活性化 ＋ 十分な隠れユニット',29,C3)).arrange(DOWN,buff=.5).move_to([0,.3,0])
         self.beat(LaggedStart(*[FadeIn(c,shift=UP*.15) for c in conditions],lag_ratio=.5))
         self.add(note('よい重みの存在 → データから探す学習へ',color=YELLOW_ACC))
         self.beat(Indicate(conditions[2],color=YELLOW_ACC))
 
     def symmetry(self):
-        ax=self.plot_axes(x=(-1,1,.5),y=(-1.4,1.4,1),height=3.15,center=(-.7,-.15,0))
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.4,1.4,1),height=2.4,center=(-.7,.35,0))
         ins=ValueTracker(1); outs=ValueTracker(1)
         h1=lambda x:np.tanh(ins.get_value()*(3*x+1.2))
         contribution=lambda x:.65*outs.get_value()*h1(x)
@@ -274,7 +293,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         total=always_redraw(lambda:curve(ax,y,color=OUT))
         ghost=curve(ax,bump,color=MUTED).set_stroke(width=5,opacity=.35)
         self.equation(r'y=0.65\tanh(3x+1.2)-0.65\tanh(3x-1.2)')
-        self.add(ghost,one,two,total,number(r's_{\rm in}=',ins.get_value,[5,.75,0],C1,places=0),number(r's_{\rm out}=',outs.get_value,[5,0,0],C2,places=0))
+        self.add(ghost,one,two,total,number(r's_{\rm in}=',ins.get_value,[5,.75,0],C1,places=2),number(r's_{\rm out}=',outs.get_value,[5,0,0],C2,places=2))
         self.beat(Create(total))
         self.equation(r'\tanh(-a)=-\tanh(a)')
         self.beat(ins.animate.set_value(-1))
@@ -283,12 +302,16 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.add(note('灰色の元の曲線と、赤い曲線が一致',color=YELLOW_ACC))
         self.beat(Indicate(total,color=YELLOW_ACC))
         # Swap complete labeled summands; the actual output is permutation invariant.
-        left=VGroup(tex(r'(-0.65)\tanh(-3x-1.2)',26,C1),jp('ユニット１',20,C1)).arrange(DOWN,buff=.15).move_to([-3,-2.35,0])
-        right=VGroup(tex(r'(-0.65)\tanh(3x-1.2)',26,C2),jp('ユニット２',20,C2)).arrange(DOWN,buff=.15).move_to([3,-2.35,0])
+        left=VGroup(tex(r'(-0.65)\tanh(-3x-1.2)',26,C1),jp('ユニット１',20,C1)).arrange(DOWN,buff=.15).move_to([-3,-2.1,0])
+        right=VGroup(tex(r'(-0.65)\tanh(3x-1.2)',26,C2),jp('ユニット２',20,C2)).arrange(DOWN,buff=.15).move_to([3,-2.1,0])
         for m in list(self.mobjects):
             if isinstance(m,Text) and m.get_center()[1]<-2: self.remove(m)
         self.add(left,right)
-        self.beat(Swap(left,right,path_arc=.22))
+        self.beat(actions=[lambda:Succession(
+            AnimationGroup(left.animate.shift(UP*.42),right.animate.shift(DOWN*.42)),
+            AnimationGroup(left.animate.shift(RIGHT*6),right.animate.shift(LEFT*6)),
+            AnimationGroup(left.animate.shift(DOWN*.42),right.animate.shift(UP*.42))),
+            lambda:Indicate(total,color=YELLOW_ACC,scale_factor=1.02)])
         self.equation(r'2^M M!\qquad M=2:\quad 2^2\cdot2!=8')
         self.beat(Indicate(self.formula,color=YELLOW_ACC))
         self.remove(left,right)
