@@ -41,6 +41,9 @@ def main():
                 for ai,action in enumerate(b.get('actions',[])):
                     if action['name']=='breath':continue
                     frames[f'{prefix}-action{ai:02}']=(action['start']+action['end'])/2
+                    if action['name'] in ['R1.1 sum squares','V08b multiply negative term','V04b opposite small step']:
+                        for fraction in [.15,.85]:
+                            frames[f'{prefix}-action{ai:02}-{fraction}']=action['start']+(action['end']-action['start'])*fraction
             if any(c['id'] in ['scene07-02-02','scene08-02-01'] for c in b['cues']):
                 for suffix,t in [('before',b['start']-.2),('during',(b['start']+b['end'])/2),('after',b['end']+.2)]:
                     frames[f'reference-{sc["id"]}-{suffix}']=t
