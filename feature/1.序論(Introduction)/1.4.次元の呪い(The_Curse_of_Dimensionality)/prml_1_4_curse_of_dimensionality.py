@@ -16,6 +16,9 @@ RED = ManimColor("#FF6B77")
 YELLOW = ManimColor("#FFE079")
 PURPLE = ManimColor("#C29AFF")
 MUTED = ManimColor("#A8B2C5")
+AID_INPUT = ManimColor("#58C4DD")
+AID_OPERATION = ManimColor("#FFFF00")
+AID_RESULT = ManimColor("#83C167")
 
 
 def line_graph(ax, x, y, color=BLUE, fill=False):
@@ -352,7 +355,35 @@ class PRML14CurseOfDimensionality(Scene):
         formula=tex(r'p(\mathbf{x})=(2\pi)^{-D/2}e^{-\|\mathbf{x}\|^2/2}',32,BLUE).move_to([0,2.6,0])
         assumption=tex(r'\mu=0,\quad\sigma=1',33).move_to([3.2,1.25,0])
         self.add(axes)
-        self.beat(FadeIn(dots),FadeIn(formula),FadeIn(assumption))
+        # Reuse 1.2 likelihood's red bell, yellow mean line and width change.
+        # This occupies the existing introduction beat, without a second recap.
+        # As in the revised 1.3 label, exclude empty space glyphs from bounds.
+        recap_label=VGroup(*[g for g in jp('復習: 1.2 ガウス分布',22) if g.has_points()])
+        recap_label.move_to([2.9,2.05,0])
+        recap_frame=SurroundingRectangle(recap_label,color=AID_OPERATION,buff=.12,stroke_width=1.2)
+        bell_ax=Axes(x_range=[-3,3,1],y_range=[0,.8,.4],x_length=3.8,y_length=1.65,
+                     tips=False,axis_config={'color':MUTED,'stroke_width':1.2}).move_to([2.9,.1,0])
+        mu=ValueTracker(-.6);sigma=ValueTracker(.65);xx=np.linspace(-3,3,181)
+        bell=always_redraw(lambda:line_graph(bell_ax,xx,
+            np.exp(-.5*((xx-mu.get_value())/sigma.get_value())**2)/(np.sqrt(2*np.pi)*sigma.get_value()),RED))
+        meanline=always_redraw(lambda:Line(bell_ax.c2p(mu.get_value(),0),bell_ax.c2p(mu.get_value(),.7),color=YELLOW))
+        meantext=jp('平均：中心',20,YELLOW).move_to([1.9,-1.25,0])
+        widthtext=jp('標準偏差：広がり',20,RED).move_to([4,-1.25,0])
+        recap=VGroup(recap_frame,recap_label,bell_ax,bell,meanline,meantext,widthtext)
+        assumption.move_to([2.9,-1.9,0])
+        self.add(recap)
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        # audio_query phrase starts at speedScale=1.08: 平均 2.367s,
+        # 標準偏差 3.772s. Move each control while its meaning is spoken.
+        self.beat(phases=[
+            ('recap 1.2 reference',2.367,lambda:Wait()),
+            ('recap 1.2 mean to zero',3.772-2.367,lambda:mu.animate.set_value(0)),
+            ('recap 1.2 standard deviation to one',first-3.772,lambda:sigma.animate.set_value(1)),
+            ('independent standard Gaussian coordinates',second,
+             lambda:AnimationGroup(FadeIn(dots),FadeIn(formula),FadeIn(assumption))),
+        ])
+        self.remove(recap)
+        assumption.move_to([3.2,1.25,0])
         center=Dot(ax.c2p(0,0),color=YELLOW,radius=.08)
         density=jp('一点での密度は中心が最大',25,BLUE).move_to([3.1,.2,0])
         self.beat(FadeIn(density),Indicate(center,scale_factor=2))
@@ -381,10 +412,63 @@ class PRML14CurseOfDimensionality(Scene):
         factors=MathTex('p(r)',r'\propto',r'r^{D-1}',r'e^{-r^2/2}',font_size=36).move_to([0,2.65,0]);factors[0].set_color(GREEN);factors[2].set_color(YELLOW);factors[3].set_color(BLUE)
         self.remove(histnote)
         self.beat(FadeIn(factors),rad.animate.set_value(1.4))
+        original=[axes,dots,ring,ra,bars,curve,area,factors]
+        self.remove(*original)
+        self.radial_product_aid()
+        self.add(*original)
         peak=Dot(rax.c2p(1,radial_pdf(1,2)),color=GREEN,radius=.07)
         peaklabel=tex(r'r_{\rm mode}=1',27,GREEN).move_to([3.8,1.5,0])
         self.beat(FadeIn(peak),FadeIn(peaklabel),rad.animate.set_value(.85))
         self.beat(rad.animate.set_value(2.5))
+
+    def radial_product_aid(self):
+        """V02: the same radius samples two separate factors and their product."""
+        retained=[m for m in self.mobjects if m is not self.subtitle]
+        frame=RoundedRectangle(width=11,height=5.4,corner_radius=.12,
+                               stroke_color=MUTED,stroke_width=1.2,
+                               fill_color=BG,fill_opacity=1).move_to([0,.05,0])
+        heading=jp('半径ごとの量 = 二つの因子の積',25).move_to([-1.5,2.36,0])
+        condition=tex(r'D=2,\quad\sigma=1',25).move_to([3.55,2.36,0])
+        note=jp('説明用の例：上二段は定数を省略した因子',20,MUTED).move_to([0,-2.32,0])
+        r=ValueTracker(.3)
+        funcs=[lambda v:np.exp(-v*v/2),lambda v:v,lambda v:v*np.exp(-v*v/2)]
+        colors=[AID_INPUT,AID_OPERATION,AID_RESULT]
+        labels=['密度の減少','輪の広さの増加','半径の密度']
+        formulas=[r'e^{-r^2/2}',r'r',r'p(r)=r e^{-r^2/2}']
+        groups=VGroup(frame,heading,condition,note)
+        axs=[]
+        for y,maximum,func,col,label,formula in zip([1.,-.3,-1.6],[1.,3.,.8],funcs,colors,labels,formulas):
+            ax=Axes(x_range=[0,3,1],y_range=[0,maximum,maximum],x_length=4.8,y_length=.8,
+                    tips=False,axis_config={'color':MUTED,'stroke_width':1,'include_numbers':True,'font_size':17})
+            ax.shift(np.array([-1.65,y,0])-ax.c2p(0,0))
+            axs.append(ax)
+            x=np.linspace(0,3,181)
+            groups.add(ax,line_graph(ax,x,func(x),col),
+                       jp(label,21,col).move_to([-3.7,y+.6,0]),
+                       tex(formula,27,col).move_to([-3.7,y+.12,0]),
+                       tex('r',22).next_to(ax.x_axis,RIGHT,buff=.1))
+        guide=always_redraw(lambda:DashedLine(
+            axs[0].c2p(r.get_value(),1),axs[2].c2p(r.get_value(),0),color=WHITE,stroke_width=1.5))
+        marks=VGroup(*[always_redraw(lambda ax=ax,fn=fn,col=col:
+            Dot(ax.c2p(r.get_value(),fn(r.get_value())),radius=.065,color=col))
+            for ax,fn,col in zip(axs,funcs,colors)])
+        values=VGroup(*[meter('=',lambda fn=fn:fn(r.get_value()),[4.25,y+.4,0],col,2)
+                       for y,fn,col in zip([1.,-.3,-1.6],funcs,colors)])
+        radius=meter('r=',r.get_value,[.9,-2.78,0],WHITE,2)
+        # Reveal the card once; movements share the sentence PCM boundaries.
+        self.add(groups,guide,marks,values,radius)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V02 identify blue and yellow factors',a,lambda:Wait()),
+            ('V02 common radius 0.3 to 1',b,lambda:r.animate.set_value(1)),
+            # Hold the peak during 半径一 ... 最大; さらに begins at 2.913s.
+            ('V02 product maximum at radius 1',2.913,lambda:Wait()),
+            ('V02 product falls from radius 1 to 2',c-2.913,lambda:r.animate.set_value(2)),
+        ])
+        # Animations can restructure VGroups into top-level objects. Restore
+        # the retained scene explicitly so no factor readouts survive the card.
+        self.clear()
+        self.add(*retained,self.subtitle)
 
     def concentration(self):
         d=ValueTracker(1)

@@ -1,5 +1,5 @@
 {
-  "video_sha256": "9c4453718238f0d3e56f0e1a79020f94f7a0b5a9919663615d6ee4be7e72943b",
+  "video_sha256": "0bc04954096a9ba1993abb6379e8f713302e6b0dc4efd23db436b5a631934f6f",
   "ffprobe": {
     "programs": [],
     "streams": [
@@ -10,13 +10,31 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "591.864067"
+        "duration": "605.930733"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
+        "duration": "605.973333"
+      }
+    ],
+    "format": {
+      "duration": "605.974000"
+    }
+  },
+  "baseline_ffprobe": {
+    "programs": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_type": "video",
+        "duration": "591.864067"
+      },
+      {
+        "index": 1,
+        "codec_type": "audio",
         "duration": "591.893333"
       }
     ],
@@ -24,624 +42,243 @@
       "duration": "591.894000"
     }
   },
-  "stream_duration_difference": 0.029266000000006898,
+  "stream_duration_difference": 0.04259999999999309,
+  "video_duration_increase": 14.066666000000055,
+  "video_duration_increase_percent": 2.37667173668783,
   "mean_volume_db": -26.8,
-  "max_volume_db": -6.3,
+  "max_volume_db": -5.7,
   "silence_filter": "silencedetect=noise=-45dB:d=3",
   "long_silence_count": 0,
-  "py_compile": "passed",
-  "numerical_verification": "5 groups passed",
-  "numerical_results": {
-    "1": {
-      "integral": 0.9999999999999997,
-      "second_moment": 0.9999999999999996,
-      "variance_of_r_squared": 1.9999999999999993,
-      "mode": 0.0
-    },
-    "2": {
-      "integral": 0.9999999791666665,
-      "second_moment": 2.0000000000000004,
-      "variance_of_r_squared": 3.999999916666663,
-      "mode": 1.0
-    },
-    "20": {
-      "integral": 1.0000000000000033,
-      "second_moment": 20.000000000000068,
-      "variance_of_r_squared": 40.00000000000013,
-      "mode": 4.359
-    },
-    "100": {
-      "integral": 0.9999999999999845,
-      "second_moment": 99.99999999999844,
-      "variance_of_r_squared": 199.99999999999693,
-      "mode": 9.950000000000001
-    }
-  },
-  "caption_count": 116,
+  "unchanged_sentence_pcm_count": 114,
+  "caption_count": 119,
   "caption_max_width": 9.38984375,
-  "caption_max_height": 0.69953125,
-  "narration_symbol_readings_in_display": 0,
-  "max_scene_wav_timing_difference": 6.329514690150972e-11,
-  "reviewed_frame_count": 76,
-  "math_caption_frames": 12,
+  "caption_max_height": 0.6995312499999997,
   "frames": [
     {
-      "id": "scene01-beat01",
-      "time": 3.4,
-      "reason": "beat"
-    },
-    {
-      "id": "scene01-beat02",
-      "time": 11.599999999999994,
-      "reason": "beat"
-    },
-    {
-      "id": "scene01-beat03",
       "time": 21.16666666666663,
-      "reason": "beat"
+      "label": "scene01 existing"
     },
     {
-      "id": "scene01-beat04",
-      "time": 29.5666666666666,
-      "reason": "beat"
-    },
-    {
-      "id": "scene01-beat05",
-      "time": 37.96666666666663,
-      "reason": "beat"
-    },
-    {
-      "id": "scene01-beat06",
-      "time": 47.20000000000044,
-      "reason": "beat"
-    },
-    {
-      "id": "scene01-06-02",
-      "time": 49.41600000000044,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene01-beat07",
-      "time": 57.10000000000089,
-      "reason": "beat"
-    },
-    {
-      "id": "scene02-beat01",
-      "time": 65.63333333333476,
-      "reason": "beat"
-    },
-    {
-      "id": "scene02-beat02",
-      "time": 72.50000000000122,
-      "reason": "beat"
-    },
-    {
-      "id": "scene02-beat03",
       "time": 80.53333333333413,
-      "reason": "beat"
+      "label": "scene02 existing"
     },
     {
-      "id": "scene02-beat04",
-      "time": 90.26666666666698,
-      "reason": "beat"
-    },
-    {
-      "id": "scene02-04-01",
-      "time": 86.48533333333364,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene02-beat05",
-      "time": 100.16666666666634,
-      "reason": "beat"
-    },
-    {
-      "id": "scene02-beat06",
-      "time": 110.83333333333252,
-      "reason": "beat"
-    },
-    {
-      "id": "scene02-beat07",
-      "time": 122.26666666666515,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-beat01",
-      "time": 132.03333333333123,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-beat02",
-      "time": 140.93333333333072,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-beat03",
       "time": 151.1999999999969,
-      "reason": "beat"
+      "label": "scene03 existing"
     },
     {
-      "id": "scene03-03-01",
-      "time": 148.7173333333302,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene03-beat04",
-      "time": 162.2999999999962,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-beat05",
-      "time": 172.99999999999562,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-beat06",
-      "time": 184.96666666666167,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-beat07",
-      "time": 196.9333333333276,
-      "reason": "beat"
-    },
-    {
-      "id": "scene03-07-01",
-      "time": 194.05066666666093,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene03-sync-0.15",
-      "time": 147.04666666666355,
-      "reason": "synchronization"
-    },
-    {
-      "id": "scene03-sync-0.85",
-      "time": 155.35333333333023,
-      "reason": "synchronization"
-    },
-    {
-      "id": "scene04-beat01",
-      "time": 207.09999999999366,
-      "reason": "beat"
-    },
-    {
-      "id": "scene04-beat02",
-      "time": 216.13333333332645,
-      "reason": "beat"
-    },
-    {
-      "id": "scene04-beat03",
       "time": 224.3999999999926,
-      "reason": "beat"
+      "label": "scene04 existing"
     },
     {
-      "id": "scene04-beat04",
-      "time": 233.2333333333255,
-      "reason": "beat"
-    },
-    {
-      "id": "scene04-04-02",
-      "time": 235.7653333333255,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene04-beat05",
-      "time": 245.16666666665827,
-      "reason": "beat"
-    },
-    {
-      "id": "scene04-05-01",
-      "time": 242.85599999999158,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene04-beat06",
-      "time": 258.06666666665745,
-      "reason": "beat"
-    },
-    {
-      "id": "scene04-06-02",
-      "time": 260.6399999999908,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene04-beat07",
-      "time": 271.59999999999013,
-      "reason": "beat"
-    },
-    {
-      "id": "scene04-07-01",
-      "time": 268.57066666665685,
-      "reason": "math caption"
-    },
-    {
-      "id": "scene05-beat01",
-      "time": 284.1999999999893,
-      "reason": "beat"
-    },
-    {
-      "id": "scene05-beat02",
-      "time": 294.3999999999887,
-      "reason": "beat"
-    },
-    {
-      "id": "scene05-beat03",
       "time": 304.0333333333215,
-      "reason": "beat"
+      "label": "scene05 existing"
     },
     {
-      "id": "scene05-beat04",
-      "time": 313.73333333332096,
-      "reason": "beat"
+      "time": 375.4666666666508,
+      "label": "scene06 existing"
     },
     {
-      "id": "scene05-beat05",
-      "time": 323.46666666665374,
-      "reason": "beat"
+      "time": 473.23333333331186,
+      "label": "scene07 existing"
     },
     {
-      "id": "scene05-beat06",
-      "time": 333.6999999999865,
-      "reason": "beat"
+      "time": 544.7333333333311,
+      "label": "scene08 existing"
     },
     {
-      "id": "scene05-beat07",
-      "time": 344.13333333331923,
-      "reason": "beat"
+      "time": 348.5,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene05-sync-0.15",
-      "time": 300.9299999999881,
-      "reason": "synchronization"
+      "time": 349.0,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene05-sync-0.85",
-      "time": 307.13666666665483,
-      "reason": "synchronization"
+      "time": 351.3,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat01",
-      "time": 354.53333333331864,
-      "reason": "beat"
+      "time": 352.3,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat02",
-      "time": 365.26666666665136,
-      "reason": "beat"
+      "time": 353.5,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat03",
-      "time": 375.33333333331746,
-      "reason": "beat"
+      "time": 355.3,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat04",
-      "time": 384.89999999998355,
-      "reason": "beat"
+      "time": 359.5,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-04-01",
-      "time": 382.4853333333169,
-      "reason": "math caption"
+      "time": 360.6,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat05",
-      "time": 395.19999999998305,
-      "reason": "beat"
+      "time": 412.9,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-05-01",
-      "time": 392.17333333331635,
-      "reason": "math caption"
+      "time": 413.6,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat06",
-      "time": 407.0999999999824,
-      "reason": "beat"
+      "time": 416.5,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat07",
-      "time": 418.3999999999817,
-      "reason": "beat"
+      "time": 417.6,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene06-beat08",
-      "time": 428.69999999998106,
-      "reason": "beat"
+      "time": 419.8,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-beat01",
-      "time": 438.93333333331384,
-      "reason": "beat"
+      "time": 422.5,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-beat02",
-      "time": 449.0333333333133,
-      "reason": "beat"
+      "time": 423.1,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-02-01",
-      "time": 446.6533333333133,
-      "reason": "math caption"
+      "time": 425.4,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-beat03",
-      "time": 459.16666666664605,
-      "reason": "beat"
+      "time": 426.3,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-beat04",
-      "time": 469.6333333333121,
-      "reason": "beat"
+      "time": 427.4,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-04-01",
-      "time": 466.8773333333121,
-      "reason": "math caption"
+      "time": 428.2,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-beat05",
-      "time": 479.2999999999782,
-      "reason": "beat"
+      "time": 432.8,
+      "label": "changed before/inside/after"
     },
     {
-      "id": "scene07-beat06",
-      "time": 490.2999999999777,
-      "reason": "beat"
-    },
-    {
-      "id": "scene07-beat07",
-      "time": 502.63333333331025,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat01",
-      "time": 512.4333333333096,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat02",
-      "time": 520.9333333333129,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat03",
-      "time": 530.6666666666533,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat04",
-      "time": 540.9333333333284,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat05",
-      "time": 551.5333333333363,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat06",
-      "time": 562.1333333333453,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat07",
-      "time": 573.5333333333531,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-beat08",
-      "time": 585.9333333333634,
-      "reason": "beat"
-    },
-    {
-      "id": "scene08-sync-0.15",
-      "time": 537.4799999999951,
-      "reason": "synchronization"
-    },
-    {
-      "id": "scene08-sync-0.85",
-      "time": 544.3866666666618,
-      "reason": "synchronization"
-    }
-  ],
-  "synchronization": [
-    {
-      "scene": "scene03",
-      "sentence": "scene03-03-01",
-      "display": "たとえば$x_1x_2$は、二つの入力が一緒に効く項です。",
-      "cue_start": 145.26666666666355,
-      "voice_onset": 145.3719583333312,
-      "actions": [
-        {
-          "name": "sentence 1",
-          "start": 145.26666666666355,
-          "end": 152.1999999999965
-        },
-        {
-          "name": "sentence 2",
-          "start": 152.1999999999965,
-          "end": 156.79999999999623
-        },
-        {
-          "name": "breath",
-          "start": 156.79999999999623,
-          "end": 157.13333333332955
-        }
-      ]
-    },
-    {
-      "scene": "scene03",
-      "sentence": "scene03-03-02",
-      "display": "その係数を動かすと、曲面の傾きが場所によって変わります。",
-      "cue_start": 152.16799999999688,
-      "voice_onset": 152.25599999999787,
-      "actions": [
-        {
-          "name": "sentence 1",
-          "start": 145.26666666666355,
-          "end": 152.1999999999965
-        },
-        {
-          "name": "sentence 2",
-          "start": 152.1999999999965,
-          "end": 156.79999999999623
-        },
-        {
-          "name": "breath",
-          "start": 156.79999999999623,
-          "end": 157.13333333332955
-        }
-      ]
-    },
-    {
-      "scene": "scene05",
-      "sentence": "scene05-03-01",
-      "display": "五十次元では、約九十九点五パーセントです。",
-      "cue_start": 299.59999999998814,
-      "voice_onset": 299.6898749999893,
-      "actions": [
-        {
-          "name": "sentence 1",
-          "start": 299.59999999998814,
-          "end": 303.19999999998794
-        },
-        {
-          "name": "sentence 2",
-          "start": 303.19999999998794,
-          "end": 308.0666666666543
-        },
-        {
-          "name": "breath",
-          "start": 308.0666666666543,
-          "end": 308.4666666666543
-        }
-      ]
-    },
-    {
-      "scene": "scene05",
-      "sentence": "scene05-03-02",
-      "display": "内側の半径は九割あるのに、その体積はほとんど残りません。",
-      "cue_start": 303.2053333333215,
-      "voice_onset": 303.2708749999893,
-      "actions": [
-        {
-          "name": "sentence 1",
-          "start": 299.59999999998814,
-          "end": 303.19999999998794
-        },
-        {
-          "name": "sentence 2",
-          "start": 303.19999999998794,
-          "end": 308.0666666666543
-        },
-        {
-          "name": "breath",
-          "start": 308.0666666666543,
-          "end": 308.4666666666543
-        }
-      ]
-    },
-    {
-      "scene": "scene08",
-      "sentence": "scene08-04-01",
-      "display": "物体を横や縦にずらすと、多くの画素が一緒に変わります。",
-      "cue_start": 535.9999999999951,
-      "voice_onset": 536.0909999999762,
-      "actions": [
-        {
-          "name": "sentence 1",
-          "start": 535.9999999999951,
-          "end": 540.3333333333319
-        },
-        {
-          "name": "sentence 2",
-          "start": 540.3333333333319,
-          "end": 545.4666666666693
-        },
-        {
-          "name": "breath",
-          "start": 545.4666666666693,
-          "end": 545.8666666666696
-        }
-      ]
-    },
-    {
-      "scene": "scene08",
-      "sentence": "scene08-04-02",
-      "display": "さらに回転させても、自由に動かしたのは位置二つと角度一つだけです。",
-      "cue_start": 540.3093333333285,
-      "voice_onset": 540.3683333333096,
-      "actions": [
-        {
-          "name": "sentence 1",
-          "start": 535.9999999999951,
-          "end": 540.3333333333319
-        },
-        {
-          "name": "sentence 2",
-          "start": 540.3333333333319,
-          "end": 545.4666666666693
-        },
-        {
-          "name": "breath",
-          "start": 545.4666666666693,
-          "end": 545.8666666666696
-        }
-      ]
+      "time": 438.3,
+      "label": "changed before/inside/after"
     }
   ],
   "scene_timing": [
     {
       "id": "scene01",
       "start": 0.0,
-      "duration": 62.53333333333476,
-      "reference": "pp.33–35 / Figs.1.19–1.20"
+      "duration": 62.53333333333476
     },
     {
       "id": "scene02",
       "start": 62.53333333333476,
-      "duration": 64.93333333332978,
-      "reference": "p.35 / Fig.1.21（5分割・1000点は独自例）"
+      "duration": 64.93333333332978
     },
     {
       "id": "scene03",
       "start": 127.46666666666455,
-      "duration": 74.99999999999575,
-      "reference": "p.36 / Eq.(1.74), Exercise 1.16"
+      "duration": 74.99999999999575
     },
     {
       "id": "scene04",
       "start": 202.4666666666603,
-      "duration": 76.733333333329,
-      "reference": "p.36 / Eqs.(1.75)–(1.76)"
+      "duration": 76.733333333329
     },
     {
       "id": "scene05",
       "start": 279.1999999999893,
-      "duration": 69.59999999999604,
-      "reference": "pp.36–37 / Eq.(1.76), Fig.1.22"
+      "duration": 69.59999999999604
     },
     {
       "id": "scene06",
       "start": 348.79999999998535,
-      "duration": 84.99999999999517,
-      "reference": "pp.36–37 / Fig.1.23, Exercise 1.20（σ=1の独自例）"
+      "duration": 99.06666666666104
     },
     {
       "id": "scene07",
-      "start": 433.7999999999805,
-      "duration": 74.5333333333291,
-      "reference": "pp.36–37 / Fig.1.23, Exercise 1.20"
+      "start": 447.8666666666464,
+      "duration": 74.53333333333791
     },
     {
       "id": "scene08",
-      "start": 508.3333333333096,
-      "duration": 83.53333333339663,
-      "reference": "pp.37–38 / 低い実効次元・局所的滑らかさ・画像例"
+      "start": 522.3999999999843,
+      "duration": 83.53333333339981
     }
   ],
+  "synchronization": [
+    {
+      "sentence": "scene06-01-01",
+      "phrase": "ヘエキンガ",
+      "query_phrase_time": 351.16689066333544,
+      "animation": {
+        "name": "recap 1.2 mean to zero",
+        "start": 351.1999999999852,
+        "end": 352.59999999998513
+      },
+      "action_minus_phrase_seconds": 0.03310933664977256,
+      "pcm_sentence_onset": 348.8489999999853
+    },
+    {
+      "sentence": "scene06-01-01",
+      "phrase": "ヒョオジュンヘンサガ",
+      "query_phrase_time": 352.5723300201603,
+      "animation": {
+        "name": "recap 1.2 standard deviation to one",
+        "start": 352.59999999998513,
+        "end": 354.799999999985
+      },
+      "action_minus_phrase_seconds": 0.02766997982485009,
+      "pcm_sentence_onset": 348.8489999999853
+    },
+    {
+      "sentence": "scene06-aid-03",
+      "phrase": "サラニ",
+      "query_phrase_time": 425.63272656880235,
+      "animation": {
+        "name": "V02 product falls from radius 1 to 2",
+        "start": 425.599999999981,
+        "end": 427.3333333333142
+      },
+      "action_minus_phrase_seconds": -0.03272656882137426,
+      "pcm_sentence_onset": 422.79516666665205
+    }
+  ],
+  "max_subtitle_pcm_timing_difference": 5.702815997210564e-11,
+  "max_scene_wav_timing_difference": 6.647837835771497e-11,
+  "py_compile": "passed",
+  "numerical_verification": "5 groups passed",
+  "numerical_results": {
+    "D2_product_integral": 0.999999999166654,
+    "D2_product_mode": 1.0,
+    "D2_factors": [
+      [
+        0.3,
+        0.9559974818331,
+        0.28679924454993
+      ],
+      [
+        1,
+        0.6065306597126334,
+        0.6065306597126334
+      ],
+      [
+        2,
+        0.1353352832366127,
+        0.2706705664732254
+      ]
+    ]
+  },
+  "narration_symbol_readings_in_display": 0,
+  "reviewed_frame_count": 29,
+  "rendered_animations": 95,
   "limitations": [
     "全編の通し聴取は未実施",
     "全フレームの目視は未実施",
