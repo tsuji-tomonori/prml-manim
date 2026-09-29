@@ -263,8 +263,8 @@ class PRML36FixedBasisLimitations(NarratedScene):
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('R1.4 five boxes',a*.25,lambda:AnimationGroup(FadeIn(row),FadeIn(count))),
-            ('R1.4 twenty-five boxes',a*.35,lambda:AnimationGroup(ReplacementTransform(row,plane),FadeOut(count),FadeIn(count25))),
-            ('R1.4 125 boxes',a*.40,lambda:AnimationGroup(ReplacementTransform(plane,cube),FadeOut(count25),FadeIn(count125))),
+            ('R1.4 twenty-five boxes',a*.35,lambda:AnimationGroup(ReplacementTransform(row,plane),Succession(FadeOut(count),FadeIn(count25)))),
+            ('R1.4 125 boxes',a*.40,lambda:AnimationGroup(ReplacementTransform(plane,cube),Succession(FadeOut(count25),FadeIn(count125)))),
             ('R1.4 centers are bases',b*.65,lambda:AnimationGroup(LaggedStart(*[FadeIn(d) for d in centers],lag_ratio=.006),FadeIn(mapping))),
             ('R1.4 basis count',b*.35,lambda:Indicate(centers,scale_factor=1.025)),
         ])
