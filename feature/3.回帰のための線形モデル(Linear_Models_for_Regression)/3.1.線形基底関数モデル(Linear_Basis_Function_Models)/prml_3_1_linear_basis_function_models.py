@@ -146,9 +146,9 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
                  tex('x',22,MUTED).next_to(ax.x_axis,RIGHT,buff=.12))
         a,b = [self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
-            ('R1.1 residuals',a*.52,lambda:Create(lines)),
-            ('R1.1 square residuals',a*.28,lambda:LaggedStart(*[TransformFromCopy(l,t) for l,t in zip(lines,tiles)],lag_ratio=.12)),
-            ('R1.1 sum squares',a*.20,lambda:AnimationGroup(TransformFromCopy(tiles,bar),FadeIn(summed))),
+            ('R1.1 residuals',3.85,lambda:Create(lines)),
+            ('R1.1 square residuals',.861,lambda:LaggedStart(*[TransformFromCopy(l,t) for l,t in zip(lines,tiles)],lag_ratio=.12)),
+            ('R1.1 sum squares',a-4.711,lambda:AnimationGroup(TransformFromCopy(tiles,bar),FadeIn(summed))),
             ('R1.1 map materials',b,lambda:FadeIn(materials)),
         ])
         self.restore_body(saved)
@@ -173,9 +173,9 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.beat(phases=[
             ('R2.3 move center',a*.5,lambda:mu.animate.set_value(.8)),
             ('R2.3 widen density',a*.5,lambda:sd.animate.set_value(1.2)),
-            ('R2.3 map mean',b*.4,lambda:FadeIn(meanmap)),
-            ('R2.3 map variance',b*.4,lambda:FadeIn(varmap)),
-            ('R2.3 connect noise',b*.2,lambda:FadeIn(bridge)),
+            ('R2.3 connect noise',2.873,lambda:FadeIn(bridge)),
+            ('R2.3 map mean',4.608-2.873,lambda:FadeIn(meanmap)),
+            ('R2.3 map variance',b-4.608,lambda:FadeIn(varmap)),
         ])
         self.restore_body(saved)
 
@@ -207,10 +207,10 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         a,b = [self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('V08b select row and weights',a,lambda:AnimationGroup(Create(box),Create(wbox))),
-            ('V08b multiply positive term',b*.27,lambda:AnimationGroup(FadeIn(baseline),GrowFromEdge(plus,DOWN),FadeIn(plabel))),
-            ('V08b multiply negative term',b*.33,lambda:AnimationGroup(GrowFromEdge(minus,UP),FadeIn(mlabel))),
-            ('V08b sum to prediction',b*.25,lambda:AnimationGroup(GrowFromEdge(total,DOWN),FadeIn(tlabel),FadeIn(arithmetic),Create(outbox))),
-            ('V08b share weights next row',b*.15,lambda:AnimationGroup(Transform(box,SurroundingRectangle(rows[1],color=AID_INPUT,buff=.09)),Transform(outbox,SurroundingRectangle(entries[1],color=AID_RESULT,buff=.1)),Indicate(wbox,scale_factor=1.02))),
+            ('V08b multiply positive term',2.178,lambda:AnimationGroup(FadeIn(baseline),GrowFromEdge(plus,DOWN),FadeIn(plabel))),
+            ('V08b multiply negative term',3.87-2.178,lambda:AnimationGroup(GrowFromEdge(minus,UP),FadeIn(mlabel))),
+            ('V08b sum to prediction',b-3.87-.8,lambda:AnimationGroup(GrowFromEdge(total,DOWN),FadeIn(tlabel),FadeIn(arithmetic),Create(outbox))),
+            ('V08b share weights next row',.8,lambda:AnimationGroup(Transform(box,SurroundingRectangle(rows[1],color=AID_INPUT,buff=.09)),Transform(outbox,SurroundingRectangle(entries[1],color=AID_RESULT,buff=.1)),Indicate(wbox,scale_factor=1.02))),
         ])
         self.restore_body(saved)
 
@@ -234,8 +234,8 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('V04b increasing gradient',a,lambda:AnimationGroup(GrowArrow(gradient),FadeIn(glabel))),
-            ('V04b opposite small step',b*.48,lambda:AnimationGroup(GrowArrow(update),FadeIn(ulabel),point.animate.move_to(ax.c2p(*end)))),
-            ('V04b decrease current error',b*.52,lambda:FadeIn(value)),
+            ('V04b opposite small step',1.786,lambda:AnimationGroup(GrowArrow(update),FadeIn(ulabel),point.animate.move_to(ax.c2p(*end)))),
+            ('V04b decrease current error',b-1.786,lambda:FadeIn(value)),
         ])
         self.restore_body(saved)
 

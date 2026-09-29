@@ -60,6 +60,17 @@ def main():
     np.testing.assert_allclose(grid@shifted[:,0],grid@both[:,0]+.3,atol=1e-10)
     np.testing.assert_allclose(shifted[:,1],both[:,1],atol=1e-10)
     checks['multiple_outputs']=True
+    # Independent finite-difference check of the one-point contour example.
+    point=np.array([1.5,1.]); h=1e-6
+    cost=lambda w:.5*(w.sum()-1)**2
+    gradient=np.array([(cost(point+h*e)-cost(point-h*e))/(2*h) for e in np.eye(2)])
+    np.testing.assert_allclose(gradient,[1.5,1.5],atol=1e-9)
+    after=point-.2*gradient
+    np.testing.assert_allclose([cost(point),cost(after)],[1.125,.405],atol=1e-9)
+    example=np.array([[1,2],[1,1]])@np.array([3,-1])
+    np.testing.assert_array_equal(example,[1,2])
+    checks['visual_aids']={'row_predictions':example.tolist(),
+                           'gradient':gradient.tolist(),'error_before':cost(point),'error_after':cost(after)}
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES)==9
     for scene,e in zip(SCENES,entries):assert valid_entry(scene,e),scene['id']
