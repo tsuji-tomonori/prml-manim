@@ -97,6 +97,59 @@ for i, (title, reference, beats) in enumerate(STORY, 1):
         scene['beats'].append(dict(seconds=12, visual_note=note, segments=segments))
     SCENES.append(scene)
 
+
+# Keep the established sentence IDs; insert review beats only after assigning them.
+def review_beat(scene_id, kind, seconds, note, *lines):
+    return dict(seconds=seconds, visual_note=note, segments=[
+        dict(id=f'{scene_id}-{kind}-{i:02}', display=line[0], speech=line[1])
+        for i, line in enumerate(lines, 1)])
+
+SCENES[2]['beats'].insert(1, review_beat('scene03', 'recap-cost', 12,
+    '復習 R：1.6の橙の負の対数コストと黄の点を、一つの正解へ縮約',
+    ('1.6では、正解に低い確率を付けるほど、負の対数のコストが増えました。',
+     '一章六節では、正解に低い確率を付けるほど、ふの対数のコストが増えました。'),
+    ('同じ考え方を、クラスの予測へ使います。',
+     '同じ考え方を、クラスの予測へ使います。')))
+SCENES[2]['beats'].append(review_beat('scene03', 'aid-chain', 15,
+    '補足 V14a：a→y→E、小さな変化に局所倍率を掛け、y−tへ',
+    ('小さな変化は、各段階の倍率を掛けて伝わります。',
+     '小さな変化は、各段階の倍率を掛けて伝わります。'),
+    (r'ここでは $1/4$ と $-2$ を掛けて $-1/2$。',
+     'ここではよんぶんのいちとマイナス二を掛けて、マイナスにぶんのいち。'),
+    (r'これが、予測と目標の差 $y-t$ です。',
+     'これが、予測と目標の差、ワイ引くティーです。')))
+SCENES[4]['beats'].insert(2, review_beat('scene05', 'recap-irls', 18,
+    '復習 R：2.1の青0・緑1と分散、続いて3.1の黄の残差二乗を重み付きへ',
+    (r'2.1のベルヌーイの分散は $y(1-y)$ でした。',
+     '二章一節のベルヌーイの分散は、ワイかける一引くワイでした。'),
+    ('3.1では、点と予測のずれを二乗して足しました。',
+     '三章一節では、点と予測のずれを二乗して足しました。'),
+    ('今回は有効目標へのずれに、分散の重みを掛け、計算し直しながら繰り返します。',
+     '今回は有効目標へのずれに、分散の重みを掛け、計算し直しながら繰り返します。')))
+SCENES[4]['beats'].insert(6, review_beat('scene05', 'aid-newton', 15,
+    '補足 V11b：青い誤差を黄の局所放物線で近似し、紫の一歩−g/Hへ',
+    ('ニュートン法は、近くの誤差を放物線で近似し、その谷底へ進みます。',
+     'ニュートン法は、近くの誤差を放物線で近似し、その谷底へ進みます。'),
+    ('一変数なら、傾きを曲率で割った分だけ逆へ動きます。',
+     'いちへんすうなら、傾きを曲率で割った分だけ逆へ動きます。')))
+SCENES[8]['beats'].insert(1, review_beat('scene09', 'recap-link', 12,
+    '復習 R：2.4の自然パラメータのつまみと緑の平均曲線を、活性化とリンクへ',
+    ('2.4では、自然パラメータと分布の平均を結び付けました。',
+     '二章四節では、自然パラメータと分布の平均を結び付けました。'),
+    ('この対応を出力関数に使うと、勾配の共通した形が現れます。',
+     'この対応を出力関数に使うと、勾配の共通した形が現れます。')))
+
+# The existing demonstrations already supply the recap: name their source in speech.
+for scene in SCENES:
+    for beat in scene['beats']:
+        for segment in beat['segments']:
+            if segment['id'] == 'scene02-04-02':
+                segment.update(display='3.1の固定基底関数は、決めておいた変換で境界を表しやすくします。',
+                               speech='三章一節の固定基底関数は、決めておいた変換で境界を表しやすくします。')
+            elif segment['id'] == 'scene04-04-02':
+                segment.update(display='3.3で見たガウス事前分布も、この正則化につながります。',
+                               speech='三章三節で見たガウス事前分布も、この正則化につながります。')
+
 SYNTHESIS_SETTINGS = dict(speedScale=1.08, intonationScale=.95, prePhonemeLength=.08,
                           postPhonemeLength=.12, volumeScale=1.)
 
