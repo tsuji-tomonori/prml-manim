@@ -202,6 +202,13 @@ class PRML21BinaryVariables(NarratedScene):
         self.review_card('補足：頂上と、微分が 0 になる場所')
         ax=self.ax(xr=(.2,.9,.1),yr=(-9,-5,1),width=5.8,height=2.15,
                    center=(-1.3,-.15,0),ylabel='対数尤度')
+        # With an all-negative y range, Manim places x ticks at the top.
+        # Keep the coordinate map, but move that axis below the curve.
+        origin=ax.c2p(0,0).copy()
+        ux=ax.c2p(1,0)-origin;uy=ax.c2p(0,1)-origin
+        ax.x_axis.shift(-4*uy)
+        ax.c2p=lambda x,y=0:origin+x*ux+y*uy
+        ax.labels[0].next_to(ax.x_axis,RIGHT,buff=.15)
         fn=lambda u:5*np.log(u)+3*np.log1p(-u)
         slope=lambda u:5/u-3/(1-u)
         u=ValueTracker(.4)
@@ -239,6 +246,7 @@ class PRML21BinaryVariables(NarratedScene):
         self.review_card('復習: 1.2 ベイズ更新')
         ax=self.ax(yr=(0,2.6,1.3),width=7.6,height=2.05,center=(0,-.15,0),
                    xlabel=r'\theta',ylabel='密度・尤度')
+        ax.labels[1].set_y(1.5)
         prior=lambda u:6*u*(1-u)
         mult=ValueTracker(0);norm=ValueTracker(1)
         fn=lambda u:prior(u)*(1-mult.get_value()+mult.get_value()*u**3)*norm.get_value()
