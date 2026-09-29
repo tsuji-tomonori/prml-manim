@@ -256,13 +256,13 @@ class PRML41DiscriminantFunctions(NarratedScene):
         X=np.array([[1,-1,-.5],[1,1,.5],[1,.5,1]])
         T=np.array([[1,0],[0,1],[0,1]])
         W=np.linalg.solve(X,T)
-        xi=table(X,-3.25);xi.set_column_colors(BLUE_CLS,YELLOW_W,PURPLE_B)
-        wi=table(W,-.85);yi=table(X@W,1.35,RED_LINE)
+        xi=table(X,-3.6);xi.set_column_colors(BLUE_CLS,YELLOW_W,PURPLE_B)
+        wi=table(W,-1.05);yi=table(X@W,1.45,RED_LINE)
         ti=Matrix(T,h_buff=.55,v_buff=.5,element_to_mobject_config={'font_size':26}).move_to([3.8,.15,0])
         ti.get_rows()[0].set_color(BLUE_CLS)
         for row in ti.get_rows()[1:]:row.set_color(ORANGE_CLS)
         lab2=VGroup(*[jp(t,20).move_to([x,1.35,0]) for t,x in
-            [('拡張入力',-3.25),('重み',-.85),('スコア',1.35),('クラスの目標',3.8)]])
+            [('拡張入力',-3.6),('重み',-1.05),('スコア',1.45),('クラスの目標',3.8)]])
         destination=VGroup(xi,wi,yi,ti,lab2,tex('=',25).move_to([.25,.15,0]),
             tex(r'Y=\widetilde XW\qquad C_1:(1,0),\ C_2:(0,1)',29).move_to([0,-1.35,0]))
         self.add(jp('説明用の3点',18,MUTED).move_to([3.75,2.02,0]))
