@@ -32,9 +32,21 @@
     ]
   },
   "multiple_outputs": true,
+  "visual_aids": {
+    "row_predictions": [
+      1,
+      2
+    ],
+    "gradient": [
+      1.500000000209667,
+      1.500000000209667
+    ],
+    "error_before": 1.125,
+    "error_after": 0.4049999999245199
+  },
   "audio": {
     "scenes": 9,
-    "sentences": 133,
-    "duration": 615.4
+    "sentences": 142,
+    "duration": 660.7333333333333
   }
 }
