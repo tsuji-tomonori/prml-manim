@@ -16,6 +16,18 @@ for s in timeline:
   for c in b['cues']:
    if '$' in c['display']:
     frames.append(dict(name=c['id']+'-math',time=(c['start']+c['end'])/2,reason='math',display=c['display']))
+# Every new card: before, during each operation, and after restoring the body.
+for scene in timeline:
+ for b in scene['beats']:
+  if not any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+   continue
+  key=b['cues'][0]['id']
+  for name,t in [('before',max(0,b['start']-.2)),('after',b['end']+.2)]:
+   frames.append(dict(name=key+'-'+name,time=t,reason='card-context'))
+  for i,a in enumerate(b.get('actions',[])):
+   if a['name']=='breath': continue
+   frames.append(dict(name=f'{key}-action-{i}',time=a['start']+.7*(a['end']-a['start']),reason='card-action'))
+frames.append(dict(name='scene04-recap-label',time=timeline[3]['beats'][4]['start']+2,reason='reference'))
 for si,bi in [(3,1),(4,4),(6,1)]:
  s=timeline[si];b=s['beats'][bi]
  for fraction in [.15,.85]:

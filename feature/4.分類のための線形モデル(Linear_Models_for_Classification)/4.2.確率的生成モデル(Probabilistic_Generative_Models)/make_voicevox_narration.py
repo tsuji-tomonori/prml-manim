@@ -34,6 +34,8 @@ def valid_entry(scene, entry):
     beats = entry.get("beat_durations", [])
     if len(beats) != len(scene["beats"]) or any(d <= 0 for d in beats):
         return False
+    if any("-recap-" in b["segments"][0]["id"] and d < 10 for b, d in zip(scene["beats"], beats)):
+        return False
     cues = entry.get("subtitle_cues", [])
     if [(c.get("id"), c.get("display"), c.get("speech")) for c in cues] != [
             (s["id"], s["display"], s["speech"]) for b in scene["beats"] for s in b["segments"]]:
@@ -55,7 +57,7 @@ def pending_entry(scene):
 def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     temporary = MANIFEST.with_suffix(".tmp.json")
-    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "scenes": entries},
+    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "synthesis_settings": SYNTHESIS_SETTINGS, "scenes": entries},
                                     ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(MANIFEST)
 
@@ -82,11 +84,15 @@ def post_json(base, endpoint, params, body=None):
         return response.read()
 
 
-def sentence_audio(base, text):
+def sentence_cache(base, text):
     key = hashlib.sha256(json.dumps([base, "0.25.2", 23, SYNTHESIS_SETTINGS, text],
                                   ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache = CACHE_DIR / f"{key}.wav"
+    return CACHE_DIR / f"{key}.wav"
+
+
+def sentence_audio(base, text):
+    cache = sentence_cache(base, text)
     if cache.exists():
         return cache.read_bytes()
     query = json.loads(post_json(base, "audio_query", {"speaker": 23, "text": text}))
@@ -94,6 +100,32 @@ def sentence_audio(base, text):
     data = post_json(base, "synthesis", {"speaker": 23}, json.dumps(query).encode())
     cache.write_bytes(data)
     return data
+
+
+def preserve_sentence_audio(base):
+    """Reuse verified original PCM so unchanged narration remains identical."""
+    if not MANIFEST.exists():
+        return
+    previous = json.loads(MANIFEST.read_text())
+    legacy_settings = dict(speedScale=1.08, intonationScale=.95,
+                           prePhonemeLength=.08, postPhonemeLength=.12, volumeScale=1.)
+    if previous.get("synthesis_settings", legacy_settings) != SYNTHESIS_SETTINGS:
+        return
+    for entry in previous.get("scenes", []):
+        path = OUTPUT_DIR / f"{entry['id']}.wav"
+        if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != entry.get("wav_sha256"):
+            continue
+        with wave.open(str(path), "rb") as source:
+            params = source.getparams()
+            for cue in entry.get("subtitle_cues", []):
+                cache = sentence_cache(base, cue["speech"])
+                if cache.exists():
+                    continue
+                first, last = (round(cue[k] * params.framerate) for k in ("start", "end"))
+                source.setpos(first)
+                with wave.open(str(cache), "wb") as output:
+                    output.setparams(params)
+                    output.writeframes(source.readframes(last - first))
 
 
 def generate_scene(base, scene):
@@ -127,6 +159,8 @@ def generate_scene(base, scene):
             # Only a short breath after actual speech; never pad to the old
             # silent-storyboard duration. Align to the 15fps preview boundaries.
             target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            if "-recap-" in beat["segments"][0]["id"]:
+                target_seconds = max(10., target_seconds)
             target_frames = round(target_seconds * params[2])
             padding = target_frames - (total_frames - beat_start)
             output.writeframes(b"\0" * (padding * params[0] * params[1]))
@@ -149,12 +183,16 @@ def main():
     if not args.prepare_only:
         with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
             print("VOICEVOX Engine", response.read().decode(), flush=True)
+    if not args.prepare_only:
+        preserve_sentence_audio(args.base_url)
     entries = prepare_manifest()
     if args.prepare_only:
         print("Manifest prepared. Audio not regenerated.")
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if valid_entry(SCENES[i], entries[i]):
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")

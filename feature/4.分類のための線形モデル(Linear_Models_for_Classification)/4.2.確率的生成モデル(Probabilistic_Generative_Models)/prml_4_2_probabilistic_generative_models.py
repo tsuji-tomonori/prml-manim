@@ -10,6 +10,8 @@ from generative_model import (MEANS,COV,OTHER_COV,RED_POINTS,BLUE_POINTS,BINARY_
 RED_CLS=ManimColor('#FF6B77'); BLUE_CLS=ManimColor('#58B5ED'); GREEN_CLS=ManimColor('#77D49A')
 GOLD=ManimColor('#FFE079'); ORANGE_CLS=ManimColor('#FFB45B'); PURPLE_CLS=ManimColor('#C29AFF'); MUTED=ManimColor('#A8B2C5')
 COLORS=[RED_CLS,BLUE_CLS,GREEN_CLS]
+AID_INPUT=ManimColor("#58C4DD"); AID_OPERATION=ManimColor("#FFFF00")
+AID_RESULT=ManimColor("#83C167"); AID_COMPARE=ManimColor("#9A72AC")
 
 
 def path(ax, points, color=GOLD, width=3):
@@ -102,6 +104,161 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
             g.add(bar,tex(f'C_{i+1}',22,COLORS[i]).move_to([x,bottom-.25,0]),readout('',lambda i=i:get()[i],[x,bottom-.65,0],COLORS[i],2,22))
         self.add(g);return g
 
+    def body_card(self, title):
+        saved = [m for m in self.mobjects if m is not self.subtitle]
+        header = [m for m in saved if m.get_center()[1] > 3]
+        self.clear()
+        self.add(*header, RoundedRectangle(width=10.4, height=4.45,
+            corner_radius=.12, color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0]),
+            jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self, saved):
+        self.clear()
+        self.add(*saved)
+
+    def bayes_recap(self):
+        saved = self.body_card('復習: 1.2 ベイズの定理')
+        def rectangle(w,h,x,y,c):
+            return Rectangle(width=w,height=h,color=c,fill_opacity=.65,stroke_width=1).move_to([x,y,0])
+        # The same box priors .3/.7 and orange fractions .75/.2 as 1.2.
+        cells = VGroup()
+        for left,width,fraction,color in [(-3.5,2.1,.75,RED_CLS),(-1.4,4.9,.2,BLUE_CLS)]:
+            cells.add(rectangle(width,2*fraction,left+width/2,-.7+fraction,color))
+            cells.add(rectangle(width,2*(1-fraction),left+width/2,1.3-(1-fraction),GREEN_CLS).set_opacity(.25))
+        labels = VGroup(jp('赤い箱',22,RED_CLS).move_to([-2.45,1.55,0]),
+                        jp('青い箱',22,BLUE_CLS).move_to([1.05,1.55,0]))
+        self.add(cells,labels,jp('オレンジを観測した例',21,MUTED).move_to([0,-1.6,0]))
+        joint = np.array([.225,.14])
+        def strip(values):
+            return [rectangle(7*p,2,-3.5+7*values[:i].sum()+3.5*p,.3,COLORS[i]) for i,p in enumerate(values)]
+        raw = strip(joint); normalized = strip(joint/joint.sum())
+        total = tex(r'0.225+0.140\ \longrightarrow\ 1',29,GOLD).move_to([0,-1.15,0])
+        bridge = VGroup(jp('クラス1',22,RED_CLS).move_to([-2.45,1.55,0]),
+                        jp('クラス2',22,BLUE_CLS).move_to([1.75,1.55,0]))
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.2 select observed areas',a*.28,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
+            ('R1.2 gather equal height',a*.30,lambda:AnimationGroup(Transform(cells[0],raw[0]),Transform(cells[2],raw[1]))),
+            ('R1.2 normalize to one',a*.42,lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1]),FadeIn(total))),
+            ('R1.2 boxes to classes',.6,lambda:FadeTransform(labels,bridge)),
+            ('R1.2 connect class labels',b-.6,lambda:Circumscribe(bridge,color=GOLD)),
+        ])
+        self.restore_body(saved)
+
+    def gaussian_recap(self):
+        saved = self.body_card('復習: 2.3 ガウス分布')
+        t = ValueTracker(0)
+        rotation = np.array([[np.cos(.6),-np.sin(.6)],[np.sin(.6),np.cos(.6)]])
+        matrix = lambda: rotation @ np.diag([1+.6*t.get_value(),1-.35*t.get_value()])
+        angle = np.linspace(0,TAU,121)
+        unit = np.column_stack([np.cos(angle),np.sin(angle)])
+        points = np.random.default_rng(2303).normal(size=(70,2))
+        def shape():
+            center=np.array([-2.2,.05,0])
+            project=lambda a: np.c_[a*.63,np.zeros(len(a))]+center
+            dots=VGroup(*[Dot(p,radius=.022,color=BLUE_CLS) for p in project(points@matrix().T)])
+            rings=VGroup(*[VMobject(color=GREEN_CLS,stroke_width=2).set_points_as_corners(project(r*unit@matrix().T)) for r in [1,1.5]])
+            axes=VGroup(*[Arrow(center,center+np.r_[matrix()[:,i]*.63,0],buff=0,color=c,stroke_width=3) for i,c in enumerate([GREEN_CLS,PURPLE_CLS])])
+            return VGroup(dots,rings,axes,Dot(center,color=GOLD,radius=.065))
+        cloud=always_redraw(shape);self.add(cloud)
+        explanation=VGroup(jp('中心：平均',23,GOLD),jp('形と傾き：共分散',23,GREEN_CLS)).arrange(DOWN,buff=.3).move_to([2.2,.3,0])
+        moved=VGroup()
+        def translate():
+            moved.become(shape()).clear_updaters()
+            self.add(moved)
+            return moved.animate.shift(RIGHT*4.4)
+        relation=tex(r'\mu_1\ne\mu_2,\qquad\Sigma_1=\Sigma_2',30).move_to([0,-1.55,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R2.3 mean and covariance',a,lambda:AnimationGroup(t.animate.set_value(1),FadeIn(explanation))),
+            ('R2.3 clear explanation',b*.12,lambda:FadeOut(explanation)),
+            ('R2.3 translate same shape',b*.68,translate),
+            ('R2.3 shared covariance',b*.20,lambda:FadeIn(relation)),
+        ])
+        self.restore_body(saved)
+
+    def covariance_aid(self):
+        saved=self.body_card('補足: 残差の外積から共分散へ')
+        self.add(jp('説明用の例',18,MUTED).move_to([3.85,2.02,0]))
+        def mat(values,x,color):
+            return Matrix(values,h_buff=.95,v_buff=.65,
+                element_to_mobject_config={'font_size':32}).set_color(color).move_to([x,.5,0])
+        col=mat([[2],[-1]],-3.6,AID_INPUT)
+        row=mat([[2,-1]],-1.3,AID_COMPARE)
+        prod=mat([[4,-2],[-2,1]],2.15,AID_OPERATION)
+        entries=prod.get_entries()
+        entries[0].set_color(AID_INPUT);entries[3].set_color(AID_INPUT)
+        entries[1].set_color(AID_COMPARE);entries[2].set_color(AID_COMPARE)
+        self.add(col,row,prod.get_brackets(),tex('=',30).move_to([.45,.5,0]),
+            tex('r',27,AID_INPUT).next_to(col,UP,buff=.18),
+            tex('r^T',27,AID_COMPARE).next_to(row,UP,buff=.18),
+            tex('rr^T',27,AID_OPERATION).next_to(prod,UP,buff=.18),
+            jp('各点から、そのクラスの平均を引いた残差',21,MUTED).move_to([0,-1.8,0]))
+        summary=MathTex(r'\widehat\Sigma=',r'\frac{1}{N}',r'\sum_{n=1}^N r_nr_n^T',
+                        font_size=34,color=AID_RESULT).move_to([0,-.95,0])
+        def cell(i):
+            return AnimationGroup(Indicate(col.get_entries()[i//2],color=AID_OPERATION),
+                Indicate(row.get_entries()[i%2],color=AID_OPERATION),FadeIn(entries[i]))
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V08d diagonal squares',a,lambda:LaggedStart(cell(0),cell(3),lag_ratio=.6)),
+            ('V08d cross products',b,lambda:LaggedStart(cell(1),cell(2),lag_ratio=.6)),
+            ('V08d sum all residual tables',c*.55,lambda:TransformFromCopy(VGroup(*entries),summary[2])),
+            ('V08d divide by N',c*.45,lambda:AnimationGroup(FadeIn(summary[:2]),Circumscribe(summary[1],color=AID_OPERATION))),
+        ])
+        self.restore_body(saved)
+
+    def bernoulli_recap(self):
+        saved=self.body_card('復習: 2.1 ベルヌーイ分布')
+        self.add(jp('1単語の有無：クラスを固定',21,MUTED).move_to([0,1.5,0]))
+        bars=VGroup(*[Rectangle(width=1.05,height=2.2*p,fill_color=c,fill_opacity=.8,
+            stroke_width=0).move_to([x,-1,0],aligned_edge=DOWN)
+            for x,p,c in [(-2,.3,BLUE_CLS),(2,.7,GREEN_CLS)]])
+        labels=VGroup(*[VGroup(tex(z,30,c),jp(word,21,c)).arrange(DOWN,buff=.15).move_to([x,-1.5,0])
+            for x,z,word,c in [(-2,'0','ない',BLUE_CLS),(2,'1','ある',GREEN_CLS)]])
+        probs=VGroup(tex(r'1-\mu',30,BLUE_CLS).move_to([-2,.1,0]),tex(r'\mu',30,GREEN_CLS).move_to([2,1,0]))
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        selected=SurroundingRectangle(VGroup(bars[1],probs[1]),color=GOLD,buff=.15)
+        zero=SurroundingRectangle(VGroup(bars[0],probs[0]),color=GOLD,buff=.15)
+        self.add(labels)
+        self.beat(phases=[
+            ('R2.1 binary probabilities',a,lambda:AnimationGroup(FadeIn(bars),FadeIn(probs))),
+            ('R2.1 choose one',b*.43,lambda:Create(selected)),
+            ('R2.1 choose zero',b*.57,lambda:Transform(selected,zero)),
+            ('R2.1 one parameter per word',c,lambda:FadeIn(tex(r'\mu\ \longrightarrow\ \mu_{k1},\mu_{k2},\mu_{k3}',29).move_to([0,.55,0]))),
+        ])
+        self.restore_body(saved)
+
+    def family_recap(self):
+        saved=self.body_card('復習: 2.4 指数型分布族')
+        # Preserve 2.4's soil/normalizer/parameter/feature colors.
+        def equation(symbol,y):
+            eq=MathTex(r'p(x\mid '+symbol+r')=',r'h(x)',r'g('+symbol+r')',
+                r'\exp\{',symbol+r'^T',r'u(x)',r'\}',font_size=34).move_to([0,y,0])
+            for i,c in [(1,MUTED),(2,PURPLE_CLS),(4,GOLD),(5,BLUE_CLS)]:eq[i].set_color(c)
+            # Give all three meaning labels their own horizontal space.
+            eq[0].move_to([-3.65,y,0])
+            eq[1].move_to([-1.5,y,0])
+            eq[2].move_to([.35,y,0])
+            VGroup(*eq[3:]).move_to([2.9,y,0])
+            return eq
+        eq=equation(r'\eta',.6)
+        boxes=VGroup(*[SurroundingRectangle(part,color=color,buff=.15) for part,color in
+            [(eq[1],MUTED),(eq[2],PURPLE_CLS),(eq[3:],GOLD)]])
+        meanings=VGroup(*[jp(word,21,color).next_to(box,DOWN,buff=.25) for word,color,box in
+            zip(['入力だけ','正規化係数','両者の結合'],[MUTED,PURPLE_CLS,GOLD],boxes)])
+        first=equation(r'\lambda_1',.65);second=equation(r'\lambda_2',-.55)
+        common=VGroup(*[SurroundingRectangle(e[1],color=GOLD,buff=.14) for e in [first,second]])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R2.4 three factors',a*.4,lambda:FadeIn(eq)),
+            ('R2.4 meaning frames',a*.6,lambda:AnimationGroup(Create(boxes),FadeIn(meanings))),
+            ('R2.4 class parameters',b*.5,lambda:AnimationGroup(FadeOut(boxes),FadeOut(meanings),ReplacementTransform(eq,first),FadeIn(second))),
+            ('R2.4 common input factor',b*.5,lambda:Create(common)),
+        ])
+        self.restore_body(saved)
+
     def bayes(self):
         ax=self.axes(yr=(0,.48,.1),height=3.2,labels=('x',r'p(x\mid C_k)'))
         x=ValueTracker(0);scale=ValueTracker(1)
@@ -111,6 +268,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.add(guide);note=self.note('赤：クラス1　青：クラス2　／　自作の密度')
         self.beat(Create(curves))
         f=self.formula(r'p(x\mid C_k)');self.beat(x.animate.set_value(-1.1))
+        self.bayes_recap()
         self.remove(f);f=self.formula(r'q_k=',r'p(x\mid C_k)',r'p(C_k)');f[2].set_color(ORANGE_CLS)
         self.beat(scale.animate.set_value(.5),Transform(ax.marks[-1],tex('q_k',24).move_to(ax.marks[-1])))
         prob=lambda:np.array([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])/sum([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])
@@ -144,6 +302,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.equation(f,r'a=\ln\frac{p}{1-p}',r'\qquad p=\sigma(a)',colors={0:GOLD})
 
     def shared(self):
+        self.gaussian_recap()
         ax=self.axes();dots=self.dots(ax);ell=self.ellipses(ax)
         note=self.note('同じ共分散：楕円の形は共通、中心は別')
         self.beat(FadeIn(dots),Create(ell))
@@ -184,7 +343,10 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.beat(Circumscribe(f[1],color=ORANGE_CLS),Indicate(boundary,scale_factor=1,color=GOLD))
         self.beat(prior.animate.set_value(.2))
         ghosts=VGroup(*[path(ax,p,MUTED,1.2).set_opacity(.5) for pi in [.2,.5,.8] for p in decision_paths(priors=[pi,1-pi])])
-        self.beat(Create(ghosts));self.beat(prior.animate.set_value(.5))
+        recap=jp('復習: 1.5 等しい誤分類損失',20).move_to([-3.65,2.85,0])
+        self.add(recap)
+        self.beat(Create(ghosts));self.remove(recap)
+        self.beat(prior.animate.set_value(.5))
 
     def multiclass(self):
         ax=self.axes();t=ValueTracker(0);x=ValueTracker(-1);y=ValueTracker(-.5)
@@ -227,6 +389,8 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.remove(links,centers)
         self.remove(f);f=self.formula(r'\hat\Sigma=\frac1N\sum_n r_nr_n^T');f.set_color(GOLD)
         self.beat(Transform(dots,centered),Create(common))
+        self.covariance_aid()
+        self.beat(Circumscribe(f,color=GOLD))
         self.remove(f);f=self.formula(r'\hat\Sigma=\frac{N_1}{N}S_1+\frac{N_2}{N}S_2,\qquad S_k=\frac1{N_k}\sum_{n\in C_k}r_nr_n^T',size=28)
         ell=self.ellipses(ax,means,[cov,cov]);self.beat(Transform(dots,self.dots(ax)),ReplacementTransform(common,ell))
         field=self.field(ax,lambda:means,lambda:[cov,cov],lambda:[prior,1-prior]);self.add(field)
@@ -262,6 +426,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         arrows=VGroup(*[Arrow(root.get_bottom(),n.get_top(),buff=.15,color=MUTED) for n in nodes]);self.add(root)
         self.add(nodes)
         self.beat(phases=[('show conditional dependence',.8,lambda:Create(arrows)),('condition on class',self.beat_cues()[-1]['end']-.8,lambda:Circumscribe(root,color=PURPLE_CLS))])
+        self.bernoulli_recap()
         self.remove(root,arrows,nodes)
         bits=np.array([0,0,0]);bit_mobs=VGroup();params=VGroup()
         for i in range(3):
@@ -293,12 +458,13 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.note('指数型分布族：共通する「書き方」から考える')
         f=self.formula(r'\mathcal N(x\mid\mu,\Sigma)\qquad\mathrm{Bernoulli}(x\mid\mu)',size=36,y=1.1)
         self.beat(Circumscribe(f,color=GOLD))
-        f=self.equation(f,r'p(x\mid\lambda_k)=',r'h(x)',r'g(\lambda_k)',r'\exp[\lambda_k^Tu(x)]',y=1.1,size=36,colors={1:PURPLE_CLS,2:ORANGE_CLS,3:GOLD})
+        self.family_recap()
+        f=self.equation(f,r'p(x\mid\lambda_k)=',r'h(x)',r'g(\lambda_k)',r'\exp[\lambda_k^Tu(x)]',y=1.1,size=36,colors={1:MUTED,2:PURPLE_CLS,3:GOLD})
         restriction=tex(r'u(x)=x,\qquad s\ \mathrm{shared}',36,GREEN_CLS).move_to([0,-.4,0])
         self.beat(phases=[('state restrictions',.6,lambda:FadeIn(restriction)),('explain restrictions',self.beat_cues()[-1]['end']-.6,lambda:Circumscribe(restriction,color=GREEN_CLS))])
         self.remove(restriction)
         restriction=tex(r'u(x)=x,\qquad s=1',30,GREEN_CLS).move_to([0,2.05,0]);self.add(restriction)
-        ratio=MathTex(r'\frac{p(x\mid\lambda_1)}{p(x\mid\lambda_2)}=',r'\frac{h(x)}{h(x)}',r'\frac{g(\lambda_1)}{g(\lambda_2)}',r'e^{(\lambda_1-\lambda_2)^Tx}',font_size=35).move_to([0,-.5,0]);ratio[1].set_color(PURPLE_CLS);ratio[3].set_color(GOLD)
+        ratio=MathTex(r'\frac{p(x\mid\lambda_1)}{p(x\mid\lambda_2)}=',r'\frac{h(x)}{h(x)}',r'\frac{g(\lambda_1)}{g(\lambda_2)}',r'e^{(\lambda_1-\lambda_2)^Tx}',font_size=35).move_to([0,-.5,0]);ratio[1].set_color(MUTED);ratio[2].set_color(PURPLE_CLS);ratio[3].set_color(GOLD)
         self.beat(phases=[('form density ratio',.8,lambda:TransformFromCopy(f,ratio)),('cancel shared factor',self.beat_cues()[-1]['end']-.8,lambda:Create(Cross(ratio[1],stroke_color=GOLD)))])
         self.remove(f,ratio,*[m for m in self.mobjects if isinstance(m,Cross)])
         f=self.formula(r'a(x)=',r'(\lambda_1-\lambda_2)^Tx',r'+\ln\frac{g(\lambda_1)p(C_1)}{g(\lambda_2)p(C_2)}',size=34,y=.75);f[1].set_color(GOLD)

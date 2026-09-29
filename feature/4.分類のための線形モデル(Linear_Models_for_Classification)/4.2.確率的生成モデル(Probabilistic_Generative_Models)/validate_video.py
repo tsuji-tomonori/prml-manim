@@ -42,6 +42,32 @@ for si,bi in [(3,1),(4,4),(6,1)]:
   indices=np.flatnonzero(np.abs(pcm[begin:end])>10**(-45/20))
   onsets.append(t['start']+(begin+int(indices[0]))/rate)
  sync.append(dict(scene=e['id'],beat=bi+1,action_start=b['action_start'],action_end=b['action_end'],speech_onsets=onsets,display=[c['display'] for c in cues]))
-result=dict(probe=probe,stream_difference=abs(float(v['duration'])-float(a['duration'])),silences_over_3s=0,volume_db=volume,max_scene_clock_error=max(errors),max_sentence_clock_error=max(sentence_errors),sync=sync,sha256=hashlib.sha256(video.read_bytes()).hexdigest(),full_listening=False)
+# Check every inserted operation against the actual voiced PCM interval.
+card_sync=[]
+mapping={'scene01':[0,0,0,1,1], 'scene03':[0,1,1,1],
+         'scene06':[0,1,2,2], 'scene08':[0,1,1,2], 'scene09':[0,0,1,1]}
+for e,t in zip(entries,timeline):
+ with wave.open(str(ROOT/e['path'])) as wav:
+  rate=wav.getframerate()
+  pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype='<i2')/32768
+ for bi,b in enumerate(t['beats']):
+  if not any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+   continue
+  voiced=[]
+  for c in [c for c in e['subtitle_cues'] if c['beat_index']==bi]:
+   first,last=(round(c[k]*rate) for k in ('start','end'))
+   active=np.flatnonzero(np.abs(pcm[first:last])>10**(-45/20))
+   voiced.append([t['start']+(first+int(active[0]))/rate,t['start']+(first+int(active[-1]))/rate])
+  actions=[a for a in b['actions'] if a['name']!='breath']
+  assert len(actions)==len(mapping[e['id']])
+  checked=[]
+  for action,ci in zip(actions,mapping[e['id']]):
+   lo,hi=voiced[ci]
+   overlap=min(action['end'],hi)-max(action['start'],lo)
+   assert overlap>0,(action,voiced[ci])
+   checked.append(dict(**action,sentence_id=b['cues'][ci]['id'],voiced_start=lo,voiced_end=hi,overlap=overlap))
+  card_sync.append(dict(scene=e['id'],start=b['start'],end=b['end'],duration=b['end']-b['start'],actions=checked))
+assert len(card_sync)==5
+result=dict(probe=probe,stream_difference=abs(float(v['duration'])-float(a['duration'])),silences_over_3s=0,volume_db=volume,max_scene_clock_error=max(errors),max_sentence_clock_error=max(sentence_errors),sync=sync,sha256=hashlib.sha256(video.read_bytes()).hexdigest(),full_listening=False,card_sync=card_sync)
 (ROOT/'validation_results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps(result,ensure_ascii=False,indent=2))
