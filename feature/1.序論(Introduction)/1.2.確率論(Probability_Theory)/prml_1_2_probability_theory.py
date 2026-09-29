@@ -186,11 +186,13 @@ class PRML12ProbabilityTheory(NarratedScene):
         a, b, c = [self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
             ('log card enter', .4, lambda: FadeIn(card)),
-            ('positive factors', a*.62-.4, lambda: FadeIn(factors[:4])),
-            ('product one eighth', a*.38, lambda: TransformFromCopy(VGroup(factors[0], factors[2]), factors[4])),
-            ('take natural log of product', b*.52, lambda: TransformFromCopy(factors, product_log)),
+            ('positive factors', a*.68-.4, lambda: FadeIn(factors[:4])),
+            ('product one eighth', a*.32, lambda: FadeIn(factors[4])),
+            ('take natural log of product', b*.52,
+             lambda: AnimationGroup(Indicate(factors, scale_factor=1.02), FadeIn(product_log))),
             ('split into sum of logs', b*.48,
-             lambda: AnimationGroup(ReplacementTransform(product_log, logsum), FadeIn(identity))),
+             lambda: Succession(FadeOut(product_log, run_time=.2),
+                                FadeIn(logsum, run_time=.6), FadeIn(identity, run_time=.4))),
             ('order and maximizing location preserved', c, lambda: FadeIn(order)),
         ])
         self.restore_aid_body(body)
