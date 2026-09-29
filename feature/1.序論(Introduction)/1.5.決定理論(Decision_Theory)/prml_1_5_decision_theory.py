@@ -19,6 +19,10 @@ YELLOW_LOSS = '#FFE079'
 PURPLE_HOLD = '#C29AFF'
 MUTED = '#A8B2C5'
 BG = '#10141F'
+AID_INPUT = '#58C4DD'
+AID_OPERATION = '#FFFF00'
+AID_RESULT = '#83C167'
+AID_PRIOR = '#9A72AC'
 
 
 def curve(ax, f, low, high, color=BLUE_C1, n=201):
@@ -138,6 +142,100 @@ class PRML15DecisionTheory(NarratedScene):
         self.add(self.header)
         self.formula=None
 
+    def review_card(self, title):
+        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
+                                 color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0])
+        # Empty Pango space glyphs must not enlarge the visible label bounds.
+        label = VGroup(*[g for g in jp(title, 23) if g.has_points()])
+        label.move_to([-4.85,2.02,0], aligned_edge=LEFT)
+        self.add(frame,label)
+        return label
+
+    def bayes_recap(self):
+        """Reuse the existing Bayes beat, with 1.2 bayes()'s area operation."""
+        body = [m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        old_formula = self.formula
+        self.wipe_body()
+        label = self.review_card('復習: 1.2 ベイズ更新')
+        red, blue, green = '#FF6B77', '#58B5ED', '#77D49A'
+        legend = VGroup(jp('赤い箱由来',20,red),jp('青い箱由来',20,blue),
+                        jp('観測：オレンジ',20)).arrange(RIGHT,buff=.5).move_to([0,1.4,0])
+        self.add(legend)
+        width, height, left, bottom = 7, 1.7, -3.5, -.9
+        def block(w,h,x,y,color,opacity=.65):
+            return Rectangle(width=w,height=h,stroke_color=color,stroke_width=1.5,
+                             fill_color=color,fill_opacity=opacity).move_to([x+w/2,y+h/2,0])
+        cells = VGroup()
+        for x,w,p,color in [(left,width*.3,.75,red),(left+width*.3,width*.7,.2,blue)]:
+            cells.add(block(w,height*p,x,bottom,color),
+                      block(w,height*(1-p),x,bottom+height*p,green,.2))
+        self.add(cells)
+        joint_weights = np.array([.3*.75,.7*.2])
+        strip, normalized = VGroup(), VGroup()
+        for k,color in enumerate([red,blue]):
+            strip.add(block(width*joint_weights[k],height,left+width*joint_weights[:k].sum(),bottom,color))
+            normalized.add(block(width*joint_weights[k]/joint_weights.sum(),height,
+                                 left+width*joint_weights[:k].sum()/joint_weights.sum(),bottom,color))
+        mapping = VGroup(jp('箱の種類 → クラス',22),jp('果物の観測 → 画像',22)).arrange(RIGHT,buff=.7).move_to([0,-1.65,0])
+        formula = tex(r'p(C_k\mid x)=\frac{p(x\mid C_k)p(C_k)}{p(x)}\qquad(1.77)',32).move_to([0,-2.58,0])
+        a,b,c = [self.sentence_duration(i) for i in range(3)]
+        # audio_query at speedScale=1.08: 合計 starts 2.0444 s into sentence 2.
+        self.beat(phases=[
+            ('R1.2 identify prior and posterior',a,lambda:Indicate(label,scale_factor=1.02)),
+            ('R1.2 select observed fruit',.8,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
+            ('R1.2 collect equal-height areas',2.0444-.8,
+             lambda:AnimationGroup(Transform(cells[0],strip[0]),Transform(cells[2],strip[1]))),
+            ('R1.2 normalize by observed total',b-2.0444,
+             lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1]))),
+            ('R1.2 map boxes and fruit to classes and image',c,
+             lambda:AnimationGroup(FadeIn(mapping),FadeIn(formula))),
+        ])
+        self.wipe_body()
+        self.add(*body)
+        self.formula = old_formula
+
+    def prior_factor_aid(self):
+        """V06b: show proportional factors, remove one prior, then normalize."""
+        body = [m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        old_formula = self.formula
+        self.wipe_body()
+        self.review_card('補足：事前確率は一回分だけ残す')
+        self.add(jp('前提：クラスを固定すると画像と検査は独立',20).move_to([0,1.48,0]))
+        def token(name,formula,color):
+            box = RoundedRectangle(width=2.65,height=.62,corner_radius=.08,
+                                   stroke_color=color,stroke_width=1.4)
+            content = VGroup(jp(name,17,color),tex(formula,23,color)).arrange(RIGHT,buff=.14)
+            return VGroup(box,content)
+        image_factor = token('画像の尤度',r'p(x_I\mid C_k)',AID_INPUT).move_to([-.15,.6,0])
+        blood_factor = token('検査の尤度',r'p(x_B\mid C_k)',AID_INPUT).move_to([-.15,-.3,0])
+        prior1 = token('事前',r'p(C_k)',AID_PRIOR).move_to([3,.6,0])
+        prior2 = token('事前',r'p(C_k)',AID_PRIOR).move_to([3,-.3,0])
+        prefixes = VGroup(tex(r'p(C_k\mid x_I)\propto',26).move_to([-3.2,.6,0]),
+                          tex(r'p(C_k\mid x_B)\propto',26).move_to([-3.2,-.3,0]))
+        crosses = VGroup(*[tex(r'\times',27,AID_OPERATION).move_to([1.43,y,0]) for y in [.6,-.3]])
+        self.add(prefixes,image_factor,blood_factor,crosses)
+        slash = Line(prior2.get_corner(DL),prior2.get_corner(UR),color=AID_OPERATION,stroke_width=3)
+        result = MathTex(r'w_k=',r'p(x_I\mid C_k)',r'p(x_B\mid C_k)',r'p(C_k)',font_size=29)
+        result[1:3].set_color(AID_INPUT);result[3].set_color(AID_PRIOR)
+        result.move_to([0,-1.45,0])
+        normalized = tex(r'p(C_k\mid x_I,x_B)=\frac{w_k}{\sum_j w_j}\quad\Longrightarrow\quad\sum_k p(C_k\mid x_I,x_B)=1',29,AID_RESULT).move_to([0,-2.57,0])
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        # Accent-phrase starts: 事前確率 1.9359 s; 除いて 0.7750 s;
+        # 全クラス 1.8607 s. The matching PCM cues supply the sentence boundaries.
+        self.beat(phases=[
+            ('V06b two posterior factors',1.9359,lambda:Indicate(prefixes,scale_factor=1.02)),
+            ('V06b one prior in each posterior',a-1.9359,lambda:AnimationGroup(FadeIn(prior1),FadeIn(prior2))),
+            ('V06b identify duplicate prior',.775,lambda:Indicate(prior2,color=AID_OPERATION,scale_factor=1.04)),
+            ('V06b cancel one prior',1.8607-.775,lambda:AnimationGroup(Create(slash),prior2.animate.set_opacity(.15))),
+            ('V06b collect remaining factors',.7,lambda:AnimationGroup(FadeIn(result[0]),
+                TransformFromCopy(image_factor[1][1],result[1]),TransformFromCopy(blood_factor[1][1],result[2]),
+                TransformFromCopy(prior1[1][1],result[3]))),
+            ('V06b normalize over all classes',b-1.8607-.7,lambda:FadeIn(normalized)),
+        ])
+        self.wipe_body()
+        self.add(*body)
+        self.formula = old_formula
+
     def question(self):
         p=ValueTracker(.08)
         bar=probability_bar(p.get_value)
@@ -154,8 +252,8 @@ class PRML15DecisionTheory(NarratedScene):
         self.input_value=readout('x=',lambda:.5*np.log((1-p.get_value())/p.get_value()),(0,-1.7,0),GREEN_ACTION,2)
         self.add(self.input_value)
         self.beat(p.animate.set_value(.85),start_sentence=1)
-        eq=self.formula_at(r'p(C_k\mid x)=\frac{p(x\mid C_k)p(C_k)}{p(x)}\qquad(1.77)',34)
-        self.beat(Indicate(eq,color=BLUE_C1))
+        self.bayes_recap()
+        self.formula_at(r'p(C_k\mid x)=\frac{p(x\mid C_k)p(C_k)}{p(x)}\qquad(1.77)',34)
         self.remove(self.input_value)
         inference=self.note('推論：確率を求める',(-2,-1.6,0),BLUE_C1)
         decision=self.note('決定：行動を選ぶ',(2,-1.6,0),GREEN_ACTION)
@@ -335,6 +433,7 @@ class PRML15DecisionTheory(NarratedScene):
         self.remove(likelihood_note)
         eq=self.formula_at(r'p(C_k\mid x_I,x_B)\propto\frac{p(C_k\mid x_I)p(C_k\mid x_B)}{p(C_k)}\quad(1.85)',31)
         self.beat(Indicate(eq,color=YELLOW_LOSS))
+        self.prior_factor_aid()
         evidence=ValueTracker(0)
         result=lambda:combine_posteriors(.5,.2+.4*evidence.get_value(),.2)[0]
         bar=probability_bar(result,pos=(0,-.8,0),width=8,height=.55)
