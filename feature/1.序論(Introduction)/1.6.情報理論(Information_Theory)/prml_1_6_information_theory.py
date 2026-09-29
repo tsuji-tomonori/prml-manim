@@ -307,9 +307,10 @@ class PRML16InformationTheory(Scene):
         self.beat(phases=[
             ('R1.2 recall density area',a,lambda:pulse(area,color=BLUE_DATA)),
             ('R1.2 widen probability interval',b,lambda:radius.animate.set_value(1.2)),
-            ('R1.2 connect to uniform density',1.0,lambda:AnimationGroup(
-                FadeOut(graph),FadeOut(area),FadeOut(probability),Transform(ax,uniform_ax),
-                Transform(legend,new_legend),FadeIn(uniform))),
+            ('R1.2 clear previous density',.4,lambda:AnimationGroup(
+                FadeOut(graph),FadeOut(area),FadeOut(probability),FadeOut(ax),FadeOut(legend))),
+            ('R1.2 connect to uniform density',.6,lambda:AnimationGroup(
+                FadeIn(uniform_ax),FadeIn(new_legend),FadeIn(uniform))),
             ('R1.2 uniform interval for this section',c-1.0,lambda:pulse(uniform,color=BLUE_DATA)),
         ])
         self.remove(*self.body_objects())
@@ -518,7 +519,7 @@ class PRML16InformationTheory(Scene):
         self.beat(phases=[
             ('V07a weight ratios by p',2.6346,lambda:AnimationGroup(*[pulse(row[0],color=AID_INPUT) for row in rows])),
             ('V07a cancel denominators to q',a-2.6346,lambda:AnimationGroup(Create(cancellations),FadeIn(results),
-                *[TransformFromCopy(rows[i][2],contributions[i]) for i in range(2)])),
+                *[GrowFromEdge(contributions[i],LEFT) for i in range(2)])),
             ('V07a identify remaining q',.8703,lambda:pulse(results,color=AID_RESULT)),
             ('V07a sum remaining q',1.6934-.8703,lambda:Transform(contributions,targets)),
             ('V07a mean equals one',b-1.6934,lambda:FadeIn(total)),
