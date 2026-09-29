@@ -51,7 +51,7 @@ class ModelSelectionChecks(unittest.TestCase):
             for i,b in enumerate(s['beats']):
                 self.assertGreater(e['beat_durations'][i]-e['beat_speech_ends'][i],.3)
                 self.assertLess(e['beat_durations'][i]-e['beat_speech_ends'][i],.43)
-        self.assertEqual(sum(len(b['segments']) for s in SCENES for b in s['beats']),122)
+        self.assertEqual(sum(len(b['segments']) for s in SCENES for b in s['beats']),123)
 
 
 if __name__=='__main__':
