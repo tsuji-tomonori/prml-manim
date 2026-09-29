@@ -43,12 +43,19 @@ def main():
             assert c['id']==expected['id'] and c['display']==expected['display']
             assert abs(c['start']-s['start']-expected['start'])<1e-6
     assert max(timing_errors)<1e-6
-    for si,bi,name in [(0,1,'weight raises local bump'),(2,4,'straighten manifold'),(4,2,'rotate relevant direction'),(5,2,'shift then sharpen sigmoid')]:
+    # Review every new card through its phases and both neighbouring shots.
+    for si,bi in [(1,0),(4,4),(2,0)]:
+        b=timeline[si]['beats'][bi]
+        times=[b['start']-.15,b['start']+.6,b['end']-.2,b['end']+.2]
+        times += [(p['start']+p['end'])/2 for p in b.get('actions',[]) if p['name']!='breath']
+        for j,t in enumerate(times):
+            frames.append(dict(label=f"{timeline[si]['id']}-review-{j}",time=t))
+    for si,bi,name in [(0,1,'weight raises local bump'),(2,4,'straighten manifold'),(4,2,'rotate relevant direction'),(5,2,'shift then sharpen sigmoid'),(1,0,'R1.4 boxes to basis centers'),(4,4,'V08a projection to scalar')]:
         s=timeline[si];b=s['beats'][bi];e=manifest[si]
         with wave.open(str(ROOT/'assets/voicevox'/f"{s['id']}.wav"),'rb') as w:
             rate=w.getframerate();assert w.getsampwidth()==2
             pcm=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2').astype(float)/32768
-        cue=e['subtitle_cues'][bi*2]
+        cue=next(c for c in e['subtitle_cues'] if c['id']==b['cues'][0]['id'])
         window=pcm[round(cue['start']*rate):round(cue['end']*rate)]
         active=np.flatnonzero(abs(window)>10**(-45/20))
         onset=s['start']+cue['start']+active[0]/rate

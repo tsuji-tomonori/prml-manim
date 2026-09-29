@@ -14,6 +14,9 @@ PURPLE_BASIS=ManimColor('#C29AFF')
 GREEN_BASIS=ManimColor('#77D49A')
 MUTED=ManimColor('#A8B2C5')
 COLORS=[YELLOW_BASIS,PURPLE_BASIS,GREEN_BASIS]
+AID_INPUT=ManimColor('#58C4DD')
+AID_OPERATION=ManimColor('#FFFF00')
+AID_RESULT=ManimColor('#83C167')
 
 def line(points,color=WHITE,width=3,opacity=1):
     return VMobject().set_points_as_corners(points).set_stroke(color,width,opacity)
@@ -91,6 +94,7 @@ class PRML36FixedBasisLimitations(NarratedScene):
         self.beat(ReplacementTransform(normal,question),ShowPassingFlash(model.copy().clear_updaters(),time_width=.7))
 
     def growth(self):
+        self.grid_recap()
         hint=self.hint('各方向に 5 個の局所基底を置く例')
         def grid(dim):
             pts=[]
@@ -127,12 +131,15 @@ class PRML36FixedBasisLimitations(NarratedScene):
 
     def manifold_scene(self):
         self.hint('独自データ：曲線＋小さな測定の揺らぎ')
+        recap=jp('復習: 1.4 多様体',23).move_to([3.2,2.05,0])
+        self.add(recap)
         ax=self.plane(center=(-1.7,.05,0),size=4.2)
         flatten=ValueTracker(0);noise=ValueTracker(1);s=ValueTracker(-.9)
         coords=lambda: np.column_stack([CLEAN[:,0],CLEAN[:,1]*(1-flatten.get_value())])+NOISE*noise.get_value()
         dots=VGroup(*[Dot(radius=.035,color=BLUE_DATA) for _ in DATA])
         for i,d in enumerate(dots):d.add_updater(lambda m,i=i:m.move_to(ax.c2p(*coords()[i])))
         self.beat(FadeIn(dots))
+        self.remove(recap)
         u=np.linspace(-1,1,180)
         path=always_redraw(lambda:curve(ax,u,.68*np.sin(2.4*u)*(1-flatten.get_value()),GREEN_BASIS,3))
         self.beat(Create(path))
@@ -208,6 +215,8 @@ class PRML36FixedBasisLimitations(NarratedScene):
         self.beat(angle.animate.set_value(PI/4))
         formula=tex(r'z=\frac{x_1+x_2}{\sqrt2}\qquad t=\frac{1}{1+e^{-3z}}',29).move_to([0,-2.66,0])
         self.beat(Write(formula),Indicate(arrow,scale_factor=1.03))
+        self.projection_aid()
+        self.beat(Indicate(arrow,scale_factor=1.03))
         progress=ValueTracker(-.8);mode=ValueTracker(0)
         pos=lambda: np.array([progress.get_value(),-progress.get_value()]) if mode.get_value()<.5 else np.array([progress.get_value(),progress.get_value()])
         probe=always_redraw(lambda:Dot(ax.c2p(*pos()),radius=.1,color=interpolate_color(BLUE_DATA,RED_MODEL,float(response(pos())))).set_stroke(WHITE,2))
@@ -219,6 +228,77 @@ class PRML36FixedBasisLimitations(NarratedScene):
         text=jp('広がり：2 次元\n目標に効く方向：1',25,GREEN_BASIS).move_to([3.2,.1,0])
         self.remove(value);self.beat(FadeIn(text),Circumscribe(dots,color=GREEN_BASIS))
         self.beat(angle.animate.set_value(.15))
+
+    def body_card(self,title):
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        header=[m for m in saved if m.get_center()[1]>3]
+        self.clear()
+        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
+                               color=AID_OPERATION,stroke_width=1.2).move_to([0,.1,0])
+        label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(*header,frame,label)
+        return saved
+
+    def restore_body(self,saved):
+        self.clear()
+        self.add(*saved)
+
+    def grid_recap(self):
+        saved=self.body_card('復習: 1.4 次元の呪い')
+        self.add(jp('説明用の例：各方向を5分割',19,MUTED).move_to([2.65,2.02,0]))
+        # Preserve 1.4 grid(): blue squares, blue-to-purple depth layers.
+        row=VGroup(*[Square(.66,color=BLUE_DATA,fill_opacity=.16)
+                     .move_to([(i-2)*.68,0,0]) for i in range(5)]).move_to([-2.2,0,0])
+        plane=VGroup(*[Square(.66,color=BLUE_DATA,fill_opacity=.13)
+                       .move_to([(i-2)*.68,(j-2)*.68,0]) for i in range(5) for j in range(5)]).move_to(row)
+        cube=VGroup(*[Square(.45,color=interpolate_color(BLUE_DATA,PURPLE_BASIS,k/4),fill_opacity=.03)
+                      .move_to([(i-2)*.47+.27*k,(j-2)*.47+.17*k,0])
+                      for k in range(5) for i in range(5) for j in range(5)]).move_to(row)
+        count=tex('5',40,BLUE_DATA).move_to([2.4,.65,0])
+        count25=tex(r'5\times5=25',38,BLUE_DATA).move_to(count)
+        count125=tex(r'5\times5\times5=125',34,BLUE_DATA).move_to(count)
+        centers=VGroup(*[Dot(c.get_center(),radius=.035,color=YELLOW_BASIS) for c in cube])
+        mapping=VGroup(jp('箱ひとつ → 基底ひとつ',24,YELLOW_BASIS),
+                       tex('B=125',34,YELLOW_BASIS)).arrange(DOWN,buff=.3).move_to([2.4,-.65,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.4 five boxes',a*.25,lambda:AnimationGroup(FadeIn(row),FadeIn(count))),
+            ('R1.4 twenty-five boxes',a*.35,lambda:AnimationGroup(ReplacementTransform(row,plane),FadeOut(count),FadeIn(count25))),
+            ('R1.4 125 boxes',a*.40,lambda:AnimationGroup(ReplacementTransform(plane,cube),FadeOut(count25),FadeIn(count125))),
+            ('R1.4 centers are bases',b*.65,lambda:AnimationGroup(LaggedStart(*[FadeIn(d) for d in centers],lag_ratio=.006),FadeIn(mapping))),
+            ('R1.4 basis count',b*.35,lambda:Indicate(centers,scale_factor=1.025)),
+        ])
+        self.restore_body(saved)
+
+    def projection_aid(self):
+        saved=self.body_card('補足: 方向への影と内積')
+        self.add(jp('説明用の例・矢印の長さは1',19,MUTED).move_to([2.5,2.02,0]))
+        ax=Axes(x_range=[-.15,1.2,.5],y_range=[-.15,1.2,.5],x_length=3.2,y_length=3.2,
+                tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.5,-.15,0])
+        u=np.ones(2)/np.sqrt(2);x=np.array([1.,0.]);p=(x@u)*u
+        arrow=Arrow(ax.c2p(0,0),ax.c2p(*u),buff=0,color=AID_OPERATION)
+        point=Dot(ax.c2p(*x),color=AID_INPUT,radius=.065)
+        drop=DashedLine(ax.c2p(*x),ax.c2p(*p),color=AID_INPUT,dash_length=.08)
+        shadow=Line(ax.c2p(0,0),ax.c2p(*p),color=AID_RESULT,stroke_width=7)
+        foot=Dot(ax.c2p(*p),color=AID_RESULT,radius=.055)
+        xlab=tex(r'\mathbf x=(1,0)',25,AID_INPUT).next_to(point,DOWN,buff=.2)
+        ulab=tex(r'\mathbf u=(1,1)/\sqrt2',25,AID_OPERATION).move_to([-2.55,1.43,0])
+        numberline=NumberLine(x_range=[0,1,.5],length=3.1,include_numbers=True,
+                              font_size=22,color=MUTED).move_to([2.55,-.7,0])
+        mark=Dot(numberline.n2p(1/np.sqrt(2)),radius=.07,color=AID_RESULT)
+        result=tex(r'z=\mathbf u^T\mathbf x=\frac{1+0}{\sqrt2}=\frac1{\sqrt2}',29,AID_RESULT).move_to([2.45,.65,0])
+        note=jp('矢印と同じ向きが ＋',22).move_to([2.45,-1.45,0])
+        self.add(ax,tex('x_1',23).next_to(ax.x_axis,RIGHT,buff=.1),
+                 tex('x_2',23).next_to(ax.y_axis,UP,buff=.1),point,xlab,ulab)
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('V08a unit direction',a*.45,lambda:GrowArrow(arrow)),
+            ('V08a perpendicular projection',a*.55,lambda:Create(drop)),
+            ('V08a signed shadow',b*.32,lambda:AnimationGroup(Create(shadow),FadeIn(foot),FadeIn(numberline),FadeIn(note))),
+            ('V08a shadow becomes feature',b*.48,lambda:AnimationGroup(TransformFromCopy(foot,mark),FadeIn(result))),
+            ('V08a scalar result',b*.20,lambda:Indicate(mark,scale_factor=1.4)),
+        ])
+        self.restore_body(saved)
 
     def adaptive(self):
         self.hint('内部の向き・位置・幅と、外側の重みを分けて動かす')
