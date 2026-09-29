@@ -52,6 +52,35 @@ def main():
         sync.append(dict(scene=scene['id'],beat=bi+1,action=[start,end],speech_start=speech_start,display=first_cue['display']))
         for fraction in [.2,.8]:
             frames.append(dict(id=f"{scene['id']}-sync-{fraction}",time=start+(end-start)*fraction,reason='sync'))
+    for scene,entry in zip(timeline,manifest):
+        for beat in scene['beats']:
+            if not any('recap' in c['id'] for c in beat['cues']):
+                continue
+            key=beat['cues'][0]['id'].rsplit('-',1)[0]
+            assert 10 <= beat['end']-beat['start'] <= 30
+            times=[('before',max(0,beat['start']-.4)),('after',beat['end']+.4)]
+            for i,cue in enumerate(beat['cues']):
+                times.append((f'sentence{i+1}',cue['start']+.8*(cue['end']-cue['start'])))
+            with wave.open(entry['path'],'rb') as source:
+                rate=source.getframerate()
+                samples=np.frombuffer(source.readframes(source.getnframes()),dtype='<i2')/32768
+            for i,action in enumerate(beat['actions']):
+                if action['name']=='breath':continue
+                lo=round((action['start']-scene['start'])*rate)
+                hi=round((action['end']-scene['start'])*rate)
+                active=np.flatnonzero(np.abs(samples[lo:hi])>10**(-45/20))
+                assert len(active)>0,action
+                sync.append(dict(scene=scene['id'],action=action['name'],
+                                 interval=[action['start'],action['end']],
+                                 audible=[scene['start']+(lo+int(active[0]))/rate,
+                                          scene['start']+(lo+int(active[-1]))/rate]))
+                times.append((f'action{i+1}',(action['start']+action['end'])/2))
+            for label,t in times:
+                frames.append(dict(id=f'{key}-{label}',time=t,reason='recap'))
+    # The zero-card mixture reference has a changed first sentence.
+    scene=timeline[6];beat=scene['beats'][0]
+    for label,t in [('before',scene['start']-.4),('during',(beat['cues'][0]['start']+beat['cues'][0]['end'])/2),('after',beat['end']+.4)]:
+        frames.append(dict(id=f'mixture-reference-{label}',time=t,reason='reference'))
     assert max(drift)<1/15
     for row in frames:
         destination=out/(row['id']+'.png')

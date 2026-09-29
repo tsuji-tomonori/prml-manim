@@ -94,6 +94,30 @@ scene('事前も含めて、モデルを確かめる','pp.164–165 / 事前依�
  ('次節へ、原文の範囲',['次の節では、線形回帰でエビデンスを使い、事前とノイズの強さを決めます。','今日の鍵は、最良の一点から、可能性全体の平均へと視点を広げることです。']),
 ])
 
+# Insert recap beats after assigning the original IDs, so old sentence IDs stay stable.
+def recap(scene_index, before, key, note, pairs):
+    SCENES[scene_index]['beats'].insert(before, dict(seconds=12, visual_note=note,
+        segments=[dict(id=f"scene{scene_index+1:02d}-recap-{key}-{i+1:02d}", display=d, speech=s)
+                  for i,(d,s) in enumerate(pairs)]))
+
+recap(0, 2, 'roles', '復習: 1.3 訓練・検証・テスト（元の三色のデータ列）', [
+    ('1.3では、訓練・検証・テストに役割を分け、検証データでモデルを選びました。', '一章三節では、訓練、検証、テストに役割を分け、検証データでモデルを選びました。'),
+    ('今回は、各モデルがデータ全体をどれだけ予測していたかで比べます。', '今回は、各モデルがデータ全体をどれだけ予測していたかで比べます。'),
+])
+recap(2, 0, 'bayes', '復習: 1.2 ベイズの定理（箱の面積からモデルの確率へ）', [
+    ('1.2では、観測に合う面積を集め、合計を $1$ にそろえました。', '一章二節では、観測に合う面積を集め、合計を一にそろえました。'),
+    ('今回は箱をモデルに置き換え、事前確率にモデル証拠を掛けます。', '今回は箱をモデルに置き換え、事前確率にモデル証拠を掛けます。'),
+    ('この重みも、合計を $1$ にそろえます。', 'この重みも、合計を一にそろえます。'),
+])
+recap(7, 4, 'kl', '復習: 1.6 KL（確率棒・余分なコストからデータ集合へ）', [
+    (r'1.6の $\mathrm{KL}$ は、別の分布を使う余分な平均コストでした。', '一章六節のケーエルは、別の分布を使う余分な平均コストでした。'),
+    ('今回は、一つの結果をデータ集合 $D$ に置き換えます。', '今回は、一つの結果をデータ集合ディーに置き換えます。'),
+    ('比の対数を、真の分布で重み付けして平均する点は同じです。', '比の対数を、真の分布で重み付けして平均する点は同じです。'),
+])
+SCENES[6]['beats'][0]['segments'][0].update(
+    display='2.3で見た混合分布を、二つのモデルの予測に使います。',
+    speech='二章三節で見た混合分布を、二つのモデルの予測に使います。')
+
 # Reading corrections apply only to speech; display keeps conventional notation.
 for story in SCENES:
     for beat in story['beats']:

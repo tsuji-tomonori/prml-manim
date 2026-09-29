@@ -78,6 +78,108 @@ class PRML34BayesianModelComparison(Scene):
         number=readout(label,tr.get_value,[pos[0]+width/2+1.3,pos[1],0],GOLD,2)
         return VGroup(rail,dot,number)
 
+    def recap_card(self, title):
+        """Temporarily replace the body; keep the header and PCM caption clock."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        header=[m for m in saved if m.get_center()[1]>2.65]
+        self.clear()
+        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
+                               color='#FFFF00',stroke_width=1.2).move_to([0,.1,0])
+        label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(*header,frame,label)
+        return saved
+
+    def restore_recap(self, saved):
+        self.clear()
+        self.add(*saved)
+
+    def roles_recap(self):
+        saved=self.recap_card('復習: 1.3 訓練・検証・テスト')
+        orange=ManimColor('#FFB45B')
+        rows=VGroup()
+        # Same square data strips and colours as 1.3 roles().
+        for i,(label,color) in enumerate(zip(['訓練：係数を学ぶ','検証：モデルを選ぶ','テスト：最後に測る'],[BLUE,orange,GREEN])):
+            y=1.12-i*.8
+            blocks=VGroup(*[Square(side_length=.22,color=color,fill_opacity=.65) for _ in range(10)])
+            blocks.arrange(RIGHT,buff=.06).move_to([-2.45,y,0])
+            rows.add(VGroup(blocks,jp(label,23,color).move_to([1.25,y,0])))
+        arrow=Arrow([- .9,.32,0],[-.15,.32,0],buff=.06,color=orange,stroke_width=2)
+        current=jp('今回：データ全体への予測でモデルを比べる',23,GOLD).move_to([0,-1.53,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.3 three data roles',a*.48,lambda:FadeIn(rows)),
+            ('R1.3 validation selects model',a*.52,lambda:AnimationGroup(GrowArrow(arrow),pulse(rows[1],orange))),
+            ('R1.3 map to evidence comparison',b*.65,lambda:FadeIn(current)),
+            ('R1.3 compare models',b*.35,lambda:pulse(current)),
+        ])
+        self.restore_recap(saved)
+
+    def bayes_recap(self):
+        saved=self.recap_card('復習: 1.2 ベイズの定理')
+        # 1.2 bayes(): red/blue boxes, masses .3*.75 and .7*.2.
+        prior=np.array([.3,.7]);evidence=np.array([.75,.2]);joint=prior*evidence
+        def strip(values):
+            return VGroup(*[Rectangle(width=7*v,height=1.15,stroke_color=c,fill_color=c,fill_opacity=.65)
+                .move_to([-3.5+7*sum(values[:i])+3.5*v,.05,0])
+                for i,(v,c) in enumerate(zip(values,[RED,BLUE]))])
+        band=strip(joint)
+        full=strip(joint/joint.sum())
+        boxes=VGroup(jp('赤い箱',23,RED),jp('青い箱',23,BLUE)).arrange(RIGHT,buff=2).move_to([0,1.2,0])
+        models=VGroup(tex('M_1',29,RED),tex('M_2',29,BLUE)).arrange(RIGHT,buff=2.4).move_to(boxes)
+        factors=VGroup(tex(r'0.3\times0.75=0.225',26,RED),tex(r'0.7\times0.2=0.140',26,BLUE)).arrange(RIGHT,buff=.7).move_to([0,-.92,0])
+        meaning=jp('事前確率 × モデル証拠',23,GOLD).move_to([0,-1.65,0])
+        total=jp('合計 1',23,GREEN).move_to([3.8,1.2,0])
+        self.add(jp('説明用の例：観測は二種類',18,MUTED).move_to([2.65,2.02,0]))
+        self.add(boxes,band)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        def model_labels():
+            # Avoid morphing Japanese glyphs into overlapping mathematical glyphs.
+            self.remove(boxes)
+            return AnimationGroup(FadeIn(models),FadeOut(total))
+        self.beat(phases=[
+            ('R1.2 observed areas',a*.60,lambda:pulse(band)),
+            ('R1.2 normalize box areas',a*.40,lambda:AnimationGroup(Transform(band,full),FadeIn(total))),
+            ('R1.2 boxes become models',b*.52,model_labels),
+            ('R1.2 prior times evidence',b*.48,lambda:AnimationGroup(Transform(band,strip(joint)),FadeIn(factors),FadeIn(meaning))),
+            ('R1.2 normalize model weights',c,lambda:AnimationGroup(Transform(band,full),FadeIn(total))),
+        ])
+        self.restore_recap(saved)
+
+    def kl_recap(self):
+        saved=self.recap_card('復習: 1.6 KLダイバージェンス')
+        orange=ManimColor('#FFB45B')
+        # Reuse the four-result example from 1.6 divergence(), in natural logs.
+        p=np.array([.5,.25,.125,.125]);q=np.array([.1,.2,.3,.4])
+        excess=float(p@np.log(p/q))
+        def bars(values,color,outline=False):
+            return VGroup(*[Rectangle(width=.62,height=3*v,stroke_color=color,stroke_width=2,
+                fill_color=color,fill_opacity=0 if outline else .7).move_to([-3.9+i*.92,-.8+1.5*v,0])
+                for i,v in enumerate(values)])
+        pb=bars(p,BLUE);qb=bars(q,orange,True)
+        xl=VGroup(*[tex(f'x_{i+1}',24).move_to([-3.9+i*.92,-1.12,0]) for i in range(4)])
+        dl=VGroup(*[tex(f'D_{i+1}',24).move_to(xl[i]) for i in range(4)])
+        legend=VGroup(jp('真の p',21,BLUE),jp('想定 q',21,orange)).arrange(RIGHT,buff=.4).move_to([-2.5,1.24,0])
+        mapping=VGroup(tex(r'p(D)=p(D\mid M_1)',25,BLUE),tex(r'q(D)=p(D\mid M_2)',25,orange)).arrange(DOWN,buff=.2).move_to([2.1,1.03,0])
+        formula=tex(r'\sum_D p(D)\ln\frac{p(D)}{q(D)}',29,GOLD).move_to([1.5,.05,0])
+        bar=Rectangle(width=excess*3,height=.38,stroke_width=0,fill_color=GOLD,fill_opacity=.85).move_to([.6+excess*1.5,-.82,0])
+        result=tex(r'\mathrm{KL}=%.3f'%excess,26,PURPLE).move_to([2.05,-1.3,0])
+        meaning=jp('余分な平均コスト',22,PURPLE).move_to([2,1.18,0])
+        self.add(jp('説明用の例：4通り・確率はすべて正',17,MUTED).move_to([2.5,2.02,0]))
+        self.add(pb,qb,xl,legend,meaning)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        def dataset_labels():
+            # The caption is already explaining the new meaning at this boundary.
+            self.remove(meaning)
+            return AnimationGroup(Transform(xl,dl),FadeIn(mapping))
+        self.beat(phases=[
+            ('R1.6 true and assumed distributions',a*.55,lambda:pulse(qb,orange)),
+            ('R1.6 extra average cost',a*.45,lambda:AnimationGroup(FadeIn(bar),FadeIn(result))),
+            ('R1.6 outcomes become datasets',b,dataset_labels),
+            ('R1.6 log ratio averaged under truth',c*.65,lambda:AnimationGroup(Write(formula),pulse(pb,BLUE))),
+            ('R1.6 connect average to KL',c*.35,lambda:pulse(bar,GOLD)),
+        ])
+        self.restore_recap(saved)
+
     def question(self):
         ax=self.ax([-1,1,.5],[0,1.8,.5])
         dots=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=BLUE) for x,t in zip(bm.X,bm.T)])
@@ -89,6 +191,7 @@ class PRML34BayesianModelComparison(Scene):
         label=readout('d=',degree.get_value,[4.8,1.65,0],GREEN,0)
         self.add(fit,label)
         self.beat(degree.animate.set_value(2),end_sentence=1)
+        self.roles_recap()
         residual=always_redraw(lambda:VGroup(*[Line(ax.c2p(x,t),ax.c2p(x,float(np.interp(x,bm.GRID,bm.interpolate_rows(bm.ML_CURVES,degree.get_value())))),color=GOLD,stroke_width=2)
                                                 for x,t in zip(bm.X,bm.T)]))
         self.add(residual)
@@ -135,6 +238,7 @@ class PRML34BayesianModelComparison(Scene):
         self.beat(FadeIn(flow),pulse(f2))
 
     def models(self):
+        self.bayes_recap()
         ax=self.ax([.5,3.5,1],[0,1,.25],width=7.8)
         # Explicit labels avoid suggesting model identifiers are continuous.
         ax.x_axis.numbers.set_opacity(0)
@@ -263,7 +367,10 @@ class PRML34BayesianModelComparison(Scene):
         c1=always_redraw(lambda:graph(ax,lambda x:a(x)*(1-scale.get_value()+scale.get_value()*p.get_value()),-3.5,3.5,BLUE))
         c2=always_redraw(lambda:graph(ax,lambda x:b(x)*(1-scale.get_value()+scale.get_value()*(1-p.get_value())),-3.5,3.5,PURPLE))
         self.add(ax,tex('t',25).next_to(ax.x_axis,RIGHT,buff=.2))
+        recap_label=jp('復習: 2.3 混合分布',23).move_to([0,2.25,0])
+        self.add(recap_label)
         self.beat(Create(c1),Create(c2))
+        self.remove(recap_label)
         slider=self.slider(p,0,1,r'p(M_1\mid D)=',pos=(-1.5,2.25,0),width=3)
         self.add(slider)
         self.beat(scale.animate.set_value(1),start_sentence=1)
@@ -311,6 +418,7 @@ class PRML34BayesianModelComparison(Scene):
         weighted_formula=self.formula(r'\mathbb E[\ell]=\sum_{k=0}^6 p(k\mid M_1)\ell(k)',size=31)
         self.add(weighted_label,weighted_formula)
         self.beat(Transform(bars,weighted),Transform(ax,weighted_ax),FadeIn(ticks1),FadeIn(average))
+        self.kl_recap()
         kl=self.formula(r'\int',r'p(D\mid M_1)',r'\ln\frac{p(D\mid M_1)}{p(D\mid M_2)}',r'\,dD=D_{\rm KL}(p_1\Vert p_2)\geq0',colors=[WHITE,BLUE,GOLD,GREEN],size=28)
         self.beat(ReplacementTransform(weighted_formula,kl),pulse(average))
         note=jp('真の分布が候補に含まれるときの、対数比の平均',24).move_to([0,2.25,0])
@@ -455,4 +563,3 @@ class PRML34BayesianModelComparison(Scene):
         self.play(Succession(*visual), UpdateFromAlphaFunc(captions, caption_at, rate_func=linear),
                   run_time=(frames - 1e-5) / fps, rate_func=linear)
         self.beat_index += 1
-
