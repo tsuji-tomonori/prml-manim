@@ -114,7 +114,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         precision=VGroup(jp('精度：方向ごとの曲率',23,PRIOR),
                          tex(r'A=\Sigma^{-1},\quad a_i=1/\lambda_i^\Sigma',28,PRIOR),
                          tex(r'\sigma_i=1/\sqrt{a_i}',29,EV_COLOR)).arrange(DOWN,buff=.18).move_to([2.1,-.73,0])
-        mapping=jp('今回の共分散は S_N ／ 正の固有値',19,MUTED).move_to([0,-1.76,0])
+        mapping=VGroup(jp('今回の共分散は',19,MUTED),tex(r'S_N',23,MUTED),jp('／ 正の固有値',19,MUTED)).arrange(RIGHT,buff=.1).move_to([0,-1.76,0])
         self.add(points,ring,axes,covariance)
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
@@ -143,7 +143,8 @@ class PRML35EvidenceApproximation(NarratedScene):
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('V13a same quadratic',a*.60,lambda:Create(curve)),
-            ('V13a complete the square',a*.40,lambda:TransformMatchingTex(expanded,completed)),
+            ('V13a clear expanded form',.4,lambda:FadeOut(expanded)),
+            ('V13a show completed square',a*.40-.4,lambda:FadeIn(completed)),
             ('V13a minimum at w=1',b*.65,lambda:AnimationGroup(FadeIn(bottom),Create(guide),FadeIn(center))),
             ('V13a constant height 3',b*.35,lambda:AnimationGroup(Create(level),FadeIn(constant))),
         ])
@@ -167,7 +168,9 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.add(square,h1,vertical,precision)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
-            ('V10 curvature to standard deviations',a,lambda:AnimationGroup(Transform(square,rectangle),Transform(h1,half),FadeIn(widths))),
+            ('V10 clear unit width label',.4,lambda:FadeOut(h1)),
+            ('V10 curvature to standard deviations',a-.9,lambda:AnimationGroup(Transform(square,rectangle),FadeIn(widths))),
+            ('V10 show half width',.5,lambda:FadeIn(half)),
             ('V10 product of widths',b,lambda:AnimationGroup(FadeIn(product),FadeIn(caption),Indicate(square,color=yellow,scale_factor=1.02))),
             ('V10 common Gaussian factor and peak',c,lambda:AnimationGroup(FadeIn(factors),Indicate(product,scale_factor=1.02))),
         ])
