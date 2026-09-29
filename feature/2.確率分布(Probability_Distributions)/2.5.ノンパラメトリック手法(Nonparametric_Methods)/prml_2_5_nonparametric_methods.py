@@ -359,10 +359,11 @@ class PRML25NonparametricMethods(NarratedScene):
         self.add(legend,cells)
         first,second=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
-            ('R1.2 introduce',1.0,lambda:Indicate(heading,color=WHITE,scale_factor=1.01)),
-            ('R1.2 select observation',first*.43-1,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
-            ('R1.2 collect areas',first*.23,lambda:AnimationGroup(Transform(cells[0],strip[0]),Transform(cells[2],strip[1]))),
-            ('R1.2 normalize',first*.34,lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1]),FadeIn(total_label))),
+            # audio_query phrase boundaries / speedScale=1.08, rounded to frames by beat().
+            ('R1.2 introduce',1.4568,lambda:Indicate(heading,color=WHITE,scale_factor=1.01)),
+            ('R1.2 select observation',3.3859-1.4568,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
+            ('R1.2 collect areas',3.8902-3.3859,lambda:AnimationGroup(Transform(cells[0],strip[0]),Transform(cells[2],strip[1]))),
+            ('R1.2 normalize',first-3.8902,lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1]),FadeIn(total_label))),
             ('R1.2 map to classes',second,lambda:FadeIn(mapping)),
         ])
         self.clear();self.add(*header,frame)
@@ -382,8 +383,8 @@ class PRML25NonparametricMethods(NarratedScene):
         self.add(labels,condition)
         first,second=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
-            ('R1.5 posterior bars',first*.65,lambda:AnimationGroup(*[GrowFromEdge(b,DOWN) for b in bars])),
-            ('R1.5 choose largest',first*.35,lambda:Create(chosen)),
+            ('R1.5 posterior bars',4.0862,lambda:AnimationGroup(*[GrowFromEdge(b,DOWN) for b in bars])),
+            ('R1.5 choose largest',first-4.0862,lambda:Create(chosen)),
             ('R1.5 map to current colors',second,lambda:FadeIn(mapping)),
         ])
         self.clear();self.add(*saved)
@@ -393,7 +394,7 @@ class PRML25NonparametricMethods(NarratedScene):
         self.add(jp('説明用の例：各軸を5分割',20,MUTED).move_to([0,1.35,0]))
         # 1.4 grid(): the same blue square cells, with one row copied across a new axis.
         row=VGroup(*[Square(.47,color=DATA,fill_opacity=.16)
-                     .move_to([-2.1+(i-2)*.49,0,0]) for i in range(5)])
+                     .move_to([-2.1+(i-2)*.49,-.15,0]) for i in range(5)])
         rows=VGroup(*[row.copy().shift(UP*(j-2)*.49) for j in range(5)])
         five=tex('5',38,DATA).move_to([2,.65,0])
         twenty_five=tex(r'5\times5=25',38,DATA).move_to(five)
@@ -403,10 +404,11 @@ class PRML25NonparametricMethods(NarratedScene):
         self.add(row,five)
         first,second=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
-            ('R1.4 five cells',first*.45,lambda:Indicate(row,color=DATA,scale_factor=1.02)),
-            ('R1.4 copy into 25 cells',first*.55,lambda:AnimationGroup(ReplacementTransform(row,rows),Transform(five,twenty_five))),
-            ('R1.4 generalize',second*.45,lambda:FadeIn(general)),
-            ('R1.4 map to ten bins',second*.55,lambda:AnimationGroup(Transform(general,current),FadeIn(mapping))),
+            ('R1.4 five cells',3.3744,lambda:Indicate(row,color=DATA,scale_factor=1.02)),
+            ('R1.4 copy into 25 cells',first-3.3744-.6,lambda:AnimationGroup(ReplacementTransform(row,rows),Transform(five,twenty_five))),
+            ('R1.4 generalize',.6,lambda:FadeIn(general)),
+            ('R1.4 map to ten bins',1.5144,lambda:AnimationGroup(Transform(general,current),FadeIn(mapping))),
+            ('R1.4 repeated multiplication',second-1.5144,lambda:Indicate(general,color=COUNT,scale_factor=1.04)),
         ])
         self.clear();self.add(*saved)
 
