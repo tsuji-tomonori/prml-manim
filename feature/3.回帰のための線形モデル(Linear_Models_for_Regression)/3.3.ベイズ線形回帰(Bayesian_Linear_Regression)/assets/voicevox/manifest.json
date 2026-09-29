@@ -5,6 +5,13 @@
     "id": 23,
     "speed_scale": 1.08
   },
+  "synthesis_settings": {
+    "speedScale": 1.08,
+    "intonationScale": 0.95,
+    "prePhonemeLength": 0.08,
+    "postPhonemeLength": 0.12,
+    "volumeScale": 1.0
+  },
   "scenes": [
     {
       "id": "scene01",
