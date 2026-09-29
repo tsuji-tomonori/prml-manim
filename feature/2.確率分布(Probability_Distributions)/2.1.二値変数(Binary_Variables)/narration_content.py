@@ -536,6 +536,33 @@ SCENES = [{'title': '３回とも表。次も、必ず表？',
                            'id': 'scene09-06-03'}]}],
   'id': 'scene09'}]
 
+# Keep existing sentence IDs; split only at the insertion anchor.
+fit_beat = SCENES[2]['beats'][4]
+fit_tail = fit_beat['segments'].pop()
+SCENES[2]['beats'][5:5] = [
+    dict(seconds=15, visual_note='V04a: 対数尤度の青い曲線と黄色い接線、正→負→0（本文カード）', segments=[
+        dict(id='scene03-aid-01', display='微分は、曲線のその場所での傾きです。',
+             speech='微分は、曲線のその場所での傾きです。'),
+        dict(id='scene03-aid-02', display='頂上の左では正、右では負になります。',
+             speech='頂上の左ではせい、右ではふになります。'),
+        dict(id='scene03-aid-03', display=r'この例では、傾きが $0$ になる $\mu=5/8$ が最大点です。',
+             speech='この例では、傾きがゼロになる、ミューが八ぶんの五の場所が最大点です。'),
+    ]),
+    dict(seconds=4, visual_note='本編の尤度図へ戻り、最尤推定の値を確認', segments=[fit_tail]),
+]
+SCENES[4]['beats'].insert(1, dict(seconds=17,
+    visual_note='復習: 1.2 ベイズ更新／青い事前×橙の尤度→紫の事後、面積1、θからμへ',
+    segments=[
+        dict(id='scene05-recap-01', display='1.2で見たベイズ更新を思い出しましょう。',
+             speech='一章二節で見たベイズ更新を思い出しましょう。'),
+        dict(id='scene05-recap-02', display='事前分布に、観測の尤度を掛けます。',
+             speech='事前分布に、観測の尤度を掛けます。'),
+        dict(id='scene05-recap-03', display='面積を $1$ にそろえると、事後分布になります。',
+             speech='面積を一にそろえると、事後分布になります。'),
+        dict(id='scene05-recap-04', display=r'今回は、表の確率を $\mu$ と書いて調べます。',
+             speech='今回は、おもての確率をミューと書いて調べます。'),
+    ]))
+
 SYNTHESIS_SETTINGS=dict(speedScale=1.08,intonationScale=.95,prePhonemeLength=.08,postPhonemeLength=.12,volumeScale=1.0)
 def estimated_duration(beat):
     return max(beat['seconds'],sum(len(s['speech']) for s in beat['segments'])/6+.8)
@@ -552,7 +579,8 @@ def export():
         '字幕 display の $...$ は MathTex。speech は独立した読み上げ文。各文PCMの時刻で映像を同期する。',
         '歴史コラムとガンマ関数の導出は省略。式(2.22)–(2.23)はデータ全体による平均として説明し、(2.21),(2.24)を画面に示す。','']
     for s in SCENES:
-        e=entries.get(s['id'],{});ds=e.get('beat_durations',[])
+        e=entries.get(s['id'],{})
+        ds=e.get('beat_durations',[]) if e.get('script_sha256')==script_hash(s) else []
         lines += [f"## {s['id']} {s['title']}",'',f"原文: {s['reference']}。音声尺: {sum(ds):.3f} 秒（未生成は0）。",'']
         for i,b in enumerate(s['beats']):
             lines += [f"### {i+1}. {b['visual_note']}",'',f"尺: {ds[i]:.3f} 秒" if i<len(ds) else '尺: 音声生成後に確定','']

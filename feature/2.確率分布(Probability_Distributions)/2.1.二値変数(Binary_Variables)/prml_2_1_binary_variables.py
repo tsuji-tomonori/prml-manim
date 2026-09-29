@@ -18,6 +18,9 @@ YELLOW=ManimColor('#FFE079')
 PRIOR_COLOR=ManimColor('#C29AFF')
 POST=ManimColor('#FFB45B')
 MUTED=ManimColor('#A8B2C5')
+AID_INPUT='#58C4DD'
+AID_OPERATION='#FFFF00'
+AID_RESULT='#83C167'
 
 
 def readout(label,getter,pos,color=WHITE,places=3,size=26):
@@ -174,12 +177,105 @@ class PRML21BinaryVariables(NarratedScene):
         deriv=self.f(r'\frac{m}{\mu}-\frac{N-m}{1-\mu}=0\quad\Longrightarrow\quad\mu_{\rm ML}=\frac mN',y=-1.88,size=25)
         self.add(deriv)
         self.beat(mu.animate.set_value(.625),pulse(deriv),end_sentence=2)
+        self.slope_aid()
+        self.beat(pulse(deriv))
         top=coins(OBS,2.15,r=.18)
         # Remove slider to leave room for the permuted observations.
         for m in list(self.mobjects):
             if isinstance(m,VGroup) and len(m)==3 and any(isinstance(x,Line) for x in m): self.discard(m)
         self.add(top)
         self.beat(Transform(top,coins(OBS[::-1],2.15,r=.18),rate_func=lambda t:smooth(min(1,4*t))),pulse(deriv))
+
+    def body_objects(self):
+        return [m for m in self.mobjects if m is not self.subtitle
+                and not (isinstance(m,Text) and m.get_y()>2.7)]
+
+    def review_card(self,title):
+        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
+            color=AID_OPERATION,stroke_width=1.2).move_to([0,.1,0])
+        label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(frame,label)
+
+    def slope_aid(self):
+        """V04a: actual log likelihood and its derivative, not a generic hill."""
+        body=self.body_objects();self.discard(*body)
+        self.review_card('補足：頂上と、微分が 0 になる場所')
+        ax=self.ax(xr=(.2,.9,.1),yr=(-9,-5,1),width=5.8,height=2.15,
+                   center=(-1.3,-.15,0),ylabel='対数尤度')
+        # With an all-negative y range, Manim places x ticks at the top.
+        # Keep the coordinate map, but move that axis below the curve.
+        origin=ax.c2p(0,0).copy()
+        ux=ax.c2p(1,0)-origin;uy=ax.c2p(0,1)-origin
+        ax.x_axis.shift(-4*uy)
+        ax.c2p=lambda x,y=0:origin+x*ux+y*uy
+        ax.labels[0].next_to(ax.x_axis,RIGHT,buff=.15)
+        fn=lambda u:5*np.log(u)+3*np.log1p(-u)
+        slope=lambda u:5/u-3/(1-u)
+        u=ValueTracker(.4)
+        graph=curve(ax,fn,AID_INPUT,lo=.2,hi=.9)
+        dot=always_redraw(lambda:Dot(ax.c2p(u.get_value(),fn(u.get_value())),color=AID_OPERATION))
+        def tangent():
+            x=u.get_value();y=fn(x);d=slope(x)
+            return Line(ax.c2p(x-.075,y-.075*d),ax.c2p(x+.075,y+.075*d),color=AID_OPERATION,stroke_width=3)
+        line=always_redraw(tangent)
+        label=jp('傾き',24,AID_OPERATION).move_to([3.25,.9,0])
+        value=DecimalNumber(slope(.4),num_decimal_places=2,include_sign=True,
+                            font_size=32,color=AID_OPERATION).move_to([3.25,.3,0])
+        value.add_updater(lambda m:m.set_value(0 if abs(slope(u.get_value()))<1e-7 else slope(u.get_value())).move_to([3.25,.3,0]))
+        mu=readout(r'\mu=',u.get_value,[3.25,-.4,0],AID_INPUT,3)
+        result=tex(r'\mu_{\rm ML}=5/8',28,AID_RESULT).move_to([3.25,-1.15,0])
+        condition=jp('説明用の例：m = 5, N = 8（両端の解は別に調べる）',20,MUTED).move_to([0,-1.85,0])
+        self.add(graph,dot,line,label,value,mu,condition)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        # audio_query (speed 1.08): right clause 2.079 s, negative 2.558 s;
+        # sentence 3: zero 1.692 s, mu 2.656 s.
+        self.beat(phases=[
+            ('V04a introduce tangent',a,lambda:pulse(line.copy(),AID_OPERATION)),
+            ('V04a positive slope on left',2.079,lambda:u.animate.set_value(.42)),
+            ('V04a cross the maximum',.479,lambda:u.animate.set_value(.8)),
+            ('V04a negative slope on right',b-2.558,lambda:Wait()),
+            ('V04a return to zero slope',1.692,lambda:u.animate.set_value(.625)),
+            ('V04a zero slope',2.656-1.692,lambda:Wait()),
+            ('V04a maximum at five eighths',c-2.656,lambda:FadeIn(result)),
+        ])
+        self.discard(*self.body_objects());self.add(*body)
+
+    def bayes_recap(self):
+        """Recall 1.2 parameters(): preserve its prior/likelihood/posterior colors."""
+        body=self.body_objects();self.discard(*body)
+        self.review_card('復習: 1.2 ベイズ更新')
+        ax=self.ax(yr=(0,2.6,1.3),width=7.6,height=2.05,center=(0,-.15,0),
+                   xlabel=r'\theta',ylabel='密度・尤度')
+        ax.labels[1].set_y(1.5)
+        prior=lambda u:6*u*(1-u)
+        mult=ValueTracker(0);norm=ValueTracker(1)
+        fn=lambda u:prior(u)*(1-mult.get_value()+mult.get_value()*u**3)*norm.get_value()
+        base=curve(ax,prior,TAIL).set_stroke(opacity=.4)
+        like=curve(ax,lambda u:u**3,POST)
+        updated=always_redraw(lambda:curve(ax,fn,TAIL if mult.get_value()==0 else PRIOR_COLOR))
+        fill=always_redraw(lambda:area(ax,fn,color=PRIOR_COLOR))
+        legend=VGroup(jp('事前密度',20,TAIL),jp('尤度',20,POST),jp('事後密度',20,PRIOR_COLOR))
+        legend.arrange(RIGHT,buff=.55).move_to([0,1.38,0])
+        example=jp('1.2 の例：表を3回観測',20,MUTED).move_to([2.85,2.02,0])
+        note=jp('事前 × 尤度',23,PRIOR_COLOR).move_to([0,-1.8,0])
+        normnote=jp('面積を 1 にそろえる → 事後分布',23,PRIOR_COLOR).move_to([0,-1.8,0])
+        mapping=VGroup(jp('今回も表の確率：',23),tex(r'\theta\ \longrightarrow\ \mu',30))
+        mapping.arrange(RIGHT,buff=.2).move_to([0,-1.8,0])
+        self.add(base,like,updated,legend,example,note)
+        a,b,c,d=[self.sentence_duration(i) for i in range(4)]
+        def normalize():
+            self.discard(note);self.add(normnote,fill)
+            return norm.animate.set_value(5)
+        def connect():
+            self.discard(normnote);self.add(mapping)
+            return pulse(mapping)
+        self.beat(phases=[
+            ('R1.2 recall prior and likelihood',a,lambda:pulse(legend)),
+            ('R1.2 multiply prior by likelihood',b,lambda:mult.animate.set_value(1)),
+            ('R1.2 normalize area from 0.2 to 1',c,normalize),
+            ('R1.2 connect theta to mu',d,connect),
+        ])
+        self.discard(*self.body_objects());self.add(*body)
 
     def counts(self):
         rows=[]
@@ -217,6 +313,7 @@ class PRML21BinaryVariables(NarratedScene):
         self.add(note,g,tip)
         self.beat(pulse(g),pulse(tip))
         self.discard(g,note,tip)
+        self.bayes_recap()
         ax.labels[1].become(jp('確率密度',20,MUTED).move_to(ax.labels[1]))
         # Fixed axes compare densities at their true height; every density has area 1.
         a,b=ValueTracker(1),ValueTracker(1)

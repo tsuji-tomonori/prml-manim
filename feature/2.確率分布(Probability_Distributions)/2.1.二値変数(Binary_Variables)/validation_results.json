@@ -9,26 +9,26 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "597.333011"
+        "duration": "623.666344"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "597.376000"
+        "duration": "623.701333"
       }
     ],
     "format": {
-      "duration": "597.376000"
+      "duration": "623.702000"
     }
   },
-  "av_difference_seconds": 0.04298899999992045,
+  "av_difference_seconds": 0.03498899999999594,
   "long_silence_count": 0,
   "mean_volume_db": -26.4,
   "max_volume_db": -7.3,
   "max_scene_audio_drift_seconds": 5.756817245128332e-11,
-  "sentence_count": 133,
+  "sentence_count": 140,
   "scene_durations": [
     {
       "id": "scene01",
@@ -43,7 +43,7 @@
     {
       "id": "scene03",
       "title": "この観測を、最もよく説明する確率は？",
-      "seconds": 68.8
+      "seconds": 81.53333333333333
     },
     {
       "id": "scene04",
@@ -53,7 +53,7 @@
     {
       "id": "scene05",
       "title": "確率そのものの、不確かさを描く",
-      "seconds": 70.6
+      "seconds": 84.2
     },
     {
       "id": "scene06",
@@ -76,8 +76,8 @@
       "seconds": 72.33333333333333
     }
   ],
-  "extracted_frames": 74,
-  "symbolic_frames": 12,
+  "extracted_frames": 101,
+  "symbolic_frames": 15,
   "review": {
     "frames": {
       "scene01-beat01": 5.4,
@@ -102,58 +102,85 @@
       "scene03-beat02": 137.96666666666425,
       "scene03-beat03": 147.69999999999703,
       "scene03-beat04": 156.9333333333298,
-      "scene03-beat05": 168.06666666666263,
-      "scene03-05-03": 172.63199999999597,
-      "scene03-beat06": 181.93333333332856,
-      "scene04-beat01": 193.3999999999944,
-      "scene04-beat02": 201.73333333332724,
-      "scene04-beat03": 211.53333333332677,
-      "scene04-beat04": 222.73333333332613,
-      "scene04-beat05": 233.66666666665884,
-      "scene04-05-01": 231.18666666665882,
-      "scene04-beat06": 245.29999999999154,
-      "scene05-beat01": 257.0666666666575,
-      "scene05-beat02": 267.69999999999027,
-      "scene05-beat03": 277.36666666665633,
-      "scene05-03-02": 278.88266666665635,
-      "scene05-beat04": 287.76666666665585,
-      "scene05-beat05": 299.33333333332183,
-      "scene05-beat06": 313.59999999998786,
-      "scene06-beat01": 327.99999999998687,
-      "scene06-beat02": 339.7666666666529,
-      "scene06-beat03": 351.2666666666522,
-      "scene06-beat04": 361.36666666665155,
-      "scene06-04-02": 363.7493333333182,
-      "scene06-beat05": 370.5333333333177,
-      "scene06-05-02": 373.0053333333177,
-      "scene06-beat06": 382.53333333331716,
-      "scene07-beat01": 394.3666666666497,
-      "scene07-beat02": 404.19999999998254,
-      "scene07-beat03": 413.7999999999819,
-      "scene07-beat04": 422.9999999999814,
-      "scene07-beat05": 432.9333333333142,
-      "scene07-beat06": 444.59999999998024,
-      "scene08-beat01": 455.83333333331285,
-      "scene08-beat02": 467.0333333333123,
-      "scene08-beat03": 480.59999999997825,
-      "scene08-03-03": 484.1813333333116,
-      "scene08-beat04": 492.83333333331075,
-      "scene08-beat05": 505.3333333333102,
-      "scene08-beat06": 518.7999999999765,
-      "scene09-beat01": 530.6666666666531,
-      "scene09-beat02": 541.466666666662,
-      "scene09-beat03": 551.9000000000035,
-      "scene09-beat04": 563.100000000012,
-      "scene09-beat05": 575.5333333333547,
-      "scene09-beat06": 589.7000000000318,
-      "sync-scene01-0.15": 24.867733333333277,
-      "sync-scene01-0.85": 28.22026666666661,
-      "sync-scene03-0.15": 144.30293333333034,
-      "sync-scene03-0.85": 150.69439999999702,
-      "sync-scene06-0.15": 350.5781333333189,
-      "sync-scene06-0.85": 355.49119999998555,
-      "sync-scene08-0.15": 462.37546666664565,
-      "sync-scene08-0.85": 471.283199999979
+      "scene03-beat05": 166.3333333333293,
+      "scene03-beat06": 177.4666666666621,
+      "scene03-aid-03": 180.61066666666207,
+      "scene03-beat07": 185.56666666666138,
+      "scene03-05-03": 185.3839999999947,
+      "scene03-beat08": 194.66666666666117,
+      "scene04-beat01": 206.13333333332702,
+      "scene04-beat02": 214.46666666665985,
+      "scene04-beat03": 224.26666666665938,
+      "scene04-beat04": 235.46666666665874,
+      "scene04-beat05": 246.39999999999145,
+      "scene04-05-01": 243.91999999999143,
+      "scene04-beat06": 258.03333333332415,
+      "scene05-beat01": 269.7999999999902,
+      "scene05-beat02": 282.19999999998953,
+      "scene05-recap-03": 283.23466666665615,
+      "scene05-recap-04": 286.75999999998953,
+      "scene05-beat03": 294.03333333332205,
+      "scene05-beat04": 303.69999999998817,
+      "scene05-03-02": 305.2159999999882,
+      "scene05-beat05": 314.09999999998763,
+      "scene05-beat06": 325.66666666665367,
+      "scene05-beat07": 339.93333333331964,
+      "scene06-beat01": 354.3333333333187,
+      "scene06-beat02": 366.0999999999847,
+      "scene06-beat03": 377.599999999984,
+      "scene06-beat04": 387.6999999999834,
+      "scene06-04-02": 390.0826666666501,
+      "scene06-beat05": 396.8666666666495,
+      "scene06-05-02": 399.33866666664954,
+      "scene06-beat06": 408.86666666664905,
+      "scene07-beat01": 420.6999999999815,
+      "scene07-beat02": 430.5333333333143,
+      "scene07-beat03": 440.1333333333138,
+      "scene07-beat04": 449.33333333331325,
+      "scene07-beat05": 459.266666666646,
+      "scene07-beat06": 470.93333333331213,
+      "scene08-beat01": 482.1666666666447,
+      "scene08-beat02": 493.36666666664416,
+      "scene08-beat03": 506.9333333333101,
+      "scene08-03-03": 510.5146666666434,
+      "scene08-beat04": 519.1666666666442,
+      "scene08-beat05": 531.6666666666525,
+      "scene08-beat06": 545.1333333333307,
+      "scene09-beat01": 557.0000000000073,
+      "scene09-beat02": 567.8000000000163,
+      "scene09-beat03": 578.2333333333579,
+      "scene09-beat04": 589.4333333333662,
+      "scene09-beat05": 601.8666666667091,
+      "scene09-beat06": 616.033333333386,
+      "context-scene03-before": 170.86666666666207,
+      "context-scene03-after": 184.0666666666621,
+      "added-scene03-1": 172.86666666666198,
+      "added-scene03-2": 175.5333333333285,
+      "added-scene03-3": 176.83333333332843,
+      "added-scene03-4": 177.49999999999505,
+      "added-scene03-5": 178.76666666666165,
+      "added-scene03-6": 180.0999999999949,
+      "added-scene03-7": 181.93333333332814,
+      "added-scene03-last": 183.51666666666208,
+      "context-scene05-before": 274.99999999998954,
+      "context-scene05-after": 289.3999999999895,
+      "added-scene05-1": 276.9999999999894,
+      "added-scene05-2": 280.0666666666559,
+      "added-scene05-3": 283.23333333332243,
+      "added-scene05-4": 286.7666666666555,
+      "added-scene05-last": 288.84999999998956,
+      "sync-scene01-beat03-0.15": 24.867733333333277,
+      "sync-scene01-beat03-0.85": 28.22026666666661,
+      "sync-scene03-beat03-0.15": 144.30293333333034,
+      "sync-scene03-beat03-0.85": 150.69439999999702,
+      "sync-scene06-beat03-0.15": 376.9114666666507,
+      "sync-scene06-beat03-0.85": 381.8245333333174,
+      "sync-scene08-beat02-0.15": 488.7087999999775,
+      "sync-scene08-beat02-0.85": 497.6165333333108,
+      "sync-scene03-beat06-0.15": 173.06986666666208,
+      "sync-scene03-beat06-0.85": 181.4847999999954,
+      "sync-scene05-beat02-0.15": 277.3807999999895,
+      "sync-scene05-beat02-0.85": 286.62453333332286
     },
     "symbolic": [
       "scene01-02-02",
@@ -162,8 +189,11 @@
       "scene01-06-01",
       "scene02-03-02",
       "scene02-06-02",
+      "scene03-aid-03",
       "scene03-05-03",
       "scene04-05-01",
+      "scene05-recap-03",
+      "scene05-recap-04",
       "scene05-03-02",
       "scene06-04-02",
       "scene06-05-02",
@@ -187,20 +217,136 @@
       {
         "scene": "scene06",
         "beat": 3,
-        "action_start": 349.5253333333189,
-        "action_end": 356.54399999998554,
-        "pcm_onset": 349.6003333333189
+        "action_start": 375.8586666666507,
+        "action_end": 382.8773333333174,
+        "pcm_onset": 375.9336666666507
       },
       {
         "scene": "scene08",
         "beat": 2,
-        "action_start": 460.46666666664566,
-        "action_end": 473.191999999979,
-        "pcm_onset": 460.53820833331235
+        "action_start": 486.7999999999775,
+        "action_end": 499.5253333333108,
+        "pcm_onset": 486.8715416666442
+      },
+      {
+        "scene": "scene03",
+        "beat": 6,
+        "action_start": 171.26666666666208,
+        "action_end": 183.2879999999954,
+        "pcm_onset": 171.35995833332873
+      },
+      {
+        "scene": "scene05",
+        "beat": 2,
+        "action_start": 275.3999999999895,
+        "action_end": 288.60533333332285,
+        "pcm_onset": 275.4505416666562
+      }
+    ],
+    "additions": [
+      {
+        "key": "added-scene03-1",
+        "name": "V04a introduce tangent",
+        "start": 171.26666666666208,
+        "end": 174.4666666666619
+      },
+      {
+        "key": "added-scene03-2",
+        "name": "V04a positive slope on left",
+        "start": 174.4666666666619,
+        "end": 176.5999999999951
+      },
+      {
+        "key": "added-scene03-3",
+        "name": "V04a cross the maximum",
+        "start": 176.5999999999951,
+        "end": 177.06666666666175
+      },
+      {
+        "key": "added-scene03-4",
+        "name": "V04a negative slope on right",
+        "start": 177.06666666666175,
+        "end": 177.93333333332836
+      },
+      {
+        "key": "added-scene03-5",
+        "name": "V04a return to zero slope",
+        "start": 177.93333333332836,
+        "end": 179.59999999999494
+      },
+      {
+        "key": "added-scene03-6",
+        "name": "V04a zero slope",
+        "start": 179.59999999999494,
+        "end": 180.59999999999488
+      },
+      {
+        "key": "added-scene03-7",
+        "name": "V04a maximum at five eighths",
+        "start": 180.59999999999488,
+        "end": 183.2666666666614
+      },
+      {
+        "key": "added-scene05-1",
+        "name": "R1.2 recall prior and likelihood",
+        "start": 275.3999999999895,
+        "end": 278.59999999998934
+      },
+      {
+        "key": "added-scene05-2",
+        "name": "R1.2 multiply prior by likelihood",
+        "start": 278.59999999998934,
+        "end": 281.5333333333225
+      },
+      {
+        "key": "added-scene05-3",
+        "name": "R1.2 normalize area from 0.2 to 1",
+        "start": 281.5333333333225,
+        "end": 284.9333333333223
+      },
+      {
+        "key": "added-scene05-4",
+        "name": "R1.2 connect theta to mu",
+        "start": 284.9333333333223,
+        "end": 288.59999999998877
+      }
+    ],
+    "phrase_sync": [
+      {
+        "scene": "scene03",
+        "action": "V04a negative slope on right",
+        "boundary": "start",
+        "visual_time": 177.06666666666175,
+        "phrase_time": 177.05056666666206,
+        "difference_seconds": 0.016099999999681813
+      },
+      {
+        "scene": "scene03",
+        "action": "V04a return to zero slope",
+        "boundary": "end",
+        "visual_time": 179.59999999999494,
+        "phrase_time": 179.61923333332874,
+        "difference_seconds": -0.019233333333801284
+      },
+      {
+        "scene": "scene05",
+        "action": "R1.2 multiply prior by likelihood",
+        "boundary": "start",
+        "visual_time": 278.59999999998934,
+        "phrase_time": 278.6634333333228,
+        "difference_seconds": -0.063433333333478
+      },
+      {
+        "scene": "scene05",
+        "action": "R1.2 normalize area from 0.2 to 1",
+        "boundary": "start",
+        "visual_time": 281.5333333333225,
+        "phrase_time": 281.6287666666562,
+        "difference_seconds": -0.09543333333368764
       }
     ]
   },
   "full_listen": false,
   "all_frames_reviewed": false,
-  "sha256": "92245ac8f7e0e8da03b137f301255772e13618d0b7c24f54d98395194840f8d2"
+  "sha256": "4dc90fc3e3074fb751b1da971db65d6cf937317329e7178101f94bde9009f603"
 }
