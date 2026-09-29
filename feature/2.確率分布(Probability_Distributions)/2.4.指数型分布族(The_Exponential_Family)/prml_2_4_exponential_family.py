@@ -130,6 +130,7 @@ class PRML24ExponentialFamily(NarratedScene):
         ax=Axes(x_range=[0,1,.5],y_range=[0,1,.5],x_length=5.4,y_length=2,
                 tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=20))
         ax.move_to([-1.6,-.05,0])
+        zero=tex('0',22).move_to(ax.c2p(0,0)+DOWN*.3)
         bars=always_redraw(lambda:VGroup(*[
             Rectangle(width=.42,height=2*p,color=BLUE,fill_opacity=.6)
             .move_to(ax.c2p(k,0),aligned_edge=DOWN)
@@ -142,10 +143,10 @@ class PRML24ExponentialFamily(NarratedScene):
                       tex('x',24).next_to(ax.x_axis,RIGHT,buff=.3))
         value=readout(r'\mathbb E[x]=\mu=',mu.get_value,(3.2,.7,0),YELLOW)
         eq=tex(r'0(1-\mu)+1\mu=\mu',32,YELLOW).move_to([-1.6,-1.78,0])
-        link=tex(r'\mathbb E[x]\ \longrightarrow\ A\prime(\eta)',30,YELLOW).move_to([2.7,-1.0,0])
-        self.add(ax,bars,mean,fulcrum,labels,value)
+        link=tex(r'\mathbb E[x]\ \longrightarrow\ A^{\prime}(\eta)',30,YELLOW).move_to([3.0,-1.5,0])
+        self.add(ax,bars,mean,fulcrum,labels,value,zero)
         self.beat(
-            mu.animate.set_value(.5),
+            self.highlight(bars,BLUE),
             AnimationGroup(mu.animate.set_value(.7),FadeIn(eq)),
             AnimationGroup(FadeIn(link),self.highlight(value)()),
         )
@@ -175,11 +176,11 @@ class PRML24ExponentialFamily(NarratedScene):
         top=curve(upper,A,-3,3,blue);bottom=curve(lower,sigmoid,-3,3,blue)
         dot=always_redraw(lambda:Dot(lower.c2p(eta.get_value(),mu()),color=yellow,radius=.065))
         tag1=tex('A',24,blue).move_to([-5.25,1.42,0])
-        tag2=tex(r'A\prime=\mu',24,blue).move_to([-4.8,-.32,0])
+        tag2=tex(r'A^{\prime}=\mu',24,blue).move_to([-4.8,-.32,0])
         xs=VGroup(*[tex(r'\eta',22).next_to(a.x_axis,RIGHT,buff=.12) for a in [upper,lower]])
-        slope=readout(r'A\prime=\mu=',mu,(2.9,.87,0),yellow)
-        second=readout(r'A\prime\prime=',variance,(2.9,.1,0),yellow)
-        equals=tex(r'A\prime\prime=\mu(1-\mu)',30,green).move_to([2.9,-.6,0])
+        slope=readout(r'A^{\prime}=\mu=',mu,(2.9,.87,0),yellow)
+        second=readout(r'A^{\prime\prime}=',variance,(2.9,.1,0),yellow)
+        equals=tex(r'A^{\prime\prime}=\mu(1-\mu)',30,green).move_to([2.9,-.6,0])
         # Equal-height bars come from the same Bernoulli distribution.
         def bar(x,color):
             return always_redraw(lambda:Rectangle(width=.55,height=3*variance(),color=color,fill_opacity=.65)
@@ -187,13 +188,14 @@ class PRML24ExponentialFamily(NarratedScene):
         bars=VGroup(bar(2.1,yellow),bar(3.7,green))
         labels=VGroup(jp('変化率',19,yellow).move_to([2.1,-2.0,0]),
                       jp('分散',19,green).move_to([3.7,-2.,0]))
-        comparison=tex(r'\mu:0.50\to0.10\quad A\prime\prime:0.25\to0.09',24).move_to([-.3,-2.3,0])
+        comparison=tex(r'\mu:0.50\to0.10\quad A^{\prime\prime}:0.25\to0.09',24).move_to([-.3,-2.3,0])
         self.add(upper,top,top_tan,tag1,slope)
         self.beat(
-            AnimationGroup(FadeIn(lower),FadeIn(bottom),FadeIn(tag2),FadeIn(xs),
-                           TransformFromCopy(top_tan,low_tan),FadeIn(dot)),
+            AnimationGroup(FadeIn(lower),FadeIn(bottom),TransformFromCopy(slope,tag2),FadeIn(xs),
+                           FadeIn(low_tan),FadeIn(dot)),
             AnimationGroup(FadeIn(second),FadeIn(equals),FadeIn(bars),FadeIn(labels)),
-            AnimationGroup(eta.animate.set_value(np.log(1/9)),FadeIn(comparison)),
+            AnimationGroup(eta.animate(rate_func=lambda a:smooth(np.clip((a-.45)/.4,0,1)))
+                           .set_value(np.log(1/9)),FadeIn(comparison,rate_func=lambda a:min(1,8*a))),
         )
         self.restore_body(body)
 
