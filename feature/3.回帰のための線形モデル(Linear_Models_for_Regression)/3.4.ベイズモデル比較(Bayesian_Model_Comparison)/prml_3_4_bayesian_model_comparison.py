@@ -132,10 +132,14 @@ class PRML34BayesianModelComparison(Scene):
         self.add(jp('説明用の例：観測は二種類',18,MUTED).move_to([2.65,2.02,0]))
         self.add(boxes,band)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
+        def model_labels():
+            # Avoid morphing Japanese glyphs into overlapping mathematical glyphs.
+            self.remove(boxes)
+            return AnimationGroup(FadeIn(models),FadeOut(total))
         self.beat(phases=[
             ('R1.2 observed areas',a*.60,lambda:pulse(band)),
             ('R1.2 normalize box areas',a*.40,lambda:AnimationGroup(Transform(band,full),FadeIn(total))),
-            ('R1.2 boxes become models',b*.52,lambda:AnimationGroup(Transform(boxes,models),FadeOut(total))),
+            ('R1.2 boxes become models',b*.52,model_labels),
             ('R1.2 prior times evidence',b*.48,lambda:AnimationGroup(Transform(band,strip(joint)),FadeIn(factors),FadeIn(meaning))),
             ('R1.2 normalize model weights',c,lambda:AnimationGroup(Transform(band,full),FadeIn(total))),
         ])
@@ -163,10 +167,14 @@ class PRML34BayesianModelComparison(Scene):
         self.add(jp('説明用の例：4通り・確率はすべて正',17,MUTED).move_to([2.5,2.02,0]))
         self.add(pb,qb,xl,legend,meaning)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
+        def dataset_labels():
+            # The caption is already explaining the new meaning at this boundary.
+            self.remove(meaning)
+            return AnimationGroup(Transform(xl,dl),FadeIn(mapping))
         self.beat(phases=[
             ('R1.6 true and assumed distributions',a*.55,lambda:pulse(qb,orange)),
             ('R1.6 extra average cost',a*.45,lambda:AnimationGroup(FadeIn(bar),FadeIn(result))),
-            ('R1.6 outcomes become datasets',b,lambda:AnimationGroup(Transform(xl,dl),FadeOut(meaning),FadeIn(mapping))),
+            ('R1.6 outcomes become datasets',b,dataset_labels),
             ('R1.6 log ratio averaged under truth',c*.65,lambda:AnimationGroup(Write(formula),pulse(pb,BLUE))),
             ('R1.6 connect average to KL',c*.35,lambda:pulse(bar,GOLD)),
         ])
