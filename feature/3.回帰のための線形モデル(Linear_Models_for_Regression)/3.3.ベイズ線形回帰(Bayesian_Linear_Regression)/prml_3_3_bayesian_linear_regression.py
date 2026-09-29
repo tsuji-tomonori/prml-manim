@@ -166,12 +166,14 @@ class PRML33BayesianLinearRegression(NarratedScene):
         arrow=Arrow([- .8,-1.45,0],[.5,-1.45,0],buff=0,color=yellow)
         self.add(size1)
         a,b=[self.sentence_duration(i) for i in range(2)]
-        def fold():
+        def fold_column(j):
+            # Move one column at a time so unlike symbols never cross in transit.
             return AnimationGroup(*[Transform(moving[2*i+j],target.get_entries()[3*j+i])
-                                    for i in range(3) for j in range(2)],FadeIn(brackets))
+                                    for i in range(3)])
         self.beat(phases=[
-            ('V08c identify columns',a*.485,lambda:Circumscribe(source.get_columns()[0],color=yellow)),
-            ('V08c columns to rows',a*.515,fold),
+            ('V08c identify columns',a*.485,lambda:AnimationGroup(Circumscribe(source.get_columns()[0],color=yellow),FadeIn(brackets))),
+            ('V08c constant column to row',a*.2575,lambda:fold_column(0)),
+            ('V08c input column to row',a*.2575,lambda:fold_column(1)),
             ('V08c dimensions',b*.65,lambda:AnimationGroup(GrowArrow(arrow),FadeIn(size2))),
             ('V08c preserve entries',b*.35,lambda:Circumscribe(moving,color=yellow)),
         ])

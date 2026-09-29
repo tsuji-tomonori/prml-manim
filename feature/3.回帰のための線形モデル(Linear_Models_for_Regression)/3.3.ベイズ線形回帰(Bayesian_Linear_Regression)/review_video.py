@@ -1,4 +1,4 @@
-"""Extract every beat, every formula caption, and three motion timing pairs."""
+"""Extract every beat, every formula caption, and motion timing pairs including every inserted card."""
 import json
 import sys
 import subprocess
@@ -36,8 +36,8 @@ for scene,entry in zip(timeline,manifest):
                 frames.append(dict(id=f'{tag}-action{i}-{phase}',
                                    time=action['start']+phase*(action['end']-action['start']),
                                    reason=action['name']))
-    if scene['id'] in ['scene02','scene06','scene08']:
-        bi={'scene02':3,'scene06':5,'scene08':1}[scene['id']]
+    if scene['id'] in ['scene02','scene04','scene06','scene08']:
+        bi={'scene02':3,'scene04':5,'scene06':5,'scene08':1}[scene['id']]
         beat=scene['beats'][bi]
         with wave.open(str(ROOT/'assets/voicevox'/f"{scene['id']}.wav"),'rb') as w:
             pcm=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2')/32768
