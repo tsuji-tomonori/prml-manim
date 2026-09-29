@@ -351,15 +351,19 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
                       [(-3.7,r'\Delta a=0.04',AID_INPUT),(0,r'\Delta y\approx0.01',AID_OPERATION),
                        (3.7,r'\Delta E\approx-0.02',AID_RESULT)]])
         product=tex(r'\frac{dE}{da}=\frac14\times(-2)=-\frac12',35,AID_RESULT).move_to([0,-1.55,0])
+        identity=tex(r'\frac{dE}{da}=-\frac12=0.5-1=y-t',35,AID_RESULT).move_to([0,-1.55,0])
+        def show_difference():
+            self.remove(product)
+            self.add(identity)
+            return Create(Line([-2.8,-2.,0],[2.8,-2.,0],color=AID_OPERATION,stroke_width=2))
         self.add(boxes,arrows,factors)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
             ('V14a small input change',a*.25,lambda:FadeIn(deltas[0])),
-            ('V14a propagate to probability',a*.35,lambda:TransformFromCopy(deltas[0],deltas[1])),
-            ('V14a propagate to error',a*.4,lambda:TransformFromCopy(deltas[1],deltas[2])),
-            ('V14a multiply local derivatives',b,lambda:AnimationGroup(FadeIn(product),Circumscribe(factors,color=AID_OPERATION))),
-            ('V14a identify prediction minus target',c,lambda:Transform(product,
-                tex(r'\frac{dE}{da}=-\frac12=0.5-1=y-t',35,AID_RESULT).move_to(product))),
+            ('V14a propagate to probability',a*.35,lambda:FadeIn(deltas[1],shift=RIGHT*.2)),
+            ('V14a propagate to error',a*.4,lambda:FadeIn(deltas[2],shift=RIGHT*.2)),
+            ('V14a multiply local derivatives',b,lambda:FadeIn(product,rate_func=lambda t:min(1,4*t))),
+            ('V14a identify prediction minus target',c,show_difference),
         ])
         self.restore_body(saved)
 
@@ -382,7 +386,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         squares=VGroup(*[Square(side_length=abs(r)*1.25,color='#FFE079',fill_opacity=.55).move_to([1.2+i*1.5,.4,0]) for i,r in enumerate(res)])
         eq=tex(r'\sum_n(t_n-y_n)^2',32,'#FFE079').move_to([0,-1.65,0])
         explanation=jp('説明用の3点・面積がずれの二乗',20,MUTED).move_to([0,1.45,0])
-        labels=VGroup(tex('t_n',25,'#58B5ED').move_to([-4.7,1.,0]),tex('y_n',25,'#FF6B77').move_to([-4.7,-.5,0]))
+        labels=VGroup(tex('t_n',25,'#58B5ED').move_to([-5.1,1.,0]),tex('y_n',25,'#FF6B77').move_to([-5.1,-.5,0]))
         weights=np.array([.09,.25,.16])
         weighted=VGroup(*[sq.copy().scale(np.sqrt(r)).set_color(GREEN_CLASS) for sq,r in zip(squares,weights)])
         weightlabels=VGroup(*[tex(f'R_{{{i+1},{i+1}}}={r:.2f}',23,GREEN_CLASS).move_to([1.2+i*1.5,-.55,0]) for i,r in enumerate(weights)])
@@ -393,15 +397,17 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
             return AnimationGroup(TransformFromCopy(residuals,squares),FadeIn(eq))
         def weighted_squares():
             explanation.become(jp('今回：有効目標へのずれに、分散の重み',21,MUTED).move_to([0,1.45,0]))
-            return AnimationGroup(Transform(squares,weighted),FadeIn(weightlabels),
-                Transform(labels,VGroup(tex('z_n',25,'#58B5ED').move_to(labels[0]),tex(r'\phi_n^Tw',25,'#FF6B77').move_to(labels[1]))),
-                Transform(eq,tex(r'\sum_n R_{nn}(z_n-\phi_n^Tw)^2',32,GREEN_CLASS).move_to(eq)))
+            labels.become(VGroup(tex('z_n',25,'#58B5ED').move_to([-5.1,1.,0]),
+                tex(r'\phi_n^Tw',23,'#FF6B77').move_to([-5.1,-.5,0])))
+            eq.become(tex(r'\sum_n R_{nn}(z_n-\phi_n^Tw)^2',32,GREEN_CLASS).move_to([0,-1.65,0]))
+            return AnimationGroup(Transform(squares,weighted),FadeIn(weightlabels,rate_func=lambda t:min(1,4*t)))
+
         a,b,c=[self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
             ('R2.1 Bernoulli variance',a,lambda:mu.animate.set_value(.5)),
             ('R3.1 residual squared areas',b,least_squares),
             ('R3.1 effective targets and variance weights',c*.7,weighted_squares),
-            ('R3.1 recompute on next iteration',c*.3,lambda:Circumscribe(VGroup(eq,weightlabels),color=YELLOW_ACC)),
+            ('R3.1 recompute on next iteration',c*.3,lambda:FadeIn(jp('更新のたびに R と z を計算し直す',20).move_to([0,-2.15,0]))),
         ])
         self.restore_body(saved)
 

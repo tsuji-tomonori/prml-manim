@@ -54,9 +54,12 @@ class NarratedScene(Scene):
         return cues[index]['end']-cues[index]['start']
 
     def recap_label(self, label):
-        text=jp(label,21).move_to([6.05,1.9,0],aligned_edge=RIGHT)
-        box=SurroundingRectangle(text,color='#FFFF00',buff=.10,stroke_width=1)
-        return VGroup(box,text)
+        # Measure at the origin before positioning: shifted empty SVG parents
+        # can enlarge Cairo's family bounds in this Manim version.
+        text=jp(label,21)
+        box=Rectangle(width=text.width+.24,height=text.height+.20,
+                      color='#FFFF00',stroke_width=1)
+        return VGroup(box,text).move_to([6.05,1.9,0],aligned_edge=RIGHT)
 
     def beat(self,*animations,actions=None,phases=None):
         beat=self.story['beats'][self.bi]
