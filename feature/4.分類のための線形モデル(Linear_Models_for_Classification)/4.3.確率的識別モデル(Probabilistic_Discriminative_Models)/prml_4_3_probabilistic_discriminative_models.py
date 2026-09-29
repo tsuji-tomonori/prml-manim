@@ -152,7 +152,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         rg=always_redraw(lambda:curve(ax,lambda x:sigmoid(fit(SEP_T,lam.get_value(),steps=12)[-1][0]+fit(SEP_T,lam.get_value(),steps=12)[-1][1]*x)))
         self.add(rg,number(r'\lambda=',lam.get_value,[5.1,.6,0],PURPLE_ACC))
         f=self.equation(r'E_{\rm reg}=E+',r'\frac{\lambda}{2}\|w\|^2');f[1].set_color(PURPLE_ACC)
-        recap=self.recap_label('復習: 3.3 ガウス事前分布')
+        recap=self.recap_label('復習: 3.3 ガウス事前分布').shift(UP*.45)
         self.add(recap)
         self.beat(lam.animate.set_value(1.5))
         self.remove(recap)
