@@ -33,19 +33,28 @@ def main():
                 assert abs(c['start']-t['start']-mc[c['id']]['start'])<1/15
                 if '$' in c['display']:
                     samples.append(dict(name=c['id']+'-math',time=(c['start']+c['end'])/2,kind='math',display=c['display']))
-        selected={'scene03':1,'scene05':3,'scene07':6}
-        if t['id'] in selected:
-            b=t['beats'][selected[t['id']]]
+            if any('recap' in c['id'] for c in b['cues']):
+                # Include both sides of each card and both ends of every narrated operation.
+                samples.extend([dict(name=b['cues'][0]['id']+'-before',time=b['start']-.2,kind='recap'),
+                                dict(name=b['cues'][0]['id']+'-after',time=b['end']+.2,kind='recap')])
+                for action in b['actions']:
+                    if action['name']=='breath':continue
+                    for f in [.15,.85]:
+                        name=b['cues'][0]['id']+'-'+action['name'].replace(' ','-')+f'-{f}'
+                        samples.append(dict(name=name,time=action['start']+f*(action['end']-action['start']),kind='recap'))
+        selected={'scene03':'scene03-02-01','scene05':'scene05-04-01','scene07':'scene07-07-01'}
+        sync_beats=[b for b in t['beats'] if any('recap' in c['id'] or c['id']==selected.get(t['id']) for c in b['cues'])]
+        for b in sync_beats:
             with wave.open(str(OUTPUT_DIR/f"{t['id']}.wav"),'rb') as wav:
                 rate=wav.getframerate();pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype='<i2')/32768.
             c=b['cues'][0];off=round((c['start']-t['start'])*rate)
             end=round((c['end']-t['start'])*rate)
             nz=np.flatnonzero(np.abs(pcm[off:end])>10**(-45/20))
             onset=t['start']+(off+int(nz[0]))/rate
-            sync.append(dict(scene=t['id'],beat=selected[t['id']]+1,sentence=c['id'],speech_onset=onset,
-                             action_start=b['action_start'],action_end=b['action_end']))
+            sync.append(dict(scene=t['id'],beat=t['beats'].index(b)+1,sentence=c['id'],speech_onset=onset,
+                             action_start=b['action_start'],action_end=b['action_end'],phases=b.get('actions',[])))
             for f in [.15,.85]:
-                samples.append(dict(name=t['id']+f'-sync-{f}',time=b['action_start']+f*(b['action_end']-b['action_start']),kind='sync'))
+                samples.append(dict(name=c['id']+f'-sync-{f}',time=b['action_start']+f*(b['action_end']-b['action_start']),kind='sync'))
     assert max_delta<1/15
     for s in samples:
         subprocess.run(['ffmpeg','-v','error','-y','-ss',str(s['time']),'-i',str(VIDEO),'-frames:v','1',str(out/(s['name']+'.png'))],check=True)

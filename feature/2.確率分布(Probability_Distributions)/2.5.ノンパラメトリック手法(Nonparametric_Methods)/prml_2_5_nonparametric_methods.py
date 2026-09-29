@@ -309,6 +309,7 @@ class PRML25NonparametricMethods(NarratedScene):
                  readout(r'K_{\rm blue}=',lambda:int((LABELS[index()]==1).sum()),[3.6,1.1,0],DATA,0))
         f=tex(r'K=5',32,COUNT).move_to([3.6,.4,0]);self.add(f)
         self.beat(Indicate(circle,scale_factor=1.02))
+        self.classification_recap()
         a=self.formula(r'p(x\mid C_k)={K_k\over N_kV},\quad p(C_k)={N_k\over N},\quad p(x)={K\over NV}',size=28)
         self.beat(LaggedStart(*[Circumscribe(dots[i],color=COUNT,buff=.04) for i in index()],lag_ratio=.15))
         self.remove(a)
@@ -320,6 +321,96 @@ class PRML25NonparametricMethods(NarratedScene):
         self.remove(f);self.add(readout(r'p(C_{\rm red}\mid x)=',lambda:posterior(q(),5)[0],[3.6,-.4,0],MODEL,1),
                                 readout(r'p(C_{\rm blue}\mid x)=',lambda:posterior(q(),5)[1],[3.6,-1.1,0],DATA,1))
         self.beat(qx.animate.set_value(.65),qy.animate.set_value(-.4))
+
+    def recap_card(self, label):
+        """Replace the body while keeping the title and reference outside the card."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        header=[m for m in saved if m.get_bottom()[1]>2.7]
+        self.clear()
+        self.add(*header)
+        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
+                               color='#FFFF00',stroke_width=1.2).move_to([0,.1,0])
+        heading=VGroup(*[g for g in jp(label,23) if g.has_points()])
+        heading.move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(frame,heading)
+        return saved,header,frame,heading
+
+    def classification_recap(self):
+        # 1.2 bayes(): preserve the red/blue boxes and green excluded fruit.
+        saved,header,frame,heading=self.recap_card('復習: 1.2 ベイズの定理')
+        legend=VGroup(jp('赤い箱由来',20,MODEL),jp('青い箱由来',20,DATA),
+                      jp('観測：オレンジ',20)).arrange(RIGHT,buff=.45).move_to([0,1.35,0])
+        def block(w,h,x,y,color,opacity=.65):
+            return Rectangle(width=w,height=h,stroke_color=color,stroke_width=1.4,
+                             fill_color=color,fill_opacity=opacity).move_to([x+w/2,y+h/2,0])
+        width,height,left,bottom=7,1.6,-3.5,-.75
+        cells=VGroup()
+        for x,w,p,color in [(left,width*.3,.75,MODEL),(left+width*.3,width*.7,.2,DATA)]:
+            cells.add(block(w,height*p,x,bottom,color),
+                      block(w,height*(1-p),x,bottom+height*p,TRUE,.2))
+        weights=np.array([.225,.140]);total=weights.sum()
+        strip=VGroup(*[block(width*v,height,left+width*weights[:k].sum(),bottom,c)
+                       for k,(v,c) in enumerate(zip(weights,[MODEL,DATA]))])
+        normalized=VGroup(*[block(width*v/total,height,left+width*weights[:k].sum()/total,bottom,c)
+                            for k,(v,c) in enumerate(zip(weights,[MODEL,DATA]))])
+        total_label=tex(r'0.225+0.140\ \longrightarrow\ 1',28).move_to([0,-1.2,0])
+        mapping=VGroup(jp('箱の種類 → クラス',22),jp('果物の観測 → 点の位置',22))
+        mapping.arrange(RIGHT,buff=.6).move_to([0,-1.72,0])
+        self.add(legend,cells)
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            # audio_query phrase boundaries / speedScale=1.08, rounded to frames by beat().
+            ('R1.2 introduce',1.4568,lambda:Indicate(heading,color=WHITE,scale_factor=1.01)),
+            ('R1.2 select observation',3.3859-1.4568,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
+            ('R1.2 collect areas',3.8902-3.3859,lambda:AnimationGroup(Transform(cells[0],strip[0]),Transform(cells[2],strip[1]))),
+            ('R1.2 normalize',first-3.8902,lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1]),FadeIn(total_label))),
+            ('R1.2 map to classes',second,lambda:FadeIn(mapping)),
+        ])
+        self.clear();self.add(*header,frame)
+        heading=jp('復習: 1.5 決定理論',23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        # 1.5 errors(): blue C1 / orange C2; reduce to a fixed-x posterior comparison.
+        orange=ManimColor('#FFB45B')
+        self.add(heading,jp('説明用の例：観測後のクラス確率',20,MUTED).move_to([0,1.35,0]))
+        bars=VGroup(*[Rectangle(width=.9,height=2*p,color=c,fill_opacity=.65)
+                      .move_to([x,-.75,0],aligned_edge=DOWN)
+                      for x,p,c in [(-1.8,.6,DATA),(1.8,.4,orange)]])
+        labels=VGroup(tex(r'p(C_1\mid x)=0.6',27,DATA).move_to([-1.8,.83,0]),
+                      tex(r'p(C_2\mid x)=0.4',27,orange).move_to([1.8,.83,0]))
+        condition=jp('正解の損失 0 ／ 誤分類の損失は同じ',21).move_to([0,-1.2,0])
+        chosen=SurroundingRectangle(bars[0],color=TRUE,buff=.09)
+        mapping=VGroup(jp('この例の C₁ → 今回の赤',21,MODEL),
+                       jp('この例の C₂ → 今回の青',21,DATA)).arrange(RIGHT,buff=.6).move_to([0,-1.75,0])
+        self.add(labels,condition)
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.5 posterior bars',4.0862,lambda:AnimationGroup(*[GrowFromEdge(b,DOWN) for b in bars])),
+            ('R1.5 choose largest',first-4.0862,lambda:Create(chosen)),
+            ('R1.5 map to current colors',second,lambda:FadeIn(mapping)),
+        ])
+        self.clear();self.add(*saved)
+
+    def dimension_recap(self):
+        saved,_,_,heading=self.recap_card('復習: 1.4 次元の呪い')
+        self.add(jp('説明用の例：各軸を5分割',20,MUTED).move_to([0,1.35,0]))
+        # 1.4 grid(): the same blue square cells, with one row copied across a new axis.
+        row=VGroup(*[Square(.47,color=DATA,fill_opacity=.16)
+                     .move_to([-2.1+(i-2)*.49,-.15,0]) for i in range(5)])
+        rows=VGroup(*[row.copy().shift(UP*(j-2)*.49) for j in range(5)])
+        five=tex('5',38,DATA).move_to([2,.65,0])
+        twenty_five=tex(r'5\times5=25',38,DATA).move_to(five)
+        general=tex(r'5^D',38,DATA).move_to([2,-.35,0])
+        current=tex(r'10^D',38,DATA).move_to(general)
+        mapping=jp('今回は各軸を10分割',23).move_to([0,-1.65,0])
+        self.add(row,five)
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.4 five cells',3.3744,lambda:Indicate(row,color=DATA,scale_factor=1.02)),
+            ('R1.4 copy into 25 cells',first-3.3744-.6,lambda:AnimationGroup(ReplacementTransform(row,rows),Transform(five,twenty_five))),
+            ('R1.4 generalize',.6,lambda:FadeIn(general)),
+            ('R1.4 map to ten bins',1.5144,lambda:AnimationGroup(Transform(general,current),FadeIn(mapping))),
+            ('R1.4 repeated multiplication',second-1.5144,lambda:Indicate(general,color=COUNT,scale_factor=1.04)),
+        ])
+        self.clear();self.add(*saved)
 
     def boundaries(self):
         ax,dots=self.plane()
@@ -363,6 +454,7 @@ class PRML25NonparametricMethods(NarratedScene):
         bars=self.hist(ax,.1)
         self.remove(f,links,*links,win)
         self.beat(FadeOut(rug),FadeIn(bars))
+        self.dimension_recap()
         self.clear();self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
         count=ValueTracker(1)
         grid=always_redraw(lambda:VGroup(*[
