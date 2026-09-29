@@ -564,6 +564,37 @@ SCENES = [{'id': 'scene01',
                            'display': '複数の山の学習には反復計算が必要です。第九章の混合モデルへつながります。',
                            'speech': '複数の山の学習には反復計算が必要です。第九章の混合モデルへつながります。'}]}]}]
 
+
+# Reuse the existing mean/width demonstration as a recap; keep stable sentence IDs.
+SCENES[0]['beats'][1]['visual_note'] = '復習 R：1.2の赤いベル形と黄色の平均位置を再現'
+SCENES[0]['beats'][1]['segments'][0].update(
+    display='1.2で見たガウス分布です。平均を動かすと、山も横へ動きます。',
+    speech='一章二節で見たガウス分布です。平均を動かすと、山も横へ動きます。')
+SCENES[0]['beats'][2]['visual_note'] = '復習 R：幅のつまみを動かし、多変量へつなぐ'
+SCENES[0]['beats'][2]['segments'].append(dict(
+    id='scene01-recap-01', display='今回は、中心と広がりを複数の変数へ広げます。',
+    speech='今回は、中心と広がりを複数の変数へ広げます。'))
+SCENES[2]['beats'].append(dict(seconds=15,
+    visual_note='補足 V10：説明用の円と単位正方形を横2倍、面積倍率と密度補正を対応',
+    segments=[
+        dict(id='scene03-aid-01', display='横を $2$ 倍に広げると、面積も $2$ 倍です。',
+             speech='横を二倍に広げると、面積も二倍です。'),
+        dict(id='scene03-aid-02', display=r'共分散は $\Sigma=\mathrm{diag}(4,1)$。面積倍率は行列式の平方根です。',
+             speech='共分散は、横の分散が四、縦が一。面積倍率は行列式の平方根です。'),
+        dict(id='scene03-aid-03', display='密度の高さを半分にして、全体の確率を保ちます。',
+             speech='密度の高さを半分にして、全体の確率を保ちます。'),
+    ]))
+SCENES[5]['beats'].insert(3, dict(seconds=17,
+    visual_note='復習 R：1.2の青い事前×橙の尤度→紫の事後、正規化して線形ガウスへ',
+    segments=[
+        dict(id='scene06-recap-01', display='1.2のベイズ更新では、事前に尤度を掛けました。',
+             speech='一章二節のベイズ更新では、事前に尤度を掛けました。'),
+        dict(id='scene06-recap-02', display='面積を $1$ にそろえると、事後分布になります。',
+             speech='面積を一にそろえると、事後分布になります。'),
+        dict(id='scene06-recap-03', display='今回は線形ガウスモデルです。事後の中心と広がりも式で求められます。',
+             speech='今回は線形ガウスモデルです。事後の中心と広がりも式で求められます。'),
+    ]))
+
 def estimated_duration(beat):
     """Silent preview only; voiced renders use measured sentence PCM durations."""
     return max(float(beat["seconds"]), sum(len(s["speech"]) for s in beat["segments"]) / 6.0 + 0.8)
