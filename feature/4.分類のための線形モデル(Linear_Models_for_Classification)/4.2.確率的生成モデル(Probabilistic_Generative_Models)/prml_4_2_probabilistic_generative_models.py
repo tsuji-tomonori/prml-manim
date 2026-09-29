@@ -141,7 +141,8 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
             ('R1.2 select observed areas',a*.28,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
             ('R1.2 gather equal height',a*.30,lambda:AnimationGroup(Transform(cells[0],raw[0]),Transform(cells[2],raw[1]))),
             ('R1.2 normalize to one',a*.42,lambda:AnimationGroup(Transform(cells[0],normalized[0]),Transform(cells[2],normalized[1]),FadeIn(total))),
-            ('R1.2 boxes to classes',b,lambda:Transform(labels,bridge)),
+            ('R1.2 boxes to classes',.6,lambda:FadeTransform(labels,bridge)),
+            ('R1.2 connect class labels',b-.6,lambda:Circumscribe(bridge,color=GOLD)),
         ])
         self.restore_body(saved)
 
@@ -342,7 +343,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         self.beat(Circumscribe(f[1],color=ORANGE_CLS),Indicate(boundary,scale_factor=1,color=GOLD))
         self.beat(prior.animate.set_value(.2))
         ghosts=VGroup(*[path(ax,p,MUTED,1.2).set_opacity(.5) for pi in [.2,.5,.8] for p in decision_paths(priors=[pi,1-pi])])
-        recap=jp('復習: 1.5 等しい誤分類損失',20).move_to([-3.65,2.6,0])
+        recap=jp('復習: 1.5 等しい誤分類損失',20).move_to([-3.65,2.85,0])
         self.add(recap)
         self.beat(Create(ghosts));self.remove(recap)
         self.beat(prior.animate.set_value(.5))
