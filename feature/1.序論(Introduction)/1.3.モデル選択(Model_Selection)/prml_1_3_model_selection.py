@@ -16,6 +16,10 @@ PURPLE_TERM = ManimColor('#C29AFF')
 YELLOW_ERROR = ManimColor('#FFE079')
 MUTED = ManimColor('#A8B2C5')
 BG = '#10141F'
+# The revised 1.1 RMS example uses the shared review palette.
+AID_INPUT = ManimColor('#58C4DD')
+AID_OPERATION = ManimColor('#FFFF00')
+AID_RESULT = ManimColor('#83C167')
 
 
 def polyline(points, color, width=3):
@@ -137,7 +141,7 @@ class PRML13ModelSelection(NarratedScene):
         formula=MathTex(r'E_{\rm val}', '=',r'\frac1{N_{\rm val}}\sum_n',r'(y(x_n)-t_n)^2',font_size=29)
         formula[0].set_color(ORANGE_DATA); formula[3].set_color(ORANGE_DATA)
         formula.move_to([0,-2.03,0])
-        self.beat(Write(formula),Indicate(errs,color=ORANGE_DATA))
+        self.mse_recap()
         # Same central space becomes a score plot. New points are computed, never hand drawn.
         self.clear()
         self.add(jp(self.story['title'],34).move_to([0,3.35,0]),formula)
@@ -159,6 +163,56 @@ class PRML13ModelSelection(NarratedScene):
         choice=SurroundingRectangle(va[model.SELECTED-1],color=YELLOW_ERROR,buff=.12)
         result=tex(r'd^*=3,\quad E_{\rm val}=%.4f'%model.VALID[2],27,ORANGE_DATA).move_to([0,-2.6,0])
         self.beat(Create(choice),Write(result))
+
+    def mse_recap(self):
+        """Reuse 1.1's signed arrows, equal-area squares and RMS stages.
+
+        This replaces the original MSE explanation beat. The next beat returns
+        directly to the measured error plot, so the example never overlays it.
+        """
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
+        frame = RoundedRectangle(width=10.5, height=4.55, corner_radius=.12,
+                                 stroke_color=AID_OPERATION, stroke_width=1.2,
+                                 fill_color=BG, fill_opacity=1).move_to([0,.05,0])
+        heading = jp('復習: 1.1 RMS（説明用の二点の例）',25)
+        heading.move_to([-4.9,1.94,0],aligned_edge=LEFT)
+        card = VGroup(frame,heading)
+        stages = VGroup(*[jp(label,25,AID_OPERATION).move_to([x,1.25,0])
+                          for label,x in [('二乗',-3.2),('平均',0),('平方根',3.2)]])
+        arrows = VGroup(Arrow([-3.85,-.3,0],[-3.85,.6,0],buff=0,color=AID_INPUT),
+                        Arrow([-2.55,.6,0],[-2.55,-.3,0],buff=0,color=AID_INPUT))
+        inputs = VGroup(tex('+2',30,AID_INPUT).move_to([-3.85,.86,0]),
+                        tex('-2',30,AID_INPUT).move_to([-2.55,.86,0]))
+        squares = VGroup(*[Square(side_length=.9,color=AID_OPERATION,fill_opacity=.25)
+                           .move_to([x,-.05,0]) for x in [-3.85,-2.55]])
+        areas = VGroup(*[tex('4',32,AID_OPERATION).move_to(sq) for sq in squares])
+        mean = Square(side_length=.9,color=AID_OPERATION,fill_opacity=.25).move_to([0,-.05,0])
+        mean_formula = tex(r'\frac{4+4}{2}=4',30,AID_OPERATION).move_to([0,-1.05,0])
+        result = Line([2.75,-.05,0],[3.65,-.05,0],color=AID_RESULT,stroke_width=6)
+        root_formula = tex(r'\sqrt4=2',34,AID_RESULT).move_to([3.2,-1.05,0])
+        rms = jp('RMS誤差',23,AID_RESULT).move_to([3.2,-1.8,0])
+        focus = SurroundingRectangle(VGroup(mean,mean_formula),color=AID_RESULT,buff=.16)
+        current = jp('今回：平均二乗誤差',23,AID_RESULT).move_to([0,-1.8,0])
+        a,b,c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('recap 1.1 enter',.5,lambda: FadeIn(card)),
+            # audio_query: 二乗 starts at 4.85 s; 平方根 at 4.02 s
+            # in the next sentence. Keep the operation on the spoken concept.
+            ('signed residuals +2 -2',4.85-.5,
+             lambda: AnimationGroup(FadeIn(stages),FadeIn(inputs),Create(arrows))),
+            ('square residuals to areas 4 4',a-4.85,
+             lambda: AnimationGroup(ReplacementTransform(arrows,squares),FadeIn(areas))),
+            ('average squared areas',1.1,
+             lambda: AnimationGroup(TransformFromCopy(squares,mean),FadeIn(mean_formula))),
+            ('recall RMS name',2.92,lambda: FadeIn(rms)),
+            ('recall RMS square root',b-4.02,
+             lambda: AnimationGroup(TransformFromCopy(mean,result),FadeIn(root_formula))),
+            ('return to mean',2.07,lambda: Wait()),
+            ('use mean before square root',2.13,
+             lambda: AnimationGroup(Create(focus),FadeIn(current))),
+            ('smaller mean is better',c-4.2,lambda: Indicate(mean_formula,color=AID_RESULT)),
+        ])
 
     def roles(self):
         role_labels=['訓練：係数を学ぶ','検証：モデルを選ぶ','テスト：最後に測る']
@@ -331,11 +385,37 @@ class PRML13ModelSelection(NarratedScene):
         self.add(ax,labels)
         likelihood=polyline([ax.c2p(int(d),float(v)) for d,v in zip(model.DEGREES,model.LOG_LIKELIHOOD)],BLUE_DATA)
         self.beat(Create(likelihood))
+        # Empty space glyphs retain the origin in their bounding box after a
+        # shift. Measure only visible glyphs when drawing the reference frame.
+        recap_label=VGroup(*[g for g in jp('復習: 1.2 尤度',20) if g.has_points()])
+        recap_label.move_to([-4.4,2.65,0])
+        recap=VGroup(SurroundingRectangle(recap_label,color=AID_OPERATION,buff=.12),recap_label)
         likelihood_label=tex(r'p(\mathcal D\mid\mathbf w)',35,BLUE_DATA).move_to([0,-2.3,0])
         meaning=VGroup(tex(r'\mathcal D',24,BLUE_DATA),jp('：訓練データ',20),tex(r'\mathbf w',24,BLUE_DATA),jp('：係数',20)).arrange(RIGHT,buff=.13).move_to([0,-2.8,0])
+        self.add(recap)  # Readable as soon as the section number is spoken.
         self.beat(Write(likelihood_label),Write(meaning))
-        self.beat(ReplacementTransform(likelihood_label,formula[0]))
         self.remove(meaning)
+        product=tex(r'p_1p_2\cdots p_N',30,BLUE_DATA).move_to([0,-2.3,0])
+        logproduct=tex(r'\ln(p_1p_2\cdots p_N)',30,AID_OPERATION).move_to(product)
+        logsum=tex(r'\ln p_1+\ln p_2+\cdots+\ln p_N',30,AID_OPERATION).move_to(product)
+        condition=VGroup(jp('独立な観測',18),tex(r'p_n>0',22,BLUE_DATA),
+                         jp('：各点の密度',18)).arrange(RIGHT,buff=.18).move_to([0,-2.8,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('independent density product',2.48,
+             lambda: AnimationGroup(Succession(FadeOut(likelihood_label,run_time=.2),
+                                                FadeIn(product,run_time=.3),Wait(1.98)),FadeIn(condition))),
+            ('take logarithm',.92,
+             lambda: Succession(FadeOut(product,run_time=.12),FadeIn(logproduct,run_time=.18),Wait(.62))),
+            ('product to sum of logs',a-3.4,
+             lambda: Succession(FadeOut(logproduct,run_time=.12),FadeIn(logsum,run_time=.18),Wait(a-3.7))),
+            ('log likelihood score correspondence',2.93,
+             lambda: AnimationGroup(FadeOut(logsum),FadeIn(formula[0]))),
+            ('larger log likelihood is better',b-2.93,
+             lambda: Indicate(likelihood,color=AID_OPERATION,scale_factor=1)),
+        ])
+        likelihood.set_color(BLUE_DATA)
+        self.remove(recap,condition)
         self.add(formula[0])
         fixed=tex(r'\ln p=-\frac N2\ln(2\pi\sigma^2)-\frac{\sum_n(y(x_n)-t_n)^2}{2\sigma^2}',28,BLUE_DATA).move_to([0,-2.3,0])
         note=VGroup(tex(r'\sigma=0.25',22,MUTED),jp('既知の標準偏差',18,MUTED)).arrange(RIGHT,buff=.25).move_to([0,-2.8,0])
