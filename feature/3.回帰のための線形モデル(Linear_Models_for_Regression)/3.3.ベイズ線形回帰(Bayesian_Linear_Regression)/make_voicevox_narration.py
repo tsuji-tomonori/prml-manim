@@ -55,7 +55,7 @@ def pending_entry(scene):
 def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     temporary = MANIFEST.with_suffix(".tmp.json")
-    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "scenes": entries},
+    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "synthesis_settings": SYNTHESIS_SETTINGS, "scenes": entries},
                                     ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(MANIFEST)
 
@@ -93,7 +93,12 @@ def preserve_existing_sentences(base):
     """Reuse exact PCM slices before rebuilding edited scenes."""
     if not MANIFEST.exists():
         return
-    for entry in json.loads(MANIFEST.read_text())['scenes']:
+    previous = json.loads(MANIFEST.read_text())
+    legacy_settings = dict(speedScale=1.08, intonationScale=.95, prePhonemeLength=.08,
+                           postPhonemeLength=.12, volumeScale=1.0)
+    if previous.get('synthesis_settings', legacy_settings) != SYNTHESIS_SETTINGS:
+        return
+    for entry in previous['scenes']:
         source = OUTPUT_DIR / f"{entry['id']}.wav"
         if not source.exists() or hashlib.sha256(source.read_bytes()).hexdigest() != entry.get('wav_sha256'):
             continue
