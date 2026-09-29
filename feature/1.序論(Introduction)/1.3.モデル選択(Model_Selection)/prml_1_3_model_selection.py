@@ -414,6 +414,7 @@ class PRML13ModelSelection(NarratedScene):
             ('larger log likelihood is better',b-2.93,
              lambda: Indicate(likelihood,color=AID_OPERATION,scale_factor=1)),
         ])
+        likelihood.set_color(BLUE_DATA)
         self.remove(recap,condition)
         self.add(formula[0])
         fixed=tex(r'\ln p=-\frac N2\ln(2\pi\sigma^2)-\frac{\sum_n(y(x_n)-t_n)^2}{2\sigma^2}',28,BLUE_DATA).move_to([0,-2.3,0])
