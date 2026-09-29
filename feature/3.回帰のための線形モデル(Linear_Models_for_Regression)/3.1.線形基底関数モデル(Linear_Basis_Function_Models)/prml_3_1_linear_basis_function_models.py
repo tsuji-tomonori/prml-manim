@@ -209,16 +209,16 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
             ('V08b select row and weights',a,lambda:AnimationGroup(Create(box),Create(wbox))),
             ('V08b multiply positive term',2.178,lambda:AnimationGroup(FadeIn(baseline),GrowFromEdge(plus,DOWN),FadeIn(plabel))),
             ('V08b multiply negative term',3.87-2.178,lambda:AnimationGroup(GrowFromEdge(minus,UP),FadeIn(mlabel))),
-            ('V08b sum to prediction',b-3.87-.8,lambda:AnimationGroup(GrowFromEdge(total,DOWN),FadeIn(tlabel),FadeIn(arithmetic),Create(outbox))),
-            ('V08b share weights next row',.8,lambda:AnimationGroup(Transform(box,SurroundingRectangle(rows[1],color=AID_INPUT,buff=.09)),Transform(outbox,SurroundingRectangle(entries[1],color=AID_RESULT,buff=.1)),Indicate(wbox,scale_factor=1.02))),
+            ('V08b sum to prediction',b-3.87,lambda:AnimationGroup(GrowFromEdge(total,DOWN),FadeIn(tlabel),FadeIn(arithmetic),Create(outbox))),
+            ('V08b share weights next row',self.sentence_duration(2),lambda:AnimationGroup(Transform(box,SurroundingRectangle(rows[1],color=AID_INPUT,buff=.09)),Transform(outbox,SurroundingRectangle(entries[1],color=AID_RESULT,buff=.1)),FadeOut(VGroup(plus,minus,total,plabel,mlabel,tlabel)),Transform(arithmetic,tex(r'1\times3+1\times(-1)=2',31,AID_OPERATION).move_to(arithmetic)),Indicate(wbox,scale_factor=1.02))),
         ])
         self.restore_body(saved)
 
     def gradient_aid(self):
         saved = self.aid_card('補足: 勾配と、逆向きの一歩')
         self.add(jp('説明用の例：今回の一点だけの誤差',20,MUTED).move_to([0,1.45,0]))
-        ax = Axes(x_range=[-.5,2.5,1],y_range=[-.5,2.5,1],x_length=3.1,y_length=2.9,
-                  tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.5,-.15,0])
+        ax = Axes(x_range=[-.5,2.5,1],y_range=[-.5,2.5,1],x_length=2.7,y_length=2.7,
+                  tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.5,-.35,0])
         contours = VGroup(*[Line(ax.c2p(max(-.5,c-2.5),min(2.5,c+.5)),
                                    ax.c2p(min(2.5,c+.5),max(-.5,c-2.5)),color=AID_INPUT,stroke_opacity=.5)
                            for c in [-.5,0,1,2,2.5,3,3.5]])
