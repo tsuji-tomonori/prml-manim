@@ -16,6 +16,10 @@ GOLD=ManimColor('#FFE079')
 PURPLE=ManimColor('#C29AFF')
 ORANGE=ManimColor('#FFB45B')
 MUTED=ManimColor('#A8B2C5')
+AID_INPUT=ManimColor('#58C4DD')
+AID_OPERATION=ManimColor('#FFFF00')
+AID_RESULT=ManimColor('#83C167')
+AID_PRIOR=ManimColor('#9A72AC')
 COLORS=[DATA,GOLD,PURPLE,ORANGE,BASIS]
 U=np.linspace(0,1,241)
 GRID=design(U)
@@ -107,12 +111,141 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
             .move_to(base+RIGHT*((i-(n-1)/2)*.29)+UP*w*scale/2)
             for i,w in enumerate(getter())]))
 
+    def aid_card(self, label):
+        """Use the chapter-wide card; suspend the original body until this beat ends."""
+        saved = [m for m in self.mobjects if m is not self.subtitle]
+        self.clear()
+        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
+                                 color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0])
+        heading = jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(self.header, frame, heading)
+        return saved
+
+    def restore_body(self, saved):
+        self.clear()
+        self.add(*saved)
+
+    def squares_recap(self):
+        saved = self.aid_card('復習: 1.1 最小二乗')
+        ax = Axes(x_range=[0,1,.5],y_range=[-.6,1.4,1],x_length=3.8,y_length=2.1,
+                  tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.6,.15,0])
+        xs = np.array([.2,.5,.8]); pred = .2+.4*xs; residual = np.array([.6,-.8,.4])
+        points = dots(ax,xs,pred+residual)
+        model = curve(ax,.2+.4*U,MODEL)
+        lines = VGroup(*[Line(ax.c2p(x,y),ax.c2p(x,t),color=GOLD)
+                        for x,y,t in zip(xs,pred,pred+residual)])
+        tiles = VGroup(*[Square(side_length=abs(r),color=GOLD,fill_opacity=.3)
+                         .move_to([1.2+1.05*i,.55,0]) for i,r in enumerate(residual)])
+        bar = Rectangle(width=float(residual@residual)*1.8,height=.18,color=GOLD,fill_opacity=.85)
+        bar.move_to([1,-.45,0],aligned_edge=LEFT)
+        summed = tex(r'\sum_n(t_n-y_n)^2',28,GOLD).move_to([2.3,-1,0])
+        materials = tex(r'1,x,x^2,\ldots\quad\longrightarrow\quad\phi_0(x),\phi_1(x),\ldots',29)
+        materials.move_to([0,-1.65,0])
+        self.add(ax,points,model,jp('説明用の3点',19,MUTED).move_to([-2.6,1.48,0]),
+                 jp('残差の二乗（共通縮尺）',20,GOLD).move_to([2.3,1.48,0]),
+                 tex('x',22,MUTED).next_to(ax.x_axis,RIGHT,buff=.12))
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.1 residuals',a*.52,lambda:Create(lines)),
+            ('R1.1 square residuals',a*.28,lambda:LaggedStart(*[TransformFromCopy(l,t) for l,t in zip(lines,tiles)],lag_ratio=.12)),
+            ('R1.1 sum squares',a*.20,lambda:AnimationGroup(TransformFromCopy(tiles,bar),FadeIn(summed))),
+            ('R1.1 map materials',b,lambda:FadeIn(materials)),
+        ])
+        self.restore_body(saved)
+
+    def gaussian_recap(self):
+        saved = self.aid_card('復習: 2.3 ガウス分布')
+        ax = Axes(x_range=[-4,4,2],y_range=[0,.6,.2],x_length=5.1,y_length=2.35,
+                  tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-1.8,-.02,0])
+        mu = ValueTracker(0); sd = ValueTracker(.75)
+        def normal(t):
+            return np.exp(-.5*((t-mu.get_value())/sd.get_value())**2)/(sd.get_value()*np.sqrt(2*np.pi))
+        ts = np.linspace(-4,4,241)
+        graph = always_redraw(lambda:path([ax.c2p(t,normal(t)) for t in ts],MODEL))
+        marker = always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),normal(mu.get_value())),color=GOLD))
+        width = always_redraw(lambda:Line(ax.c2p(mu.get_value()-sd.get_value(),.06),ax.c2p(mu.get_value()+sd.get_value(),.06),color=MODEL,stroke_width=4))
+        meanmap = tex(r'\mu\ \longrightarrow\ y(x,\mathbf w)',29,GOLD).move_to([2.9,.65,0])
+        varmap = tex(r'\sigma^2\ \longrightarrow\ \beta^{-1}',29,MODEL).move_to([2.9,-.2,0])
+        bridge = VGroup(jp('今回：予測の周りのノイズ',22,BASIS),tex(r't\mid x\sim\mathcal N(y(x,\mathbf w),\beta^{-1})',29,BASIS)).arrange(RIGHT,buff=.35).move_to([0,-1.65,0])
+        self.add(ax,graph,marker,width,jp('密度の面積 = 1',20,MUTED).move_to([-1.8,1.48,0]),
+                 tex('t',23,MUTED).next_to(ax.x_axis,RIGHT,buff=.1))
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R2.3 move center',a*.5,lambda:mu.animate.set_value(.8)),
+            ('R2.3 widen density',a*.5,lambda:sd.animate.set_value(1.2)),
+            ('R2.3 map mean',b*.4,lambda:FadeIn(meanmap)),
+            ('R2.3 map variance',b*.4,lambda:FadeIn(varmap)),
+            ('R2.3 connect noise',b*.2,lambda:FadeIn(bridge)),
+        ])
+        self.restore_body(saved)
+
+    def matrix_aid(self):
+        saved = self.aid_card('補足: 一行から、一つの予測へ')
+        self.add(jp('説明用の例：基底は 1 と x',20,MUTED).move_to([0,1.45,0]))
+        matrix = Matrix([[1,2],[1,1]],element_to_mobject_config={'font_size':32},h_buff=.8,v_buff=.7)
+        matrix.set_color(AID_INPUT).move_to([-2.4,.5,0])
+        weights = Matrix([[3],[-1]],element_to_mobject_config={'font_size':32},v_buff=.7)
+        weights.set_color(AID_PRIOR).move_to([-.65,.5,0])
+        result = Matrix([[1],[2]],element_to_mobject_config={'font_size':32},v_buff=.7)
+        result.set_color(AID_RESULT).move_to([1.15,.5,0])
+        rows = matrix.get_rows(); entries = result.get_entries()
+        box = SurroundingRectangle(rows[0],color=AID_INPUT,buff=.09)
+        wbox = SurroundingRectangle(weights,color=AID_PRIOR,buff=.09)
+        outbox = SurroundingRectangle(entries[0],color=AID_RESULT,buff=.10)
+        labels = VGroup(tex(r'x_1=2',23,AID_INPUT).move_to([-4.1,.85,0]),tex(r'x_2=1',23,AID_INPUT).move_to([-4.1,.15,0]),
+                        tex(r'\Phi',27,AID_INPUT).move_to([-2.4,-.6,0]),tex(r'\mathbf w',27,AID_PRIOR).move_to([-.65,-.6,0]),tex(r'\mathbf y',27,AID_RESULT).move_to([1.15,-.6,0]))
+        self.add(matrix,weights,result,labels,tex('=',28).move_to([.25,.5,0]))
+        origin = np.array([2.8,-.55,0]); scale=.4
+        baseline = Line([2.6,-.55,0],[4.7,-.55,0],color=MUTED)
+        plus = Rectangle(width=.34,height=3*scale,color=AID_OPERATION,fill_opacity=.65).move_to(origin,aligned_edge=DOWN)
+        minus = Rectangle(width=.34,height=2*scale,color=AID_OPERATION,fill_opacity=.65).move_to(origin+RIGHT*.8,aligned_edge=UP)
+        total = Rectangle(width=.34,height=scale,color=AID_RESULT,fill_opacity=.85).move_to(origin+RIGHT*1.6,aligned_edge=DOWN)
+        plabel = tex('+3',24,AID_OPERATION).next_to(plus,UP,buff=.1)
+        mlabel = tex('-2',24,AID_OPERATION).next_to(minus,DOWN,buff=.1)
+        tlabel = tex('1',24,AID_RESULT).next_to(total,UP,buff=.1)
+        arithmetic = tex(r'1\times3+2\times(-1)=1',31,AID_OPERATION).move_to([-1,-1.65,0])
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('V08b select row and weights',a,lambda:AnimationGroup(Create(box),Create(wbox))),
+            ('V08b multiply positive term',b*.27,lambda:AnimationGroup(FadeIn(baseline),GrowFromEdge(plus,DOWN),FadeIn(plabel))),
+            ('V08b multiply negative term',b*.33,lambda:AnimationGroup(GrowFromEdge(minus,UP),FadeIn(mlabel))),
+            ('V08b sum to prediction',b*.25,lambda:AnimationGroup(GrowFromEdge(total,DOWN),FadeIn(tlabel),FadeIn(arithmetic),Create(outbox))),
+            ('V08b share weights next row',b*.15,lambda:AnimationGroup(Transform(box,SurroundingRectangle(rows[1],color=AID_INPUT,buff=.09)),Transform(outbox,SurroundingRectangle(entries[1],color=AID_RESULT,buff=.1)),Indicate(wbox,scale_factor=1.02))),
+        ])
+        self.restore_body(saved)
+
+    def gradient_aid(self):
+        saved = self.aid_card('補足: 勾配と、逆向きの一歩')
+        self.add(jp('説明用の例：今回の一点だけの誤差',20,MUTED).move_to([0,1.45,0]))
+        ax = Axes(x_range=[-.5,2.5,1],y_range=[-.5,2.5,1],x_length=3.1,y_length=2.9,
+                  tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.5,-.15,0])
+        contours = VGroup(*[Line(ax.c2p(max(-.5,c-2.5),min(2.5,c+.5)),
+                                   ax.c2p(min(2.5,c+.5),max(-.5,c-2.5)),color=AID_INPUT,stroke_opacity=.5)
+                           for c in [-.5,0,1,2,2.5,3,3.5]])
+        start=np.array([1.5,1.]); grad=np.array([1.5,1.5]); end=start-.2*grad
+        point=Dot(ax.c2p(*start),color=AID_INPUT)
+        gradient=Arrow(ax.c2p(*start),ax.c2p(*(start+.45*grad)),buff=0,color=AID_OPERATION)
+        update=Arrow(ax.c2p(*start),ax.c2p(*end),buff=0,color=AID_PRIOR,max_tip_length_to_length_ratio=.3)
+        f=tex(r'E_n=\tfrac12(w_0+w_1-1)^2',30).move_to([2.25,.8,0])
+        glabel=VGroup(tex(r'\nabla E_n',29,AID_OPERATION),jp('最も増える向き',21,AID_OPERATION)).arrange(RIGHT,buff=.22).move_to([2.25,.05,0])
+        ulabel=VGroup(tex(r'-\eta\nabla E_n',29,AID_PRIOR),jp('小さく逆へ',21,AID_PRIOR)).arrange(RIGHT,buff=.22).move_to([2.25,-.65,0])
+        value=tex(r'E_n:\ 1.125\ \longrightarrow\ 0.405',28,AID_RESULT).move_to([1.9,-1.55,0])
+        self.add(ax,contours,point,f,tex('w_0',23).next_to(ax.x_axis,RIGHT,buff=.12),tex('w_1',23).next_to(ax.y_axis,UP,buff=.1))
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('V04b increasing gradient',a,lambda:AnimationGroup(GrowArrow(gradient),FadeIn(glabel))),
+            ('V04b opposite small step',b*.48,lambda:AnimationGroup(GrowArrow(update),FadeIn(ulabel),point.animate.move_to(ax.c2p(*end)))),
+            ('V04b decrease current error',b*.52,lambda:FadeIn(value)),
+        ])
+        self.restore_body(saved)
+
     def knobs(self):
         ax=self.axes()
         d=dots(ax)
         self.beat(LaggedStart(*[FadeIn(o) for o in d],lag_ratio=.1))
         line=curve(ax,np.polyval(np.polyfit(X,T,1),U),MUTED)
         self.beat(Create(line),self.equation(r'y=w_0+w_1x'))
+        self.squares_recap()
         self.remove(line)
         w0,w1,w2=[ValueTracker(0) for _ in range(3)]
         g=gaussian(U,[.28,.73],.15)
@@ -153,6 +286,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.beat(mu.animate.set_value(.6),self.equation(r'\mathbf{x}\longrightarrow\boldsymbol\phi(\mathbf{x})\longrightarrow\mathbf{w}^T\boldsymbol\phi(\mathbf{x})'))
 
     def likelihood(self):
+        self.gaussian_recap()
         ax=self.axes(span=1.85)
         a=ValueTracker(0)
         weights=lambda:(1-a.get_value())*fit(.3)+a.get_value()*W_ML
@@ -202,6 +336,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         ym=DecimalMatrix(y[:,None],element_to_mobject_config={'num_decimal_places':2,'font_size':27},v_buff=.7).move_to([5.65,.65,0])
         self.add(tex('=',28).move_to([4.6,.65,0]))
         self.beat(FadeIn(wm),FadeIn(ym),self.equation(r'\mathbf y=\Phi\mathbf w',MODEL))
+        self.matrix_aid()
         self.beat(self.equation(r'\Phi^T(\Phi\mathbf w-\mathbf t)=0\quad\Longrightarrow\quad\Phi^T\Phi\mathbf w=\Phi^T\mathbf t'),Indicate(cols[1],color=GOLD))
         self.beat(self.equation(r'\mathbf w_{\rm ML}=(\Phi^T\Phi)^{-1}\Phi^T\mathbf t=\Phi^\dagger\mathbf t'),FadeIn(self.note('逆行列の式：列が独立',(1.5,1.95,0),MUTED,22)))
         # Explicitly label the temporary degeneracy experiment, without changing the stored data.
@@ -267,6 +402,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         arriving=always_redraw(lambda:dots(ax,X[ORDER[:max(3,int(step.get_value()))]],T[ORDER[:max(3,int(step.get_value()))]]))
         self.add(arriving)
         self.beat(step.animate.set_value(12),self.equation(r'\mathbf w^{(\tau+1)}=\mathbf w^{(\tau)}-\eta\nabla E_n'))
+        self.gradient_aid()
         self.beat(ShowPassingFlash(Underline(bars,color=PURPLE),time_width=.35),self.equation(r'E_n=\frac12(t_n-\mathbf w^T\boldsymbol\phi_n)^2,\qquad\mathrm{LMS}'))
 
     def ridge(self):
@@ -284,7 +420,10 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.add(self.note('重み：共通の線形縮尺',(3.8,1.55,0),PURPLE,19),readout(r'\|\mathbf w\|=',lambda:np.linalg.norm(weights()),(3.7,1.1,0),PURPLE))
         self.add(Line([2.5,-.3,0],[5.1,-.3,0],color=MUTED,stroke_width=1))
         self.add(VGroup(*[tex(str(i),16,MUTED).move_to([3.8+(i-4)*.29,-1.7,0]) for i in range(9)]))
+        reference=self.note('復習: 1.1 正則化',(-3.8,2.35,0),WHITE,22)
+        self.add(reference)
         self.beat(FadeIn(bars))
+        self.remove(reference)
         self.beat(self.equation(r'{{E_D(\mathbf w)}}+{{\frac\lambda2\mathbf w^T\mathbf w}}'))
         self.formula.set_color_by_tex('E_D',GOLD).set_color_by_tex('lambda',PURPLE)
         self.beat(loglam.animate.set_value(-1))
@@ -305,7 +444,10 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         q=ValueTracker(2)
         boundary=always_redraw(lambda:path([ax.c2p(*v) for v in q_boundary(q.get_value())],PURPLE,4))
         self.add(boundary,self.slider(q,.5,4,(4.3,.8,0),'q=',PURPLE,width=2.3))
+        reference=self.note('復習: 1.1 正則化',(3.9,2,0),WHITE,22)
+        self.add(reference)
         self.beat(radius.animate.set_value(np.linalg.norm(center)-1),self.equation(r'w_1^2+w_2^2\le1',PURPLE))
+        self.remove(reference)
         opt=Dot(ax.c2p(*L2_POINT),radius=.085,color=MODEL)
         self.beat(FadeIn(opt),self.equation(r'\mathbf w^*='+r'('+f'{L2_POINT[0]:.3f},{L2_POINT[1]:.3f}'+r')^T',MODEL))
         # During the shape change both the point and tangent contour use the
