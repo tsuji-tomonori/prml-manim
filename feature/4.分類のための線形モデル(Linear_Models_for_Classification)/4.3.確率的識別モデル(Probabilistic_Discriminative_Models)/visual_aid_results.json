@@ -1,0 +1,44 @@
+{
+  "baseline_commit": "276bec1",
+  "chain_derivative": -0.49999999999772443,
+  "chain_delta_y": 0.009998666879965423,
+  "chain_delta_E": -0.01980001333191128,
+  "newton_gradient": 1.9999999999964488,
+  "newton_curvature": 3.999999220738459,
+  "newton_step": -0.5,
+  "unchanged_sentences_byte_identical": 99,
+  "changed_existing_sentences": [
+    "scene02-04-02",
+    "scene04-04-02"
+  ],
+  "cards": [
+    {
+      "id": "scene03-recap-cost-01",
+      "seconds": 10.0,
+      "note": "復習 R：1.6の橙の負の対数コストと黄の点を、一つの正解へ縮約"
+    },
+    {
+      "id": "scene03-aid-chain-01",
+      "seconds": 12.133333333333333,
+      "note": "補足 V14a：a→y→E、小さな変化に局所倍率を掛け、y−tへ"
+    },
+    {
+      "id": "scene05-recap-irls-01",
+      "seconds": 15.533333333333333,
+      "note": "復習 R：2.1の青0・緑1と分散、続いて3.1の黄の残差二乗を重み付きへ"
+    },
+    {
+      "id": "scene05-aid-newton-01",
+      "seconds": 10.533333333333333,
+      "note": "補足 V11b：青い誤差を黄の局所放物線で近似し、紫の一歩−g/Hへ"
+    },
+    {
+      "id": "scene09-recap-link-01",
+      "seconds": 10.333333333333334,
+      "note": "復習 R：2.4の自然パラメータのつまみと緑の平均曲線を、活性化とリンクへ"
+    }
+  ],
+  "baseline_wav_seconds": 504.4,
+  "new_wav_seconds": 563.2,
+  "increase_percent": 11.657414750198258
+}

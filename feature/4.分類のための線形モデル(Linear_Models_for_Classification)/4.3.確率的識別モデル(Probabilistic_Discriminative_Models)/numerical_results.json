@@ -33,16 +33,16 @@
   "scene_durations": {
     "scene01": 57.46666666666667,
     "scene02": 60.333333333333336,
-    "scene03": 60.06666666666667,
-    "scene04": 50.8,
-    "scene05": 65.06666666666666,
+    "scene03": 82.2,
+    "scene04": 51.06666666666667,
+    "scene05": 91.13333333333334,
     "scene06": 49.93333333333333,
     "scene07": 45.86666666666667,
     "scene08": 51.666666666666664,
-    "scene09": 63.2
+    "scene09": 73.53333333333333
   },
-  "sentences": 101,
-  "beats": 50,
-  "wav_seconds": 504.4,
+  "sentences": 113,
+  "beats": 55,
+  "wav_seconds": 563.2,
   "checks": "8 groups passed: derivatives, IRLS, basis, separation/ridge, softmax, CDF/noise, canonical, audio/display"
 }

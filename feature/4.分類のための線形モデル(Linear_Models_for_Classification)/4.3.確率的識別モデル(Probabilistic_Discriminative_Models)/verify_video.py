@@ -41,7 +41,8 @@ def main():
                 if '$' in cue['display']:
                     frames.append(dict(id=cue['id']+'-math',time=(cue['start']+cue['end'])/2,kind='math',display=cue['display']))
         if scene['id'] in ['scene01','scene05','scene07']:
-            bi={'scene01':3,'scene05':3,'scene07':2}[scene['id']]
+            anchor={'scene01':'scene01-04-01','scene05':'scene05-04-01','scene07':'scene07-03-01'}[scene['id']]
+            bi=next(i for i,b in enumerate(scene['beats']) if any(c['id']==anchor for c in b['cues']))
             beat=scene['beats'][bi];cue=beat['cues'][0]
             with wave.open(str(ROOT/entry['path']),'rb') as f:
                 rate=f.getframerate();pcm=np.frombuffer(f.readframes(f.getnframes()),dtype='<i2')/32768
@@ -51,6 +52,36 @@ def main():
             sync.append(dict(scene=scene['id'],note=beat['note'],sentence=cue['id'],pcm_onset=onset,actions=beat['actions']))
             for fct in [.15,.85]:
                 frames.append(dict(id=f"{scene['id']}-sync-{fct}",time=beat['start']+fct*(beat['end']-beat['start']),kind='sync'))
+    review_sync=[]
+    for scene,entry in zip(timeline,manifest):
+        with wave.open(str(ROOT/entry['path']),'rb') as source:
+            rate=source.getframerate()
+            pcm=np.frombuffer(source.readframes(source.getnframes()),dtype='<i2')/32768
+        for beat in scene['beats']:
+            key=beat['cues'][0]['id']
+            review=('-recap-' in key or '-aid-' in key)
+            label=any(c['id'] in ['scene02-04-02','scene04-04-02'] for c in beat['cues'])
+            if not (review or label):
+                continue
+            for name,t in [('before',beat['start']-.2),('after',beat['end']+.2)]:
+                frames.append(dict(id=key+'-'+name,time=t,kind='review-context'))
+            for i,cue in enumerate(beat['cues']):
+                for fraction in [.15,.85]:
+                    frames.append(dict(id=f"{key}-sentence{i+1}-{fraction}",
+                        time=cue['start']+fraction*(cue['end']-cue['start']),kind='review-sentence'))
+            if review:
+                comparisons=[]
+                for action in beat['actions']:
+                    if action.get('name')=='breath':
+                        continue
+                    lo=round((action['start']-scene['start'])*rate)
+                    hi=round((action['end']-scene['start'])*rate)
+                    active=np.flatnonzero(abs(pcm[lo:hi])>10**(-45/20))
+                    assert len(active), action
+                    comparisons.append(dict(**action,pcm_first_active=scene['start']+(lo+int(active[0]))/rate,
+                        pcm_last_active=scene['start']+(lo+int(active[-1]))/rate))
+                review_sync.append(dict(id=key,actions=comparisons,cues=beat['cues']))
+    assert len(review_sync)==5
     for f in frames:
         path=args.output/(f['id']+'.png')
         run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(path)])
@@ -63,7 +94,7 @@ def main():
             draw.text((x+10,y+6),f"{f['id']}  {f['time']:.3f}s",fill='white')
         sheet.save(args.output/f'sheet-{start//6+1:02}.png')
     result=dict(probe=probe,silence_intervals=0,volume=[s.strip() for s in volume.splitlines() if 'mean_volume:' in s or 'max_volume:' in s],frames=frames,sync=sync,max_caption_clock_error=max_clock_error,
-                mp4_sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),visual_review='pending',full_listening=False)
+                review_sync=review_sync,mp4_sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),visual_review='pending',full_listening=False)
     (ROOT/'validation_results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k!='frames'},ensure_ascii=False,indent=2))
     print('frames',len(frames),'sheets',(len(frames)+5)//6)
