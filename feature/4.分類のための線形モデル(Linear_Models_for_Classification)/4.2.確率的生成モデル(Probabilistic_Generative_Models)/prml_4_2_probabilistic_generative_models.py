@@ -236,6 +236,11 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
             eq=MathTex(r'p(x\mid '+symbol+r')=',r'h(x)',r'g('+symbol+r')',
                 r'\exp\{',symbol+r'^T',r'u(x)',r'\}',font_size=34).move_to([0,y,0])
             for i,c in [(1,MUTED),(2,PURPLE_CLS),(4,GOLD),(5,BLUE_CLS)]:eq[i].set_color(c)
+            # Give all three meaning labels their own horizontal space.
+            eq[0].move_to([-3.65,y,0])
+            eq[1].move_to([-1.5,y,0])
+            eq[2].move_to([.35,y,0])
+            VGroup(*eq[3:]).move_to([2.9,y,0])
             return eq
         eq=equation(r'\eta',.6)
         boxes=VGroup(*[SurroundingRectangle(part,color=color,buff=.15) for part,color in
