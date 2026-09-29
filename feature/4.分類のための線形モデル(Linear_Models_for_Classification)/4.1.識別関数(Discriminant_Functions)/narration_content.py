@@ -101,6 +101,38 @@ for i,(title,reference,beats) in enumerate(STORY,1):
         scene['beats'].append({'seconds':10,'visual_note':note,'segments':segments})
     SCENES.append(scene)
 
+# Keep all original sentence IDs when inserting or splitting a beat.
+def review_beat(scene, kind, seconds, note, pairs):
+    return {'seconds':seconds, 'visual_note':note, 'segments':[
+        {'id':f'{scene}-{kind}-{i:02}', 'display':display, 'speech':speech}
+        for i,(display,speech) in enumerate(pairs,1)]}
+
+SCENES[3]['beats'].insert(0, review_beat('scene04','recap',12,
+    '復習 R：3.1 の入力行・重み・予測列から分類の目標へ', [
+    ('3.1の最小二乗は、予測を目標の数へ近づけました。',
+     '三章一せつの最小二乗は、予測を目標の数へ近づけました。'),
+    ('今回はクラスを表す数に合わせ、分類に使えるかを確かめます。',
+     '今回はクラスを表す数に合わせ、分類に使えるかを確かめます。')]))
+SCENES[4]['beats'].insert(0, review_beat('scene05','recap',12,
+    '復習 R：2.3 の青い点群・緑と紫の主軸から射影へ', [
+    ('2.3では、点の広がりは方向によって違いました。',
+     '二章三せつでは、点の広がりは方向によって違いました。'),
+    ('ここでは、二つの集団を一本の軸へ写し、離れ方と広がりを比べます。',
+     'ここでは、二つの集団を一本の軸へ写し、離れ方と広がりを比べます。')]))
+matrix_beat = SCENES[4]['beats'][6]
+first, second = matrix_beat['segments']
+SCENES[4]['beats'][6:7] = [
+    dict(matrix_beat, segments=[first]),
+    review_beat('scene05','aid',15,
+        '補足 V08d：ずれ (2,1) の外積、各点の和、横方向の二乗偏差和', [
+        ('ずれの成分を縦横に掛けた表を、各点について足します。',
+         'ずれの成分をたてよこに掛けたひょうを、各点について足します。'),
+        ('横方向なら、この左上が二乗偏差の合計です。',
+         '横方向なら、この左上が二乗偏差の合計です。'),
+        ('点の数では割りません。', '点の数では割りません。')]),
+    dict(matrix_beat, visual_note='補足から最適方向へ戻る', segments=[second]),
+]
+
 SYNTHESIS_SETTINGS={'speedScale':1.08,'intonationScale':.95,'prePhonemeLength':.08,'postPhonemeLength':.12,'volumeScale':1.0}
 
 def estimated_duration(beat):
