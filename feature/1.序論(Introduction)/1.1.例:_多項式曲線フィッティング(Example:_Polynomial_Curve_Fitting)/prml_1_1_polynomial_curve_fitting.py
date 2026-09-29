@@ -26,6 +26,10 @@ REG_PURPLE = ManimColor("#C29AFF")
 MUTED = ManimColor("#A8B2C5")
 BG = "#10141F"
 TERM_COLORS = [BLUE_DATA, RESIDUAL_YELLOW, REG_PURPLE, TEST_ORANGE]
+# Shared visual-aid palette from the chapter 1–5 review plan.
+AID_INPUT = ManimColor("#58C4DD")
+AID_OPERATION = ManimColor("#FFFF00")
+AID_RESULT = ManimColor("#83C167")
 SCENE_DIR = Path(__file__).resolve().parent
 
 
@@ -457,6 +461,99 @@ class PRML11PolynomialCurveFitting(Scene):
         truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.55)
         self.beat(Create(truth), Indicate(line))
 
+    def aid_card(self, heading):
+        """Temporarily replace the body, retaining the title and caption clock."""
+        retained = [*self.mobjects[:2], self.subtitle]
+        body = [m for m in self.mobjects if m not in retained]
+        self.remove(*body)
+        frame = RoundedRectangle(width=10.5, height=4.55, corner_radius=.12,
+                                 stroke_color=MUTED, stroke_width=1.2,
+                                 fill_color=BG, fill_opacity=1).move_to([0, .05, 0])
+        heading = jp(heading, 25).move_to([0, 1.92, 0])
+        return body, VGroup(frame, heading)
+
+    def restore_aid_body(self, body):
+        retained = [*self.mobjects[:2], self.subtitle]
+        self.remove(*[m for m in self.mobjects if m not in retained])
+        self.add(*body)
+
+    def rms_aid(self):
+        body, card = self.aid_card('補足：RMSを作る3段階（2点の例）')
+        stages = VGroup(*[jp(label, 25, AID_OPERATION).move_to([x, 1.25, 0])
+                          for label, x in [('二乗', -3.2), ('平均', 0), ('平方根', 3.2)]])
+        arrows = VGroup(Arrow([-3.85, -.3, 0], [-3.85, .6, 0], buff=0, color=AID_INPUT),
+                        Arrow([-2.55, .6, 0], [-2.55, -.3, 0], buff=0, color=AID_INPUT))
+        inputs = VGroup(tex('+2', 30, AID_INPUT).move_to([-3.85, .86, 0]),
+                        tex('-2', 30, AID_INPUT).move_to([-2.55, .86, 0]))
+        squares = VGroup(*[Square(side_length=.9, color=AID_OPERATION,
+                                  fill_opacity=.25).move_to([x, -.05, 0])
+                           for x in [-3.85, -2.55]])
+        areas = VGroup(*[tex('4', 32, AID_OPERATION).move_to(sq) for sq in squares])
+        total = Rectangle(width=1.8, height=.9, color=AID_OPERATION,
+                          fill_opacity=.25).move_to([0, -.05, 0])
+        mean = Square(side_length=.9, color=AID_OPERATION,
+                      fill_opacity=.25).move_to(total)
+        sum_formula = tex('4+4=8', 30, AID_OPERATION).move_to([0, -.96, 0])
+        mean_formula = tex(r'\frac{4+4}{2}=4', 30, AID_OPERATION).move_to([0, -1.18, 0])
+        result = Line([2.75, -.05, 0], [3.65, -.05, 0], color=AID_RESULT, stroke_width=6)
+        result_formula = tex(r'\sqrt{4}=2', 34, AID_RESULT).move_to([3.2, -1.05, 0])
+        unit = jp('元の値と同じ単位', 23, AID_RESULT).move_to([3.2, -1.75, 0])
+        cues = self.beat_cues()
+        a, b, c = [q['end'] - q['start'] for q in cues]
+        self.beat(phases=[
+            ('RMS example enter', .6, lambda: FadeIn(card)),
+            ('signed residuals +2 -2', a * .48 - .6,
+             lambda: AnimationGroup(FadeIn(stages), FadeIn(inputs), Create(arrows))),
+            ('square residual lengths into areas 4 4', a * .52,
+             lambda: AnimationGroup(ReplacementTransform(arrows, squares), FadeIn(areas))),
+            ('sum areas to 8', b * .5,
+             lambda: AnimationGroup(TransformFromCopy(squares, total), FadeIn(sum_formula))),
+            ('divide by two to mean area 4', b * .5,
+             lambda: AnimationGroup(ReplacementTransform(total, mean), ReplacementTransform(sum_formula, mean_formula))),
+            ('square root to length 2', c * .48,
+             lambda: AnimationGroup(TransformFromCopy(mean, result), FadeIn(result_formula))),
+            ('original units', c * .52, lambda: FadeIn(unit)),
+        ])
+        self.restore_aid_body(body)
+
+    def log_scale_aid(self):
+        body, card = self.aid_card('補足：大きさを圧縮し、符号を残す（説明用の例）')
+        definition = tex(r'\operatorname{sgn}(w)\,\log_{10}(1+|w|)', 30,
+                         AID_OPERATION).move_to([0, 1.2, 0])
+        axis = NumberLine(x_range=[-3, 3, 1], length=7.2,
+                          include_numbers=True, font_size=24, color=MUTED).move_to([0, -.75, 0])
+        inputs = VGroup(*[tex(str(v), 32, AID_INPUT).move_to(axis.n2p(i) + UP * 1.35)
+                          for i, v in enumerate([9, 99, 999], 1)])
+        targets = VGroup(*[Dot(axis.n2p(i), color=AID_OPERATION, radius=.075) for i in [1, 2, 3]])
+        links = VGroup(*[Arrow(label.get_bottom(), target.get_top(), buff=.12,
+                              color=AID_OPERATION, stroke_width=2) for label, target in zip(inputs, targets)])
+        neg = tex('-99', 32, AID_INPUT).move_to(axis.n2p(-2) + UP * 1.35)
+        neg_link = Arrow(neg.get_bottom(), axis.n2p(-2) + UP * .08,
+                         buff=.12, color=AID_OPERATION, stroke_width=2)
+        neg_dot = Dot(axis.n2p(-2), color=AID_OPERATION, radius=.075)
+        # Equal lengths in opposite directions preserve the sign visibly.
+        positive = Arrow([-4.25, .05, 0], [-4.25, .95, 0], buff=0, color=AID_RESULT)
+        negative = Arrow([-4.25, .05, 0], [-4.25, -.85, 0], buff=0, color=AID_RESULT)
+        pos_label = tex('+2', 26, AID_RESULT).next_to(positive, LEFT, buff=.1)
+        neg_label = tex('-2', 26, AID_RESULT).next_to(negative, LEFT, buff=.1)
+        note = jp('棒の長さは同じ・向きは逆', 25, AID_RESULT).move_to([0, -1.8, 0])
+        a, b, c = [q['end'] - q['start'] for q in self.beat_cues()]
+        self.beat(phases=[
+            ('log example enter', .6, lambda: FadeIn(card)),
+            ('coefficient inputs 9 99 999', a * .5 - .6,
+             lambda: AnimationGroup(FadeIn(definition), FadeIn(axis), FadeIn(inputs))),
+            ('map to equal ticks 1 2 3', a * .5,
+             lambda: LaggedStart(*[AnimationGroup(GrowArrow(link), FadeIn(target))
+                                  for link, target in zip(links, targets)], lag_ratio=.25)),
+            ('compress magnitude retain direction', b,
+             lambda: AnimationGroup(Indicate(definition, scale_factor=1.02), GrowArrow(positive), FadeIn(pos_label))),
+            ('negative coefficient -99 to -2', c * .55,
+             lambda: AnimationGroup(FadeIn(neg), GrowArrow(neg_link), FadeIn(neg_dot))),
+            ('negative bar points down with length 2', c * .45,
+             lambda: AnimationGroup(GrowArrow(negative), FadeIn(neg_label), FadeIn(note))),
+        ])
+        self.restore_aid_body(body)
+
     def degrees(self):
         tracker = ValueTracker(0)
         w = lambda: degree_weights(tracker.get_value())
@@ -511,6 +608,7 @@ class PRML11PolynomialCurveFitting(Scene):
             ('count residuals', duration * .64, lambda: count_residuals(duration * .64)),
             ('RMS stamp', duration * .36, lambda: AnimationGroup(TransformFromCopy(lines.copy().clear_updaters(), train_pts[0]),
                                                               TransformFromCopy(test_lines.copy().clear_updaters(), test_pts[0])))])
+        self.rms_aid()
         for m in range(1, 10):
             counter.set_value(0)
             # Use callbacks only at the fitted endpoint; RMS markers are never interpolated observations.
@@ -574,6 +672,7 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(Create(bars), moving=False)
         self.add(scale_formula)
         self.beat(Indicate(scale_formula, scale_factor=1.02), moving=False)
+        self.log_scale_aid()
         self.beat(tracker.animate.set_value(6))
         self.beat(tracker.animate.set_value(9))
         self.beat(tracker.animate.set_value(3))
