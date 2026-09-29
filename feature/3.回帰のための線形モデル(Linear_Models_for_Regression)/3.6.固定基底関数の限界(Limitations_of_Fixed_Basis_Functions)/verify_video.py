@@ -29,7 +29,7 @@ def main():
     volumes={k:float(re.search(k+r':\s*(-?[\d.]+) dB',vol)[1]) for k in ['mean_volume','max_volume']}
     timeline=json.loads((ROOT/'media/prml36_timeline.json').read_text())
     manifest=json.loads((ROOT/'assets/voicevox/manifest.json').read_text())['scenes']
-    frames=[];sync=[];timing_errors=[]
+    frames=[];sync=[];timing_errors=[];added_phase_audio=[]
     for s,e in zip(timeline,manifest):
         timing_errors.append(abs(s['end']-s['start']-e['duration']))
         for bi in [1,4,7]:
@@ -43,17 +43,36 @@ def main():
             assert c['id']==expected['id'] and c['display']==expected['display']
             assert abs(c['start']-s['start']-expected['start'])<1e-6
     assert max(timing_errors)<1e-6
-    for si,bi,name in [(0,1,'weight raises local bump'),(2,4,'straighten manifold'),(4,2,'rotate relevant direction'),(5,2,'shift then sharpen sigmoid')]:
+    # Review every new card through its phases and both neighbouring shots.
+    for si,bi in [(1,0),(4,4),(2,0)]:
+        b=timeline[si]['beats'][bi]
+        times=[b['start']-.15,b['start']+.6,b['end']-.2,b['end']+.2]
+        times += [(p['start']+p['end'])/2 for p in b.get('actions',[]) if p['name']!='breath']
+        for j,t in enumerate(times):
+            frames.append(dict(label=f"{timeline[si]['id']}-review-{j}",time=t))
+    for si,bi,name in [(0,1,'weight raises local bump'),(2,4,'straighten manifold'),(4,2,'rotate relevant direction'),(5,2,'shift then sharpen sigmoid'),(1,0,'R1.4 boxes to basis centers'),(4,4,'V08a projection to scalar')]:
         s=timeline[si];b=s['beats'][bi];e=manifest[si]
         with wave.open(str(ROOT/'assets/voicevox'/f"{s['id']}.wav"),'rb') as w:
             rate=w.getframerate();assert w.getsampwidth()==2
             pcm=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2').astype(float)/32768
-        cue=e['subtitle_cues'][bi*2]
+        cue=next(c for c in e['subtitle_cues'] if c['id']==b['cues'][0]['id'])
         window=pcm[round(cue['start']*rate):round(cue['end']*rate)]
         active=np.flatnonzero(abs(window)>10**(-45/20))
         onset=s['start']+cue['start']+active[0]/rate
         sync.append(dict(scene=s['id'],beat=bi+1,action=name,start=b['action_start'],end=b['action_end'],first_voice=onset,phases=b.get('actions',[])))
+        if (si,bi) in [(1,0),(4,4)]:
+            for phase in b['actions']:
+                if phase['name']=='breath':continue
+                begin=round((phase['start']-s['start'])*rate)
+                finish=round((phase['end']-s['start'])*rate)
+                voiced=np.flatnonzero(abs(pcm[begin:finish])>10**(-45/20))
+                assert len(voiced),phase['name']
+                added_phase_audio.append(dict(**phase,
+                    first_voice=s['start']+(begin+voiced[0])/rate,
+                    last_voice=s['start']+(begin+voiced[-1])/rate))
         for fraction in [.12,.82]:frames.append(dict(label=f"{s['id']}-sync-{fraction}",time=b['start']+fraction*(b['action_end']-b['start'])))
+    for phase in timeline[1]['beats'][0]['actions'][1:3]:
+        frames.append(dict(label=phase['name']+'-settled',time=phase['end']-.13))
     for i,f in enumerate(frames):
         f['file']=f'frame-{i:02}.png'
         run(['ffmpeg','-loglevel','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(out/f['file'])])
@@ -67,7 +86,8 @@ def main():
     result=dict(video_sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),probe=probe,duration_difference=delta,
                 silence_intervals_ge_3s=silence_count,**volumes,timeline_max_error=max(timing_errors),
                 scenes=[dict(id=s['id'],title=s['title'],start=s['start'],duration=e['duration'],reference=s['reference']) for s,e in zip(timeline,manifest)],
-                sync=sync,frames=frames,visual_review='pending',full_listening=False)
+                sync=sync,added_phase_audio=added_phase_audio,
+                frames=frames,visual_review='pending',full_listening=False)
     (ROOT/'validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k not in ['frames','scenes','sync']},ensure_ascii=False,indent=2))
     print('Extracted frames:',len(frames))
