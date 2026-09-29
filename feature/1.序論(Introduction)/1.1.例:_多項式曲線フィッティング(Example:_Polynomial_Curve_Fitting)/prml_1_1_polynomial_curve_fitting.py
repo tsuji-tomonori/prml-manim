@@ -502,9 +502,9 @@ class PRML11PolynomialCurveFitting(Scene):
         a, b, c = [q['end'] - q['start'] for q in cues]
         self.beat(phases=[
             ('RMS example enter', .6, lambda: FadeIn(card)),
-            ('signed residuals +2 -2', a * .48 - .6,
+            ('signed residuals +2 -2', a * .70 - .6,
              lambda: AnimationGroup(FadeIn(stages), FadeIn(inputs), Create(arrows))),
-            ('square residual lengths into areas 4 4', a * .52,
+            ('square residual lengths into areas 4 4', a * .30,
              lambda: AnimationGroup(ReplacementTransform(arrows, squares), FadeIn(areas))),
             ('sum areas to 8', b * .5,
              lambda: AnimationGroup(TransformFromCopy(squares, total), FadeIn(sum_formula))),
@@ -540,16 +540,16 @@ class PRML11PolynomialCurveFitting(Scene):
         a, b, c = [q['end'] - q['start'] for q in self.beat_cues()]
         self.beat(phases=[
             ('log example enter', .6, lambda: FadeIn(card)),
-            ('coefficient inputs 9 99 999', a * .5 - .6,
+            ('coefficient inputs 9 99 999', a * .70 - .6,
              lambda: AnimationGroup(FadeIn(definition), FadeIn(axis), FadeIn(inputs))),
-            ('map to equal ticks 1 2 3', a * .5,
+            ('map to equal ticks 1 2 3', a * .30,
              lambda: LaggedStart(*[AnimationGroup(GrowArrow(link), FadeIn(target))
                                   for link, target in zip(links, targets)], lag_ratio=.25)),
             ('compress magnitude retain direction', b,
              lambda: AnimationGroup(Indicate(definition, scale_factor=1.02), GrowArrow(positive), FadeIn(pos_label))),
-            ('negative coefficient -99 to -2', c * .55,
+            ('negative coefficient -99 to -2', c * .70,
              lambda: AnimationGroup(FadeIn(neg), GrowArrow(neg_link), FadeIn(neg_dot))),
-            ('negative bar points down with length 2', c * .45,
+            ('negative bar points down with length 2', c * .30,
              lambda: AnimationGroup(GrowArrow(negative), FadeIn(neg_label), FadeIn(note))),
         ])
         self.restore_aid_body(body)
