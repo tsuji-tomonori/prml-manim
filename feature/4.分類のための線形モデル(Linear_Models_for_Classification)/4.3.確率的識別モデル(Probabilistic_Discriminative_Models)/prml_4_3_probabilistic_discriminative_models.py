@@ -6,6 +6,11 @@ from manim import *
 from discriminative_model import *
 from scene_support import *
 
+AID_INPUT='#58C4DD'
+AID_OPERATION='#FFFF00'
+AID_RESULT='#83C167'
+AID_COMPARE='#9A72AC'
+
 class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
     def construct(self):
         self.camera.background_color=BG
@@ -82,7 +87,10 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.add(edge);self.equation(r'\phi_1+\phi_2=1',r'\quad\Longleftrightarrow\quad x_1^2+x_2^2=1')
         oldnames=VGroup(tex('x_1',25).next_to(ax.x_axis,RIGHT),tex('x_2',25).next_to(ax.y_axis,UP))
         self.remove(fnames)
+        recap=self.recap_label('復習: 3.1 固定基底関数')
+        self.add(recap)
         self.beat(alpha.animate.set_value(0),Transform(stage,ax))
+        self.remove(recap)
         self.add(oldnames)
         coincident=VGroup(Dot(ax.c2p(.25,.2),radius=.13,color=RED_CLASS),Dot(ax.c2p(.25,.2),radius=.075,color=BLUE_CLASS))
         self.add(coincident)
@@ -99,6 +107,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.add(graph,dot,number('E_n=',lambda:cost(p.get_value()),[5.3,.5,0],YELLOW_ACC),knob('y=',p,.02,.98))
         self.equation(r't=1:\quad E_n=-\ln y',size=36)
         self.beat(p.animate.set_value(.1))
+        self.cost_recap()
         self.beat(p.animate.set_value(.025))
         self.equation(r't=0:\quad E_n=-\ln(1-y)',size=36)
         target.set_value(0)
@@ -122,6 +131,8 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.add(chain)
         self.beat(Indicate(chain,color=YELLOW_ACC,scale_factor=1.04))
 
+        self.chain_aid()
+
     def separation(self):
         ax=self.plot_axes(labels=('x','y'))
         k=ValueTracker(1); boundary=ValueTracker(0)
@@ -141,7 +152,10 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         rg=always_redraw(lambda:curve(ax,lambda x:sigmoid(fit(SEP_T,lam.get_value(),steps=12)[-1][0]+fit(SEP_T,lam.get_value(),steps=12)[-1][1]*x)))
         self.add(rg,number(r'\lambda=',lam.get_value,[5.1,.6,0],PURPLE_ACC))
         f=self.equation(r'E_{\rm reg}=E+',r'\frac{\lambda}{2}\|w\|^2');f[1].set_color(PURPLE_ACC)
+        recap=self.recap_label('復習: 3.3 ガウス事前分布').shift(UP*.45)
+        self.add(recap)
         self.beat(lam.animate.set_value(1.5))
+        self.remove(recap)
         self.add(note('訓練ラベルの正解率 ≠ 未知の点での確率の正しさ'))
         self.beat(lam.animate.set_value(.3))
 
@@ -161,6 +175,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         zlabel=number('z=',z,[5.2,.6,0],PURPLE_ACC)
         self.add(zlabel)
         self.beat(a.animate.set_value(.3))
+        self.irls_recap()
         self.remove(graph,tangent,contact,tangent_note,zlabel)
         self.add(note('分散は y=0.5 のとき最大：0.25'))
         rgraph=curve(ax,lambda x:sigmoid(x)*(1-sigmoid(x)),color=GREEN_CLASS)
@@ -183,6 +198,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(step.animate.set_value(4))
         self.equation(r'w_{\rm new}=w-H^{-1}\nabla E',r'\qquad H=\Phi^TR\Phi',size=31)
         self.beat(step.animate.set_value(7))
+        self.newton_aid()
         self.equation(r'u^THu=\sum_n R_{nn}(\phi_n^Tu)^2\geq0',size=34)
         self.remove(*[m for m in self.mobjects if isinstance(m,Text) and m.get_center()[1]<-2])
         self.add(note('凸：局所的な谷底が、全体でも谷底になる形'))
@@ -274,6 +290,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         equations=VGroup(*[tex(f,32,c) for f,c in zip(forms,[BLUE_CLASS,YELLOW_ACC,GREEN_CLASS])]).arrange(DOWN,buff=.55).move_to([0,.2,0])
         self.add(equations)
         self.beat(LaggedStart(*[Indicate(m,scale_factor=1.05) for m in equations],lag_ratio=.3))
+        self.link_recap()
         self.remove(*equations.get_family())
         self.equation(r'p(t|\eta,s)=\frac1s h(t/s)g(\eta)e^{\eta t/s}',size=34)
         mean=tex(r'y=\mathbb E[t|\eta]',38,RED_CLASS).move_to([-3,.3,0]);natural=tex(r'\eta=\psi(y)',38,GREEN_CLASS).move_to([3,.3,0])
@@ -293,3 +310,155 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         g=always_redraw(lambda:curve(ax,lambda x:sigmoid(1.5*x+shift.get_value())))
         self.add(g,note('特徴 → スコア → 確率 → ラベルへの損失'))
         self.beat(shift.animate.set_value(.5))
+
+    def cost_recap(self):
+        saved,frame,heading=self.body_card('復習: 1.6 負の対数のコスト')
+        # 1.6 learning(): orange model cost, yellow position, blue observation 1.
+        orange='#FFB45B'; yellow='#FFE079'; blue='#58B5ED'
+        ax=Axes(x_range=(0,1,.2),y_range=(0,3,1),x_length=5.2,y_length=2.5,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=20)).move_to([-1.9,.1,0])
+        theta=ValueTracker(.9)
+        graph=curve(ax,lambda x:-np.log(x),.06,.98,orange)
+        dot=always_redraw(lambda:Dot(ax.c2p(theta.get_value(),-np.log(theta.get_value())),color=yellow,radius=.08))
+        symbol=tex(r'\theta',27,yellow).next_to(ax.x_axis,RIGHT)
+        formula=tex(r'\bar L=-\ln\theta',32,orange).move_to([-1.8,-1.65,0])
+        self.add(ax,graph,dot,symbol,formula,
+                 jp('説明用の例：観測は 1 が一つ',21).move_to([0,1.45,0]),
+                 number('p=',theta.get_value,[3.45,.6,0],yellow),
+                 number(r'-\ln p=',lambda:-np.log(theta.get_value()),[3.45,-.1,0],orange))
+        bridge=VGroup(Dot([-0.95,0,0],color=blue),Arrow([-.6,0,0],[.6,0,0],buff=0,color=WHITE),Dot([.95,0,0],color=RED_CLASS)).move_to([3.3,-.95,0])
+        bridge.add(jp('観測 1 → 赤の正解',20).move_to([3.3,-1.55,0]))
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.6 lower correct probability',a,lambda:theta.animate.set_value(.1)),
+            ('R1.6 transfer cost to classification',b,lambda:AnimationGroup(
+                Transform(symbol,tex('y',27,yellow).move_to(symbol)),
+                Transform(formula,tex(r'E_n=-\ln y',32,orange).move_to(formula)),FadeIn(bridge))),
+        ])
+        self.restore_body(saved)
+
+    def chain_aid(self):
+        saved,frame,heading=self.body_card('補足: 小さな変化を、倍率でつなぐ')
+        self.add(jp('説明用の例：t = 1',20,MUTED).move_to([3.8,1.5,0]))
+        boxes=VGroup(*[VGroup(RoundedRectangle(width=1.9,height=.85,corner_radius=.08,color=c),
+                     tex(label,34,c)).move_to([x,.4,0]) for x,label,c in
+                     [(-3.7,'a=0',AID_INPUT),(0,'y=0.5',AID_OPERATION),(3.7,r'E=-\ln y',AID_RESULT)]])
+        arrows=VGroup(Arrow([-2.7,.4,0],[-1,.4,0],buff=.07,color=AID_OPERATION),
+                      Arrow([1,.4,0],[2.7,.4,0],buff=.07,color=AID_OPERATION))
+        factors=VGroup(tex(r'\frac{dy}{da}=\frac14',30,AID_OPERATION).move_to([-1.85,1.15,0]),
+                       tex(r'\frac{dE}{dy}=-2',30,AID_OPERATION).move_to([1.85,1.15,0]))
+        deltas=VGroup(*[tex(label,29,c).move_to([x,-.5,0]) for x,label,c in
+                      [(-3.7,r'\Delta a=0.04',AID_INPUT),(0,r'\Delta y\approx0.01',AID_OPERATION),
+                       (3.7,r'\Delta E\approx-0.02',AID_RESULT)]])
+        product=tex(r'\frac{dE}{da}=\frac14\times(-2)=-\frac12',35,AID_RESULT).move_to([0,-1.55,0])
+        identity=tex(r'\frac{dE}{da}=-\frac12=0.5-1=y-t',35,AID_RESULT).move_to([0,-1.55,0])
+        def show_difference():
+            self.remove(product)
+            self.add(identity)
+            return Create(Line([-2.8,-2.,0],[2.8,-2.,0],color=AID_OPERATION,stroke_width=2))
+        self.add(boxes,arrows,factors)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V14a small input change',a*.25,lambda:FadeIn(deltas[0])),
+            ('V14a propagate to probability',a*.35,lambda:FadeIn(deltas[1],shift=RIGHT*.2)),
+            ('V14a propagate to error',a*.4,lambda:FadeIn(deltas[2],shift=RIGHT*.2)),
+            ('V14a multiply local derivatives',b,lambda:FadeIn(product,rate_func=lambda t:min(1,4*t))),
+            ('V14a identify prediction minus target',c,show_difference),
+        ])
+        self.restore_body(saved)
+
+    def irls_recap(self):
+        saved,frame,heading=self.body_card('復習: 2.1 ベルヌーイの分散')
+        mu=ValueTracker(.2)
+        line=NumberLine(x_range=[0,1,.5],length=6,include_numbers=True,font_size=24).move_to([0,-.25,0])
+        bars=always_redraw(lambda:VGroup(*[Rectangle(width=.65,height=2*p,color=c,fill_opacity=.75,stroke_width=0)
+            .move_to(line.n2p(x),aligned_edge=DOWN) for x,p,c in [(0,1-mu.get_value(),'#58B5ED'),(1,mu.get_value(),'#77D49A')]]))
+        pivot=always_redraw(lambda:Triangle(color='#FFE079',fill_opacity=1).scale(.13).next_to(line.n2p(mu.get_value()),DOWN,buff=.1))
+        variance=number(r'\mu(1-\mu)=',lambda:mu.get_value()*(1-mu.get_value()),[0,-1.35,0],'#FFE079')
+        old=VGroup(line,bars,pivot,variance,tex(r'\mu=y',28,'#FFE079').move_to([3.9,.9,0]))
+        self.add(old)
+        ax=Axes(x_range=(0,3,1),y_range=(0,2,1),x_length=4,y_length=2.4,tips=False,
+                axis_config=dict(color=MUTED)).move_to([-2.65,.05,0])
+        xs=np.array([.5,1.5,2.5]); targets=np.array([1.5,.3,1.7]); pred=np.array([.7,1.,1.3]);res=targets-pred
+        model=Line(ax.c2p(0,.55),ax.c2p(3,1.45),color='#FF6B77')
+        dots=VGroup(*[Dot(ax.c2p(x,t),color='#58B5ED',radius=.07) for x,t in zip(xs,targets)])
+        residuals=VGroup(*[Line(ax.c2p(x,p),ax.c2p(x,t),color='#FFE079',stroke_width=4) for x,t,p in zip(xs,targets,pred)])
+        squares=VGroup(*[Square(side_length=abs(r)*1.25,color='#FFE079',fill_opacity=.55).move_to([1.2+i*1.5,.4,0]) for i,r in enumerate(res)])
+        eq=tex(r'\sum_n(t_n-y_n)^2',32,'#FFE079').move_to([0,-1.65,0])
+        explanation=jp('説明用の3点・面積がずれの二乗',20,MUTED).move_to([0,1.45,0])
+        labels=VGroup(tex('t_n',25,'#58B5ED').move_to([-5.1,1.,0]),tex('y_n',25,'#FF6B77').move_to([-5.1,-.5,0]))
+        weights=np.array([.09,.25,.16])
+        weighted=VGroup(*[sq.copy().scale(np.sqrt(r)).set_color(GREEN_CLASS) for sq,r in zip(squares,weights)])
+        weightlabels=VGroup(*[tex(f'R_{{{i+1},{i+1}}}={r:.2f}',23,GREEN_CLASS).move_to([1.2+i*1.5,-.55,0]) for i,r in enumerate(weights)])
+        def least_squares():
+            self.remove(*old.get_family())
+            heading.become(jp('復習: 3.1 残差の二乗から最小二乗へ',25).move_to([-5.35,2.05,0],aligned_edge=LEFT))
+            self.add(ax,model,dots,residuals,explanation,labels)
+            return AnimationGroup(TransformFromCopy(residuals,squares),FadeIn(eq))
+        def weighted_squares():
+            explanation.become(jp('今回：有効目標へのずれに、分散の重み',21,MUTED).move_to([0,1.45,0]))
+            labels.become(VGroup(tex('z_n',25,'#58B5ED').move_to([-5.1,1.,0]),
+                tex(r'\phi_n^Tw',23,'#FF6B77').move_to([-5.1,-.5,0])))
+            eq.become(tex(r'\sum_n R_{nn}(z_n-\phi_n^Tw)^2',32,GREEN_CLASS).move_to([0,-1.65,0]))
+            return AnimationGroup(Transform(squares,weighted),FadeIn(weightlabels,rate_func=lambda t:min(1,4*t)))
+
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('R2.1 Bernoulli variance',a,lambda:mu.animate.set_value(.5)),
+            ('R3.1 residual squared areas',b,least_squares),
+            ('R3.1 effective targets and variance weights',c*.7,weighted_squares),
+            ('R3.1 recompute on next iteration',c*.3,lambda:FadeIn(jp('更新のたびに R と z を計算し直す',20).move_to([0,-2.15,0]))),
+        ])
+        self.restore_body(saved)
+
+    def newton_aid(self):
+        saved,frame,heading=self.body_card('補足: 近くを放物線で近似する')
+        # At w=0: E=1, g=2, H=4. This illustrative quartic is convex.
+        ax=Axes(x_range=(-1.2,.4,.4),y_range=(0,2.3,1),x_length=5.3,y_length=2.6,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=20)).move_to([-1.8,-.05,0])
+        error=lambda w:1+2*w+2*w*w+.5*w**4
+        quadratic=lambda w:1+2*w+2*w*w
+        actual=curve(ax,error,-1.15,.38,AID_INPUT)
+        local=curve(ax,quadratic,-.9,.35,AID_OPERATION)
+        point=Dot(ax.c2p(0,1),color=AID_INPUT,radius=.085)
+        tangent=Line(ax.c2p(-.18,.64),ax.c2p(.18,1.36),color=AID_COMPARE)
+        arrow=Arrow(ax.c2p(0,.16),ax.c2p(-.5,.16),buff=0,color=AID_COMPARE)
+        step=tex(r'\Delta w=-\frac{g}{H}=-\frac24=-0.5',30,AID_RESULT).move_to([2.75,-.8,0])
+        self.add(ax,actual,point,tex('w',24).next_to(ax.x_axis,RIGHT),
+                 jp('説明用の一変数・曲率 H > 0',20,MUTED).move_to([0,1.45,0]),
+                 jp('青：元の誤差',21,AID_INPUT).move_to([3.15,.85,0]),
+                 jp('黄：局所近似',21,AID_OPERATION).move_to([3.15,.35,0]))
+        vals=tex(r'g=2,\quad H=4',30,AID_OPERATION).move_to([2.8,-.2,0])
+        note=jp('近似した谷底へ一歩 → 計算し直す',22).move_to([0,-1.9,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('V11b local quadratic approximation',a*.65,lambda:Create(local)),
+            ('V11b show approximating minimum',a*.35,lambda:AnimationGroup(FadeIn(vals),FadeIn(tangent),FadeIn(note))),
+            ('V11b gradient divided by curvature',b,lambda:AnimationGroup(GrowArrow(arrow),FadeIn(step),point.animate.move_to(ax.c2p(-.5,quadratic(-.5))))),
+        ])
+        self.restore_body(saved)
+
+    def link_recap(self):
+        saved,frame,heading=self.body_card('復習: 2.4 自然パラメータと平均')
+        # 2.4 likelihood(): green sigmoid, yellow tracking point and eta slider.
+        eta=ValueTracker(-1.5)
+        ax=Axes(x_range=(-3,3,1),y_range=(0,1,.5),x_length=5,y_length=2.4,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=20)).move_to([-2,-.2,0])
+        graph=curve(ax,sigmoid,color='#77D49A')
+        dot=always_redraw(lambda:Dot(ax.c2p(eta.get_value(),sigmoid(eta.get_value())),color='#FFE079',radius=.08))
+        line=NumberLine(x_range=[-3,3,1],length=3.8,include_numbers=False,color=MUTED).move_to([-2.6,-1.85,0])
+        slider=VGroup(line,always_redraw(lambda:Dot(line.n2p(eta.get_value()),radius=.07,color='#FFE079')))
+        self.add(ax,graph,dot,slider,tex(r'\eta',25,'#FFE079').next_to(line,LEFT),
+                 tex(r'\eta',25).next_to(ax.x_axis,RIGHT),tex(r'\mu',25).next_to(ax.y_axis,UP),
+                 number(r'\mu=',lambda:sigmoid(eta.get_value()),[3.4,.95,0],'#FFE079'),
+                 jp('ベルヌーイの例',20,MUTED).move_to([2.95,1.5,0]))
+        forward=VGroup(tex(r'\eta\ \longrightarrow\ \mu',31,'#77D49A'),jp('活性化関数',22)).arrange(DOWN,buff=.12).move_to([3.2,.2,0])
+        backward=VGroup(tex(r'\eta\ \longleftarrow\ \mu',31,'#77D49A'),jp('リンク関数',22)).arrange(DOWN,buff=.12).move_to([3.2,-.9,0])
+        bridge=tex(r'\eta=a=w^T\phi,\quad\mu=y',28,YELLOW_ACC).move_to([0,-2.2,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R2.4 natural parameter controls mean',a,lambda:eta.animate.set_value(1.5)),
+            ('R2.4 forward and inverse mapping',b*.65,lambda:LaggedStart(FadeIn(forward),FadeIn(backward),lag_ratio=.45)),
+            ('R2.4 link to current variables',b*.35,lambda:FadeIn(bridge)),
+        ])
+        self.restore_body(saved)

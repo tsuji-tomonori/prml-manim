@@ -1,7 +1,7 @@
 """Export the authoritative display/speech data and measured durations."""
 import json
 from pathlib import Path
-from narration_content import SCENES
+from narration_content import SCENES, script_hash
 
 ROOT = Path(__file__).resolve().parent
 
@@ -23,6 +23,8 @@ def main():
              '重要式は映像に表示し、専門語は先に意味を説明する。途中の連続補間は視覚化で、IRLSの更新値は各反復の整数位置。', '']
     for scene in SCENES:
         entry = entries.get(scene['id'], {})
+        if entry.get('script_sha256') != script_hash(scene):
+            entry = {}
         lines += [f"## {scene['id']} {scene['title']}", '', f"原文: {scene['reference']}",
                   f"音声尺: {entry.get('duration', '未生成')} 秒", '']
         for i, beat in enumerate(scene['beats']):
