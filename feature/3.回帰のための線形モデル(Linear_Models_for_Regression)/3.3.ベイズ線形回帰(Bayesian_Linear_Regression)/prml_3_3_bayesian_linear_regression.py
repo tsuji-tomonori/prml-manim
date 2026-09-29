@@ -134,9 +134,12 @@ class PRML33BayesianLinearRegression(NarratedScene):
         center=Dot(ga.c2p(0,0),color=MEAN,radius=.07)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
         def switch():
-            self.remove(density_objects,mass,prior)
-            self.add(ga,ring,dots,xlabels)
-            return Transform(label,jp('復習: 2.3 ガウス分布').scale_to_fit_height(label.height).move_to(label,aligned_edge=LEFT))
+            # AnimationGroup can lift children out of density_objects. Clear all
+            # body objects explicitly, retaining only the title, card and captions.
+            header = [m for m in saved if m.get_center()[1] > 3]
+            self.clear()
+            self.add(*header,frame,label,self.subtitle,ga,ring,dots,xlabels)
+            return Transform(label,jp('復習: 2.3 ガウス分布',23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
         self.beat(phases=[
             ('R1.2 recall prior and likelihood',a*.25,lambda:Wait()),
             ('R1.2 multiply',a*.32,lambda:Transform(prior,product)),
@@ -144,7 +147,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
             ('R2.3 change source',b*.22,switch),
             ('R2.3 ellipse and axes',b*.78,lambda:AnimationGroup(Transform(ring,ellipse),Transform(dots,target),Create(axes))),
             ('R map coordinates to weights',c*.55,lambda:AnimationGroup(Transform(xlabels,wlabels),FadeIn(mapping),FadeIn(center))),
-            ('R connect center and spread',c*.45,lambda:AnimationGroup(Indicate(center),Indicate(ring,scale_factor=1.04))),
+            ('R connect center and spread',c*.45,lambda:AnimationGroup(Circumscribe(center,color=YELLOW),Circumscribe(ring,color=YELLOW))),
         ])
         self.restore_body(saved)
 
@@ -167,10 +170,10 @@ class PRML33BayesianLinearRegression(NarratedScene):
             return AnimationGroup(*[Transform(moving[2*i+j],target.get_entries()[3*j+i])
                                     for i in range(3) for j in range(2)],FadeIn(brackets))
         self.beat(phases=[
-            ('V08c identify columns',a*.42,lambda:Indicate(source.get_columns()[0],color=yellow)),
+            ('V08c identify columns',a*.42,lambda:Circumscribe(source.get_columns()[0],color=yellow)),
             ('V08c columns to rows',a*.58,fold),
             ('V08c dimensions',b*.65,lambda:AnimationGroup(GrowArrow(arrow),FadeIn(size2))),
-            ('V08c preserve entries',b*.35,lambda:Indicate(moving,color=yellow,scale_factor=1.03)),
+            ('V08c preserve entries',b*.35,lambda:Circumscribe(moving,color=yellow)),
         ])
         self.restore_body(saved)
 
@@ -189,8 +192,10 @@ class PRML33BayesianLinearRegression(NarratedScene):
                     for x,y in xy[:,::8].T if abs(y+1.45)>.01])
         hy=VGroup(*[DashedLine(ax.c2p(x,y),ax.c2p(2.4,y),color=yellow,stroke_width=1)
                     for x,y in xy[:,::8].T if abs(x-2.4)>.01])
-        shadowx=Line(ax.c2p(-2,-1.45),ax.c2p(2,-1.45),color=yellow,stroke_width=5)
-        shadowy=Line(ax.c2p(2.4,-1),ax.c2p(2.4,1),color=yellow,stroke_width=5)
+        shadowx=VGroup(Line(ax.c2p(-2,-1.45),ax.c2p(2,-1.45),color=yellow,stroke_width=5),
+                       *[tex(str(v),18,green).next_to(ax.c2p(v,-1.45),DOWN,buff=.09) for v in [-2,0,2]])
+        shadowy=VGroup(Line(ax.c2p(2.4,-1),ax.c2p(2.4,1),color=yellow,stroke_width=5),
+                       *[tex(str(v),18,green).next_to(ax.c2p(2.4,v),RIGHT,buff=.09) for v in [-1,0,1]])
         horizontal=VGroup(tex(r'\phi=(1,0)^T',29,yellow),jp('標準偏差 2　分散 4',23,green)).arrange(DOWN,buff=.2).move_to([2.5,.95,0])
         vertical=VGroup(tex(r'\phi=(0,1)^T',29,yellow),jp('標準偏差 1　分散 1',23,green)).arrange(DOWN,buff=.2).move_to([2.5,-.3,0])
         result=tex(r'\mathrm{Var}(\phi^Tw)=\phi^TS\phi',28,green).move_to([2.45,-1.42,0])
