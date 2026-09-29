@@ -23,7 +23,8 @@ class NarratedScene(Scene):
         if not valid_entry(self.story,self.entry):
             raise RuntimeError('Missing or stale audio: '+self.story['id'])
         self.start=float(self.time)
-        self.add(jp(self.story['title'],32).move_to([0,3.35,0]))
+        self.title=jp(self.story['title'],32).move_to([0,3.35,0])
+        self.add(self.title)
         self.formula=None
         self.add_sound(str(OUTPUT_DIR/(self.story['id']+'.wav')))
         self.timeline.append(dict(id=self.story['id'],start=self.start,reference=self.story['reference'],beats=[]))
@@ -35,7 +36,29 @@ class NarratedScene(Scene):
         self.add(self.formula)
         return self.formula
 
-    def beat(self,*animations,actions=None):
+    def body_card(self, label):
+        saved = [m for m in self.mobjects if m is not self.title and m is not self.subtitle]
+        self.remove(*saved)
+        frame = RoundedRectangle(width=11.5, height=4.9, corner_radius=.12,
+                                 stroke_color='#FFFF00', stroke_width=1).move_to([0,0,0])
+        heading = jp(label, 25).move_to([-5.35,2.05,0], aligned_edge=LEFT)
+        self.add(frame, heading)
+        return saved, frame, heading
+
+    def restore_body(self, saved):
+        self.remove(*[m for m in self.mobjects if m is not self.title and m is not self.subtitle])
+        self.add(*saved)
+
+    def sentence_duration(self, index):
+        cues=[c for c in self.entry['subtitle_cues'] if c['beat_index']==self.bi]
+        return cues[index]['end']-cues[index]['start']
+
+    def recap_label(self, label):
+        text=jp(label,21).move_to([6.05,1.9,0],aligned_edge=RIGHT)
+        box=SurroundingRectangle(text,color='#FFFF00',buff=.10,stroke_width=1)
+        return VGroup(box,text)
+
+    def beat(self,*animations,actions=None,phases=None):
         beat=self.story['beats'][self.bi]
         cues=[c for c in self.entry['subtitle_cues'] if c['beat_index']==self.bi]
         offset=sum(self.entry['beat_durations'][:self.bi])
@@ -51,7 +74,25 @@ class NarratedScene(Scene):
         record=dict(note=beat['visual_note'],start=start,end=start+duration,
                     cues=[dict(c,start=self.start+c['start'],end=self.start+c['end']) for c in cues],actions=[])
         cap(captions,0)
-        if actions:
+        if phases:
+            # All phase boundaries share the PCM clock, rounded cumulatively to frames.
+            elapsed=0
+            requested=0.
+            assert sum(p[1] for p in phases) <= duration + 1e-6
+            for name, seconds, factory in [*phases, ('breath', duration-sum(p[1] for p in phases), lambda:Wait())]:
+                requested += seconds
+                end=min(duration, round(requested*15)/15)
+                dt=end-elapsed
+                if dt<=1e-6:
+                    continue
+                self.update_mobjects(0)
+                animation=factory()
+                self.play(animation,UpdateFromAlphaFunc(captions,
+                    lambda m,a,e=elapsed,d=dt:cap(m,(e+a*d)/duration)),
+                    run_time=dt-1e-7,rate_func=linear)
+                record['actions'].append(dict(name=name,start=start+elapsed,end=start+end))
+                elapsed=end
+        elif actions:
             # Factories defer target creation until the corresponding spoken sentence.
             elapsed=0
             for i,factory in enumerate(actions):
