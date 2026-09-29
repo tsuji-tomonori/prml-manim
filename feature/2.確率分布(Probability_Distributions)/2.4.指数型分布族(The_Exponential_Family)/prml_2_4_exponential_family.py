@@ -191,7 +191,7 @@ class PRML24ExponentialFamily(NarratedScene):
         comparison=tex(r'\mu:0.50\to0.10\quad A^{\prime\prime}:0.25\to0.09',24).move_to([-.3,-2.3,0])
         self.add(upper,top,top_tan,tag1,slope)
         self.beat(
-            AnimationGroup(FadeIn(lower),FadeIn(bottom),TransformFromCopy(slope,tag2),FadeIn(xs),
+            AnimationGroup(FadeIn(lower),FadeIn(bottom),TransformFromCopy(slope[0],tag2),FadeIn(xs),
                            FadeIn(low_tan),FadeIn(dot)),
             AnimationGroup(FadeIn(second),FadeIn(equals),FadeIn(bars),FadeIn(labels)),
             AnimationGroup(eta.animate(rate_func=lambda a:smooth(np.clip((a-.45)/.4,0,1)))
