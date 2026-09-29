@@ -331,7 +331,8 @@ class PRML44LaplaceApproximation(NarratedScene):
         label=tex('H=',28).next_to(mat,LEFT,buff=.15)
         cross=tex(r'\frac{\Delta h_x}{\Delta y}=\frac{0.5}{1}=0.5',28,AID_COMPARE).move_to([2.7,-.05,0])
         self.beat(self.brief(AnimationGroup(FadeOut(atzero),FadeIn(cross),FadeIn(mat),FadeIn(label))),
-                  Circumscribe(VGroup(entries[1],entries[2]),color=AID_COMPARE),
+                  AnimationGroup(Circumscribe(entries[1],color=AID_COMPARE,buff=.08),
+                                 Circumscribe(entries[2],color=AID_COMPARE,buff=.08)),
                   self.equation(r'H=\nabla\nabla h=A\succ0',colors={0:AID_RESULT},size=29))
         self.restore_body(saved)
 
