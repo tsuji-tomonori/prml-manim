@@ -392,12 +392,13 @@ class PRML13ModelSelection(NarratedScene):
         recap=VGroup(SurroundingRectangle(recap_label,color=AID_OPERATION,buff=.12),recap_label)
         likelihood_label=tex(r'p(\mathcal D\mid\mathbf w)',35,BLUE_DATA).move_to([0,-2.3,0])
         meaning=VGroup(tex(r'\mathcal D',24,BLUE_DATA),jp('：訓練データ',20),tex(r'\mathbf w',24,BLUE_DATA),jp('：係数',20)).arrange(RIGHT,buff=.13).move_to([0,-2.8,0])
-        self.beat(FadeIn(recap),Write(likelihood_label),Write(meaning))
+        self.add(recap)  # Readable as soon as the section number is spoken.
+        self.beat(Write(likelihood_label),Write(meaning))
         self.remove(meaning)
         product=tex(r'p_1p_2\cdots p_N',30,BLUE_DATA).move_to([0,-2.3,0])
         logproduct=tex(r'\ln(p_1p_2\cdots p_N)',30,AID_OPERATION).move_to(product)
         logsum=tex(r'\ln p_1+\ln p_2+\cdots+\ln p_N',30,AID_OPERATION).move_to(product)
-        condition=VGroup(jp('独立な観測',18),tex(r'p_n',22,BLUE_DATA),
+        condition=VGroup(jp('独立な観測',18),tex(r'p_n>0',22,BLUE_DATA),
                          jp('：各点の密度',18)).arrange(RIGHT,buff=.18).move_to([0,-2.8,0])
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
