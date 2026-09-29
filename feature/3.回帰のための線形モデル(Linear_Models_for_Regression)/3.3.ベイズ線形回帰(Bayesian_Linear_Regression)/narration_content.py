@@ -89,8 +89,43 @@ scene('細い帯は、いつ信頼できる？', 'pp.158,160–161 / (3.59), (3.
 ('分布で答えるまとめ', ['二点から始めた問いには、候補の分布を更新し、それを混ぜた予測分布で答えました。', '次の節では、重みを積分する考え方を使って、モデルそのものを比較します。']),
 ])
 
+
+# Insertions keep the original sentence IDs stable for audio and review anchors.
+def aid_beat(note, seconds, rows):
+    return dict(seconds=seconds, visual_note=note,
+                segments=[dict(id=i, display=d, speech=s) for i,d,s in rows])
+
+SCENES[1]['beats'].insert(3, aid_beat('復習 R：1.2の積と正規化 → 2.3の楕円を係数へ', 20, [
+    ('scene02-recap-01', '1.2では、事前に尤度を掛け、面積を $1$ にそろえて候補を更新しました。',
+     '一章二節では、事前に尤度を掛け、面積を一にそろえて候補を更新しました。'),
+    ('scene02-recap-02', '2.3では、ガウス分布の広がりを楕円で表しました。',
+     '二章三節では、ガウス分布の広がりを楕円で表しました。'),
+    ('scene02-recap-03', '今回は、二つの係数の中心と広がりを、この平面に持たせます。',
+     '今回は、二つの係数の中心と広がりを、この平面に持たせます。'),
+]))
+SCENES[3]['beats'].insert(5, aid_beat('補足 V08c：転置で列を行へ移し、3×2から2×3へ', 10, [
+    ('scene04-aid-01', '転置では、数を変えず、縦の列を横の行へ移します。',
+     '転置では、数を変えず、縦の列を横の行へ移します。'),
+    ('scene04-aid-02', '$3$ 行 $2$ 列が、$2$ 行 $3$ 列になります。',
+     '三行二列が、二行三列になります。'),
+]))
+original = SCENES[5]['beats'][4]
+SCENES[5]['beats'][4:5] = [
+    dict(original, segments=original['segments'][:1], visual_note='予測分散の2項を示す'),
+    aid_beat('補足 V09b：説明用の共分散diag(4,1)を横・縦へ射影', 15, [
+        ('scene06-aid-01', '説明用の例で、係数の雲を横へ写します。',
+         '説明用の例で、係数の雲を横へ写します。'),
+        ('scene06-aid-02', '標準偏差が $2$ なら分散は $4$。縦へ写すと、標準偏差も分散も $1$ です。',
+         '標準偏差が二なら分散は四。縦へ写すと、標準偏差も分散も一です。'),
+        ('scene06-aid-03', r'この広がりが $\phi^T S\phi$ です。一般の $\phi$ では、向きに加えて長さも効きます。',
+         'この広がりが、ファイの転置、エス、ファイです。一般のファイでは、向きに加えて長さも効きます。'),
+    ]),
+    dict(original, segments=original['segments'][1:], visual_note='本編へ復帰して入力を走査'),
+]
+
 # Speech-only fixes, audited against the original Engine readings.
 READING_FIXES = {
+    'scene04-aid-01': ('横の行', '横のぎょう'),
     'scene01-01-01': ('値', 'あたい'),
     'scene03-02-01': ('値', 'あたい'),
     'scene04-05-02': ('行と列', 'ぎょうと列'),

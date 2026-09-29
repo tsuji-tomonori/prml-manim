@@ -55,7 +55,7 @@ def pending_entry(scene):
 def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     temporary = MANIFEST.with_suffix(".tmp.json")
-    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "scenes": entries},
+    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "synthesis_settings": SYNTHESIS_SETTINGS, "scenes": entries},
                                     ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(MANIFEST)
 
@@ -82,11 +82,43 @@ def post_json(base, endpoint, params, body=None):
         return response.read()
 
 
-def sentence_audio(base, text):
+def sentence_cache(base, text):
     key = hashlib.sha256(json.dumps([base, "0.25.2", 23, SYNTHESIS_SETTINGS, text],
                                   ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache = CACHE_DIR / f"{key}.wav"
+    return CACHE_DIR / f"{key}.wav"
+
+
+def preserve_existing_sentences(base):
+    """Reuse exact PCM slices before rebuilding edited scenes."""
+    if not MANIFEST.exists():
+        return
+    previous = json.loads(MANIFEST.read_text())
+    legacy_settings = dict(speedScale=1.08, intonationScale=.95, prePhonemeLength=.08,
+                           postPhonemeLength=.12, volumeScale=1.0)
+    if previous.get('synthesis_settings', legacy_settings) != SYNTHESIS_SETTINGS:
+        return
+    for entry in previous['scenes']:
+        source = OUTPUT_DIR / f"{entry['id']}.wav"
+        if not source.exists() or hashlib.sha256(source.read_bytes()).hexdigest() != entry.get('wav_sha256'):
+            continue
+        with wave.open(str(source), 'rb') as audio:
+            params = audio.getparams()
+            pcm = audio.readframes(audio.getnframes())
+        stride = params.nchannels * params.sampwidth
+        for cue in entry.get('subtitle_cues', []):
+            destination = sentence_cache(base, cue['speech'])
+            if destination.exists():
+                continue
+            lo = round(cue['start'] * params.framerate) * stride
+            hi = round(cue['end'] * params.framerate) * stride
+            with wave.open(str(destination), 'wb') as output:
+                output.setparams(params)
+                output.writeframes(pcm[lo:hi])
+
+
+def sentence_audio(base, text):
+    cache = sentence_cache(base, text)
     if cache.exists():
         return cache.read_bytes()
     query = json.loads(post_json(base, "audio_query", {"speaker": 23, "text": text}))
@@ -149,12 +181,17 @@ def main():
     if not args.prepare_only:
         with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
             print("VOICEVOX Engine", response.read().decode(), flush=True)
+    if not args.prepare_only:
+        preserve_existing_sentences(args.base_url)
     entries = prepare_manifest()
     if args.prepare_only:
         print("Manifest prepared. Audio not regenerated.")
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if valid_entry(SCENES[i], entries[i]):
+            print(f"{SCENES[i]['id']}: unchanged, keeping existing WAV", flush=True)
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")

@@ -1,4 +1,4 @@
-"""Extract every beat, every formula caption, and three motion timing pairs."""
+"""Extract every beat, every formula caption, and motion timing pairs including every inserted card."""
 import json
 import sys
 import subprocess
@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image,ImageDraw
 ROOT=Path(__file__).parent
 VIDEO=ROOT/'media/videos/prml_3_3_bayesian_linear_regression/480p15/PRML33BayesianLinearRegression.mp4'
-OUT=Path('/tmp/prml33-review');OUT.mkdir(exist_ok=True)
+OUT=Path('/tmp/prml33-visual-aid-recap/frames');OUT.mkdir(parents=True,exist_ok=True)
 timeline=json.loads((ROOT/'media/prml33_timeline.json').read_text())
 manifest=json.loads((ROOT/'assets/voicevox/manifest.json').read_text())['scenes']
 frames=[];sync=[]
@@ -24,8 +24,20 @@ for scene,entry in zip(timeline,manifest):
                 assert cue['display']==actual['display']
             if '$' in cue['display']:
                 frames.append(dict(id=cue['id'],time=(cue['start']+cue['end'])/2,reason='math',display=cue['display']))
-    if scene['id'] in ['scene02','scene06','scene08']:
-        bi={'scene02':4,'scene06':3,'scene08':1}[scene['id']]
+    for beat in scene['beats']:
+        if not any('aid' in c['id'] or 'recap' in c['id'] for c in beat['cues']):
+            continue
+        tag=beat['cues'][0]['id']
+        frames.extend([dict(id=tag+'-before',time=beat['start']-.2,reason='aid boundary'),
+                       dict(id=tag+'-after',time=beat['end']+.2,reason='aid boundary')])
+        for i,action in enumerate(beat.get('actions', [])):
+            if action['name']=='breath': continue
+            for phase in [.15,.85]:
+                frames.append(dict(id=f'{tag}-action{i}-{phase}',
+                                   time=action['start']+phase*(action['end']-action['start']),
+                                   reason=action['name']))
+    if scene['id'] in ['scene02','scene04','scene06','scene08']:
+        bi={'scene02':3,'scene04':5,'scene06':5,'scene08':1}[scene['id']]
         beat=scene['beats'][bi]
         with wave.open(str(ROOT/'assets/voicevox'/f"{scene['id']}.wav"),'rb') as w:
             pcm=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2')/32768
@@ -33,7 +45,7 @@ for scene,entry in zip(timeline,manifest):
         for cue in beat['cues']:
             a=round((cue['start']-scene['start'])*sr);b=round((cue['end']-scene['start'])*sr)
             indices=np.flatnonzero(abs(pcm[a:b])>10**(-45/20))
-            sync.append(dict(scene=scene['id'],cue=cue['id'],display=cue['display'],cue_start=cue['start'],voice_onset=scene['start']+(a+indices[0])/sr,action_start=beat['action_start'],action_end=beat['action_end']))
+            sync.append(dict(scene=scene['id'],cue=cue['id'],display=cue['display'],cue_start=cue['start'],voice_onset=scene['start']+(a+indices[0])/sr,action_start=beat['action_start'],action_end=beat['action_end'],phases=beat.get('actions',[])))
         for phase in [.15,.85]:
             frames.append(dict(id=f"{scene['id']}-sync-{phase}",time=beat['start']+phase*(beat['end']-beat['start']),reason='sync'))
 
