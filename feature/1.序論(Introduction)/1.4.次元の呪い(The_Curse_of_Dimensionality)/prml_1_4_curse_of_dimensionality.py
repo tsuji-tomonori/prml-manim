@@ -376,7 +376,7 @@ class PRML14CurseOfDimensionality(Scene):
         # audio_query phrase starts at speedScale=1.08: 平均 2.367s,
         # 標準偏差 3.772s. Move each control while its meaning is spoken.
         self.beat(phases=[
-            ('recap 1.2 reference',2.367,lambda:Indicate(recap_label,scale_factor=1.02)),
+            ('recap 1.2 reference',2.367,lambda:Wait()),
             ('recap 1.2 mean to zero',3.772-2.367,lambda:mu.animate.set_value(0)),
             ('recap 1.2 standard deviation to one',first-3.772,lambda:sigma.animate.set_value(1)),
             ('independent standard Gaussian coordinates',second,
@@ -423,6 +423,7 @@ class PRML14CurseOfDimensionality(Scene):
 
     def radial_product_aid(self):
         """V02: the same radius samples two separate factors and their product."""
+        retained=[m for m in self.mobjects if m is not self.subtitle]
         frame=RoundedRectangle(width=11,height=5.4,corner_radius=.12,
                                stroke_color=MUTED,stroke_width=1.2,
                                fill_color=BG,fill_opacity=1).move_to([0,.05,0])
@@ -458,13 +459,16 @@ class PRML14CurseOfDimensionality(Scene):
         self.add(groups,guide,marks,values,radius)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
-            ('V02 identify blue and yellow factors',a,lambda:Indicate(VGroup(values[0],values[1]),scale_factor=1.06,color=WHITE)),
+            ('V02 identify blue and yellow factors',a,lambda:Wait()),
             ('V02 common radius 0.3 to 1',b,lambda:r.animate.set_value(1)),
             # Hold the peak during 半径一 ... 最大; さらに begins at 2.913s.
-            ('V02 product maximum at radius 1',2.913,lambda:Indicate(marks[2],scale_factor=1.5,color=AID_RESULT)),
+            ('V02 product maximum at radius 1',2.913,lambda:Wait()),
             ('V02 product falls from radius 1 to 2',c-2.913,lambda:r.animate.set_value(2)),
         ])
-        self.remove(groups,guide,marks,values,radius)
+        # Animations can restructure VGroups into top-level objects. Restore
+        # the retained scene explicitly so no factor readouts survive the card.
+        self.clear()
+        self.add(*retained,self.subtitle)
 
     def concentration(self):
         d=ValueTracker(1)
