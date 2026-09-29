@@ -152,10 +152,10 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         a,b,c = [self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
             ('V07b select columns',a*.40,lambda:Create(boxes)),
-            ('V07b mean predictions',a*.60,lambda:AnimationGroup(FadeIn(mean_label),TransformFromCopy(columns[0],mean_values[0]),TransformFromCopy(columns[1],mean_values[1]))),
+            ('V07b mean predictions',a*.60,lambda:AnimationGroup(FadeIn(mean_label),FadeIn(mean_values,shift=UP*.18))),
             ('V07b square deviations',b*.56,lambda:AnimationGroup(FadeOut(boxes),Transform(cells,square_cells),FadeIn(tiles))),
             ('V07b average over datasets',b*.44,lambda:AnimationGroup(FadeIn(variance_label),FadeIn(variances))),
-            ('V07b average over inputs',c*.58,lambda:TransformFromCopy(variances,total)),
+            ('V07b average over inputs',c*.58,lambda:FadeIn(total,shift=UP*.18)),
             ('V07b general input weights',c*.42,lambda:FadeIn(general)),
         ])
         self.restore_body(saved)
