@@ -385,7 +385,10 @@ class PRML13ModelSelection(NarratedScene):
         self.add(ax,labels)
         likelihood=polyline([ax.c2p(int(d),float(v)) for d,v in zip(model.DEGREES,model.LOG_LIKELIHOOD)],BLUE_DATA)
         self.beat(Create(likelihood))
-        recap_label=jp('復習: 1.2 尤度',20).move_to([-4.4,2.65,0])
+        # Empty space glyphs retain the origin in their bounding box after a
+        # shift. Measure only visible glyphs when drawing the reference frame.
+        recap_label=VGroup(*[g for g in jp('復習: 1.2 尤度',20) if g.has_points()])
+        recap_label.move_to([-4.4,2.65,0])
         recap=VGroup(SurroundingRectangle(recap_label,color=AID_OPERATION,buff=.12),recap_label)
         likelihood_label=tex(r'p(\mathcal D\mid\mathbf w)',35,BLUE_DATA).move_to([0,-2.3,0])
         meaning=VGroup(tex(r'\mathcal D',24,BLUE_DATA),jp('：訓練データ',20),tex(r'\mathbf w',24,BLUE_DATA),jp('：係数',20)).arrange(RIGHT,buff=.13).move_to([0,-2.8,0])
@@ -399,11 +402,14 @@ class PRML13ModelSelection(NarratedScene):
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('independent density product',2.48,
-             lambda: AnimationGroup(ReplacementTransform(likelihood_label,product),FadeIn(condition))),
-            ('take logarithm',.92,lambda: ReplacementTransform(product,logproduct)),
-            ('product to sum of logs',a-3.4,lambda: ReplacementTransform(logproduct,logsum)),
+             lambda: AnimationGroup(Succession(FadeOut(likelihood_label,run_time=.2),
+                                                FadeIn(product,run_time=.3),Wait(1.98)),FadeIn(condition))),
+            ('take logarithm',.92,
+             lambda: Succession(FadeOut(product,run_time=.12),FadeIn(logproduct,run_time=.18),Wait(.62))),
+            ('product to sum of logs',a-3.4,
+             lambda: Succession(FadeOut(logproduct,run_time=.12),FadeIn(logsum,run_time=.18),Wait(a-3.7))),
             ('log likelihood score correspondence',2.93,
-             lambda: ReplacementTransform(logsum,formula[0])),
+             lambda: AnimationGroup(FadeOut(logsum),FadeIn(formula[0]))),
             ('larger log likelihood is better',b-2.93,lambda: Indicate(likelihood,color=BLUE_DATA)),
         ])
         self.remove(recap,condition)
