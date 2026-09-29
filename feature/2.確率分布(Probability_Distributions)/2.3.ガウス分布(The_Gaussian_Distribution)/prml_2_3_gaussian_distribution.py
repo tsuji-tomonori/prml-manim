@@ -49,6 +49,7 @@ class PRML23GaussianDistribution(NarratedScene):
         for i,method in enumerate([self.shape,self.clt,self.geometry,self.restrictions,self.conditioning,
                                    self.linear_bayes,self.estimation,self.bayesian,self.robust,self.periodic,self.mixtures]):
             self.begin(i)
+            self.header = self.mobjects[0]
             if not self.audio_entry:
                 raise RuntimeError('Generate matching narration before rendering')
             self.top=None; self.bottom=None
@@ -111,16 +112,29 @@ class PRML23GaussianDistribution(NarratedScene):
     def shape(self):
         ax=self.ax(x=(-5,5,2),y=(0,.65,.2),w=9,h=3.1,pos=(0,.05,0))
         mu=ValueTracker(0); sd=ValueTracker(.75)
-        graph=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),sd.get_value())))
+        graph=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),sd.get_value()),color=RED))
         points=np.random.default_rng(2301).normal(0,.75,60)
         dots=VGroup(*[Dot(ax.c2p(x,.015+(i%3)*.017),radius=.035,color=BLUE) for i,x in enumerate(points)])
         self.add(dots)
         self.beat(Create(graph),self.equation(r'\mathcal N(x\mid\mu,\sigma^2)'))
-        self.add(self.slider(mu,-1.5,1.5,(-2.7,-2.25,0),r'\mu',YELLOW,2.5),self.slider(sd,.55,1.4,(2.5,-2.25,0),r'\sigma',PURPLE,2.5))
+        self.add(self.slider(mu,-1.5,1.5,(-2.7,-2.25,0),r'\mu',YELLOW,2.5),self.slider(sd,.55,1.4,(2.5,-2.25,0),r'\sigma',RED,2.5))
         marker=always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),normal(mu.get_value(),mu.get_value(),sd.get_value())),color=YELLOW))
         self.add(marker)
+        recap=self.review_card('復習: 1.2 ガウス分布', height=5.1)
+        area_note=jp('密度の面積 = 1',22,MUTED).move_to([3.6,1.8,0])
+        self.add(area_note)
         self.beat(mu.animate.set_value(1.2),FadeOut(dots))
-        self.beat(sd.animate.set_value(1.35))
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        bridge=tex(r'x \longrightarrow (x_1,x_2,\ldots)',30).move_to([2.6,1.8,0])
+        def connect():
+            self.remove(area_note)
+            return FadeIn(bridge)
+        self.beat(phases=[
+            ('R1.2 widen Gaussian',a,lambda:sd.animate.set_value(1.35)),
+            ('R1.2 standard deviation',b,lambda:Indicate(graph,color=RED,scale_factor=1)),
+            ('R1.2 map to multiple variables',c,connect),
+        ])
+        self.remove(recap,bridge)
         edge=ValueTracker(-.2)
         def area():
             x=np.linspace(-.5,edge.get_value(),81)
@@ -133,7 +147,7 @@ class PRML23GaussianDistribution(NarratedScene):
         pair=always_redraw(lambda:VGroup(*[Dot(ax.c2p(mu.get_value()+sg*z.get_value()*sd.get_value(),normal(mu.get_value()+sg*z.get_value()*sd.get_value(),mu.get_value(),sd.get_value())),color=YELLOW,radius=.06) for sg in [-1,1]]))
         self.add(pair)
         formula=MathTex(r'\mathcal N(x\mid',r'\mu',r',',r'\sigma^2',r')=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]',font_size=29).move_to([0,2.55,0])
-        formula[1].set_color(YELLOW); formula[3].set_color(PURPLE)
+        formula[1].set_color(YELLOW); formula[3].set_color(RED)
         self.beat(z.animate.set_value(1.7),ReplacementTransform(self.top,formula,run_time=.08));self.top=formula
         self.beat(mu.animate.set_value(0),sd.animate.set_value(.8))
 
@@ -170,6 +184,93 @@ class PRML23GaussianDistribution(NarratedScene):
         self.add(dot)
         self.beat(t.animate.set_value(2*np.pi),self.equation(r'\Delta^2=(x-\mu)^T\Sigma^{-1}(x-\mu)=\sum_i y_i^2/\lambda_i',bottom=True,size=26))
         self.beat(angle.animate.set_value(0),s1.animate.set_value(1),s2.animate.set_value(1),self.equation(r'\mathcal N(x\mid\mu,\Sigma)=\frac{e^{-\Delta^2/2}}{(2\pi)^{D/2}|\Sigma|^{1/2}}',size=29),self.equation(r'z_i=y_i/\sqrt{\lambda_i}\quad\Rightarrow\quad\Delta^2=\sum_i z_i^2',bottom=True))
+
+        self.determinant_aid()
+
+    def review_card(self,label,height=5.0):
+        frame=RoundedRectangle(width=11.6,height=height,corner_radius=.12,
+                               color='#FFFF00',stroke_width=1.3).move_to([0,0,0])
+        heading=jp(label,24).move_to([-5.4,2.18,0],aligned_edge=LEFT)
+        group=VGroup(frame,heading)
+        self.add(group)
+        return group
+
+    def replace_body(self,label):
+        body=[m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        self.remove(*body)
+        self.review_card(label)
+        return body
+
+    def restore_body(self,body):
+        temporary=[m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        for mob in temporary:
+            mob.clear_updaters(recursive=True)
+        self.remove(*temporary)
+        self.add(*body)
+
+    def determinant_aid(self):
+        body=self.replace_body('補足：行列式と面積倍率')
+        blue='#58C4DD';yellow='#FFFF00';green='#83C167'
+        stretch=ValueTracker(1);height=ValueTracker(1)
+        origin=np.array([-2.7,.05,0])
+        ring=always_redraw(lambda:Ellipse(width=2*stretch.get_value(),height=2,
+                                         color=blue).move_to(origin))
+        square=always_redraw(lambda:Rectangle(width=stretch.get_value(),height=1,
+                       color=yellow,fill_color=blue,fill_opacity=.24).move_to(origin))
+        area=readout(r'|\det B|=',stretch.get_value,(-2.7,-1.55,0),yellow)
+        example=jp('説明用の例：単位正方形と等密度線',20,MUTED).move_to([0,1.58,0])
+        transform=tex(r'B=\mathrm{diag}(2,1)',28,blue).move_to([-2.7,-2.12,0])
+        covariance_label=tex(r'\Sigma=BB^T=\mathrm{diag}(4,1)',28,green).move_to([2.5,1.05,0])
+        determinant=tex(r'\sqrt{\det\Sigma}=\sqrt{4}=2',29,yellow).move_to([2.5,.43,0])
+        bar=always_redraw(lambda:Rectangle(width=.65,height=1.2*height.get_value(),
+                    fill_color=green,fill_opacity=.65,stroke_color=green)
+                    .move_to([1,-1.65+.6*height.get_value(),0]))
+        barlabel=jp('密度の高さの比',21,green).move_to([3.1,-.45,0])
+        value=readout('',height.get_value,(3.1,-1.05,0),green)
+        correction=tex(r'p_x(Bz)=p_z(z)/2',29,green).move_to([2.5,-2.12,0])
+        self.add(ring,square,area,example)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V10 stretch area by two',a,lambda:AnimationGroup(stretch.animate.set_value(2),FadeIn(transform))),
+            ('V10 covariance determinant square root',b,lambda:AnimationGroup(FadeIn(covariance_label),FadeIn(determinant))),
+            ('V10 compensate density by one half',c,lambda:AnimationGroup(FadeIn(barlabel),FadeIn(value),FadeIn(correction),height.animate.set_value(.5),FadeIn(bar))),
+        ])
+        self.restore_body(body)
+
+    def bayes_recap(self):
+        body=self.replace_body('復習: 1.2 ベイズ更新')
+        # 1.2 parameters(): blue Beta(2,2), orange theta^3, purple Beta(5,2).
+        ax=self.ax(x=(0,1,.5),y=(0,2.6,1),w=4.4,h=2.2,pos=(-2.5,-.05,0),xlabel=r'\theta',ylabel='p,L')
+        prior=lambda u:6*u*(1-u)
+        like=curve(ax,lambda u:u**3,color='#FFB45B')
+        baseline=curve(ax,prior,color=BLUE).set_stroke(opacity=.35)
+        current=curve(ax,prior,color=BLUE)
+        product=curve(ax,lambda u:prior(u)*u**3,color=PURPLE)
+        posterior=curve(ax,lambda u:5*prior(u)*u**3,color=PURPLE)
+        labels=VGroup(jp('事前',20,BLUE),jp('尤度',20,'#FFB45B'),jp('事後',20,PURPLE)).arrange(RIGHT,buff=.3).move_to([-2.1,1.42,0])
+        example=jp('1.2 の例：表が3回',20,MUTED).move_to([-2.5,-1.65,0])
+        operation=jp('事前 × 尤度',24,PURPLE).move_to([2.55,.85,0])
+        normalization=jp('面積を 1 にそろえる',23,PURPLE).move_to([2.55,.2,0])
+        link=tex(r'\theta\ \longrightarrow\ x',30).move_to([2.55,-.45,0])
+        bridge=jp('今回は線形ガウス',24).move_to([2.55,-1.2,0])
+        # Same colours transfer to the two Gaussian curves in the main figure.
+        gaussian_ax=Axes(x_range=[-2.5,2.5,1],y_range=[0,1,.5],x_length=4.4,y_length=2.2,tips=False,
+                         axis_config={'include_ticks':False,'color':MUTED}).move_to(ax)
+        m,v=linear_posterior(1.4,.9,1.3)
+        gaussian_prior=curve(gaussian_ax,normal,color=BLUE)
+        gaussian_post=curve(gaussian_ax,lambda x:normal(x,m,np.sqrt(v)),color=PURPLE)
+        self.add(baseline,current,like,labels,example)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        def connect():
+            self.remove(ax,ax.labels,like,example,labels)
+            self.add(gaussian_ax,tex('x',23).next_to(gaussian_ax,RIGHT,buff=.1))
+            return AnimationGroup(Transform(baseline,gaussian_prior),Transform(current,gaussian_post),FadeIn(link),FadeIn(bridge))
+        self.beat(phases=[
+            ('R1.2 multiply prior by likelihood',a,lambda:AnimationGroup(Transform(current,product),FadeIn(operation))),
+            ('R1.2 normalize area from 0.2 to 1',b,lambda:AnimationGroup(Transform(current,posterior),FadeIn(normalization))),
+            ('R1.2 map to linear Gaussian',c,connect),
+        ])
+        self.restore_body(body)
 
     def restrictions(self):
         ax=self.ax(x=(-4,4,2),y=(-3,3,1),pos=(-2.2,0,0),w=5.2,h=3.9,xlabel='x_1',ylabel='x_2')
@@ -231,12 +332,13 @@ class PRML23GaussianDistribution(NarratedScene):
         self.beat(a.animate.set_value(1.4),self.equation(r'\mathbb E[y]=0,\qquad\mathrm{var}[y]=a^2+s^2',bottom=True))
         cut=always_redraw(lambda:Line(ax.c2p(-2.6,obs.get_value()),ax.c2p(2.6,obs.get_value()),color=YELLOW))
         self.beat(Create(cut),self.equation(r'y=1.3\quad\Longrightarrow\quad p(x\mid y)'))
+        self.bayes_recap()
         # The sliders move below the shared posterior plot.
         for mob in list(self.mobjects):
             if isinstance(mob,VGroup) and len(mob)==4: self.remove(mob)
         den=self.ax(x=(-2.5,2.5,1),y=(0,1.75,.5),pos=(3.2,.1,0),w=4.1,h=3.1,xlabel='x',ylabel='p')
         prior=curve(den,normal,color=BLUE)
-        post=always_redraw(lambda:curve(den,lambda x:normal(x,linear_posterior(a.get_value(),noise.get_value(),obs.get_value())[0],np.sqrt(linear_posterior(a.get_value(),noise.get_value(),obs.get_value())[1])),color=YELLOW))
+        post=always_redraw(lambda:curve(den,lambda x:normal(x,linear_posterior(a.get_value(),noise.get_value(),obs.get_value())[0],np.sqrt(linear_posterior(a.get_value(),noise.get_value(),obs.get_value())[1])),color=PURPLE))
         self.beat(Create(prior),Create(post),self.equation(r'p(x\mid y)\propto p(y\mid x)p(x)'))
         self.beat(noise.animate.set_value(.35),self.equation(r'\mathrm{var}[x\mid y]^{-1}=1+a^2/s^2',bottom=True))
         self.beat(obs.animate.set_value(-.5),self.equation(r'S=(\Lambda+A^TLA)^{-1},\quad m=S\{A^TL(y-b)+\Lambda\mu\}',bottom=True,size=25),self.equation(r'p(x)=\mathcal N(\mu,\Lambda^{-1}),\quad p(y\mid x)=\mathcal N(Ax+b,L^{-1})',size=25))
