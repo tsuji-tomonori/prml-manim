@@ -50,7 +50,7 @@ def main():
         onset=sc['start']+start+above[0]/sr
         sync.append(dict(scene=sc['id'],beat=bi+1,action_start=b['action_start'],action_end=b['action_end'],pcm_onset=onset))
         for frac in [.15,.85]:
-            frames[f"sync-{sc['id']}-{frac}"]=b['action_start']+(b['action_end']-b['action_start'])*frac
+            frames[f"sync-{sc['id']}-beat{bi+1:02}-{frac}"]=b['action_start']+(b['action_end']-b['action_start'])*frac
     # Approximate phrase positions from audio_query / speedScale=1.08.
     # These are synthesis-clock checks, not forced alignment of the soundtrack.
     phrase_sync=[]
