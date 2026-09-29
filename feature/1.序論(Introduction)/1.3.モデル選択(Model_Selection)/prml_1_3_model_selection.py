@@ -197,17 +197,21 @@ class PRML13ModelSelection(NarratedScene):
         a,b,c = [self.sentence_duration(i) for i in range(3)]
         self.beat(phases=[
             ('recap 1.1 enter',.5,lambda: FadeIn(card)),
-            ('signed residuals +2 -2',a*.68-.5,
+            # audio_query: 二乗 starts at 4.85 s; 平方根 at 4.02 s
+            # in the next sentence. Keep the operation on the spoken concept.
+            ('signed residuals +2 -2',4.85-.5,
              lambda: AnimationGroup(FadeIn(stages),FadeIn(inputs),Create(arrows))),
-            ('square residuals to areas 4 4',a*.32,
+            ('square residuals to areas 4 4',a-4.85,
              lambda: AnimationGroup(ReplacementTransform(arrows,squares),FadeIn(areas))),
-            ('average squared areas',b*.32,
+            ('average squared areas',1.1,
              lambda: AnimationGroup(TransformFromCopy(squares,mean),FadeIn(mean_formula))),
-            ('recall RMS square root',b*.68,
-             lambda: AnimationGroup(TransformFromCopy(mean,result),FadeIn(root_formula),FadeIn(rms))),
-            ('use mean before square root',c*.65,
+            ('recall RMS name',2.92,lambda: FadeIn(rms)),
+            ('recall RMS square root',b-4.02,
+             lambda: AnimationGroup(TransformFromCopy(mean,result),FadeIn(root_formula))),
+            ('return to mean',2.07,lambda: Wait()),
+            ('use mean before square root',2.13,
              lambda: AnimationGroup(Create(focus),FadeIn(current))),
-            ('smaller mean is better',c*.35,lambda: Indicate(mean_formula,color=AID_RESULT)),
+            ('smaller mean is better',c-4.2,lambda: Indicate(mean_formula,color=AID_RESULT)),
         ])
 
     def roles(self):
@@ -387,17 +391,20 @@ class PRML13ModelSelection(NarratedScene):
         meaning=VGroup(tex(r'\mathcal D',24,BLUE_DATA),jp('：訓練データ',20),tex(r'\mathbf w',24,BLUE_DATA),jp('：係数',20)).arrange(RIGHT,buff=.13).move_to([0,-2.8,0])
         self.beat(FadeIn(recap),Write(likelihood_label),Write(meaning))
         self.remove(meaning)
-        product=tex(r'\ln(p_1p_2\cdots p_N)',30,AID_OPERATION).move_to([0,-2.3,0])
+        product=tex(r'p_1p_2\cdots p_N',30,BLUE_DATA).move_to([0,-2.3,0])
+        logproduct=tex(r'\ln(p_1p_2\cdots p_N)',30,AID_OPERATION).move_to(product)
         logsum=tex(r'\ln p_1+\ln p_2+\cdots+\ln p_N',30,AID_OPERATION).move_to(product)
         condition=VGroup(jp('独立な観測',18),tex(r'p_n',22,BLUE_DATA),
                          jp('：各点の密度',18)).arrange(RIGHT,buff=.18).move_to([0,-2.8,0])
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
-            ('log of independent density product',a*.55,
+            ('independent density product',2.48,
              lambda: AnimationGroup(ReplacementTransform(likelihood_label,product),FadeIn(condition))),
-            ('product to sum of logs',a*.45,lambda: ReplacementTransform(product,logsum)),
-            ('log likelihood score correspondence',b,
+            ('take logarithm',.92,lambda: ReplacementTransform(product,logproduct)),
+            ('product to sum of logs',a-3.4,lambda: ReplacementTransform(logproduct,logsum)),
+            ('log likelihood score correspondence',2.93,
              lambda: ReplacementTransform(logsum,formula[0])),
+            ('larger log likelihood is better',b-2.93,lambda: Indicate(likelihood,color=BLUE_DATA)),
         ])
         self.remove(recap,condition)
         self.add(formula[0])
