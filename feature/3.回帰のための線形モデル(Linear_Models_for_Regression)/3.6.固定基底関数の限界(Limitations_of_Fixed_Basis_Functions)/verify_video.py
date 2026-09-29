@@ -29,7 +29,7 @@ def main():
     volumes={k:float(re.search(k+r':\s*(-?[\d.]+) dB',vol)[1]) for k in ['mean_volume','max_volume']}
     timeline=json.loads((ROOT/'media/prml36_timeline.json').read_text())
     manifest=json.loads((ROOT/'assets/voicevox/manifest.json').read_text())['scenes']
-    frames=[];sync=[];timing_errors=[]
+    frames=[];sync=[];timing_errors=[];added_phase_audio=[]
     for s,e in zip(timeline,manifest):
         timing_errors.append(abs(s['end']-s['start']-e['duration']))
         for bi in [1,4,7]:
@@ -60,7 +60,19 @@ def main():
         active=np.flatnonzero(abs(window)>10**(-45/20))
         onset=s['start']+cue['start']+active[0]/rate
         sync.append(dict(scene=s['id'],beat=bi+1,action=name,start=b['action_start'],end=b['action_end'],first_voice=onset,phases=b.get('actions',[])))
+        if (si,bi) in [(1,0),(4,4)]:
+            for phase in b['actions']:
+                if phase['name']=='breath':continue
+                begin=round((phase['start']-s['start'])*rate)
+                finish=round((phase['end']-s['start'])*rate)
+                voiced=np.flatnonzero(abs(pcm[begin:finish])>10**(-45/20))
+                assert len(voiced),phase['name']
+                added_phase_audio.append(dict(**phase,
+                    first_voice=s['start']+(begin+voiced[0])/rate,
+                    last_voice=s['start']+(begin+voiced[-1])/rate))
         for fraction in [.12,.82]:frames.append(dict(label=f"{s['id']}-sync-{fraction}",time=b['start']+fraction*(b['action_end']-b['start'])))
+    for phase in timeline[1]['beats'][0]['actions'][1:3]:
+        frames.append(dict(label=phase['name']+'-settled',time=phase['end']-.13))
     for i,f in enumerate(frames):
         f['file']=f'frame-{i:02}.png'
         run(['ffmpeg','-loglevel','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(out/f['file'])])
@@ -74,7 +86,8 @@ def main():
     result=dict(video_sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),probe=probe,duration_difference=delta,
                 silence_intervals_ge_3s=silence_count,**volumes,timeline_max_error=max(timing_errors),
                 scenes=[dict(id=s['id'],title=s['title'],start=s['start'],duration=e['duration'],reference=s['reference']) for s,e in zip(timeline,manifest)],
-                sync=sync,frames=frames,visual_review='pending',full_listening=False)
+                sync=sync,added_phase_audio=added_phase_audio,
+                frames=frames,visual_review='pending',full_listening=False)
     (ROOT/'validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k not in ['frames','scenes','sync']},ensure_ascii=False,indent=2))
     print('Extracted frames:',len(frames))
