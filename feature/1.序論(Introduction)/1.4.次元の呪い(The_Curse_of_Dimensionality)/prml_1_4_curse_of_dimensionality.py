@@ -357,7 +357,9 @@ class PRML14CurseOfDimensionality(Scene):
         self.add(axes)
         # Reuse 1.2 likelihood's red bell, yellow mean line and width change.
         # This occupies the existing introduction beat, without a second recap.
-        recap_label=jp('復習: 1.2 ガウス分布',22).move_to([2.9,2.05,0])
+        # As in the revised 1.3 label, exclude empty space glyphs from bounds.
+        recap_label=VGroup(*[g for g in jp('復習: 1.2 ガウス分布',22) if g.has_points()])
+        recap_label.move_to([2.9,2.05,0])
         recap_frame=SurroundingRectangle(recap_label,color=AID_OPERATION,buff=.12,stroke_width=1.2)
         bell_ax=Axes(x_range=[-3,3,1],y_range=[0,.8,.4],x_length=3.8,y_length=1.65,
                      tips=False,axis_config={'color':MUTED,'stroke_width':1.2}).move_to([2.9,.1,0])
