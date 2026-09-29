@@ -19,6 +19,10 @@ GREEN_TRUE = ManimColor('#77D49A')
 PURPLE_KL = ManimColor('#C29AFF')
 MUTED = ManimColor('#A8B2C5')
 COLORS = [BLUE_DATA, GREEN_TRUE, YELLOW_INFO, PURPLE_KL]
+AID_INPUT = '#58C4DD'
+AID_OPERATION = '#FFFF00'
+AID_RESULT = '#83C167'
+AID_COMPARISON = '#9A72AC'
 
 def pulse(m, **kwargs):
     """Highlight a snapshot without freezing its source or leaving a ghost."""
@@ -268,14 +272,57 @@ class PRML16InformationTheory(Scene):
         self.beat(uniform.animate.set_value(1))
         self.beat(concentrate.animate.set_value(1))
 
+    def body_objects(self):
+        return [m for m in self.mobjects if m is not self.subtitle
+                and not (isinstance(m, Text) and m.get_y() > 2.7)]
+
+    def review_card(self, title):
+        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
+                                 color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0])
+        label = VGroup(*[g for g in jp(title,23) if g.has_points()])
+        label.move_to([-4.85,2.02,0], aligned_edge=LEFT)
+        self.add(frame,label)
+        return label
+
+    def density_recap(self):
+        """1.2 density(): keep its green density and blue interval area."""
+        self.review_card('復習: 1.2 密度と区間の確率')
+        ax = self.ax([-3,3,1],[0,.6,.2],center=(0,-.25,0),width=7.8,height=2.15)
+        radius = ValueTracker(.2)
+        graph = curve(ax,lambda z:gaussian_pdf(z,.8),-3,3,GREEN_TRUE)
+        def fill():
+            xs = np.linspace(-radius.get_value(),radius.get_value(),100)
+            return Polygon(ax.c2p(xs[0],0),*[ax.c2p(z,gaussian_pdf(z,.8)) for z in xs],
+                           ax.c2p(xs[-1],0),stroke_width=0,fill_color=BLUE_DATA,fill_opacity=.4)
+        area = always_redraw(fill)
+        legend = VGroup(jp('密度',21,GREEN_TRUE),jp('区間の確率',21,BLUE_DATA)).arrange(RIGHT,buff=.7).move_to([0,1.35,0])
+        import math
+        probability = readout('P=',lambda:math.erf(radius.get_value()/(.8*np.sqrt(2))),[3.5,.85,0],BLUE_DATA)
+        self.add(ax,graph,area,legend,probability)
+        uniform_ax = self.ax([0,1,.25],[0,1,1],center=(0,-.25,0),width=7.8,height=2.15)
+        uniform = Polygon(uniform_ax.c2p(0,0),uniform_ax.c2p(1,0),uniform_ax.c2p(1,1),
+                          uniform_ax.c2p(0,1),color=BLUE_DATA,fill_opacity=.3)
+        new_legend = jp('今回：一様分布を区間に分けて伝える',22).move_to([0,1.35,0])
+        a,b,c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('R1.2 recall density area',a,lambda:pulse(area,color=BLUE_DATA)),
+            ('R1.2 widen probability interval',b,lambda:radius.animate.set_value(1.2)),
+            ('R1.2 clear previous density',.4,lambda:AnimationGroup(
+                FadeOut(graph),FadeOut(area),FadeOut(probability),FadeOut(ax),FadeOut(legend))),
+            ('R1.2 connect to uniform density',.6,lambda:AnimationGroup(
+                FadeIn(uniform_ax),FadeIn(new_legend),FadeIn(uniform))),
+            ('R1.2 uniform interval for this section',c-1.0,lambda:pulse(uniform,color=BLUE_DATA)),
+        ])
+        self.remove(*self.body_objects())
+
     def bins(self):
+        self.density_recap()
         ax=self.ax([0,1,.25],[0,2,1],center=(0,.1,0),height=3)
         width=ValueTracker(1)
         density=always_redraw(lambda:Polygon(ax.c2p(0,0),ax.c2p(width.get_value(),0),
             ax.c2p(width.get_value(),1/width.get_value()),ax.c2p(0,1/width.get_value()),
             color=BLUE_DATA,fill_opacity=.3))
         self.add(ax,density,jp('密度',21,BLUE_DATA).move_to([-5.1,1.7,0]))
-        self.beat(pulse(density))
         def divisions(n):
             return VGroup(*[Line(ax.c2p(i/n,0),ax.c2p(i/n,1),color=YELLOW_INFO,stroke_width=2) for i in range(1,n)])
         div=divisions(4); f=self.formula(r'\Delta=1/4,\quad H_\Delta=\log_2 4=2\ \mathrm{bit}',size=31)
@@ -431,9 +478,54 @@ class PRML16InformationTheory(Scene):
         self.remove(f)
         f=self.formula(r'E_p[q/p]=\sum_xq(x)=1',size=31);self.add(f)
         self.beat(x.animate.set_value(1))
+        self.ratio_average_aid()
         self.remove(f)
         f=self.formula(r'\mathrm{KL}(p\Vert q)=E_p[-\ln(q/p)]\ge-\ln1=0',size=30);self.add(f)
         self.beat(pulse(f),pulse(dots))
+
+    def ratio_average_aid(self):
+        """V07a: explicit weighted products, then collect their total."""
+        body = self.body_objects()
+        self.remove(*body)
+        self.review_card('補足：比の平均が 1 になる理由')
+        condition = tex(r'p_i>0,\ q_i>0\quad(i=1,2)',23).move_to([2.85,2.02,0])
+        distributions = VGroup(tex(r'p=(1/2,1/2)',29,AID_INPUT),
+                               tex(r'q=(1/4,3/4)',29,AID_COMPARISON)).arrange(RIGHT,buff=.8).move_to([0,1.25,0])
+        rows = VGroup()
+        results = VGroup()
+        for y,numerator in [(.3,1),(-.7,3)]:
+            row = MathTex(r'\tfrac12',r'\times',rf'\frac{{{numerator}/4}}{{1/2}}',
+                          font_size=34).move_to([-2.5,y,0])
+            row[0].set_color(AID_INPUT);row[2].set_color(AID_OPERATION)
+            result = tex(rf'=\tfrac{{{numerator}}}4',34,AID_RESULT).move_to([-.45,y,0])
+            rows.add(row);results.add(result)
+        # The common scale is 3 units per probability 1.
+        contributions = VGroup(*[Rectangle(width=3*v,height=.35,stroke_width=0,
+            fill_color=AID_OPERATION,fill_opacity=.8).move_to([1.25+1.5*v,y,0])
+            for v,y in [(.25,.3),(.75,-.7)]])
+        targets = VGroup(*[Rectangle(width=3*v,height=.35,stroke_color=BG,stroke_width=2,
+            fill_color=AID_RESULT,fill_opacity=.8).move_to([1.25+3*left+1.5*v,-1.6,0])
+            for v,left in [(.25,0),(.75,.25)]])
+        total = tex(r'E_p[q/p]=\tfrac14+\tfrac34=1',31,AID_RESULT).move_to([-1.6,-1.6,0])
+        # Fixed fractions 1/4 over 1/2 and 3/4 over 1/2: last three glyphs
+        # are the denominator 1/2. Cross out equal multiplying/dividing factors.
+        cancellations = VGroup(*[Line(factor.get_corner(DL),factor.get_corner(UR),
+            color=AID_OPERATION,stroke_width=2.5)
+            for row in rows for factor in (row[0],row[2][-3:])])
+        self.add(condition,distributions,rows)
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        # audio_query / speedScale=1.08: 分母が 2.6346 s into sentence 1;
+        # 足すので .8703 s and 平均は 1.6934 s into sentence 2.
+        self.beat(phases=[
+            ('V07a weight ratios by p',2.6346,lambda:AnimationGroup(*[pulse(row[0],color=AID_INPUT) for row in rows])),
+            ('V07a cancel denominators to q',a-2.6346,lambda:AnimationGroup(Create(cancellations),FadeIn(results),
+                *[GrowFromEdge(contributions[i],LEFT) for i in range(2)])),
+            ('V07a identify remaining q',.8703,lambda:pulse(results,color=AID_RESULT)),
+            ('V07a sum remaining q',1.6934-.8703,lambda:Transform(contributions,targets)),
+            ('V07a mean equals one',b-1.6934,lambda:FadeIn(total)),
+        ])
+        self.remove(*self.body_objects())
+        self.add(*body)
 
     def learning(self):
         dots=VGroup(*[Dot(radius=.1,color=BLUE_DATA if d else YELLOW_INFO) for d in DATA]).arrange_in_grid(rows=2,cols=10,buff=.24).move_to([0,.5,0])

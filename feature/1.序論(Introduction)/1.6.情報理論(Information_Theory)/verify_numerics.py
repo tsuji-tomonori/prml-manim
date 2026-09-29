@@ -45,6 +45,12 @@ def main():
     for lam in np.linspace(0,1,101):
         a,b=.25,2
         assert -np.log(lam*a+(1-lam)*b)<=lam*(-np.log(a))+(1-lam)*(-np.log(b))+1e-12
+    aid_p=np.array([.5,.5]);aid_q=np.array([.25,.75])
+    weighted=aid_p*(aid_q/aid_p)
+    assert np.allclose(weighted,[.25,.75]) and np.isclose(weighted.sum(),1)
+    assert np.isclose(kl(aid_p,aid_q),-aid_p@np.log(aid_q/aid_p))
+    results['ratio_aid_contributions']=weighted.tolist()
+    results['ratio_aid_mean']=float(weighted.sum())
     assert DATA.sum()==14 and len(DATA)==20
     grid=np.linspace(.01,.99,981)
     optimum=grid[np.argmin([nll(t) for t in grid])]
