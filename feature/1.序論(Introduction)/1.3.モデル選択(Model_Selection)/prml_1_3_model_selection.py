@@ -411,7 +411,8 @@ class PRML13ModelSelection(NarratedScene):
              lambda: Succession(FadeOut(logproduct,run_time=.12),FadeIn(logsum,run_time=.18),Wait(a-3.7))),
             ('log likelihood score correspondence',2.93,
              lambda: AnimationGroup(FadeOut(logsum),FadeIn(formula[0]))),
-            ('larger log likelihood is better',b-2.93,lambda: Indicate(likelihood,color=BLUE_DATA)),
+            ('larger log likelihood is better',b-2.93,
+             lambda: Indicate(likelihood,color=AID_OPERATION,scale_factor=1)),
         ])
         self.remove(recap,condition)
         self.add(formula[0])
