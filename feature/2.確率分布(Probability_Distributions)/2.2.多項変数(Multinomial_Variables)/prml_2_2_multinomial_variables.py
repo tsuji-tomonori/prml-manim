@@ -257,7 +257,10 @@ class PRML22MultinomialVariables(NarratedScene):
         example=jp('表が3回',21,MUTED).move_to([3.8,.75,0])
         note=jp('事前 × 尤度',24,'#C29AFF').move_to([0,-1.85,0])
         normnote=jp('面積を 1 にそろえる → 事後分布',24,'#C29AFF').move_to([0,-1.85,0])
-        tri=simplex().scale(.33).move_to([3.8,-.2,0])
+        outline=Polygon(*VERTICES,color=MUTED,stroke_width=2).scale(.33).move_to([3.8,-.2,0])
+        # Keep the thumbnail's labels at readable size instead of scaling text.
+        tri=VGroup(outline,*[tex(r'\mu_'+str(k+1),20,COLORS[k]).move_to(
+            v+np.array([0,-.20 if k<2 else .20,0])) for k,v in enumerate(outline.get_vertices())])
         maplabel=jp('確率の組',21).move_to([3.8,-1.3,0])
         mapping=tex(r'\theta\ \longrightarrow\ (\mu_1,\mu_2,\mu_3)',29).move_to([0,-1.85,0])
         bridge=Arrow([2.1,-.2,0],[2.85,-.2,0],buff=.05,color='#FFFF00')
@@ -273,7 +276,7 @@ class PRML22MultinomialVariables(NarratedScene):
             self.remove(normnote,example);self.add(mapping,maplabel)
             return AnimationGroup(FadeIn(tri),GrowArrow(bridge))
         self.beat(phases=[
-            ('R1.2 recall candidate probability',a,lambda:Indicate(legend,scale_factor=1.03)),
+            ('R1.2 recall candidate probability',a,lambda:AnimationGroup(FadeIn(legend),Create(like))),
             ('R1.2 multiply prior by likelihood',b,multiply),
             ('R1.2 normalize area from 0.2 to 1',c,normalize),
             ('R1.2 map theta to probability triple',d,connect),
