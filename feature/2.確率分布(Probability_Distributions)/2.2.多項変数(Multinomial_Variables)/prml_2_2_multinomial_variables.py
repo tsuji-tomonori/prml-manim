@@ -187,7 +187,102 @@ class PRML22MultinomialVariables(NarratedScene):
         group.clear_updaters(recursive=True)
         deriv=equation(r'\sum_km_k\ln\mu_k+\lambda\left(\sum_k\mu_k-1\right)',(0,.8,0),42)
         self.beat(FadeOut(group),FadeIn(deriv),self.formula_to(r'\frac{m_k}{\mu_k}+\lambda=0\quad\Longrightarrow\quad\mu_k=-\frac{m_k}{\lambda}\quad\text{(2.32)}'))
+        self.lagrange_aid()
         self.beat(Transform(deriv,equation(r'1=\sum_k\mu_k=-\frac{N}{\lambda}\quad\Longrightarrow\quad\lambda=-N',(0,.8,0),40)),self.formula_to(r'\mu_k^{\rm ML}=m_k/N\qquad(m_k=0\Rightarrow\mu_k^{\rm ML}=0)'))
+
+    def review_card(self, label):
+        frame=RoundedRectangle(width=11.2,height=5.0,corner_radius=.12,
+                               color='#FFFF00',stroke_width=1.3).move_to([0,.05,0])
+        title=jp(label,24).move_to([-5.25,2.18,0],aligned_edge=LEFT)
+        self.add(frame,title)
+
+    def lagrange_aid(self):
+        # Replace the body, preserving the original derivation and title.
+        body=[m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        self.remove(*body)
+        self.review_card('補足：合計を 1 に保つ最尤推定')
+        ax=Axes(x_range=[0,1,.5],y_range=[0,1,.5],x_length=2.9,y_length=2.9,
+                tips=False,axis_config={'include_numbers':True,'font_size':18})
+        ax.move_to([-2.5,-.05,0])
+        labels=VGroup(tex(r'\mu_1',24).next_to(ax.x_axis,RIGHT,buff=.12),
+                      tex(r'\mu_2',24).next_to(ax.y_axis,UP,buff=.08))
+        constraint=Line(ax.c2p(0,1),ax.c2p(1,0),color='#58C4DD',stroke_width=4)
+        # Level curves for L=mu1^3 mu2^2; the top one touches at (.6,.4).
+        contours=VGroup()
+        for level in (.014,.024,.6**3*.4**2):
+            xs=np.linspace(level**(1/3),1,160)
+            ys=np.sqrt(level/xs**3)
+            contours.add(VMobject().set_points_as_corners([ax.c2p(x,y) for x,y in zip(xs,ys)])
+                         .set_stroke('#9A72AC',2))
+        t=ValueTracker(.22)
+        point=Dot(radius=.07,color='#83C167').add_updater(lambda m:m.move_to(ax.c2p(t.get_value(),1-t.get_value())))
+        example=tex(r'm=(3,2),\quad \mu_1,\mu_2>0',27).move_to([2.0,1.45,0])
+        condition=tex(r'\mu_1+\mu_2=1',30,'#58C4DD').move_to([2.0,.85,0])
+        level_label=jp('紫の曲線：同じ尤度',22,'#9A72AC').move_to([2.0,.25,0])
+        optimum=tex(r'\mu^{\rm ML}=(0.6,0.4)',29,'#83C167').move_to([2.0,-.4,0])
+        direction=jp('矢印：対数尤度が増える向き',21,'#FFFF00').move_to([1.95,-1.02,0])
+        relation=tex(r'\nabla\ell=-\lambda\nabla g,\quad\lambda=-5',27,'#FFFF00').move_to([1.95,-1.63,0])
+        foot=jp('g は合計 − 1。λ は確率ではなく、法線の倍率。',20,MUTED).move_to([0,-2.13,0])
+        p=ax.c2p(.6,.4)
+        # grad ell=(5,5)=-lambda*(1,1): identical screen scale on both axes.
+        normal=DashedLine(p,ax.c2p(.99,.79),color='#FFFF00',dash_length=.07)
+        grad=Arrow(p,ax.c2p(.89,.69),buff=0,color='#FFFF00',stroke_width=5)
+        self.add(ax,labels,constraint,contours,point,example,condition,level_label)
+        a,b,c,d=[self.sentence_duration(i) for i in range(4)]
+        self.beat(phases=[
+            ('V12 keep sum one',a,lambda:t.animate.set_value(.42)),
+            ('V12 reach constrained maximum',b,lambda:AnimationGroup(t.animate.set_value(.6),FadeIn(optimum))),
+            ('V12 gradient parallel to normal',c,lambda:AnimationGroup(Create(normal),GrowArrow(grad),FadeIn(direction))),
+            ('V12 multiplier and sign',d,lambda:AnimationGroup(FadeIn(relation),FadeIn(foot))),
+        ])
+        point.clear_updaters()
+        self.remove(*[m for m in self.mobjects if m is not self.header and m is not self.subtitle])
+        self.add(*body)
+
+    def bayes_recap(self):
+        # PRML 1.2 parameters(): blue prior, orange likelihood, purple posterior.
+        self.review_card('復習: 1.2 ベイズ更新')
+        ax=Axes(x_range=[0,1,.5],y_range=[0,2.6,1.3],x_length=5.5,y_length=2.1,
+                tips=False,axis_config={'include_numbers':True,'font_size':18}).move_to([-.9,-.15,0])
+        xlabel=tex(r'\theta',25).next_to(ax.x_axis,RIGHT,buff=.12)
+        ylabel=jp('密度・尤度',19,MUTED).move_to([-3.3,1.25,0])
+        mult=ValueTracker(0);norm=ValueTracker(1)
+        prior=lambda u:6*u*(1-u)
+        fn=lambda u:prior(u)*(1-mult.get_value()+mult.get_value()*u**3)*norm.get_value()
+        base=ax.plot(prior,x_range=[0,1,.01],color='#58B5ED').set_stroke(opacity=.4)
+        like=ax.plot(lambda u:u**3,x_range=[0,1,.01],color='#FFB45B')
+        updated=always_redraw(lambda:ax.plot(fn,x_range=[0,1,.01],color='#58B5ED' if mult.get_value()==0 else '#C29AFF'))
+        legend=VGroup(jp('事前密度',20,'#58B5ED'),jp('尤度',20,'#FFB45B'),jp('事後密度',20,'#C29AFF'))
+        legend.arrange(RIGHT,buff=.4).move_to([.6,1.52,0])
+        example=jp('表が3回',21,MUTED).move_to([3.8,.75,0])
+        note=jp('事前 × 尤度',24,'#C29AFF').move_to([0,-1.85,0])
+        normnote=jp('面積を 1 にそろえる → 事後分布',24,'#C29AFF').move_to([0,-1.85,0])
+        outline=Polygon(*VERTICES,color=MUTED,stroke_width=2).scale(.33).move_to([3.8,-.2,0])
+        # Keep the thumbnail's labels at readable size instead of scaling text.
+        tri=VGroup(outline,*[tex(r'\mu_'+str(k+1),20,COLORS[k]).move_to(
+            v+np.array([0,-.20 if k<2 else .20,0])) for k,v in enumerate(outline.get_vertices())])
+        maplabel=jp('確率の組',21).move_to([3.8,-1.3,0])
+        mapping=tex(r'\theta\ \longrightarrow\ (\mu_1,\mu_2,\mu_3)',29).move_to([0,-1.85,0])
+        bridge=Arrow([2.1,-.2,0],[2.85,-.2,0],buff=.05,color='#FFFF00')
+        self.add(ax,xlabel,ylabel,base,like,updated,legend,example)
+        a,b,c,d=[self.sentence_duration(i) for i in range(4)]
+        def multiply():
+            self.add(note)
+            return mult.animate.set_value(1)
+        def normalize():
+            self.remove(note);self.add(normnote)
+            return norm.animate.set_value(5)
+        def connect():
+            self.remove(normnote,example);self.add(mapping,maplabel)
+            return AnimationGroup(FadeIn(tri),GrowArrow(bridge))
+        self.beat(phases=[
+            ('R1.2 recall candidate probability',a,lambda:AnimationGroup(FadeIn(legend),Create(like))),
+            ('R1.2 multiply prior by likelihood',b,multiply),
+            ('R1.2 normalize area from 0.2 to 1',c,normalize),
+            ('R1.2 map theta to probability triple',d,connect),
+        ])
+        updated.clear_updaters()
+        self.remove(*[m for m in self.mobjects if m is not self.header and m is not self.subtitle])
 
     def arrangements(self):
         single=tokens([0,0,1,2],y=.6)
@@ -236,6 +331,7 @@ class PRML22MultinomialVariables(NarratedScene):
         self.beat(a[0].animate.set_value(20))
 
     def update(self):
+        self.bayes_recap()
         a=[ValueTracker(2) for _ in range(3)]
         get=lambda:np.array([t.get_value() for t in a])
         self.add(heatmap(get),simplex(),density_key())

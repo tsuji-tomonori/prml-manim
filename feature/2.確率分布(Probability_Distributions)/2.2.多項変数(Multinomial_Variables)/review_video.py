@@ -1,4 +1,4 @@
-"""Extract every beat, every mathematical subtitle and three moving sequences."""
+"""Extract every beat, math caption, review-card transition and PCM synchronization."""
 import argparse
 import json
 import subprocess
@@ -24,7 +24,8 @@ def main():
                 if '$' in c['display']:
                     frames.append(dict(id=c['id']+'-math',time=(c['start']+c['end'])/2))
         if si in (1,3,7):
-            b=s['beats'][1]
+            anchor=f"{s['id']}-02-01"
+            b=next(b for b in s['beats'] if any(c['id']==anchor for c in b['cues']))
             for fraction in (.12,.88):
                 frames.append(dict(id=f"{s['id']}-sync-{fraction}",time=b['action_start']+fraction*(b['action_end']-b['action_start'])))
             with wave.open(str(ROOT/manifest[si]['path']),'rb') as wav:
@@ -36,6 +37,28 @@ def main():
                 hit=np.flatnonzero(np.abs(samples)>10**(-45/20))
                 starts.append(c['start']+float(hit[0]/rate) if len(hit) else None)
             sync.append(dict(scene=s['id'],beat=2,action_start=b['action_start'],action_end=b['action_end'],pcm_voice_starts=starts))
+    # Every new card: before/after, each sentence, and both ends of every action.
+    for si,s in enumerate(timeline):
+        for b in s['beats']:
+            if not any('-aid-' in c['id'] or '-recap-' in c['id'] for c in b['cues']):
+                continue
+            prefix=b['cues'][0]['id'].rsplit('-',1)[0]
+            frames.extend([dict(id=prefix+'-before',time=max(0,b['start']-.3)),
+                           dict(id=prefix+'-after',time=b['end']+.3)])
+            with wave.open(str(ROOT/manifest[si]['path']),'rb') as wav:
+                rate=wav.getframerate();audio=np.frombuffer(wav.readframes(wav.getnframes()),dtype='<i2')/32768
+            audit=[]
+            for c,action in zip(b['cues'],[a for a in b['actions'] if a['name']!='breath']):
+                for fraction in (.15,.85):
+                    frames.append(dict(id=c['id']+f'-sync-{fraction}',time=action['start']+fraction*(action['end']-action['start'])))
+                offset=c['start']-s['start'];end=c['end']-s['start']
+                samples=audio[round(offset*rate):round(end*rate)]
+                hit=np.flatnonzero(np.abs(samples)>10**(-45/20))
+                onset=c['start']+float(hit[0]/rate) if len(hit) else None
+                assert abs(action['start']-c['start']) <= 1/15+.001
+                assert abs(action['end']-c['end']) <= 1/15+.001
+                audit.append(dict(id=c['id'],action=action,caption_start=c['start'],caption_end=c['end'],pcm_voice_start=onset))
+            sync.append(dict(scene=s['id'],card=prefix,sentences=audit))
     for row in frames:
         row['file']=row['id']+'.png'
         subprocess.run(['ffmpeg','-loglevel','error','-y','-ss',str(row['time']),'-i',str(VIDEO),'-frames:v','1',str(out/row['file'])],check=True)
@@ -49,5 +72,5 @@ def main():
     result=dict(frames=frames,synchronization=sync,scene_durations=[dict(id=s['id'],duration=s['end']-s['start']) for s in timeline],
                 max_scene_audio_difference=max(abs(s['end']-s['start']-e['duration']) for s,e in zip(timeline,manifest)))
     (out/'review.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
-    print(f'Extracted {len(frames)} frames; {sum("math" in r["id"] for r in frames)} mathematical subtitles; 3 sync scenes.')
+    print(f'Extracted {len(frames)} frames; {sum("math" in r["id"] for r in frames)} mathematical subtitles; {len(sync)} sync groups.')
 if __name__=='__main__':main()

@@ -67,9 +67,20 @@
       0.023255813953488372
     ]
   },
+  "review_examples": {
+    "constrained_optimum": 0.6000000007669946,
+    "gradient": [
+      5.0,
+      5.0
+    ],
+    "lambda": -5,
+    "tangent_derivative": 0.0,
+    "prior_times_likelihood_area": 0.19999999999999998,
+    "posterior_area": 0.9999999999999999
+  },
   "audio": {
     "scenes": 9,
-    "sentences": 108,
-    "total_seconds": 673.4666666666667
+    "sentences": 116,
+    "total_seconds": 706.6
   }
 }
