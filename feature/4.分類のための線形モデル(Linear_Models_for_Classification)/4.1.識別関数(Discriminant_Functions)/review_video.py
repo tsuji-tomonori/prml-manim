@@ -36,8 +36,17 @@ def main():
             lo=int((c['start']-s['start'])*rate);hi=int((c['end']-s['start'])*rate)
             indices=np.flatnonzero(abs(pcm[lo:hi])>10**(-45/20))
             onsets.append(float(s['start']+(lo+indices[0])/rate) if len(indices) else None)
+        actions=[]
+        for action in b.get('actions',[]):
+            if action['name']=='breath':continue
+            lo=round((action['start']-s['start'])*rate);hi=round((action['end']-s['start'])*rate)
+            active=np.flatnonzero(abs(pcm[lo:hi])>10**(-45/20))
+            assert len(active)>0,action['name']
+            actions.append(dict(action,voiced_samples=len(active),
+                first_voice=s['start']+(lo+int(active[0]))/rate,
+                last_voice=s['start']+(lo+int(active[-1]))/rate))
         sync.append({'scene':s['id'],'beat':bi+1,'action_start':b['action_start'],'action_end':b['action_end'],
-                     'speech_onsets':onsets,'cues':b['cues'],'actions':b.get('actions',[])})
+                     'speech_onsets':onsets,'cues':b['cues'],'actions':actions})
         for part in [0.05,.5,.95]:frames.append({'label':f"{s['id']} sync {part}",'time':b['action_start']+part*(b['action_end']-b['action_start'])})
     for i,f in enumerate(frames):
         path=OUT/f'frame-{i:03}.png';f['path']=path.name

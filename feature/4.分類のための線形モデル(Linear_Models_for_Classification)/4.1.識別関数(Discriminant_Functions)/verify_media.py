@@ -26,6 +26,7 @@ def main():
     timeline=json.loads((ROOT/'media/prml41_timeline.json').read_text())
     manifest=json.loads((ROOT/'assets/voicevox/manifest.json').read_text())['scenes']
     max_drift=0
+    max_cue_drift=0
     for sc,t,e in zip(SCENES,timeline,manifest):
         assert sc['id']==t['id']==e['id']
         max_drift=max(max_drift,abs(t['end']-t['start']-e['duration']))
@@ -33,9 +34,15 @@ def main():
         for i,b in enumerate(t['beats']):
             assert b['start']-1e-6<=b['action_start']<=b['action_end']<=b['end']+1e-6
             assert [s['display'] for s in sc['beats'][i]['segments']]==[c['display'] for c in b['cues']]
+            for c in b['cues']:
+                expected=next(q for q in e['subtitle_cues'] if q['id']==c['id'])
+                for edge in ['start','end']:
+                    max_cue_drift=max(max_cue_drift,abs(c[edge]-t['start']-expected[edge]))
     assert max_drift<1/15
+    assert max_cue_drift<1/15
     result={'probe':probe,'stream_duration_difference':delta,'long_silence_count':silence,**volume,
-            'max_scene_wav_drift':max_drift,'sha256':hashlib.sha256(VIDEO.read_bytes()).hexdigest(),
+            'max_scene_wav_drift':max_drift,'max_cue_wav_drift':max_cue_drift,
+            'sha256':hashlib.sha256(VIDEO.read_bytes()).hexdigest(),
             'full_listening':False}
     (ROOT/'validation_media.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(result,indent=2))
