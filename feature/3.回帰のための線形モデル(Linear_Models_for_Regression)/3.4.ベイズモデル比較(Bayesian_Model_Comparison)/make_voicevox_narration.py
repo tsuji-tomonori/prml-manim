@@ -17,7 +17,7 @@ SCENE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCENE_DIR / "assets" / "voicevox"
 MANIFEST = OUTPUT_DIR / "manifest.json"
 CACHE_DIR = SCENE_DIR / ".working" / "voicevox-lines"
-SPEAKER = {"label": "VOICEVOX:WhiteCUL", "id": 23, "speed_scale": 1.08}
+SPEAKER = {"label": "VOICEVOX:WhiteCUL", "id": 23, "speed_scale": SYNTHESIS_SETTINGS["speedScale"]}
 
 
 def wav_duration(path):
@@ -144,6 +144,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:50021")
     parser.add_argument("--from-scene", choices=[s["id"] for s in SCENES], default="scene01")
+    parser.add_argument("--only-changed", action="store_true", help="Reuse scenes with matching narration and WAV hashes")
     parser.add_argument("--prepare-only", action="store_true", help="Invalidate stale audio without contacting Engine")
     args = parser.parse_args()
     if not args.prepare_only:
@@ -155,6 +156,9 @@ def main():
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if args.only_changed and valid_entry(SCENES[i], entries[i]):
+            print(f"Reuse {SCENES[i]['id']}", flush=True)
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")
