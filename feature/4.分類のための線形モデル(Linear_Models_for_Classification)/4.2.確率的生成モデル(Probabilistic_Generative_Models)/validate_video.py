@@ -44,7 +44,7 @@ for si,bi in [(3,1),(4,4),(6,1)]:
  sync.append(dict(scene=e['id'],beat=bi+1,action_start=b['action_start'],action_end=b['action_end'],speech_onsets=onsets,display=[c['display'] for c in cues]))
 # Check every inserted operation against the actual voiced PCM interval.
 card_sync=[]
-mapping={'scene01':[0,0,0,1], 'scene03':[0,1,1,1],
+mapping={'scene01':[0,0,0,1,1], 'scene03':[0,1,1,1],
          'scene06':[0,1,2,2], 'scene08':[0,1,1,2], 'scene09':[0,0,1,1]}
 for e,t in zip(entries,timeline):
  with wave.open(str(ROOT/e['path'])) as wav:
@@ -61,11 +61,11 @@ for e,t in zip(entries,timeline):
   actions=[a for a in b['actions'] if a['name']!='breath']
   assert len(actions)==len(mapping[e['id']])
   checked=[]
-  for a,ci in zip(actions,mapping[e['id']]):
+  for action,ci in zip(actions,mapping[e['id']]):
    lo,hi=voiced[ci]
-   overlap=min(a['end'],hi)-max(a['start'],lo)
-   assert overlap>0,(a,voiced[ci])
-   checked.append(dict(**a,sentence_id=b['cues'][ci]['id'],voiced_start=lo,voiced_end=hi,overlap=overlap))
+   overlap=min(action['end'],hi)-max(action['start'],lo)
+   assert overlap>0,(action,voiced[ci])
+   checked.append(dict(**action,sentence_id=b['cues'][ci]['id'],voiced_start=lo,voiced_end=hi,overlap=overlap))
   card_sync.append(dict(scene=e['id'],start=b['start'],end=b['end'],duration=b['end']-b['start'],actions=checked))
 assert len(card_sync)==5
 result=dict(probe=probe,stream_difference=abs(float(v['duration'])-float(a['duration'])),silences_over_3s=0,volume_db=volume,max_scene_clock_error=max(errors),max_sentence_clock_error=max(sentence_errors),sync=sync,sha256=hashlib.sha256(video.read_bytes()).hexdigest(),full_listening=False,card_sync=card_sync)
