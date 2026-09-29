@@ -53,5 +53,17 @@ for w in [.2,.45,.8]:
     r=responsibility(np.linspace(-4,4,51),w)
     assert np.all((r>=0)&(r<=1))
 checks['responsibility_x0']=float(responsibility(0))
+# V10: use polygon area and Gaussian quadrature independently of the drawing.
+b=np.diag([2.,1.]);cov=b@b.T
+square=np.array([[0.,0.],[1.,0.],[1.,1.],[0.,1.]])@b.T
+area=.5*abs(np.dot(square[:,0],np.roll(square[:,1],-1))-np.dot(square[:,1],np.roll(square[:,0],-1)))
+assert np.isclose(area,2) and np.isclose(np.sqrt(np.linalg.det(cov)),area)
+assert np.isclose(normal(0,0,2)/normal(0),.5)
+assert abs(quad(lambda x: normal(x,0,2),-np.inf,np.inf)[0]-1)<1e-9
+product_area=quad(lambda u:6*u*(1-u)*u**3,0,1)[0]
+assert np.isclose(product_area,.2)
+assert np.isclose(quad(lambda u:30*u**4*(1-u),0,1)[0],1)
+checks['visual_aid']={'area_multiplier':area,'covariance_determinant':float(np.linalg.det(cov)),
+                      'density_ratio':.5,'bayes_product_area':product_area,'bayes_normalized_area':1.}
 print(json.dumps(checks,indent=2,ensure_ascii=False))
 print('PASS: normalization, covariance geometry, conditional/linear Bayes, CLT, MLE, bias, sequential update, posterior, t mixture, robustness, circular mean, mixture responsibilities')
