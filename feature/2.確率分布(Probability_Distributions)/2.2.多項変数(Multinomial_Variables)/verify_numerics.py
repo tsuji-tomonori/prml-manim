@@ -3,8 +3,8 @@ import itertools
 import json
 from pathlib import Path
 import numpy as np
-from scipy.integrate import dblquad
-from scipy.optimize import minimize
+from scipy.integrate import dblquad, quad
+from scipy.optimize import minimize, minimize_scalar
 from multinomial_model import *
 from narration_content import SCENES
 from make_voicevox_narration import valid_entry, MANIFEST, OUTPUT_DIR
@@ -40,6 +40,18 @@ def main():
     results['conjugacy']={'density_ratio':float(ratio),'posterior':(prior+COUNTS).tolist()}
     assert np.allclose(predictive([1,1,1],[3,1,0]),np.array([4,2,1])/7)
     results['predictive']={'four':predictive([1,1,1],[3,1,0]).tolist(),'forty':predictive([1,1,1],[30,10,0]).tolist()}
+    # Independently optimize and integrate the two review-card examples.
+    opt2=minimize_scalar(lambda u:-(3*np.log(u)+2*np.log1p(-u)),bounds=(.001,.999),method='bounded',options={'xatol':1e-12})
+    assert opt2.success and abs(opt2.x-.6)<1e-6
+    grad=np.array([3/.6,2/.4]);normal=np.ones(2)
+    assert abs(grad@np.array([1,-1]))<1e-12
+    assert np.allclose(grad-5*normal,0)
+    evidence,_=quad(lambda u:6*u*(1-u)*u**3,0,1)
+    posterior_area,_=quad(lambda u:30*u**4*(1-u),0,1)
+    assert abs(evidence-.2)<1e-12 and abs(posterior_area-1)<1e-12
+    results['review_examples']={'constrained_optimum':opt2.x,'gradient':grad.tolist(),
+        'lambda':-5,'tangent_derivative':float(grad@np.array([1,-1])),
+        'prior_times_likelihood_area':evidence,'posterior_area':posterior_area}
     manifest=json.loads(MANIFEST.read_text())
     assert len(manifest['scenes'])==len(SCENES)==9
     assert all(valid_entry(s,e) for s,e in zip(SCENES,manifest['scenes']))
@@ -48,6 +60,6 @@ def main():
                       'total_seconds':sum(s['duration'] for s in manifest['scenes'])}
     Path('numerical_results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(results,ensure_ascii=False,indent=2))
-    print('6 numerical / audio checks passed')
+    print('7 numerical / audio checks passed')
 
 if __name__=='__main__':main()
