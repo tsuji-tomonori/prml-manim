@@ -1,42 +1,4 @@
 {
-  "duration": "536.896000",
-  "size": 12444241,
-  "sha256": "6935d2d98452d62601fd56b441a8c20faebd3beaa025a556f9cf1328245d78e7",
-  "frames": 46,
-  "math_frames": 10,
-  "max_timing_error": 1.7990942069445737e-11,
-  "sync": [
-    {
-      "scene": "scene01",
-      "beat": 2,
-      "cue": "曲線を自由にすると、点の近くへ曲がっていきます。",
-      "action_start": 8.19999999999999,
-      "action_end": 15.282666666666659,
-      "speech_onset": 8.298166666666665,
-      "early": 9.31999999999999,
-      "late": 14.173333333333325
-    },
-    {
-      "scene": "scene03",
-      "beat": 4,
-      "cue": "事前分布をゼロの近くへ狭めてみます。",
-      "action_start": 129.59999999999778,
-      "action_end": 137.3759999999978,
-      "speech_onset": 129.68304166666593,
-      "early": 130.81999999999778,
-      "late": 136.10666666666444
-    },
-    {
-      "scene": "scene08",
-      "beat": 2,
-      "cue": "黄色が紫より上なら、対数エビデンスの傾きは正です。",
-      "action_start": 383.7333333333167,
-      "action_end": 391.5199999999834,
-      "speech_onset": 383.8275416666505,
-      "early": 384.9633333333167,
-      "late": 390.2933333333167
-    }
-  ],
   "ffprobe": {
     "programs": [],
     "streams": [
@@ -47,281 +9,491 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "536.866667"
+        "duration": "574.799678"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "536.896000"
+        "duration": "574.826667"
       }
     ],
     "format": {
-      "duration": "536.896000",
-      "size": "12444241"
+      "duration": "574.827000",
+      "size": "13531708"
     }
   },
-  "captions": {
-    "count": 121,
-    "max_width": 9.37421875,
-    "max_height": 0.6995312500000006,
-    "math_cues": 10
-  },
-  "frame_samples": [
-    {
-      "id": "scene01-beat2",
-      "time": 14.173333333333325,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene01-beat5",
-      "time": 38.359999999999914,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene01-beat6",
-      "time": 48.49333333333364,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene01-05-02",
-      "time": 37.847999999999914,
-      "reason": "math caption",
-      "display": "材料を混ぜる十個の係数が、重み $\\mathbf w$ です。"
-    },
-    {
-      "id": "scene01-06-01",
-      "time": 41.38400000000031,
-      "reason": "math caption",
-      "display": "$\\alpha$ は重みの事前分布の精度です。"
-    },
-    {
-      "id": "scene01-06-02",
-      "time": 44.64800000000031,
-      "reason": "math caption",
-      "display": "$\\beta$ は観測ノイズの精度で、逆数が分散です。"
-    },
-    {
-      "id": "scene01-06-03",
-      "time": 48.408000000000314,
-      "reason": "math caption",
-      "display": "比 $\\alpha/\\beta$ が正則化の強さになります。"
-    },
-    {
-      "id": "scene02-beat2",
-      "time": 64.88000000000122,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene02-beat5",
-      "time": 91.6400000000003,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene02-beat6",
-      "time": 101.37333333333316,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene03-beat2",
-      "time": 120.13333333333205,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene03-beat5",
-      "time": 145.146666666664,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene03-beat6",
-      "time": 155.74666666666346,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene04-beat2",
-      "time": 174.62666666666235,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene04-beat5",
-      "time": 201.42666666666082,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene04-beat6",
-      "time": 211.1333333333269,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene04-02-02",
-      "time": 174.43999999999568,
-      "reason": "math caption",
-      "display": "中心 $\\mathbf m_N$ は、重みの事後平均です。"
-    },
-    {
-      "id": "scene04-03-02",
-      "time": 181.83733333332844,
-      "reason": "math caption",
-      "display": "行列 $A$ は、その曲がり方をまとめたヘッセ行列です。"
-    },
-    {
-      "id": "scene05-beat2",
-      "time": 229.01333333332585,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene05-beat5",
-      "time": 255.71999999999105,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene05-beat6",
-      "time": 265.0133333333238,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene05-01-02",
-      "time": 219.20533333332637,
-      "reason": "math caption",
-      "display": "ここでは次数を $d$、重みの個数を $M=d+1$ と書き分けます。"
-    },
-    {
-      "id": "scene06-beat2",
-      "time": 281.71999999998945,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene06-beat5",
-      "time": 307.79999999998813,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene06-beat6",
-      "time": 317.1599999999876,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene06-05-02",
-      "time": 306.9359999999881,
-      "reason": "math caption",
-      "display": "$\\lambda_i/(\\alpha+\\lambda_i)$ が、各方向に残る割合です。"
-    },
-    {
-      "id": "scene07-beat2",
-      "time": 334.1733333333198,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene07-beat5",
-      "time": 362.879999999985,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene07-beat6",
-      "time": 372.5599999999844,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene07-03-01",
-      "time": 337.95999999998605,
-      "reason": "math caption",
-      "display": "棒の高さを全部足した量を、有効パラメータ数 $\\gamma$ と呼びます。"
-    },
-    {
-      "id": "scene08-beat2",
-      "time": 390.2933333333167,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene08-beat5",
-      "time": 414.7733333333154,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene08-beat6",
-      "time": 423.98666666664815,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene09-beat2",
-      "time": 440.2933333333139,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene09-beat5",
-      "time": 468.3866666666456,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene09-beat6",
-      "time": 479.17333333331175,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene09-03-02",
-      "time": 447.9226666666467,
-      "reason": "math caption",
-      "display": "$N-\\gamma$ は、その調整に使った自由度を考慮する形です。"
-    },
-    {
-      "id": "scene10-beat2",
-      "time": 497.01333333331064,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene10-beat5",
-      "time": 524.9199999999805,
-      "reason": "scene sample"
-    },
-    {
-      "id": "scene10-beat6",
-      "time": 534.8399999999878,
-      "reason": "scene sample"
-    },
-    {
-      "id": "sync-scene01-early",
-      "time": 9.31999999999999,
-      "reason": "sync"
-    },
-    {
-      "id": "sync-scene01-late",
-      "time": 14.173333333333325,
-      "reason": "sync"
-    },
-    {
-      "id": "sync-scene03-early",
-      "time": 130.81999999999778,
-      "reason": "sync"
-    },
-    {
-      "id": "sync-scene03-late",
-      "time": 136.10666666666444,
-      "reason": "sync"
-    },
-    {
-      "id": "sync-scene08-early",
-      "time": 384.9633333333167,
-      "reason": "sync"
-    },
-    {
-      "id": "sync-scene08-late",
-      "time": 390.2933333333167,
-      "reason": "sync"
-    }
-  ],
+  "old_video_seconds": 536.866667,
+  "video_seconds": 574.799678,
+  "audio_seconds": 574.826667,
+  "av_difference_seconds": 0.026989000000071428,
+  "increase_seconds": 37.933010999999965,
+  "increase_percent": 7.065629760917891,
+  "sha256": "a28eba5301dc760141244dafec0386e643a0a71b3ec08375c0711ca2114556f7",
   "long_silences": 0,
   "mean_volume_db": -26.3,
   "max_volume_db": -6.4,
-  "render_animations": 86,
-  "visual_review": "46 frames viewed; all 10 symbolic captions; 3 scene synchronization comparisons",
+  "captions": {
+    "count": 128,
+    "max_width": 9.37421875,
+    "max_height": 0.6995312500000006
+  },
+  "max_timing_error": 4.4138914745417424e-11,
+  "sync": [
+    {
+      "name": "R2.3 circle to ellipse",
+      "start": 157.9333333333295,
+      "end": 162.2666666666626,
+      "first_voice": 158.0027083333295,
+      "last_voice": 162.1484583333295
+    },
+    {
+      "name": "R2.3 covariance to precision",
+      "start": 162.2666666666626,
+      "end": 166.46666666666235,
+      "first_voice": 162.36237499999618,
+      "last_voice": 166.27770833332949
+    },
+    {
+      "name": "R2.3 higher curvature narrower widths",
+      "start": 166.46666666666235,
+      "end": 169.86666666666216,
+      "first_voice": 166.6333333333295,
+      "last_voice": 169.74912499999616
+    },
+    {
+      "name": "V13a same quadratic",
+      "start": 188.93333333332774,
+      "end": 192.33333333332754,
+      "first_voice": 189.00541666666282,
+      "last_voice": 192.3332083333295
+    },
+    {
+      "name": "V13a clear expanded form",
+      "start": 192.33333333332754,
+      "end": 192.73333333332752,
+      "first_voice": 192.3333333333295,
+      "last_voice": 192.4613333333295
+    },
+    {
+      "name": "V13a show completed square",
+      "start": 192.73333333332752,
+      "end": 194.59999999999408,
+      "first_voice": 192.7659583333295,
+      "last_voice": 194.43829166666285
+    },
+    {
+      "name": "V13a minimum at w=1",
+      "start": 194.59999999999408,
+      "end": 197.93333333332723,
+      "first_voice": 194.6388333333295,
+      "last_voice": 197.93329166666283
+    },
+    {
+      "name": "V13a constant height 3",
+      "start": 197.93333333332723,
+      "end": 199.7999999999938,
+      "first_voice": 197.9333333333295,
+      "last_voice": 199.65112499999617
+    },
+    {
+      "name": "V10 clear unit width label",
+      "start": 217.06666666665947,
+      "end": 217.46666666665945,
+      "first_voice": 217.13879166666283,
+      "last_voice": 217.46662499999616
+    },
+    {
+      "name": "V10 curvature to standard deviations",
+      "start": 217.46666666665945,
+      "end": 221.6666666666592,
+      "first_voice": 217.46666666666283,
+      "last_voice": 221.66662499999617
+    },
+    {
+      "name": "V10 show half width",
+      "start": 221.6666666666592,
+      "end": 222.13333333332585,
+      "first_voice": 221.66666666666282,
+      "last_voice": 222.01437499999616
+    },
+    {
+      "name": "V10 product of widths",
+      "start": 222.13333333332585,
+      "end": 226.59999999999226,
+      "first_voice": 222.23333333332948,
+      "last_voice": 226.48829166666283
+    },
+    {
+      "name": "V10 common Gaussian factor and peak",
+      "start": 226.59999999999226,
+      "end": 231.13333333332534,
+      "first_voice": 226.69066666666282,
+      "last_voice": 231.0049999999962
+    }
+  ],
+  "frame_samples": [
+    {
+      "id": "scene01",
+      "time": 19.66666666666663,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene02",
+      "time": 71.60000000000136,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene03",
+      "time": 125.76666666666486,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene04",
+      "time": 183.99999999999497,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene05",
+      "time": 273.16666666665657,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene06",
+      "time": 324.43333333332026,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene07",
+      "time": 378.6999999999839,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene08",
+      "time": 433.39999999998076,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene09",
+      "time": 484.3333333333112,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene10",
+      "time": 541.1999999999957,
+      "reason": "existing scene"
+    },
+    {
+      "id": "scene04-beat1",
+      "time": 169.71666666666283,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat2",
+      "time": 178.51666666666213,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat3",
+      "time": 188.3833333333283,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat4",
+      "time": 199.58333333332772,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat5",
+      "time": 207.18333333332708,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat6",
+      "time": 216.51666666666,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat7",
+      "time": 230.91666666665947,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat8",
+      "time": 240.78333333332532,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-beat9",
+      "time": 250.4499999999914,
+      "reason": "all scene04 beats"
+    },
+    {
+      "id": "scene04-recap-before",
+      "time": 157.6333333333295,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-recap-enter",
+      "time": 158.5333333333295,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-recap-exit",
+      "time": 169.96666666666283,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-recap-after",
+      "time": 170.56666666666285,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-recap-01",
+      "time": 160.09866666666284,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-recap-02",
+      "time": 166.06133333332951,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-recap-action0",
+      "time": 160.09999999999604,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-recap-action1",
+      "time": 164.36666666666247,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-recap-action2",
+      "time": 168.16666666666225,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-square-before",
+      "time": 188.63333333332773,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-square-enter",
+      "time": 189.53333333332773,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-square-exit",
+      "time": 199.83333333332772,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-square-after",
+      "time": 200.43333333332774,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-square-01",
+      "time": 191.75466666666108,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-square-02",
+      "time": 197.17333333332772,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-square-action0",
+      "time": 190.63333333332764,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-square-action1",
+      "time": 192.53333333332753,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-square-action2",
+      "time": 193.6666666666608,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-square-action3",
+      "time": 196.26666666666065,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-square-action4",
+      "time": 198.8666666666605,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-volume-before",
+      "time": 216.76666666665946,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-volume-enter",
+      "time": 217.66666666665947,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-volume-exit",
+      "time": 231.16666666665947,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-volume-after",
+      "time": 231.7666666666595,
+      "reason": "insert transition"
+    },
+    {
+      "id": "scene04-volume-01",
+      "time": 219.60533333332614,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-volume-02",
+      "time": 224.3679999999928,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-volume-03",
+      "time": 228.85333333332613,
+      "reason": "new caption"
+    },
+    {
+      "id": "scene04-volume-action0",
+      "time": 217.26666666665946,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-volume-action1",
+      "time": 219.56666666665933,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-volume-action2",
+      "time": 221.89999999999253,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-volume-action3",
+      "time": 224.36666666665906,
+      "reason": "new action"
+    },
+    {
+      "id": "scene04-volume-action4",
+      "time": 228.8666666666588,
+      "reason": "new action"
+    },
+    {
+      "id": "reference-0",
+      "time": 103.79999999999926,
+      "reason": "3.4 reference label"
+    },
+    {
+      "id": "reference-1",
+      "time": 112.43333333333258,
+      "reason": "3.4 reference label"
+    },
+    {
+      "id": "reference-2",
+      "time": 113.23333333333258,
+      "reason": "3.4 reference label"
+    }
+  ],
+  "new_cards": [
+    {
+      "id": "scene04-recap-01",
+      "start": 157.9333333333295,
+      "end": 170.26666666666284,
+      "duration": 12.333333333333343
+    },
+    {
+      "id": "scene04-square-01",
+      "start": 188.93333333332774,
+      "end": 200.13333333332773,
+      "duration": 11.199999999999989
+    },
+    {
+      "id": "scene04-volume-01",
+      "start": 217.06666666665947,
+      "end": 231.46666666665948,
+      "duration": 14.400000000000006
+    }
+  ],
   "listened_in_full": false,
+  "visual_review": {
+    "first_render_frames_viewed": 51,
+    "final_frames": 54,
+    "identical_frames": 38,
+    "changed_frames": [
+      10,
+      21,
+      24,
+      26,
+      27,
+      35,
+      36,
+      37,
+      38,
+      40,
+      43,
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "changed_frames_viewed": true
+  },
+  "phrase_timing_estimates": [
+    {
+      "id": "scene04-recap-02",
+      "phrase": "マガリ",
+      "estimated_start": 166.6141254429144,
+      "estimated_end": 166.98960442666765,
+      "method": "audio_query phoneme lengths / speedScale; estimated, not listening"
+    },
+    {
+      "id": "scene04-square-02",
+      "phrase": "タニソコ",
+      "estimated_start": 196.8465241502435,
+      "estimated_end": 197.38042919609723,
+      "method": "audio_query phoneme lengths / speedScale; estimated, not listening"
+    },
+    {
+      "id": "scene04-volume-02",
+      "phrase": "ハバノセキ",
+      "estimated_start": 222.21807407407408,
+      "estimated_end": 222.87921226396165,
+      "method": "audio_query phoneme lengths / speedScale; estimated, not listening"
+    }
+  ],
   "numeric_checks": [
     "Evidence / predictive covariance / square completion / derivative: PASS; max error 4.760636329592671e-12",
     "Scalar integral quadrature: PASS; max error 2.7755575615628914e-17",
     "30 iterations: PASS {'alpha': 3.678367661141862, 'beta': 10.58176866158709, 'gamma': 5.288678190897074, 'logev': -11.925703415001731}",
     "Plot range: PASS; mean max 1.3033190882518657 RMS range 0.2412147268279772 0.5275274822287828",
     "Polynomial optimum d=3: -17.82335067500967",
-    "10 WAV, hashes, 121 readings / captions: PASS; total seconds 536.8666666666667"
-  ]
+    "Visual examples: square completion and width product 0.5: PASS",
+    "10 WAV, hashes, 128 readings / captions: PASS; total seconds 574.8"
+  ],
+  "render_animations": 102,
+  "preserved_audio": {
+    "unchanged_scene_wav_and_manifest_entries": 9,
+    "scene04_byte_identical_original_sentences": 12,
+    "total_original_sentences_preserved": 121
+  },
+  "reading_review": {
+    "new_sentences": 7,
+    "api_sentences": 128,
+    "fixed_readings": [
+      "二分の一: ニフンノイチ → ニブンノイチ"
+    ],
+    "method": "audio_query mora strings inspected; no full listening"
+  }
 }
