@@ -91,6 +91,32 @@ scene('まだ出ていない色を、どう予測する？', 'pp.77–78 / 式(2
  ('三角形から二状態の線へ、全体を結ぶ', [('候補が二つなら、単体は線分、ディリクレ分布はベータ分布に対応します。','候補が二つなら、単体は線分、ディリクレ分布はベータ分布に対応します。'), '一回の色、回数の組、確率の地図。この三つをつなぐと、多項変数の学習が見通せます。']),
 ])
 
+# Insert with new IDs so all existing sentence IDs and PCM remain stable.
+SCENES[3]['beats'].insert(5, dict(seconds=18,
+    visual_note='補足 V12：2カテゴリの制約線上を移動し、等高線との接点と法線の倍率を示す',
+    segments=[
+        dict(id='scene04-aid-01', display='二種類の例で、確率の合計を $1$ に保って点を動かします。',
+             speech='二種類の例で、確率の合計を一に保って点を動かします。'),
+        dict(id='scene04-aid-02', display='線に沿って、尤度がこれ以上増えない場所を探します。',
+             speech='線に沿って、尤度がこれ以上増えない場所を探します。'),
+        dict(id='scene04-aid-03', display='ここでは、増える向きの矢印が、制約線に垂直です。',
+             speech='ここでは、増える向きの矢印が、制約線に垂直です。'),
+        dict(id='scene04-aid-04', display=r'$\lambda$ は、この向きの倍率を合わせる補助の数です。',
+             speech='ラムダは、この向きの倍率を合わせる補助の数です。'),
+    ]))
+SCENES[7]['beats'].insert(0, dict(seconds=16,
+    visual_note='復習 R：1.2の青い事前×橙の尤度→紫の事後、面積1、一本の軸から確率の組へ',
+    segments=[
+        dict(id='scene08-recap-01', display='1.2では、一つの確率の候補をベイズ更新しました。',
+             speech='一章二節では、一つの確率の候補をベイズ更新しました。'),
+        dict(id='scene08-recap-02', display='事前分布に、観測の尤度を掛けます。',
+             speech='事前分布に、観測の尤度を掛けます。'),
+        dict(id='scene08-recap-03', display='面積を $1$ にそろえると、事後分布になります。',
+             speech='面積を一にそろえると、事後分布になります。'),
+        dict(id='scene08-recap-04', display='今回は、合計が $1$ になる、三つの確率の組へ広げます。',
+             speech='今回は、合計が一になる、三つの確率の組へ広げます。'),
+    ]))
+
 # Apply pronunciation corrections to speech only; keep mathematical display intact.
 SPEECH_REPLACEMENTS = {
     '黄色': 'きいろ', '何色': 'なにいろ', '指数として付けます': '指数としてつけます',
@@ -119,6 +145,8 @@ def export():
            '字幕はdisplay、合成はspeech。1 beatにつき一つの視覚操作を、文のPCM時間に合わせます。','']
     for s in SCENES:
         e=entries.get(s['id'],{})
+        if e.get('script_sha256') != script_hash(s):
+            e={}
         lines += [f"## {s['id']} {s['title']}", '',f"原文：{s['reference']}",f"音声尺：{e.get('duration','未生成')} 秒",'']
         for i,b in enumerate(s['beats']):
             lines += [f"### {i+1}. {b['visual_note']}",'']
