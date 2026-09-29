@@ -93,6 +93,45 @@ for scene in SCENES:
         for j, segment in enumerate(b['segments'], 1):
             segment['id'] = f"{scene['id']}-{i:02}-{j:02}"
 
+
+# Assign old IDs before inserting cards so all existing sentence anchors remain stable.
+def review_beat(scene_id, kind, note, *lines):
+    item = beat(note, *lines)
+    for i, segment in enumerate(item['segments'], 1):
+        segment['id'] = f'{scene_id}-{kind}-{i:02}'
+    return item
+
+
+SCENES[0]['beats'].insert(2, review_beat('scene01', 'recap', '復習 R：1.2の赤青の面積を切り出し、合計1へ正規化。箱からクラスへ。',
+    (r'1.2では、観測に合う部分を集め、合計を $1$ にしました。',
+     '一章二せつでは、観測に合う部分を集め、合計を一にしました。'),
+    ('ここでも、クラスの割合と、観測の出やすさを組み合わせます。',
+     'ここでも、クラスの割合と、観測の出やすさを組み合わせます。')))
+SCENES[2]['beats'].insert(0, review_beat('scene03', 'recap', '復習 R：2.3の青い点群、緑の楕円、緑紫の主軸。中心だけを移す。',
+    ('2.3のガウス分布では、中心が平均、楕円の形が共分散でした。',
+     '二章三せつのガウス分布では、中心が平均、楕円の形がきょうぶんさんでした。'),
+    '同じ共分散なら、中心を移しても形は同じです。'))
+# Split exactly after scene06-06-01; the original second sentence follows the card.
+original = SCENES[5]['beats'][5]
+remaining = dict(original, segments=original['segments'][1:])
+original['segments'] = original['segments'][:1]
+SCENES[5]['beats'][6:6] = [
+    review_beat('scene06', 'aid', '補足 V08d：説明用の残差(2,-1)の外積。全点の表を足しNで割る。',
+        ('残差を縦横に掛けると、対角には二乗が入ります。', '残差をたてよこに掛けると、対角には二乗が入ります。'),
+        '交差する場所には、成分同士の積が入ります。',
+        ('全点の表を足して、点数で割ると共分散です。', '全点のひょうを足して、点数で割るときょうぶんさんです。')),
+    remaining]
+SCENES[7]['beats'].insert(3, review_beat('scene08', 'recap', '復習 R：2.1の青0・緑1の棒。単語の有無で因子を選択。',
+    ('2.1のベルヌーイ分布を思い出しましょう。',
+     '二章一せつのベルヌーイ分布を思い出しましょう。'),
+    (r'$1$ なら $\mu$、$0$ なら $1-\mu$ を選びます。',
+     '一ならミュー、ゼロなら一引くミューを選びます。'),
+    'これを、単語ごとに用意します。'))
+SCENES[8]['beats'].insert(1, review_beat('scene09', 'recap', '復習 R：2.4の土台・正規化・指数の3枠を再現し、クラス別の式へ。',
+    ('2.4では、入力だけの土台と、正規化の係数、指数の部分に分けました。',
+     '二章四せつでは、入力だけの土台と、せいきかの係数、指数の部分に分けました。'),
+    '今回は、クラス間で共通の部分に注目します。'))
+
 SYNTHESIS_SETTINGS = dict(speedScale=1.08, intonationScale=.95, prePhonemeLength=.08, postPhonemeLength=.12, volumeScale=1.)
 
 def estimated_duration(beat):
