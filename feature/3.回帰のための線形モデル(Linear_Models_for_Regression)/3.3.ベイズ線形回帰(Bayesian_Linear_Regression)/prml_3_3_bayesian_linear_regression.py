@@ -141,9 +141,9 @@ class PRML33BayesianLinearRegression(NarratedScene):
             self.add(*header,frame,label,self.subtitle,ga,ring,dots,xlabels)
             return Transform(label,jp('復習: 2.3 ガウス分布',23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
         self.beat(phases=[
-            ('R1.2 recall prior and likelihood',a*.25,lambda:Wait()),
-            ('R1.2 multiply',a*.32,lambda:Transform(prior,product)),
-            ('R1.2 normalize',a*.43,lambda:AnimationGroup(Transform(prior,post),FadeIn(mass))),
+            ('R1.2 recall prior and likelihood',a*.24,lambda:Wait()),
+            ('R1.2 multiply',a*.26,lambda:Transform(prior,product)),
+            ('R1.2 normalize',a*.50,lambda:AnimationGroup(Transform(prior,post),FadeIn(mass))),
             ('R2.3 change source',b*.22,switch),
             ('R2.3 ellipse and axes',b*.78,lambda:AnimationGroup(Transform(ring,ellipse),Transform(dots,target),Create(axes))),
             ('R map coordinates to weights',c*.55,lambda:AnimationGroup(Transform(xlabels,wlabels),FadeIn(mapping),FadeIn(center))),
@@ -170,8 +170,8 @@ class PRML33BayesianLinearRegression(NarratedScene):
             return AnimationGroup(*[Transform(moving[2*i+j],target.get_entries()[3*j+i])
                                     for i in range(3) for j in range(2)],FadeIn(brackets))
         self.beat(phases=[
-            ('V08c identify columns',a*.42,lambda:Circumscribe(source.get_columns()[0],color=yellow)),
-            ('V08c columns to rows',a*.58,fold),
+            ('V08c identify columns',a*.485,lambda:Circumscribe(source.get_columns()[0],color=yellow)),
+            ('V08c columns to rows',a*.515,fold),
             ('V08c dimensions',b*.65,lambda:AnimationGroup(GrowArrow(arrow),FadeIn(size2))),
             ('V08c preserve entries',b*.35,lambda:Circumscribe(moving,color=yellow)),
         ])
@@ -205,8 +205,8 @@ class PRML33BayesianLinearRegression(NarratedScene):
             ('V09b show horizontal projection',a,lambda:AnimationGroup(Create(hx),Create(shadowx))),
             ('V09b horizontal standard deviation and variance',b*.43,lambda:FadeIn(horizontal)),
             ('V09b vertical projection',b*.57,lambda:AnimationGroup(FadeOut(hx),Create(hy),Create(shadowy),FadeIn(vertical))),
-            ('V09b quadratic variance',c*.43,lambda:FadeIn(result)),
-            ('V09b general length factor',c*.57,lambda:FadeIn(general)),
+            ('V09b quadratic variance',c*.57,lambda:FadeIn(result)),
+            ('V09b general length factor',c*.43,lambda:FadeIn(general)),
         ])
         self.restore_body(saved)
 
