@@ -281,7 +281,7 @@ class PRML44LaplaceApproximation(NarratedScene):
     def gaussian_recap(self):
         saved=self.body_card('復習: 2.3 ガウス分布')
         # 2.3 shape(): red normalized bell, yellow centre, red width control.
-        ax=Axes(x_range=(-3,3,1),y_range=(0,.7,.2),x_length=5.4,y_length=2.15,
+        ax=Axes(x_range=(-5,5,2),y_range=(0,.7,.2),x_length=5.4,y_length=2.15,
                 tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=18)).move_to([-2.3,.1,0])
         mu=ValueTracker(0);sd=ValueTracker(.75)
         bell=always_redraw(lambda:self.curve(ax,lambda x:gaussian(x,mu.get_value(),sd.get_value()**-2),RED))
@@ -293,13 +293,15 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.add(ax,bell,centre,tex('z',23).next_to(ax.x_axis,RIGHT),
                  knob(mu,-1.5,1.5,-3.8,r'\mu',GOLD),knob(sd,.55,1.4,-.8,r'\sigma',RED),
                  jp('密度の面積 = 1',21,MUTED).move_to([-2.3,1.55,0]))
-        source=VGroup(tex(r'\mu:\ \mathrm{centre}',28,GOLD),tex(r'\sigma^2:\ \mathrm{variance}',28,RED)).arrange(DOWN,buff=.6).move_to([3,.4,0])
+        source=VGroup(VGroup(tex(r'\mu',30,GOLD),jp('中心',23,GOLD)).arrange(RIGHT,buff=.3),
+                      VGroup(tex(r'\sigma^2',30,RED),jp('分散',23,RED)).arrange(RIGHT,buff=.3)).arrange(DOWN,buff=.6).move_to([3,.4,0])
         self.add(source)
         self.beat(Succession(mu.animate.set_value(1.2),sd.animate.set_value(1.3)))
         target=VGroup(tex(r'\mu=z_0',32,GOLD),tex(r'\sigma^2=A^{-1}',32,RED)).arrange(DOWN,buff=.6).move_to(source)
         labels=VGroup(jp('今回：元の山のモード',21,GOLD).move_to([3,1.55,0]),
                       jp('負の対数の曲率 A > 0',21,RED).move_to([3,-1.05,0]))
-        self.beat(Transform(source,target),FadeIn(labels),mu.animate.set_value(Z0),sd.animate.set_value(A**-.5))
+        self.beat(self.brief(AnimationGroup(FadeOut(source),FadeIn(target),FadeIn(labels))),
+                  mu.animate.set_value(Z0),sd.animate.set_value(A**-.5))
         self.restore_body(saved)
 
     def hessian_aid(self):
@@ -316,6 +318,7 @@ class PRML44LaplaceApproximation(NarratedScene):
         line=always_redraw(tangent)
         dot=always_redraw(lambda:Dot(ax.c2p(x.get_value(),h(x.get_value())),color=AID_OPERATION))
         self.add(ax,graph,line,dot,tex('x',24).next_to(ax.x_axis,RIGHT),
+                 jp('y を固定した断面：横軸 x、縦軸 h',18,MUTED).move_to([-2.65,1.55,0]),
                  tex(r'h(x,y)=\frac{x^2+xy+y^2}{2}',29,AID_INPUT).move_to([2.7,.85,0]))
         self.number('y=',y.get_value,[-4,-1.55,0],AID_COMPARE)
         self.number(r'\partial h/\partial x=',lambda:x.get_value()+.5*y.get_value(),[-1,-1.55,0],AID_OPERATION)
@@ -327,7 +330,8 @@ class PRML44LaplaceApproximation(NarratedScene):
         entries=mat.get_entries();entries[1].set_color(AID_COMPARE);entries[2].set_color(AID_COMPARE)
         label=tex('H=',28).next_to(mat,LEFT,buff=.15)
         cross=tex(r'\frac{\Delta h_x}{\Delta y}=\frac{0.5}{1}=0.5',28,AID_COMPARE).move_to([2.7,-.05,0])
-        self.beat(Transform(atzero,cross),FadeIn(mat),FadeIn(label),
+        self.beat(self.brief(AnimationGroup(FadeOut(atzero),FadeIn(cross),FadeIn(mat),FadeIn(label))),
+                  Circumscribe(VGroup(entries[1],entries[2]),color=AID_COMPARE),
                   self.equation(r'H=\nabla\nabla h=A\succ0',colors={0:AID_RESULT},size=29))
         self.restore_body(saved)
 
@@ -347,7 +351,7 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(a.animate.set_value(4))
         determinant=tex(r'|A|=4\times1=4',30,AID_OPERATION).move_to([2.6,-.65,0])
         result=tex(r'\sigma_1\sigma_2=|A|^{-1/2}=\frac12',30,AID_COMPARE).move_to([2.6,-1.5,0])
-        self.beat(FadeIn(determinant),FadeIn(result),
+        self.beat(self.brief(AnimationGroup(FadeIn(determinant),FadeIn(result))),
                   Circumscribe(rect,color=AID_OPERATION),
                   self.equation(r'Z_{\rm L}=f(z_0)(2\pi)^{M/2}',r'|A|^{-1/2}',colors={1:AID_RESULT},size=29))
         self.restore_body(saved)
@@ -379,11 +383,13 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(Create(pc),scan.animate.set_value(2))
         maximum=Dot(ax.c2p(1,product(1)),color=RED,radius=.07)
         label=jp('頂上の高さ',20,RED).move_to([2.5,-.6,0])
-        bridge=VGroup(jp('今回の図の色へ',20).move_to([2.5,-1.2,0]),
+        bridge=VGroup(jp('今回の図の色へ',20).move_to([2.5,-1.15,0]),
                       tex(r'L:\ ',23,BLUE),tex(r'\longrightarrow',23),tex('L',23,GOLD),
                       tex(r'p:\ ',23,PURPLE),tex(r'\longrightarrow',23),tex('p',23,BLUE))
-        VGroup(*bridge[1:]).arrange(RIGHT,buff=.14).move_to([2.5,-1.75,0])
-        self.beat(FadeIn(maximum),FadeIn(label),FadeIn(bridge),
+        VGroup(*bridge[1:]).arrange(RIGHT,buff=.14).move_to([2.5,-1.6,0])
+        product_bridge=VGroup(jp('積',19,GOLD),tex(r'\longrightarrow',21),jp('積・証拠',19,PURPLE)).arrange(RIGHT,buff=.12).move_to([2.5,-1.97,0])
+        bridge.add(product_bridge)
+        self.beat(self.brief(AnimationGroup(FadeIn(maximum),FadeIn(label),FadeIn(bridge))),
                   self.equation(r'p(D)=\int',r'L(w)',r'p(w)',r'\,dw',colors={1:BLUE,2:PURPLE}),
                   Circumscribe(bars,color=GOLD))
         self.restore_body(saved)

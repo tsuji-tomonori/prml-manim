@@ -153,3 +153,8 @@ class NarratedScene(Scene):
         self.clear()
         objects, self.formula, self.caption = saved
         self.add(*objects)
+
+    def brief(self, animation, seconds=.7):
+        """Complete text transitions promptly while the numerical action continues."""
+        duration=self.entry['beat_durations'][self.index]
+        return Succession(animation.set_run_time(seconds),Wait(duration-seconds))
