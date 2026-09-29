@@ -70,7 +70,8 @@ class NarratedScene(Scene):
             self.start=float(self.time)
             self.bi=0
             self.subtitle=None
-            self.add(jp(self.story['title'],33).move_to([0,3.35,0]))
+            self.header=jp(self.story['title'],33).move_to([0,3.35,0])
+            self.add(self.header)
             self.add_sound(str(OUTPUT_DIR/(self.story['id']+'.wav')))
             self.timeline.append(dict(id=self.story['id'],title=self.story['title'],reference=self.story['reference'],start=self.start,beats=[]))
             method()

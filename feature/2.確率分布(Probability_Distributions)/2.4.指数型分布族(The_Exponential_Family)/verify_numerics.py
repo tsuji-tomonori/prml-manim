@@ -29,6 +29,13 @@ def main():
             assert error<1e-9
             assert np.isclose(np.trapezoid(x*p,x),mu)
             assert np.isclose(np.trapezoid(x*x*p,x),mu*mu+sd*sd)
+    # Review examples: component product and variance as a weighted square deviation.
+    assert np.dot([2,-1],[1,3]) == -1
+    for m, expected in [(.5,.25),(.1,.09)]:
+        e=np.log(m/(1-m))
+        assert np.isclose(sigmoid(e),m)
+        direct=(1-m)*(0-m)**2+m*(1-m)**2
+        assert np.isclose(direct,expected)
     step=1e-3
     A=lambda e:np.logaddexp(0,e)
     first=(A(grid+step)-A(grid-step))/(2*step)
@@ -71,6 +78,6 @@ def main():
         for seg in [seg for b in s['beats'] for seg in b['segments']]:
             assert not re.search('エックス|イータ|ミュー|シグマ|ラムダ|ニュー|カイ',seg['display'])
         assert all(abs(d*15-round(d*15))<1e-9 for d in en['beat_durations'])
-    print(json.dumps(dict(checks='8 groups passed',errors=errors,coin_mean=float(COINS.mean()),gaussian_sum=float(POINTS.sum()),gaussian_square_sum=float((POINTS**2).sum()),gaussian_mean=float(POINTS.mean()),gaussian_variance=float(POINTS.var()),posterior_mean=9/14,audio_seconds=sum(e['duration'] for e in manifest['scenes'])),indent=2))
+    print(json.dumps(dict(checks='8 original groups + review examples passed',errors=errors,coin_mean=float(COINS.mean()),gaussian_sum=float(POINTS.sum()),gaussian_square_sum=float((POINTS**2).sum()),gaussian_mean=float(POINTS.mean()),gaussian_variance=float(POINTS.var()),posterior_mean=9/14,audio_seconds=sum(e['duration'] for e in manifest['scenes'])),indent=2))
 
 if __name__=='__main__': main()

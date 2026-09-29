@@ -70,12 +70,134 @@ class PRML24ExponentialFamily(NarratedScene):
         full=MathTex(r'p(x|\eta)=',r'h(x)',r'g(\eta)',r'\exp\{',r'\eta^{\mathrm T}',r'u(x)',r'\}',font_size=43).move_to([0,.65,0])
         for i,c in [(1,MUTED),(2,PURPLE),(4,YELLOW),(5,BLUE)]: full[i].set_color(c)
         self.beat(self.match(logit,full),self.highlight(VGroup(full[4],full[5])))
+        self.inner_product_aid()
         meanings=VGroup(jp('特徴量：データから作る材料',24,BLUE),jp('自然パラメータ：材料の重み',24,YELLOW),jp('土台 × 正規化係数',24,PURPLE)).arrange(DOWN,buff=.22).move_to([0,-.8,0])
         self.add(jp('連続：積分　離散：和',18,MUTED).move_to([0,-1.8,0]))
         normalization=formula(r'g(\eta)\int h(x)\exp\{\eta^{\mathrm T}u(x)\}\,dx=1',(0,-2.3,0),30)
         self.beat(FadeIn(meanings[:2]),AnimationGroup(FadeIn(meanings[2]),FadeIn(normalization)))
         sub=formula(r'u(x)=x,\quad h(x)=1,\quad g(\eta)=\frac{1}{1+e^\eta}',(0,2.35,0),31)
         self.beat(FadeIn(sub),self.highlight(full))
+
+
+    def review_body(self, label):
+        body=[m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        self.remove(*body)
+        frame=RoundedRectangle(width=11.6,height=5.1,corner_radius=.12,
+                               color='#FFFF00',stroke_width=1.3)
+        heading=jp(label,24).move_to([-5.4,2.17,0],aligned_edge=LEFT)
+        self.add(frame,heading)
+        return body
+
+    def restore_body(self, body):
+        temporary=[m for m in self.mobjects if m is not self.header and m is not self.subtitle]
+        for m in temporary:
+            m.clear_updaters(recursive=True)
+        self.remove(*temporary)
+        self.add(*body)
+
+    def inner_product_aid(self):
+        body=self.review_body('補足：縦から横へ、掛けて足す')
+        blue='#58C4DD'; purple='#9A72AC'; yellow='#FFFF00'; green='#83C167'
+        self.add(jp('説明用の例：2つの成分',20,MUTED).move_to([2.8,2.16,0]))
+        col=Matrix([[2],[-1]],element_to_mobject=lambda x:tex(str(x),32,purple),
+                   v_buff=.6).move_to([-4, .55,0])
+        name=tex(r'\eta=',30,purple).next_to(col,LEFT)
+        row=Matrix([[2,-1]],element_to_mobject=lambda x:tex(str(x),32,purple),
+                   h_buff=.85).move_to([-1,.55,0])
+        rowname=tex(r'\eta^T=',30,purple).next_to(row,UP,buff=.25)
+        u=Matrix([[1],[3]],element_to_mobject=lambda x:tex(str(x),32,blue),
+                 v_buff=.6).move_to([1.25,.55,0])
+        uname=tex('u=',30,blue).next_to(u,UP,buff=.25)
+        arrow=Arrow([-3,.55,0],[-2.2,.55,0],color=yellow,buff=.05)
+        self.add(col,name)
+        products=VGroup(tex(r'2\times1=+2',32,yellow),tex(r'(-1)\times3=-3',32,yellow)).arrange(DOWN,buff=.35).move_to([3.65,.55,0])
+        total=tex(r'\eta^T u=2-3=-1',38,green).move_to([0,-1.55,0])
+        # The example retains signs; projection geometry is unnecessary here.
+        self.beat(
+            AnimationGroup(TransformFromCopy(col,row),FadeIn(rowname),GrowArrow(arrow)),
+            AnimationGroup(FadeIn(u),FadeIn(uname),
+                LaggedStart(*[TransformFromCopy(VGroup(row.get_entries()[i],u.get_entries()[i]),products[i])
+                              for i in range(2)],lag_ratio=.4)),
+            AnimationGroup(TransformFromCopy(products,total),
+                           ShowPassingFlash(SurroundingRectangle(products,color=yellow),time_width=.7)),
+        )
+        self.restore_body(body)
+
+    def mean_recap(self):
+        body=self.review_body('復習: 1.2 期待値')
+        # Preserve 1.2 moments(): blue probability bars, yellow mean marker.
+        mu=ValueTracker(.3)
+        ax=Axes(x_range=[0,1,.5],y_range=[0,1,.5],x_length=5.4,y_length=2,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=20))
+        ax.move_to([-1.6,-.05,0])
+        zero=tex('0',22).move_to(ax.c2p(0,0)+DOWN*.3)
+        bars=always_redraw(lambda:VGroup(*[
+            Rectangle(width=.42,height=2*p,color=BLUE,fill_opacity=.6)
+            .move_to(ax.c2p(k,0),aligned_edge=DOWN)
+            for k,p in [(0,1-mu.get_value()),(1,mu.get_value())]]))
+        mean=always_redraw(lambda:Line(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),1),color=YELLOW))
+        fulcrum=always_redraw(lambda:Triangle(color=YELLOW,fill_opacity=1).scale(.1)
+                             .move_to(ax.c2p(mu.get_value(),0)+DOWN*.13))
+        labels=VGroup(jp('確率',22,BLUE).move_to([-4.8,1.33,0]),
+                      jp('平均',22,YELLOW).move_to([.7,1.33,0]),
+                      tex('x',24).next_to(ax.x_axis,RIGHT,buff=.3))
+        value=readout(r'\mathbb E[x]=\mu=',mu.get_value,(3.2,.7,0),YELLOW)
+        eq=tex(r'0(1-\mu)+1\mu=\mu',32,YELLOW).move_to([-1.6,-1.78,0])
+        link=tex(r'\mathbb E[x]\ \longrightarrow\ A^{\prime}(\eta)',30,YELLOW).move_to([3.0,-1.5,0])
+        self.add(ax,bars,mean,fulcrum,labels,value,zero)
+        self.beat(
+            self.highlight(bars,BLUE),
+            AnimationGroup(mu.animate.set_value(.7),FadeIn(eq)),
+            AnimationGroup(FadeIn(link),self.highlight(value)()),
+        )
+        self.restore_body(body)
+
+    def curvature_aid(self):
+        body=self.review_body('補足：二階微分は、傾きの変わりやすさ')
+        blue='#58C4DD'; yellow='#FFFF00'; green='#83C167'
+        eta=ValueTracker(0.)
+        mu=lambda:float(sigmoid(eta.get_value()))
+        variance=lambda:mu()*(1-mu())
+        self.add(jp('ベルヌーイの例',20,MUTED).move_to([3.7,2.17,0]),
+                 jp('微分する変数：',20).move_to([2.55,1.55,0]),
+                 tex(r'\eta',27,yellow).move_to([4.05,1.55,0]))
+        def small_axes(ymax,center):
+            a=Axes(x_range=[-3,3,1],y_range=[0,ymax,ymax],x_length=4.6,y_length=1.2,
+                   tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=17)).move_to(center)
+            return a
+        upper=small_axes(3.2,(-2.6,.85,0));lower=small_axes(1.,(-2.6,-1.13,0))
+        A=lambda x:np.logaddexp(0,x)
+        def tangent(ax,f,df):
+            e=eta.get_value()
+            return Line(ax.c2p(e-.55,f(e)-.55*df()),ax.c2p(e+.55,f(e)+.55*df()),
+                        color=yellow,stroke_width=4)
+        top_tan=always_redraw(lambda:tangent(upper,A,mu))
+        low_tan=always_redraw(lambda:tangent(lower,sigmoid,variance))
+        top=curve(upper,A,-3,3,blue);bottom=curve(lower,sigmoid,-3,3,blue)
+        dot=always_redraw(lambda:Dot(lower.c2p(eta.get_value(),mu()),color=yellow,radius=.065))
+        tag1=tex('A',24,blue).move_to([-5.25,1.42,0])
+        tag2=tex(r'A^{\prime}=\mu',24,blue).move_to([-4.8,-.32,0])
+        xs=VGroup(*[tex(r'\eta',22).next_to(a.x_axis,RIGHT,buff=.12) for a in [upper,lower]])
+        slope=readout(r'A^{\prime}=\mu=',mu,(2.9,.87,0),yellow)
+        second=readout(r'A^{\prime\prime}=',variance,(2.9,.1,0),yellow)
+        equals=tex(r'A^{\prime\prime}=\mu(1-\mu)',30,green).move_to([2.9,-.6,0])
+        # Equal-height bars come from the same Bernoulli distribution.
+        def bar(x,color):
+            return always_redraw(lambda:Rectangle(width=.55,height=3*variance(),color=color,fill_opacity=.65)
+                                 .move_to([x,-1.75,0],aligned_edge=DOWN))
+        bars=VGroup(bar(2.1,yellow),bar(3.7,green))
+        labels=VGroup(jp('変化率',19,yellow).move_to([2.1,-2.0,0]),
+                      jp('分散',19,green).move_to([3.7,-2.,0]))
+        comparison=tex(r'\mu:0.50\to0.10\quad A^{\prime\prime}:0.25\to0.09',24).move_to([-.3,-2.3,0])
+        self.add(upper,top,top_tan,tag1,slope)
+        self.beat(
+            AnimationGroup(FadeIn(lower),FadeIn(bottom),TransformFromCopy(slope[0],tag2),FadeIn(xs),
+                           FadeIn(low_tan),FadeIn(dot)),
+            AnimationGroup(FadeIn(second),FadeIn(equals),FadeIn(bars),FadeIn(labels)),
+            AnimationGroup(eta.animate(rate_func=lambda a:smooth(np.clip((a-.45)/.4,0,1)))
+                           .set_value(np.log(1/9)),FadeIn(comparison,rate_func=lambda a:min(1,8*a))),
+        )
+        self.restore_body(body)
 
     def categories(self):
         a,b=ValueTracker(0),ValueTracker(0)
@@ -157,6 +279,7 @@ class PRML24ExponentialFamily(NarratedScene):
         self.add(ax,labels,graph,target,dot,read,eq,slider(eta,-3,3))
         self.beat(self.highlight(eq),self.highlight(target,BLUE))
         self.beat(eta.animate.set_value(np.log(7/3)),self.highlight(dot))
+        self.mean_recap()
         self.remove(graph,target,dot,labels,read)
         # Replace the coordinate system explicitly: the new ordinate is A, not E[x].
         self.remove(ax)
@@ -167,6 +290,7 @@ class PRML24ExponentialFamily(NarratedScene):
         self.add(ax,labels,graph,tangent,read)
         self.beat(self.change(eq,formula(r'A(\eta)=-\ln g(\eta),\quad\nabla A=\mathbb E[u(x)]')),eta.animate.set_value(-1.5))
         self.beat(eta.animate.set_value(1.5),self.change(eq,formula(r'\nabla^2 A=\operatorname{Cov}[u(x)]')))
+        self.curvature_aid()
         optimum=formula(r'-\nabla\ln g(\eta_{\rm ML})=\frac1N\sum_n u(x_n)',(0,2.35,0),34)
         self.beat(AnimationGroup(self.change(eq,optimum),eta.animate.set_value(np.log(7/3))),self.highlight(eq))
         self.beat(self.highlight(eq),AnimationGroup(eta.animate.set_value(3),self.change(eq,formula(r'S=N:\quad \mu_{\rm ML}=1,\quad\eta\to+\infty'))))
@@ -200,7 +324,8 @@ class PRML24ExponentialFamily(NarratedScene):
             return curve(ax,lambda x:transformed_density(x,p),lo,hi,colors[k],True)
         areas=VGroup(*[always_redraw(lambda k=k:piece(k)) for k in range(4)])
         eq=formula(r'p_\lambda(\lambda)=1,\quad 0\leq\lambda\leq1')
-        self.add(ax,labels,areas,eq)
+        recap=jp('復習: 1.2 密度と座標変換',21).move_to([-5.7,2.87,0],aligned_edge=LEFT)
+        self.add(ax,labels,areas,eq,recap)
         self.beat(self.highlight(eq),self.highlight(areas))
         self.beat(self.highlight(areas),self.highlight(ax.x_axis))
         transform=formula(r'\lambda=\eta^q,\quad q:1\to2,\quad 0\leq\eta\leq1')
