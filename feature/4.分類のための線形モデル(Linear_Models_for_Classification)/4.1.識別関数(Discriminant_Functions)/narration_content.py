@@ -101,6 +101,38 @@ for i,(title,reference,beats) in enumerate(STORY,1):
         scene['beats'].append({'seconds':10,'visual_note':note,'segments':segments})
     SCENES.append(scene)
 
+# Keep all original sentence IDs when inserting or splitting a beat.
+def review_beat(scene, kind, seconds, note, pairs):
+    return {'seconds':seconds, 'visual_note':note, 'segments':[
+        {'id':f'{scene}-{kind}-{i:02}', 'display':display, 'speech':speech}
+        for i,(display,speech) in enumerate(pairs,1)]}
+
+SCENES[3]['beats'].insert(0, review_beat('scene04','recap',12,
+    '復習 R：3.1 の入力行・重み・予測列から分類の目標へ', [
+    ('3.1の最小二乗は、予測を目標の数へ近づけました。',
+     '三章一せつの最小二乗は、予測を目標の数へ近づけました。'),
+    ('今回はクラスを表す数に合わせ、分類に使えるかを確かめます。',
+     '今回はクラスを表す数に合わせ、分類に使えるかを確かめます。')]))
+SCENES[4]['beats'].insert(0, review_beat('scene05','recap',12,
+    '復習 R：2.3 の青い点群・緑と紫の主軸から射影へ', [
+    ('2.3では、点の広がりは方向によって違いました。',
+     '二章三せつでは、点の広がりは方向によって違いました。'),
+    ('ここでは、二つの集団を一本の軸へ写し、離れ方と広がりを比べます。',
+     'ここでは、二つの集団を一本の軸へ写し、離れ方と広がりを比べます。')]))
+matrix_beat = SCENES[4]['beats'][6]
+first, second = matrix_beat['segments']
+SCENES[4]['beats'][6:7] = [
+    dict(matrix_beat, segments=[first]),
+    review_beat('scene05','aid',15,
+        '補足 V08d：ずれ (2,1) の外積、各点の和、横方向の二乗偏差和', [
+        ('ずれの成分を縦横に掛けた表を、各点について足します。',
+         'ずれの成分をたてよこに掛けたひょうを、各点について足します。'),
+        ('横方向なら、この左上が二乗偏差の合計です。',
+         '横方向なら、この左上が二乗偏差の合計です。'),
+        ('点の数では割りません。', '点の数では割りません。')]),
+    dict(matrix_beat, visual_note='補足から最適方向へ戻る', segments=[second]),
+]
+
 SYNTHESIS_SETTINGS={'speedScale':1.08,'intonationScale':.95,'prePhonemeLength':.08,'postPhonemeLength':.12,'volumeScale':1.0}
 
 def estimated_duration(beat):
@@ -123,6 +155,9 @@ def export_script():
             lines+=['',f"### {b['visual_note']}"]
             for seg in b['segments']:lines += ['',f"- 字幕: {seg['display']}",f"- 音声: {seg['speech']}"]
     lines += ['', '## 原文との対応・補足', '',
+      '- 復習 R（scene04 冒頭）: 3.1 scene04 matrix の基底・重み・予測列を縮約し、分類の二列の目標へ。青・黄・紫の入力列と赤い予測を継承する。参照: 本文 pp.141–142、(3.14)–(3.20)。',
+      '- 復習 R（scene05 冒頭）: 2.3 scene03 geometry の青い点群、緑の等密度線、緑・紫の主軸を再現し、二集団の射影へつなぐ。参照: 本文 pp.80–83。',
+      '- 補足 V08d（scene05-06-01 直後）: クラス平均との差 r=(2,1) の外積を四つのセルへ。説明用の二クラスのずれ ±(2,1)、±(1,−1) を足すと S_W=[[10,2],[2,4]]。横方向の二乗偏差和は10で、点の数では割らない。参照: (4.24)、(4.28)。',
       '- (4.4)–(4.8): w は非零。原点から境界への量 −w₀/‖w‖ は法線方向の符号付き変位。距離は絶対値。',
       '- (4.9)–(4.12): 最大スコア領域を半平面の共通部分から計算。同点には最小番号規則を使う。二値分類器の曖昧さは単純な票・符号の統合の例で、全ての運用が不能という意味ではない。',
       '- (4.15)–(4.19): 定数列を含むフルランクの設計行列で最小二乗を解く。逆行列形はフル列ランク時、実装は np.linalg.lstsq。Fig.4.4 の構造を点の連続移動で、Fig.4.5 を独自の対称3クラスで示す。ロジスティック回帰との実験比較は4.3へ譲る。',

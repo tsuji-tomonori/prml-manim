@@ -60,6 +60,15 @@ def run():
     assert np.all(np.where(augment(P_X)@P_FINAL>=0,1,-1)==P_T)
     assert np.all(np.where(augment(P_X)@np.r_[-.05,P_FINAL[1:]]>=0,1,-1)==P_T)
     results['perceptron_updates']=len(P_HISTORY)
+    # The aid uses centered residual pairs, not an uncentered second moment.
+    residual_groups=[np.array([[2,1],[-2,-1]]),np.array([[1,-1],[-1,1]])]
+    aid_sw=sum(g.T@g for g in residual_groups)
+    assert all(np.allclose(g.mean(0),0) for g in residual_groups)
+    assert np.array_equal(np.outer([2,1],[2,1]),[[4,2],[2,1]])
+    assert np.array_equal(aid_sw,[[10,2],[2,4]])
+    w=np.array([1,0])
+    assert w@aid_sw@w == sum(np.sum((g@w)**2) for g in residual_groups) == 10
+    results['aid_scatter']={'matrix':aid_sw.tolist(),'horizontal_squared_deviation_sum':10}
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES) and all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     assert {p.stem for p in OUTPUT_DIR.glob('*.wav')}=={s['id'] for s in SCENES}
@@ -70,7 +79,7 @@ def run():
     assert not any(katakana.search(s['display']) for s in sentences)
     results['audio_scenes']=len(entries);results['sentences']=len(sentences)
     results['audio_seconds']=sum(e['duration'] for e in entries)
-    results['checks_passed']=8
+    results['checks_passed']=9
     Path('validation_numerics.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(results,ensure_ascii=False,indent=2))
 

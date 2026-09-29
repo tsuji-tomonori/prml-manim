@@ -9,6 +9,8 @@ BLUE_CLS=ManimColor('#58B5ED'); ORANGE_CLS=ManimColor('#FFB45B')
 GREEN_CLS=ManimColor('#77D49A'); YELLOW_W=ManimColor('#FFE079')
 PURPLE_B=ManimColor('#C29AFF'); RED_LINE=ManimColor('#FF6B77')
 MUTED=ManimColor('#A8B2C5'); COLORS=[BLUE_CLS,ORANGE_CLS,GREEN_CLS]
+AID_INPUT=ManimColor('#58C4DD'); AID_OPERATION=ManimColor('#FFFF00')
+AID_RESULT=ManimColor('#83C167'); AID_COMPARE=ManimColor('#9A72AC')
 
 def readout(label,getter,pos,color=WHITE,places=2,size=27):
     number=DecimalNumber(getter(),num_decimal_places=places,font_size=size,color=color)
@@ -148,6 +150,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.add(slider(bias,0,2,[3.7,-.8,0],'w_{30}',GREEN_CLS));self.beat(bias.animate.set_value(2))
 
     def least_squares_scene(self):
+        self.least_squares_recap()
         self.hint('独自データを毎フレーム再学習する')
         ax=self.axes(xr=(-2.6,2.4,1),yr=(-4.2,1.8,1),width=3.5,height=4.2,center=(-2.6,.1,0))
         amount=ValueTracker(0);W=lambda:least_squares(ls_data(amount.get_value()))
@@ -197,6 +200,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         return ax,dots,theta,axis,projected,guides,strip,shadow
 
     def fisher(self):
+        self.gaussian_recap()
         self.hint('青・橙：元の点　淡い線：垂線　右の点列：同じ射影値')
         ax,dots,theta,axis,projected,guides,strip,shadow=self.fisher_display()
         self.beat(Create(axis),FadeIn(guides),FadeIn(projected))
@@ -209,9 +213,149 @@ class PRML41DiscriminantFunctions(NarratedScene):
         f2=self.bottom(r'J=\frac{w^TS_Bw}{w^TS_Ww}\qquad w\propto S_W^{-1}(m_2-m_1)',size=30)
         f2.set_color(YELLOW_W)
         self.beat(ReplacementTransform(f,f2),Circumscribe(val,color=YELLOW_W))
+        self.scatter_aid()
+        self.beat(Circumscribe(f2,color=YELLOW_W))
         threshold=ValueTracker(-.6)
         cut=always_redraw(lambda:Line(strip.n2p(threshold.get_value())+UP*.55,strip.n2p(threshold.get_value())+DOWN*.55,color=RED_LINE,stroke_width=3))
         self.add(cut);self.beat(threshold.animate.set_value(.6))
+
+    def body_card(self,title):
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        header=[m for m in saved if m.get_center()[1]>3]
+        self.clear()
+        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
+                               color=AID_OPERATION,stroke_width=1.2).move_to([0,.1,0])
+        label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(*header,frame,label)
+        return saved
+
+    def restore_body(self,saved):
+        self.clear()
+        self.add(*saved)
+
+    def least_squares_recap(self):
+        saved=self.body_card('復習: 3.1 最小二乗')
+        # Same three inputs, Gaussian bases and column colors as 3.1 matrix().
+        xx=np.array([.2,.5,.8])
+        phi=np.column_stack([np.ones(3),np.exp(-.5*((xx[:,None]-[.25,.75])/.18)**2)])
+        weights=np.array([.2,.8,-.6])
+        def table(values,x,color=WHITE):
+            return DecimalMatrix(np.asarray(values),h_buff=.72,v_buff=.5,
+                element_to_mobject_config={'num_decimal_places':2,'font_size':23}).set_color(color).move_to([x,.15,0])
+        inputs=table(phi,-3.25);inputs.set_column_colors(BLUE_CLS,YELLOW_W,PURPLE_B)
+        wm=table(weights[:,None],-.9)
+        ym=table((phi@weights)[:,None],1.05,RED_LINE)
+        target=table(np.array([1.,.3,-.4])[:,None],3.6,BLUE_CLS)
+        labels=VGroup(*[jp(t,20).move_to([x,1.35,0]) for t,x in
+            [('基底の値',-3.25),('重み',-.9),('予測',1.05),('目標の数',3.6)]])
+        equal=tex('=',25).move_to([.1,.15,0])
+        arrow=Arrow([1.85,.15,0],[2.65,.15,0],buff=0,color=RED_LINE)
+        formula=tex(r'\mathbf y=\Phi\mathbf w',30,RED_LINE).move_to([0,-1.35,0])
+        initial=VGroup(inputs,wm,ym,target,labels,equal,arrow,formula)
+        # Classification uses raw coordinates with a leading 1, as in this scene.
+        X=np.array([[1,-1,-.5],[1,1,.5],[1,.5,1]])
+        T=np.array([[1,0],[0,1],[0,1]])
+        W=np.linalg.solve(X,T)
+        xi=table(X,-3.6);xi.set_column_colors(BLUE_CLS,YELLOW_W,PURPLE_B)
+        wi=table(W,-1.05);yi=table(X@W,1.45,RED_LINE)
+        ti=Matrix(T,h_buff=.55,v_buff=.5,element_to_mobject_config={'font_size':26}).move_to([3.8,.15,0])
+        ti.get_rows()[0].set_color(BLUE_CLS)
+        for row in ti.get_rows()[1:]:row.set_color(ORANGE_CLS)
+        lab2=VGroup(*[jp(t,20).move_to([x,1.35,0]) for t,x in
+            [('拡張入力',-3.6),('重み',-1.05),('スコア',1.45),('クラスの目標',3.8)]])
+        destination=VGroup(xi,wi,yi,ti,lab2,tex('=',25).move_to([.25,.15,0]),
+            tex(r'Y=\widetilde XW\qquad C_1:(1,0),\ C_2:(0,1)',29).move_to([0,-1.35,0]))
+        self.add(jp('説明用の3点',18,MUTED).move_to([3.75,2.02,0]))
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R3.1 rows weights predictions',a*.3,lambda:FadeIn(initial)),
+            ('R3.1 prediction toward target',a*.7,lambda:AnimationGroup(
+                Indicate(inputs.get_rows()[0],color=YELLOW_W),Indicate(arrow,color=RED_LINE))),
+            ('R3.1 replace regression example',b*.12,lambda:FadeOut(initial)),
+            ('R3.1 class target columns',b*.28,lambda:FadeIn(destination)),
+            ('R3.1 class coding',b*.6,lambda:LaggedStart(
+                *[Circumscribe(row,color=YELLOW_W) for row in ti.get_rows()],lag_ratio=.4)),
+        ])
+        self.restore_body(saved)
+
+    def gaussian_recap(self):
+        saved=self.body_card('復習: 2.3 方向ごとの広がり')
+        ax=Axes(x_range=[-4.6,4.6,2],y_range=[-3.2,3.2,2],x_length=4.14,y_length=2.88,
+                tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.45,-.15,0])
+        self.add(ax,tex('x_1',23,MUTED).next_to(ax.x_axis,RIGHT,buff=.1),
+                 tex('x_2',23,MUTED).next_to(ax.y_axis,UP,buff=.08))
+        # Reproduce the cloud, green contours and green/purple principal axes.
+        points=np.random.default_rng(2303).normal(size=(100,2))
+        stretch=ValueTracker(0)
+        rotation=np.array([[np.cos(.6),-np.sin(.6)],[np.sin(.6),np.cos(.6)]])
+        mat=lambda:rotation@np.diag([1+.6*stretch.get_value(),1-.35*stretch.get_value()])
+        dots=always_redraw(lambda:VGroup(*[Dot(ax.c2p(*p),radius=.022,color=BLUE_CLS) for p in points@mat().T]))
+        angles=np.linspace(0,TAU,121)
+        circle=np.column_stack([np.cos(angles),np.sin(angles)])
+        rings=always_redraw(lambda:VGroup(*[
+            VMobject(color=GREEN_CLS,stroke_width=2).set_points_as_corners(
+                [ax.c2p(*p) for p in r*circle@mat().T]) for r in [1,2]]))
+        principal=always_redraw(lambda:VGroup(*[Arrow(ax.c2p(0,0),ax.c2p(*mat()[:,i]),
+            buff=0,color=c,stroke_width=4) for i,c in enumerate([GREEN_CLS,PURPLE_B])]))
+        label=VGroup(jp('同じ点群でも、方向で幅が変わる',21),
+            tex(r'\sqrt{\lambda_1}=1.6',28,GREEN_CLS),
+            tex(r'\sqrt{\lambda_2}=0.65',28,PURPLE_B)).arrange(DOWN,buff=.3).move_to([2.3,.6,0])
+        strip=NumberLine(x_range=[-3,3,1],length=3.8,include_ticks=False,color=MUTED).move_to([2.3,-1.15,0])
+        # Two class clouds are a new schematic example, with original class colors.
+        group_points=[np.array([[-.8,-.25],[-.6,.2],[-1.1,0]]),
+                      np.array([[.6,-.15],[.9,.3],[1.2,.05]])]
+        sources=VGroup(*[Dot([2.3+.65*p[0],-.15+p[1],0],radius=.06,color=COLORS[k])
+                         for k,g in enumerate(group_points) for p in g])
+        shadows=VGroup(*[Dot(strip.n2p(p[0])+UP*(.08 if k==0 else -.08),radius=.05,color=COLORS[k])
+                         for k,g in enumerate(group_points) for p in g])
+        axislabel=tex(r'y=w^Tx',26,YELLOW_W).move_to([2.3,-1.7,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.add(dots,rings,principal)
+        self.beat(phases=[
+            ('R2.3 directional widths',a*.72,lambda:stretch.animate.set_value(1)),
+            ('R2.3 principal axes',a*.28,lambda:FadeIn(label)),
+            ('R2.3 bridge to two classes',b*.22,lambda:FadeOut(label)),
+            ('R2.3 two class clouds',b*.22,lambda:AnimationGroup(FadeIn(sources),FadeIn(strip),FadeIn(axislabel))),
+            ('R2.3 projection to one axis',b*.56,lambda:TransformFromCopy(sources,shadows)),
+        ])
+        self.restore_body(saved)
+
+    def scatter_aid(self):
+        saved=self.body_card('補足: ずれの外積と散布行列')
+        self.add(jp('説明用の例',18,MUTED).move_to([3.85,2.02,0]))
+        col=Matrix([[2],[1]],v_buff=.6,element_to_mobject_config={'font_size':32}).set_color(AID_INPUT).move_to([-3.4,.55,0])
+        row=Matrix([[2,1]],h_buff=.65,element_to_mobject_config={'font_size':32}).set_color(AID_COMPARE).move_to([-1.65,.55,0])
+        prod=Matrix([[4,2],[2,1]],v_buff=.6,h_buff=.65,element_to_mobject_config={'font_size':32}).set_color(AID_OPERATION).move_to([.85,.55,0])
+        labels=VGroup(tex('r',27,AID_INPUT).next_to(col,UP,buff=.18),
+                      tex('r^T',27,AID_COMPARE).next_to(row,UP,buff=.18),
+                      tex('rr^T',27,AID_OPERATION).next_to(prod,UP,buff=.18))
+        eq=tex('=',30).move_to([-.25,.55,0])
+        self.add(col,row,eq,labels,prod.get_brackets())
+        entries=prod.get_entries()
+        # Four centered residuals: two points in each of two classes.
+        total=Matrix([[10,2],[2,4]],h_buff=.7,v_buff=.6,
+                     element_to_mobject_config={'font_size':32}).set_color(AID_RESULT).move_to([3.6,.55,0])
+        total_label=tex(r'S_W=\sum_n r_nr_n^T',27,AID_RESULT).move_to([3.45,1.5,0])
+        example=tex(r'C_1:\ \pm(2,1)\qquad C_2:\ \pm(1,-1)',27).move_to([0,-.95,0])
+        residual_note=jp('各クラスの平均からのずれ',20,MUTED).move_to([0,-1.55,0])
+        link=Arrow([1.65,.55,0],[2.55,.55,0],buff=0,color=AID_OPERATION)
+        take=tex(r'w=(1,0)^T:\quad w^TS_Ww=2^2+(-2)^2+1^2+(-1)^2=10',
+                 29,AID_RESULT).move_to([0,-.95,0])
+        no_division=jp('点の数で割らない二乗偏差和',23).move_to([0,-1.65,0])
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V08d multiply four cells',a*.58,lambda:LaggedStart(*[
+                AnimationGroup(Indicate(col.get_entries()[i//2],color=AID_OPERATION),
+                               Indicate(row.get_entries()[i%2],color=AID_OPERATION),FadeIn(entries[i]))
+                for i in range(4)],lag_ratio=.6)),
+            ('V08d sum centered residuals',a*.42,lambda:AnimationGroup(
+                FadeIn(total),FadeIn(total_label),GrowArrow(link),FadeIn(example),FadeIn(residual_note))),
+            ('V08d select horizontal scatter',b*.2,lambda:AnimationGroup(FadeOut(example),FadeOut(residual_note))),
+            ('V08d horizontal sum of squares',b*.8,lambda:AnimationGroup(
+                FadeIn(take),Circumscribe(total.get_entries()[0],color=AID_OPERATION))),
+            ('V08d no division by count',c,lambda:FadeIn(no_division)),
+        ])
+        self.restore_body(saved)
 
     def relation(self):
         self.hint('同じ自作データ：青30点、橙22点、合計52点')

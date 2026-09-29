@@ -20,8 +20,21 @@
     -2.280087526213741e-15
   ],
   "perceptron_updates": 3,
+  "aid_scatter": {
+    "matrix": [
+      [
+        10,
+        2
+      ],
+      [
+        2,
+        4
+      ]
+    ],
+    "horizontal_squared_deviation_sum": 10
+  },
   "audio_scenes": 10,
-  "sentences": 114,
-  "audio_seconds": 545.2,
-  "checks_passed": 8
+  "sentences": 121,
+  "audio_seconds": 576.4,
+  "checks_passed": 9
 }
