@@ -120,6 +120,7 @@ class PRML23GaussianDistribution(NarratedScene):
         self.add(self.slider(mu,-1.5,1.5,(-2.7,-2.25,0),r'\mu',YELLOW,2.5),self.slider(sd,.55,1.4,(2.5,-2.25,0),r'\sigma',RED,2.5))
         marker=always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),normal(mu.get_value(),mu.get_value(),sd.get_value())),color=YELLOW))
         self.add(marker)
+        self.remove(self.top)
         recap=self.review_card('復習: 1.2 ガウス分布', height=5.1)
         area_note=jp('密度の面積 = 1',22,MUTED).move_to([3.6,1.8,0])
         self.add(area_note)
@@ -135,6 +136,7 @@ class PRML23GaussianDistribution(NarratedScene):
             ('R1.2 map to multiple variables',c,connect),
         ])
         self.remove(recap,bridge)
+        self.add(self.top)
         edge=ValueTracker(-.2)
         def area():
             x=np.linspace(-.5,edge.get_value(),81)
@@ -230,10 +232,13 @@ class PRML23GaussianDistribution(NarratedScene):
         correction=tex(r'p_x(Bz)=p_z(z)/2',29,green).move_to([2.5,-2.12,0])
         self.add(ring,square,area,example)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
+        def compensate():
+            self.add(bar,barlabel,value,correction)
+            return height.animate.set_value(.5)
         self.beat(phases=[
             ('V10 stretch area by two',a,lambda:AnimationGroup(stretch.animate.set_value(2),FadeIn(transform))),
             ('V10 covariance determinant square root',b,lambda:AnimationGroup(FadeIn(covariance_label),FadeIn(determinant))),
-            ('V10 compensate density by one half',c,lambda:AnimationGroup(FadeIn(barlabel),FadeIn(value),FadeIn(correction),height.animate.set_value(.5),FadeIn(bar))),
+            ('V10 compensate density by one half',c,compensate),
         ])
         self.restore_body(body)
 
