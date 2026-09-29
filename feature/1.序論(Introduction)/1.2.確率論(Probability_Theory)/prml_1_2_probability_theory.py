@@ -17,6 +17,10 @@ ORANGE=ManimColor('#FFB45B')
 YELLOW=ManimColor('#FFE079')
 PURPLE=ManimColor('#C29AFF')
 MUTED=ManimColor('#A8B2C5')
+AID_INPUT=ManimColor('#58C4DD')
+AID_OPERATION=ManimColor('#FFFF00')
+AID_RESULT=ManimColor('#83C167')
+AID_COMPARE=ManimColor('#9A72AC')
 
 
 def line_graph(ax,x,y,color=BLUE,opacity=1,width=3):
@@ -63,7 +67,8 @@ class PRML12ProbabilityTheory(NarratedScene):
         self.subtitle=None
         self.equation=None
         self.legend_group=None
-        self.add(jp(self.story['title'],32).move_to([0,3.35,0]))
+        self.title=jp(self.story['title'],32).move_to([0,3.35,0])
+        self.add(self.title)
         entry=self.manifest[self.story['id']]
         if not valid_entry(self.story,entry):
             raise RuntimeError('Generate matching narration before rendering: '+self.story['id'])
@@ -111,6 +116,129 @@ class PRML12ProbabilityTheory(NarratedScene):
         g.add(number('',tracker.get_value,np.array(pos)+RIGHT*(width/2+.5),color,2))
         self.add(g)
         return g
+
+    def aid_card(self, heading):
+        """Use the section 1.1 card convention without overlapping the live plot."""
+        retained = [self.title, self.subtitle]
+        body = [m for m in self.mobjects if m not in retained]
+        self.remove(*body)
+        frame = RoundedRectangle(width=10.5, height=4.55, corner_radius=.12,
+                                 stroke_color=MUTED, stroke_width=1.2,
+                                 fill_color=BG, fill_opacity=1).move_to([0, .05, 0])
+        label = jp(heading, 25).move_to([0, 1.92, 0])
+        return body, VGroup(frame, label)
+
+    def restore_aid_body(self, body):
+        self.remove(*[m for m in self.mobjects if m not in [self.title, self.subtitle]])
+        self.add(*body)
+
+    def derivative_aid(self):
+        body, card = self.aid_card('補足：微分は幅の倍率（説明用の例）')
+        ax = Axes(x_range=[0, 1.1, .5], y_range=[0, 2.2, 1],
+                  x_length=1.4, y_length=2.8, tips=False,
+                  axis_config={'color': MUTED, 'include_ticks': False}).move_to([-3.5, -.25, 0])
+        labels = VGroup(tex('x', 24).next_to(ax.x_axis, RIGHT, buff=.1),
+                        tex('y', 24).next_to(ax.y_axis, UP, buff=.1),
+                        tex('y=2x', 28, AID_INPUT).move_to([-2.25, 1.18, 0]))
+        line = Line(ax.c2p(0, 0), ax.c2p(1, 2), color=AID_INPUT)
+        tangent = Line(ax.c2p(.15, .3), ax.c2p(.9, 1.8), color=AID_OPERATION, stroke_width=5)
+        dot = Dot(ax.c2p(.4, .8), color=AID_INPUT)
+        dx = Line(ax.c2p(.4, .8), ax.c2p(.75, .8), color=AID_INPUT, stroke_width=5)
+        dy = Line(ax.c2p(.75, .8), ax.c2p(.75, 1.5), color=AID_OPERATION, stroke_width=5)
+        delta = VGroup(tex(r'\Delta x', 25, AID_INPUT).next_to(dx, DOWN, buff=.1),
+                       tex(r'\Delta y=2\Delta x', 25, AID_OPERATION).next_to(dy, RIGHT, buff=.14))
+        forward = tex(r'\frac{dy}{dx}=2', 32, AID_OPERATION).move_to([1.15, 1.1, 0])
+        inverse = tex(r'\frac{dx}{dy}=\frac12', 32, AID_RESULT).move_to([3.45, 1.1, 0])
+        strip = rect(1, 1.2, [2.2, -.35, 0], AID_INPUT, .4)
+        target = rect(2, .6, [2.2, -.65, 0], AID_RESULT, .4)
+        before = tex(r'p_x\,\Delta x', 28, AID_INPUT).move_to([2.2, -1.25, 0])
+        after = tex(r'p_y\,\Delta y=(p_x/2)(2\Delta x)', 28, AID_RESULT).move_to([1.6, -1.25, 0])
+        note = jp('幅 × 高さ = 同じ確率', 24, AID_RESULT).move_to([1.6, -1.85, 0])
+        a, b, c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('derivative card enter', .4, lambda: FadeIn(card)),
+            ('slope is local multiplier', a-.4,
+             lambda: AnimationGroup(Create(ax), FadeIn(labels), Create(line), Create(tangent), FadeIn(dot))),
+            ('width doubles', b*.52,
+             lambda: AnimationGroup(Create(dx), Create(dy), FadeIn(delta), FadeIn(forward), FadeIn(strip), FadeIn(before))),
+            ('inverse multiplier one half', b*.48, lambda: FadeIn(inverse)),
+            ('density height halves preserving area', c*.7,
+             lambda: AnimationGroup(Transform(strip, target), ReplacementTransform(before, after))),
+            ('equal probability', c*.3, lambda: FadeIn(note)),
+        ])
+        self.restore_aid_body(body)
+
+    def logarithm_aid(self):
+        body, card = self.aid_card('補足：正の数の積から、対数の和へ（説明用の例）')
+        factors = MathTex(r'\frac12', r'\times', r'\frac14', r'=', r'\frac18',
+                          font_size=38).arrange(RIGHT, buff=.4).move_to([0, .95, 0])
+        factors[0].set_color(AID_INPUT); factors[2].set_color(AID_INPUT)
+        factors[1].set_color(AID_OPERATION); factors[4].set_color(AID_RESULT)
+        product_log = tex(r'\ln\!\left(\frac12\times\frac14\right)', 36,
+                          AID_OPERATION).move_to([0, -.1, 0])
+        logsum = MathTex(r'\ln\frac12', '+', r'\ln\frac14', '=', r'\ln\frac18',
+                         font_size=36).arrange(RIGHT, buff=.3).move_to([0, -.1, 0])
+        logsum.set_color(AID_OPERATION); logsum[-1].set_color(AID_RESULT)
+        identity = tex(r'\ln(ab)=\ln a+\ln b\qquad(a,b>0)', 30,
+                       AID_OPERATION).move_to([0, -1, 0])
+        order = tex(r'\frac18<\frac14\quad\Longrightarrow\quad\ln\frac18<\ln\frac14',
+                    30, AID_RESULT).move_to([0, -1.85, 0])
+        a, b, c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('log card enter', .4, lambda: FadeIn(card)),
+            ('positive factors', a*.68-.4, lambda: FadeIn(factors[:4])),
+            ('product one eighth', a*.32, lambda: FadeIn(factors[4])),
+            ('take natural log of product', b*.52,
+             lambda: AnimationGroup(Indicate(factors, scale_factor=1.02), FadeIn(product_log))),
+            ('split into sum of logs', b*.48,
+             lambda: Succession(FadeOut(product_log, run_time=.2),
+                                FadeIn(logsum, run_time=.6), FadeIn(identity, run_time=.4))),
+            ('order and maximizing location preserved', c, lambda: FadeIn(order)),
+        ])
+        self.restore_aid_body(body)
+
+    def covariance_aid(self):
+        body, card = self.aid_card('補足：材料の一覧と、広がりの表（一次式の例）')
+        materials = MathTex(r'\phi(x)=', r'\begin{pmatrix}1\\x\end{pmatrix}',
+                            font_size=32, color=AID_INPUT).move_to([-2.75, 1, 0])
+        polynomial = tex(r'y=w_0\cdot1+w_1\cdot x', 28, AID_INPUT).move_to([-2.75, .15, 0])
+        matrix = Matrix([[r'\operatorname{var}(w_0)', r'\operatorname{cov}(w_0,w_1)'],
+                         [r'\operatorname{cov}(w_1,w_0)', r'\operatorname{var}(w_1)']],
+                        element_to_mobject=lambda s: tex(s, 25), h_buff=2.4, v_buff=.85,
+                        bracket_h_buff=.2).move_to([2, .45, 0])
+        entries = matrix.get_entries()
+        diag = VGroup(entries[0], entries[3]).set_color(AID_RESULT)
+        offdiag = VGroup(entries[1], entries[2]).set_color(AID_COMPARE)
+        name = tex('S=', 32).next_to(matrix, LEFT, buff=.15)
+        diag_frames = VGroup(*[SurroundingRectangle(m, color=AID_RESULT, buff=.09) for m in diag])
+        off_frames = VGroup(*[SurroundingRectangle(m, color=AID_COMPARE, buff=.09) for m in offdiag])
+        diag_label = jp('対角：それぞれの分散', 24, AID_RESULT).move_to([2, -1, 0])
+        off_label = jp('残り：一緒に変わる度合い', 24, AID_COMPARE).move_to([2, -1.65, 0])
+        ax = Axes(x_range=[-1.3, 1.3, 1], y_range=[-1.1, 1.1, 1], x_length=2.5, y_length=1.6,
+                  tips=False, axis_config={'color': MUTED, 'include_ticks': False}).move_to([-2.8, -1.05, 0])
+        labels = VGroup(tex('w_0', 23).next_to(ax.x_axis, RIGHT, buff=.12),
+                        tex('w_1', 23).next_to(ax.y_axis, UP, buff=.08))
+        # An illustrative positive-definite covariance, not the cubic fit's S.
+        cov = np.array([[1., .55], [.55, .65]])
+        vals, vecs = np.linalg.eigh(cov)
+        angle = np.linspace(0, 2*np.pi, 121)
+        points = (vecs @ np.diag(np.sqrt(vals)) @ np.array([np.cos(angle), np.sin(angle)])).T
+        ellipse = line_graph(ax, points[:, 0], points[:, 1], AID_COMPARE)
+        horizontal = Line(ax.c2p(-1, 0), ax.c2p(1, 0), color=AID_RESULT, stroke_width=4)
+        vertical = Line(ax.c2p(0, -np.sqrt(.65)), ax.c2p(0, np.sqrt(.65)), color=AID_RESULT, stroke_width=4)
+        a, b, c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('covariance card enter', .4, lambda: FadeIn(card)),
+            ('list basis materials', a-.4, lambda: AnimationGroup(FadeIn(materials), FadeIn(polynomial))),
+            ('coefficient cloud and covariance table', b*.52,
+             lambda: AnimationGroup(Create(ax), FadeIn(labels), Create(ellipse), FadeIn(matrix), FadeIn(name))),
+            ('diagonal variances', b*.48,
+             lambda: AnimationGroup(Create(diag_frames), Create(horizontal), Create(vertical), FadeIn(diag_label))),
+            ('off diagonal joint variation', c,
+             lambda: AnimationGroup(FadeOut(diag_frames), FadeOut(horizontal), FadeOut(vertical),
+                                    Create(off_frames), Indicate(ellipse, scale_factor=1.04), FadeIn(off_label))),
+        ])
+        self.restore_aid_body(body)
 
     def boxes(self):
         self.legend(('リンゴ',GREEN),('オレンジ',ORANGE))
@@ -208,7 +336,9 @@ class PRML12ProbabilityTheory(NarratedScene):
         box=always_redraw(lambda:Polygon(ax.c2p(0,0),ax.c2p(scale.get_value(),0),ax.c2p(scale.get_value(),1/scale.get_value()),ax.c2p(0,1/scale.get_value()),color=BLUE,fill_opacity=.4))
         self.add(box)
         self.beat(scale.animate.set_value(2),self.formula(r'y=2x,\qquad p_y(y)=\tfrac12 p_x(y/2)'))
-        self.beat(self.formula(r'p_y(y)=p_x(g(y))|g\prime(y)|,\quad p(x)=\int p(x,y)\,dy',size=29),Circumscribe(box))
+        self.beat(self.formula(r'p_y(y)=p_x(g(y))|g\prime(y)|',size=29),Circumscribe(box))
+        self.derivative_aid()
+        self.beat(self.formula(r'p(x)=\int p(x,y)\,dy',size=29))
 
     def moments(self):
         self.legend(('確率',BLUE),('平均',YELLOW),('二乗の寄与',PURPLE))
@@ -262,6 +392,7 @@ class PRML12ProbabilityTheory(NarratedScene):
         read=number(r'\ln L=',ll,[2.9,1.9,0],BLUE,2);self.add(read)
         self.beat(mu.animate.set_value(-.8))
         self.beat(mu.animate.set_value(float(OBS.mean())),sig.animate.set_value(float(OBS.std())),self.formula(r'\ln L=-\frac{1}{2\sigma^2}\sum_n(x_n-\mu)^2-\frac N2\ln(2\pi\sigma^2)',size=30))
+        self.logarithm_aid()
         self.beat(self.formula(r'\mu_{\rm ML}=\frac1N\sum_nx_n,\quad\sigma^2_{\rm ML}=\frac1N\sum_n(x_n-\mu_{\rm ML})^2',size=29),Indicate(dots,scale_factor=1.08))
 
     def bias(self):
@@ -363,4 +494,5 @@ class PRML12ProbabilityTheory(NarratedScene):
         guide=always_redraw(lambda:DashedLine(ax.c2p(cursor.get_value(),-1.3),ax.c2p(cursor.get_value(),1.3),color=MUTED))
         self.add(stack,guide,jp('分散の内訳',18).move_to([5.5,1.95,0]))
         self.beat(cursor.animate.set_value(1),self.formula(r'\phi(x)=(1,x,x^2,x^3)^T,\quad S^{-1}=\alpha I+\beta\sum_n\phi(x_n)\phi(x_n)^T',size=25))
+        self.covariance_aid()
         self.beat(cursor.animate.set_value(.1),self.formula(r'm(x)=\beta\phi(x)^TS\sum_n\phi(x_n)t_n,\quad s^2(x)=\beta^{-1}+\phi(x)^TS\phi(x)',size=26))
