@@ -68,6 +68,111 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.beat(phases=[('equation transform',transition,lambda:TransformMatchingTex(old,new)),
                           ('explain complete equation',duration-transition,lambda:Indicate(new,scale_factor=1.015))])
 
+    def review_card(self, label):
+        """Replace only the body; narration remains on the sentence PCM clock."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        header=[m for m in saved if m.get_center()[1]>3.0]
+        self.clear()
+        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
+                               color='#FFFF00',stroke_width=1.2).move_to([0,.1,0])
+        label=jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+        self.add(*header,frame,label)
+        return saved
+
+    def restore_review(self, saved):
+        for mob in self.mobjects:
+            if mob not in saved:
+                mob.clear_updaters(recursive=True)
+        self.clear()
+        self.add(*saved)
+
+    def gaussian_recap(self):
+        saved=self.review_card('復習: 2.3 ガウス分布')
+        # 2.3 geometry(): blue points, green rings, green/purple principal axes.
+        ax=self.axes([-2.4,2.4,1],[-1.9,1.9,1],center=(-2.6,-.1,0),
+                     width=3.7,height=3.7*3.8/4.8,xlabel='',xticks=[],yticks=[])
+        s1=ValueTracker(1);s2=ValueTracker(1);angle=ValueTracker(0)
+        def mat():
+            a=angle.get_value();r=np.array([[np.cos(a),-np.sin(a)],[np.sin(a),np.cos(a)]])
+            return r@np.diag([s1.get_value(),s2.get_value()])
+        base=np.random.default_rng(2303).normal(size=(100,2))
+        base=base[np.linalg.norm(base,axis=1)<1.65]
+        points=always_redraw(lambda:VGroup(*[Dot(ax.c2p(*v),radius=.026,color=DATA) for v in base@mat().T]))
+        theta=np.linspace(0,TAU,181)
+        def rings():
+            result=VGroup()
+            for radius in [1,1.5]:
+                xy=radius*np.c_[np.cos(theta),np.sin(theta)]@mat().T
+                result.add(path(ax,xy[:,0],xy[:,1],POST,2))
+            return result
+        ring=always_redraw(rings)
+        axes=always_redraw(lambda:VGroup(*[Arrow(ax.c2p(0,0),ax.c2p(*mat()[:,i]),buff=0,
+                          color=c,stroke_width=3) for i,c in enumerate([POST,PRIOR])]))
+        covariance=VGroup(jp('共分散：方向ごとの分散',23,POST),
+                          tex(r'\Sigma\mathbf u_i=\lambda_i^\Sigma\mathbf u_i',28,POST),
+                          tex(r'\sigma_i=\sqrt{\lambda_i^\Sigma}',29,POST)).arrange(DOWN,buff=.18).move_to([2.1,.85,0])
+        precision=VGroup(jp('精度：方向ごとの曲率',23,PRIOR),
+                         tex(r'A=\Sigma^{-1},\quad a_i=1/\lambda_i^\Sigma',28,PRIOR),
+                         tex(r'\sigma_i=1/\sqrt{a_i}',29,EV_COLOR)).arrange(DOWN,buff=.18).move_to([2.1,-.73,0])
+        mapping=jp('今回の共分散は S_N ／ 正の固有値',19,MUTED).move_to([0,-1.76,0])
+        self.add(points,ring,axes,covariance)
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R2.3 circle to ellipse',a,lambda:AnimationGroup(s1.animate.set_value(1.6),s2.animate.set_value(.65),angle.animate.set_value(.6))),
+            ('R2.3 covariance to precision',b*.55,lambda:AnimationGroup(FadeIn(precision),FadeIn(mapping))),
+            ('R2.3 higher curvature narrower widths',b*.45,lambda:AnimationGroup(s1.animate.set_value(.8),s2.animate.set_value(.45),Indicate(precision[-1],scale_factor=1.04))),
+        ])
+        self.restore_review(saved)
+
+    def square_aid(self):
+        saved=self.review_card('補足：平方完成で中心を読む')
+        blue='#58C4DD';yellow='#FFFF00';purple='#9A72AC'
+        self.add(jp('説明用の一変数の例',19,MUTED).move_to([3.1,2.02,0]))
+        ax=self.axes([-1,3,1],[0,12,3],center=(-2.6,-.1,0),width=3.5,height=2.6,
+                     xlabel='w',xticks=[0,1,2],yticks=[0,3])
+        x=np.linspace(-1,3,201);curve=path(ax,x,2*x*x-4*x+5,blue)
+        expanded=tex(r'2w^2-4w+5',34,blue).move_to([2.0,.95,0])
+        completed=MathTex(r'2(w-1)^2',r'+3',font_size=34,color=blue).move_to(expanded)
+        completed[1].set_color(purple)
+        bottom=Dot(ax.c2p(1,3),color=yellow)
+        level=Line(ax.c2p(0,0),ax.c2p(0,3),color=purple,stroke_width=5)
+        guide=DashedLine(ax.c2p(1,0),ax.c2p(1,3),color=yellow)
+        center=tex(r'w=1',32,yellow).move_to([2,-.15,0])
+        constant=VGroup(jp('一定の高さ',23,purple),tex('3',30,purple)).arrange(RIGHT,buff=.2).move_to([2,-.95,0])
+        self.add(curve,expanded)
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('V13a same quadratic',a*.60,lambda:Create(curve)),
+            ('V13a complete the square',a*.40,lambda:TransformMatchingTex(expanded,completed)),
+            ('V13a minimum at w=1',b*.65,lambda:AnimationGroup(FadeIn(bottom),Create(guide),FadeIn(center))),
+            ('V13a constant height 3',b*.35,lambda:AnimationGroup(Create(level),FadeIn(constant))),
+        ])
+        self.restore_review(saved)
+
+    def volume_aid(self):
+        saved=self.review_card('補足：幅の積と行列式')
+        blue='#58C4DD';yellow='#FFFF00';green='#83C167'
+        self.add(jp('説明用の例：正定値の精度 A',19,MUTED).move_to([2.9,2.02,0]))
+        left=np.array([-3.9,-.65,0]);scale=2.0
+        square=Square(side_length=scale,color=blue,fill_color=blue,fill_opacity=.25).move_to(left,aligned_edge=DL)
+        rectangle=Rectangle(width=scale/2,height=scale,color=blue,fill_color=blue,fill_opacity=.25).move_to(left,aligned_edge=DL)
+        h1=tex('1',28,blue).move_to(left+[1,-.36,0]);half=tex(r'\tfrac12',28,blue).move_to(left+[.5,-.36,0])
+        vertical=tex('1',28,blue).move_to(left+[-.28,1,0])
+        precision=tex(r'A=\begin{pmatrix}4&0\\0&1\end{pmatrix}',31).move_to([1.9,1.1,0])
+        widths=tex(r'\sigma_1=\frac1{\sqrt4}=\frac12,\quad\sigma_2=1',28,blue).move_to([1.9,.1,0])
+        product=tex(r'\sigma_1\sigma_2=\frac12=\frac1{\sqrt{\det A}}',31,yellow).move_to([1.9,-.9,0])
+        caption=jp('幅の因子',22,yellow).move_to([-3.1,-1.55,0])
+        factors=MathTex(r'e^{-E(\mathbf m_N)}',r'(2\pi)^{M/2}',r'|A|^{-1/2}',font_size=27,color=green).move_to([1.8,-1.73,0])
+        factors[2].set_color(yellow)
+        self.add(square,h1,vertical,precision)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V10 curvature to standard deviations',a,lambda:AnimationGroup(Transform(square,rectangle),Transform(h1,half),FadeIn(widths))),
+            ('V10 product of widths',b,lambda:AnimationGroup(FadeIn(product),FadeIn(caption),Indicate(square,color=yellow,scale_factor=1.02))),
+            ('V10 common Gaussian factor and peak',c,lambda:AnimationGroup(FadeIn(factors),Indicate(product,scale_factor=1.02))),
+        ])
+        self.restore_review(saved)
+
     def question(self):
         ax,dots=self.regression();self.remove(dots)
         tr=ValueTracker(1.2);curve=always_redraw(lambda:path(ax,U,PU@at(tr.get_value())['mean']))
@@ -114,7 +219,10 @@ class PRML35EvidenceApproximation(NarratedScene):
             y=normal(1.2,z,.35**2)*normal(z,0,np.exp(-tr.get_value()))
             return Polygon(ax.c2p(z[0],0),*[ax.c2p(x,v) for x,v in zip(z,y)],ax.c2p(z[-1],0),stroke_width=0,fill_color=EV_COLOR,fill_opacity=.45)
         product=always_redraw(lambda:path(ax,xs,like*normal(xs,0,np.exp(-tr.get_value())),EV_COLOR))
+        recap=jp('復習: 3.4 証拠の積分',22).move_to([-3.7,2.24,0])
+        self.add(recap)
         self.beat(Create(likelihood))
+        self.remove(recap)
         self.add(prior);self.beat(Create(prior))
         self.add(product,always_redraw(area))
         f=self.formula(r'p(t|\alpha,\beta)=\int p(t|w,\beta)\,p(w|\alpha)\,dw',pos=(0,-2.2,0),size=30,color=EV_COLOR)
@@ -125,6 +233,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.beat(tr.animate.set_value(-np.log(1.2**2-.35**2)))
 
     def gaussian(self):
+        self.gaussian_recap()
         f=MathTex(r'E(\mathbf w)=',r'\frac\beta2\|\mathbf t-\Phi\mathbf w\|^2','+',r'\frac\alpha2\mathbf w^T\mathbf w',font_size=34).move_to([0,2.25,0]);f[1].set_color(EV_COLOR);f[3].set_color(PRIOR)
         phi_label=jp('Φ：材料を各観測点で計算した表',22,MUTED).move_to([0,1.55,0]);self.add(f,phi_label)
         ax=self.axes([-3,3,1],[0,1.1,.5],center=(0,-.15,0),width=7,height=2.3,xlabel=r'w-m',ylabel='',xticks=[-3,0,3],yticks=[0,1])
@@ -133,10 +242,12 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.add(bell);self.beat(Indicate(f[1]),Indicate(f[3]))
         sq=tex(r'E(\mathbf w)=E(\mathbf m_N)+\tfrac12(\mathbf w-\mathbf m_N)^TA(\mathbf w-\mathbf m_N)',30).move_to(f)
         self.explain_change(f,sq)
+        self.square_aid()
         af=self.formula(r'A=\alpha I+\beta\Phi^T\Phi=S_N^{-1},\qquad \mathbf m_N=\beta A^{-1}\Phi^T\mathbf t',pos=(0,-2.2,0),size=28,color=PRIOR)
         self.beat(tr.animate.set_value(5),Indicate(af,scale_factor=1.015))
         integral=self.formula(r'\int e^{-E(\mathbf w)}d\mathbf w=e^{-E(\mathbf m_N)}(2\pi)^{M/2}|A|^{-1/2}',pos=(0,-2.8,0),size=29,color=POST)
         self.beat(tr.animate.set_value(.45),Indicate(integral,scale_factor=1.015))
+        self.volume_aid()
         self.remove(ax,ax.labels,bell,af,integral,sq,phi_label)
         # Full expression, split across two readable rows.
         log1=MathTex(r'\ln p(\mathbf t|\alpha,\beta)=',r'\frac M2\ln\alpha',r'+\frac N2\ln\beta',font_size=38).move_to([0,.65,0]);log1[1].set_color(PRIOR);log1[2].set_color(DATA)

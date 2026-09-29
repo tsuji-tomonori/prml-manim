@@ -37,6 +37,13 @@ def main():
     print('Plot range: PASS; mean max',span,'RMS range',TEST.min(),TEST.max())
     assert int(np.argmax([s['logev'] for s in POLY]))==3
     print('Polynomial optimum d=3:',POLY[3]['logev'])
+    # Independent small examples used by V13a and V10.
+    w=np.linspace(-3,4,101)
+    np.testing.assert_allclose(2*w*w-4*w+5,2*(w-1)**2+3)
+    precision=np.diag([4.,1.]);sigma=1/np.sqrt(np.linalg.eigvalsh(precision))
+    np.testing.assert_allclose(np.prod(sigma),1/np.sqrt(np.linalg.det(precision)))
+    assert np.prod(sigma)==.5
+    print('Visual examples: square completion and width product 0.5: PASS')
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES)==10
     assert all(valid_entry(sc,e) for sc,e in zip(SCENES,entries))
@@ -46,5 +53,5 @@ def main():
     assert [(r['id'],r['speech']) for r in rows]==[(s['id'],s['speech']) for s in segments]
     forbidden=['エックス','アルファ','ベータ','ガンマ','ラムダ','エムエヌ','シグマ','ダブリュー']
     assert not any(k in s['display'] for k in forbidden for s in segments)
-    print('10 WAV, hashes, 121 readings / captions: PASS; total seconds',sum(e['duration'] for e in entries))
+    print(f'10 WAV, hashes, {len(segments)} readings / captions: PASS; total seconds',sum(e['duration'] for e in entries))
 if __name__=='__main__':main()
