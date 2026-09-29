@@ -371,9 +371,12 @@ class PRML14CurseOfDimensionality(Scene):
         assumption.move_to([2.9,-1.9,0])
         self.add(recap)
         first,second=[self.sentence_duration(i) for i in range(2)]
+        # audio_query phrase starts at speedScale=1.08: 平均 2.367s,
+        # 標準偏差 3.772s. Move each control while its meaning is spoken.
         self.beat(phases=[
-            ('recap 1.2 mean to zero',first*.54,lambda:mu.animate.set_value(0)),
-            ('recap 1.2 standard deviation to one',first*.46,lambda:sigma.animate.set_value(1)),
+            ('recap 1.2 reference',2.367,lambda:Indicate(recap_label,scale_factor=1.02)),
+            ('recap 1.2 mean to zero',3.772-2.367,lambda:mu.animate.set_value(0)),
+            ('recap 1.2 standard deviation to one',first-3.772,lambda:sigma.animate.set_value(1)),
             ('independent standard Gaussian coordinates',second,
              lambda:AnimationGroup(FadeIn(dots),FadeIn(formula),FadeIn(assumption))),
         ])
@@ -455,7 +458,9 @@ class PRML14CurseOfDimensionality(Scene):
         self.beat(phases=[
             ('V02 identify blue and yellow factors',a,lambda:Indicate(VGroup(values[0],values[1]),scale_factor=1.06,color=WHITE)),
             ('V02 common radius 0.3 to 1',b,lambda:r.animate.set_value(1)),
-            ('V02 product falls from radius 1 to 2',c,lambda:r.animate.set_value(2)),
+            # Hold the peak during 半径一 ... 最大; さらに begins at 2.913s.
+            ('V02 product maximum at radius 1',2.913,lambda:Indicate(marks[2],scale_factor=1.5,color=AID_RESULT)),
+            ('V02 product falls from radius 1 to 2',c-2.913,lambda:r.animate.set_value(2)),
         ])
         self.remove(groups,guide,marks,values,radius)
 
