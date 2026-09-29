@@ -41,11 +41,35 @@ def main():
             cues+=1
     assert max_gap<1/15
     review=json.loads((ROOT/'media/review/frames.json').read_text())
+    added=[]
+    for sc in timeline:
+        for b in sc['beats']:
+            if any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+                duration=b['end']-b['start']
+                recap='-recap-' in b['cues'][0]['id']
+                assert (10 if recap else 5)<=duration<=(30 if recap else 20)
+                added.append(dict(scene=sc['id'],start=b['start'],duration=duration,actions=b['actions']))
+    # audio_query mora/phrase durations divided by speedScale=1.08.
+    # Compare spoken "足しました" and "二かける…" with the matching visual phases.
+    timing=[]
+    for cue_id,phrase_offset,action_name in [
+        ('scene01-recap-01',4.711,'R1.1 sum squares'),
+        ('scene04-aid-02',2.178,'V08b multiply negative term'),
+    ]:
+        beat=next(b for sc in timeline for b in sc['beats'] if any(c['id']==cue_id for c in b['cues']))
+        cue=next(c for c in beat['cues'] if c['id']==cue_id)
+        action=next(a for a in beat['actions'] if a['name']==action_name)
+        spoken=cue['start']+phrase_offset
+        delta=action['start']-spoken
+        assert abs(delta)<1/15
+        timing.append(dict(cue=cue_id,action=action_name,spoken_phrase_start=spoken,
+                           animation_start=action['start'],difference=delta))
     out=dict(probe=probe,audio_video_duration_gap=gap,silence_over_3s=silence,
              mean_volume_db=mean,peak_volume_db=peak,caption_cues=cues,max_scene_clock_gap=max_gap,
              scene_durations=[dict(id=s['id'],start=s['start'],duration=s['end']-s['start']) for s in timeline],
              extracted_frames=len(review['frames']),symbolic_captions=len(review['symbolic']),
              sync=review['sync'],frame_times=review['frames'],
+             visual_aids=added,phrase_timing_checks=timing,
              mp4_sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),
              full_audio_listening=False)
     (ROOT/'validation_results.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
