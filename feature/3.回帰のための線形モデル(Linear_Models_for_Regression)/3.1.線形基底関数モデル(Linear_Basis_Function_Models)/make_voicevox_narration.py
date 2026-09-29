@@ -96,7 +96,29 @@ def sentence_audio(base, text):
     return data
 
 
-def generate_scene(base, scene):
+def reusable_sentences():
+    """Keep exact PCM for unchanged sentences, including after a fresh checkout."""
+    result = {}
+    if not MANIFEST.exists():
+        return result
+    for entry in json.loads(MANIFEST.read_text()).get('scenes', []):
+        path = OUTPUT_DIR / f"{entry['id']}.wav"
+        if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != entry.get('wav_sha256'):
+            continue
+        with wave.open(str(path), 'rb') as source:
+            params = source.getparams()
+            for cue in entry.get('subtitle_cues', []):
+                source.setpos(round(cue['start'] * params.framerate))
+                pcm = source.readframes(round((cue['end'] - cue['start']) * params.framerate))
+                buffer = io.BytesIO()
+                with wave.open(buffer, 'wb') as target:
+                    target.setparams(params)
+                    target.writeframes(pcm)
+                result[(cue['id'], cue['speech'])] = buffer.getvalue()
+    return result
+
+
+def generate_scene(base, scene, reusable=None):
     path = OUTPUT_DIR / f"{scene['id']}.wav"
     temporary = path.with_suffix(".tmp.wav")
     durations, speech_ends, cues = [], [], []
@@ -107,7 +129,9 @@ def generate_scene(base, scene):
             print(f"{scene['id']} beat {i + 1}", flush=True)
             beat_start = total_frames
             for segment in beat["segments"]:
-                data = sentence_audio(base, segment["speech"])
+                data = (reusable or {}).get((segment['id'], segment['speech']))
+                if data is None:
+                    data = sentence_audio(base, segment["speech"])
                 with wave.open(io.BytesIO(data), "rb") as source:
                     params = (source.getnchannels(), source.getsampwidth(), source.getframerate())
                     if expected is None:
@@ -149,13 +173,16 @@ def main():
     if not args.prepare_only:
         with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
             print("VOICEVOX Engine", response.read().decode(), flush=True)
+    reusable = reusable_sentences() if not args.prepare_only else {}
     entries = prepare_manifest()
     if args.prepare_only:
         print("Manifest prepared. Audio not regenerated.")
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
-        entries[i] = generate_scene(args.base_url, SCENES[i])
+        if valid_entry(SCENES[i], entries[i]):
+            continue
+        entries[i] = generate_scene(args.base_url, SCENES[i], reusable)
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")
 

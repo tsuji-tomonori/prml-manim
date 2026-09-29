@@ -28,7 +28,26 @@ def main():
                 if '$' in c['display']:
                     key=c['id'];frames[key]=(c['start']+c['end'])/2;symbolic.append(key)
     sync=[]
-    for si,bi in [(0,3),(4,3),(6,3)]:
+    added=[]
+    for si,sc in enumerate(timeline):
+        for bi,b in enumerate(sc['beats']):
+            if any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+                added.append((si,bi))
+                prefix=f"added-{sc['id']}"
+                frames[prefix+'-before']=max(0,b['start']-.2)
+                frames[prefix+'-after']=b['end']+.2
+                frames[prefix+'-entry']=b['start']+.1
+                frames[prefix+'-exit']=b['end']-.1
+                for ai,action in enumerate(b.get('actions',[])):
+                    if action['name']=='breath':continue
+                    frames[f'{prefix}-action{ai:02}']=(action['start']+action['end'])/2
+                    if action['name'] in ['R1.1 sum squares','V08b multiply negative term','V04b opposite small step']:
+                        for fraction in [.15,.85]:
+                            frames[f'{prefix}-action{ai:02}-{fraction}']=action['start']+(action['end']-action['start'])*fraction
+            if any(c['id'] in ['scene07-02-02','scene08-02-01'] for c in b['cues']):
+                for suffix,t in [('before',b['start']-.2),('during',(b['start']+b['end'])/2),('after',b['end']+.2)]:
+                    frames[f'reference-{sc["id"]}-{suffix}']=t
+    for si,bi in added+[(0,4),(4,3),(6,3)]:
         sc=timeline[si];b=sc['beats'][bi];entry=manifest[si]
         with wave.open(str(ROOT/entry['path']),'rb') as w:
             pcm=np.frombuffer(w.readframes(w.getnframes()),dtype=np.int16).astype(float)/32768;sr=w.getframerate()
