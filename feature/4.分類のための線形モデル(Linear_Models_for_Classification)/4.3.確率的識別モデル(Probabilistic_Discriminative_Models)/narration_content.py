@@ -100,7 +100,8 @@ for i, (title, reference, beats) in enumerate(STORY, 1):
 
 # Keep the established sentence IDs; insert review beats only after assigning them.
 def review_beat(scene_id, kind, seconds, note, *lines):
-    return dict(seconds=seconds, visual_note=note, segments=[
+    return dict(seconds=seconds, min_seconds=10 if kind.startswith('recap') else 5,
+                visual_note=note, segments=[
         dict(id=f'{scene_id}-{kind}-{i:02}', display=line[0], speech=line[1])
         for i, line in enumerate(lines, 1)])
 
