@@ -181,7 +181,7 @@ class PRML15DecisionTheory(NarratedScene):
         a,b,c = [self.sentence_duration(i) for i in range(3)]
         # audio_query at speedScale=1.08: 合計 starts 2.0444 s into sentence 2.
         self.beat(phases=[
-            ('R1.2 identify prior and posterior',a,lambda:Indicate(label,scale_factor=1.02)),
+            ('R1.2 identify prior and posterior',a,lambda:Indicate(label,color=WHITE,scale_factor=1.02)),
             ('R1.2 select observed fruit',.8,lambda:AnimationGroup(FadeOut(cells[1]),FadeOut(cells[3]))),
             ('R1.2 collect equal-height areas',2.0444-.8,
              lambda:AnimationGroup(Transform(cells[0],strip[0]),Transform(cells[2],strip[1]))),
@@ -243,7 +243,7 @@ class PRML15DecisionTheory(NarratedScene):
         numbers=VGroup(readout(r'p(C_1\mid x)=',p.get_value,(-2,1.3,0),BLUE_C1),
                        readout(r'p(C_2\mid x)=',lambda:1-p.get_value(),(2,1.3,0),ORANGE_C2))
         self.add(numbers)
-        self.beat(Indicate(bar.copy(),remover=True,scale_factor=1,color=BLUE_C1))
+        self.beat(Circumscribe(bar,color=BLUE_C1,buff=.08))
         a=self.note('病気として対応',(-2,-.7,0),BLUE_C1,28)
         b=self.note('健康と判断',(2,-.7,0),ORANGE_C2,28)
         self.beat(FadeIn(a,shift=UP*.15),FadeIn(b,shift=UP*.15))
@@ -416,7 +416,7 @@ class PRML15DecisionTheory(NarratedScene):
         self.add(bar,readout(r'p_{\rm new}(C_1\mid x)=',p,(0,1.35,0),BLUE_C1,4),
                  self.note('学習時は２クラスを同じ数だけ集めた',size=23))
         rail=self.slider(prior,.01,.5,pos=(0,-.9,0),label=r'p_{\rm new}(C_1)',ticks=[.01,.5])
-        self.beat(Indicate(bar.copy(),remover=True,scale_factor=1))
+        self.beat(Circumscribe(bar,color=YELLOW_LOSS,buff=.08))
         self.beat(prior.animate.set_value(.01))
         eq=self.formula_at(r'p_{\rm new}(C_k\mid x)\propto p_{\rm train}(C_k\mid x)\frac{p_{\rm new}(C_k)}{p_{\rm train}(C_k)}',31)
         self.add(self.note('前提：クラスごとの入力分布は同じ',(0,-1.7,0),MUTED,21))
