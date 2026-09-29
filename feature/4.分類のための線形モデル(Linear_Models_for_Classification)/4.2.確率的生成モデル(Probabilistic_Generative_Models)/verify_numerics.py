@@ -68,6 +68,13 @@ rate=np.array([2.,5.]);n=np.arange(8)
 full=np.array([[v*np.log(l)-l-sum(np.log(np.arange(1,v+1)))+np.log(.5) for l in rate] for v in n])
 linear=n[:,None]*np.log(rate)-rate+np.log(.5)
 assert np.allclose(softmax(full),softmax(linear))
+# Supplemental examples independently checked against defining operations.
+r=np.array([2,-1])
+assert np.array_equal(np.outer(r,r),[[4,-2],[-2,1]])
+j=np.array([.3*.75,.7*.2])
+assert np.allclose(j/j.sum(),[.6164383561643836,.3835616438356164])
+out['recap_area_posterior']=(j/j.sum()).tolist()
+out['outer_product_example']=np.outer(r,r).tolist()
 entries=json.loads(MANIFEST.read_text())['scenes']
 assert len(entries)==len(SCENES)
 assert all(valid_entry(s,e) for s,e in zip(SCENES,entries))
