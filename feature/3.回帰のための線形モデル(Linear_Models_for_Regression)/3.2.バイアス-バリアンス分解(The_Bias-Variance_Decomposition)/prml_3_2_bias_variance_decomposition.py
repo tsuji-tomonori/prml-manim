@@ -74,6 +74,92 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         self.add(jp('表示20本・平均100本',19,MUTED).move_to([3.8,2.18,0]))
         return cloud,mean,truth_line
 
+    def aid_card(self, label):
+        """Temporarily replace the body; preserve the original scene and its clock."""
+        saved = [m for m in self.mobjects if m is not self.subtitle]
+        header = [m for m in saved if m.get_center()[1] > 3]
+        self.clear()
+        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
+                                 color='#FFFF00', stroke_width=1.2).move_to([0,.1,0])
+        self.add(*header, frame, jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self, saved):
+        self.clear()
+        self.add(*saved)
+
+    def conditional_mean_recap(self):
+        saved = self.aid_card('復習: 1.5 条件付き平均')
+        # 1.5 regression(): the same N(0, .6^2), blue density, yellow prediction.
+        density_ax = Axes(x_range=[-2,2,1],y_range=[0,.8,.4],x_length=3.7,y_length=2,
+                         tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.5,.1,0])
+        loss_ax = Axes(x_range=[-2,2,1],y_range=[0,4.5,1],x_length=3.7,y_length=2,
+                      tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([2.5,.1,0])
+        ts = np.linspace(-2,2,161)
+        density = polyline([density_ax.c2p(t,np.exp(-.5*(t/.6)**2)/(.6*np.sqrt(2*np.pi))) for t in ts],BLUE_DATA)
+        risk = polyline([loss_ax.c2p(t,t*t+.36) for t in ts],MEAN)
+        pred = ValueTracker(1.6)
+        marker = always_redraw(lambda:DashedLine(density_ax.c2p(pred.get_value(),0),density_ax.c2p(pred.get_value(),.8),color=MEAN))
+        point = always_redraw(lambda:Dot(loss_ax.c2p(pred.get_value(),pred.get_value()**2+.36),color=MEAN,radius=.07))
+        mean_dot = Dot(density_ax.c2p(0,0),color=TRUE_GREEN,radius=.075)
+        bridge = tex(r'\mathbb E[t\mid x]\ \longrightarrow\ h(x)',30,TRUE_GREEN).move_to([0,-1.65,0])
+        self.add(density_ax,loss_ax,density,risk,marker,point,
+                 jp('入力を固定した分布',20,BLUE_DATA).move_to([-2.5,1.4,0]),
+                 jp('期待二乗損失',20,MEAN).move_to([2.5,1.4,0]),
+                 tex('t',23).next_to(density_ax.x_axis,RIGHT,buff=.12),
+                 tex('y',23).next_to(loss_ax.x_axis,RIGHT,buff=.12),
+                 jp('説明用の例',18,MUTED).move_to([3.9,2.02,0]),
+                 tex('0',20,MUTED).next_to(density_ax.c2p(0,0),DOWN,buff=.12),
+                 tex('0',20,MUTED).next_to(loss_ax.c2p(0,0),DOWN,buff=.12))
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('R1.5 recall density',a*.24,lambda:Wait()),
+            ('R1.5 minimize squared loss',a*.61,lambda:pred.animate.set_value(0)),
+            ('R1.5 mark conditional mean',a*.15,lambda:FadeIn(mean_dot)),
+            ('R1.5 map mean to h(x)',b*.60,lambda:FadeIn(bridge)),
+            ('R1.5 retain ideal prediction',b*.40,lambda:pulse(mean_dot,scale_factor=1.35)),
+        ])
+        self.restore_body(saved)
+
+    def two_averages_aid(self):
+        saved = self.aid_card('補足: 二段階の平均')
+        blue, yellow, green = '#58C4DD', '#FFFF00', '#83C167'
+        predictions = np.array([[0,1],[2,2],[4,3]])
+        means = predictions.mean(axis=0)
+        deviations = (predictions-means)**2
+        self.add(jp('説明用の例：3組の訓練集合・等確率の2入力',20,MUTED).move_to([0,1.45,0]))
+        xs = [-1.25,2.05]; ys = [.55,0,-.55]
+        cells = VGroup(*[tex(str(predictions[i,j]),30,blue).move_to([xs[j],ys[i],0])
+                         for i in range(3) for j in range(2)])
+        self.add(cells)
+        for j in range(2): self.add(tex(rf'x_{j+1}',27,blue).move_to([xs[j],1.,0]))
+        for i in range(3): self.add(tex(rf'\mathcal D^{{({i+1})}}',25,blue).move_to([-4.2,ys[i],0]))
+        columns = [VGroup(*[cells[2*i+j] for i in range(3)]) for j in range(2)]
+        boxes = VGroup(*[SurroundingRectangle(c,color=yellow,buff=.16) for c in columns])
+        mean_label = jp('予測の平均',20,green).move_to([-3.8,-1.12,0])
+        mean_values = VGroup(*[tex(rf'\bar y={v:g}',27,green).move_to([x,-1.12,0]) for x,v in zip(xs,means)])
+        square_cells = VGroup(*[tex(rf'({predictions[i,j]}-2)^2={int(deviations[i,j])}',25,yellow)
+                               .move_to([xs[j],ys[i],0]) for i in range(3) for j in range(2)])
+        # The yellow areas encode the same squared deviations at a common scale.
+        tiles = VGroup(*[Square(side_length=max(.012,.15*np.sqrt(deviations[i,j])),color=yellow,
+                                fill_opacity=.3,stroke_width=1).move_to([xs[j]+1.12,ys[i],0])
+                         for i in range(3) for j in range(2)])
+        variances = VGroup(tex(r'V_1=\frac{4+0+4}{3}=\frac83',25,green).move_to([xs[0],-1.7,0]),
+                          tex(r'V_2=\frac{1+0+1}{3}=\frac23',25,green).move_to([xs[1],-1.7,0]))
+        variance_label = jp('二乗の平均',20,green).move_to([-3.8,-1.7,0])
+        total = tex(r'\widehat V=\frac12\left(\frac83+\frac23\right)=\frac53',30,green).move_to([-2.35,-2.58,0])
+        general = VGroup(jp('一般には',19),tex(r'p(x)',25,yellow),jp('で重み付け',19)).arrange(RIGHT,buff=.12).move_to([2.6,-2.58,0])
+        a,b,c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('V07b select columns',a*.40,lambda:Create(boxes)),
+            ('V07b mean predictions',a*.60,lambda:AnimationGroup(FadeIn(mean_label),TransformFromCopy(columns[0],mean_values[0]),TransformFromCopy(columns[1],mean_values[1]))),
+            ('V07b square deviations',b*.56,lambda:AnimationGroup(FadeOut(boxes),Transform(cells,square_cells),FadeIn(tiles))),
+            ('V07b average over datasets',b*.44,lambda:AnimationGroup(FadeIn(variance_label),FadeIn(variances))),
+            ('V07b average over inputs',c*.58,lambda:TransformFromCopy(variances,total)),
+            ('V07b general input weights',c*.42,lambda:FadeIn(general)),
+        ])
+        self.restore_body(saved)
+
     def question(self):
         ax=self.axes()
         tr=ValueTracker(-3)
@@ -102,6 +188,7 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         obs=h0+eps
         points=VGroup(*[Dot(ax.c2p(x0,t),radius=.045,color=NOISE) for t in obs])
         self.beat(LaggedStart(*[FadeIn(d) for d in points],lag_ratio=.12))
+        self.conditional_mean_recap()
         mark=always_redraw(lambda:Dot(ax.c2p(x0,y.get_value()),color=MODEL_RED,radius=.08))
         residual=always_redraw(lambda:VGroup(*[Line(ax.c2p(x0-.013*i,y.get_value()),ax.c2p(x0-.013*i,t),color=NOISE,stroke_width=1) for i,t in enumerate(obs)]))
         def squares():
@@ -264,6 +351,7 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         self.drop(approx)
         approx=self.formula(r'\widehat V=\frac1K\sum_{k=1}^K\frac1L\sum_{l=1}^L[y_l(x_k)-\bar y(x_k)]^2',size=31);approx.set_color(VAR)
         self.beat(x.animate.set_value(.9),pulse(approx,scale_factor=1.01))
+        self.two_averages_aid()
         # Reuse the main stage for the quantitative trade-off.
         for mob in list(self.mobjects):
             if mob is not self.subtitle and mob.get_center()[1]<2.5: self.drop(mob)
