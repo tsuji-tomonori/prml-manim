@@ -134,3 +134,22 @@ class NarratedScene(Scene):
         g=VGroup(prefix,n).arrange(RIGHT,buff=.12).move_to(pos);left=n.get_left().copy()
         n.add_updater(lambda m:m.set_value(fn()).move_to(left,aligned_edge=LEFT))
         self.add(g);return g
+
+    def body_card(self, heading):
+        """Temporarily replace the body, retaining all original object identities."""
+        saved = (list(self.mobjects), self.formula, self.caption)
+        title = self.mobjects[0]
+        self.clear()
+        self.add(title)
+        self.formula = None
+        self.caption = None
+        frame = RoundedRectangle(width=11.6, height=4.8, corner_radius=.12,
+                                 stroke_color='#FFFF00', stroke_width=1.5).move_to([0,.2,0])
+        label = jp(heading,25).move_to([-5.35,2.05,0],aligned_edge=LEFT)
+        self.add(frame,label)
+        return saved
+
+    def restore_body(self, saved):
+        self.clear()
+        objects, self.formula, self.caption = saved
+        self.add(*objects)
