@@ -159,7 +159,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
         for j,col in enumerate(source.get_columns()):col.set_color([blue,purple][j])
         for i,row in enumerate(target.get_rows()):row.set_color([blue,purple][i])
         self.add(source,tex(r'\Phi',31).move_to([-2.6,1.3,0]),tex(r'\Phi^T',31).move_to([2.2,1.3,0]))
-        moving=source.get_entries().copy();self.add(moving)
+        moving=source.get_entries().copy()
         brackets=target.get_brackets()
         size1=tex(r'3\times2',30,blue).move_to([-2.6,-1.45,0])
         size2=tex(r'2\times3',30,'#83C167').move_to([2.2,-1.45,0])
@@ -167,7 +167,11 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.add(size1)
         a,b=[self.sentence_duration(i) for i in range(2)]
         def fold_column(j):
-            # Move one column at a time so unlike symbols never cross in transit.
+            # Start the working copy in the empty gap between the two matrices;
+            # moving it through the source would cross the other source column.
+            for i in range(3):
+                moving[2*i+j].set_x(-.25)
+                self.add(moving[2*i+j])
             return AnimationGroup(*[Transform(moving[2*i+j],target.get_entries()[3*j+i])
                                     for i in range(3)])
         self.beat(phases=[
