@@ -42,12 +42,19 @@ def main():
     # This pedagogical example preserves width/height/area relations exactly.
     areas=[h*s*np.sqrt(2*np.pi) for h,s in [(2,.75),(2,.25),(1.4,.85)]]
     assert areas[1]<areas[2]
+    # Independent finite differences for the V11 cross derivative and V10 area.
+    example=lambda x,y:.5*(x*x+x*y+y*y)
+    cross=(example(h,1+h)-example(h,1-h)-example(-h,1+h)+example(-h,1-h))/(4*h*h)
+    assert abs(cross-.5)<1e-8
+    assert np.allclose(np.linalg.eigvalsh([[1,.5],[.5,1]]),[.5,1.5])
+    assert abs(np.linalg.det(np.diag([4,1]))**-.5-.5)<1e-12
+    assert abs(np.prod(1/np.sqrt([4,1]))-.5)<1e-12
     root=Path(__file__).resolve().parent
     entries=json.loads((root/'assets/voicevox/manifest.json').read_text())['scenes']
     assert len(entries)==len(SCENES)==9
     for scene,entry in zip(SCENES,entries):
         assert valid_entry(scene,entry),scene['id']
-        assert len(entry['subtitle_cues'])==8
+        assert len(entry['subtitle_cues'])==len(scene['beats'])
         assert abs(entry['duration']*15-round(entry['duration']*15))<1e-7
         for b in scene['beats']:
             for q in b['segments']:
@@ -56,6 +63,6 @@ def main():
     assert {f.name for f in (root/'assets/voicevox').glob('*.wav')}=={e['id']+'.wav' for e in entries}
     rows=json.loads((root/'reading_check.json').read_text())['sentences']
     assert [(r['id'],r['speech'],r['display']) for r in rows]==[(q['id'],q['speech'],q['display']) for s in SCENES for b in s['beats'] for q in b['segments']]
-    print(json.dumps(dict(check_groups=7,mode=Z0,precision=A,variance=1/A,Z=Z,Z_laplace=ZL,relative_integral_error=ZL/Z-1,mean=MEAN,peak_p=float(pdf(Z0)),peak_q=float(gaussian(Z0)),areas=areas,evidence=[evidence(.8,5),evidence(.3,5),evidence(.3,8)],bic_penalties={str(n):[float(m/2*np.log(n)) for m in [2,5]] for n in [20,200]},audio_seconds=sum(e['duration'] for e in entries)),indent=2))
+    print(json.dumps(dict(check_groups=8,mode=Z0,precision=A,variance=1/A,Z=Z,Z_laplace=ZL,relative_integral_error=ZL/Z-1,mean=MEAN,peak_p=float(pdf(Z0)),peak_q=float(gaussian(Z0)),areas=areas,evidence=[evidence(.8,5),evidence(.3,5),evidence(.3,8)],bic_penalties={str(n):[float(m/2*np.log(n)) for m in [2,5]] for n in [20,200]},audio_seconds=sum(e['duration'] for e in entries)),indent=2))
 
 if __name__=='__main__':main()
