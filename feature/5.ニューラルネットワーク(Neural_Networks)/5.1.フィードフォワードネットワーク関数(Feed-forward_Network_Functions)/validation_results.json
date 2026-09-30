@@ -1,5 +1,5 @@
 {
-  "video_sha256": "dde3c2fa337a62f9699946c08f72b9cd66f9abefaa88eb0fad7a4d350f7e566c",
+  "video_sha256": "ff06944baef6ac624a29e3ed2e70426842b187971f677dbf453aa44289ab902c",
   "probe": {
     "programs": [],
     "streams": [
@@ -9,386 +9,662 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "597.666667"
+        "duration": "629.000000"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "597.696000"
+        "duration": "629.034667"
       }
     ],
     "format": {
-      "duration": "597.696000"
+      "duration": "629.035000"
     }
   },
-  "stream_gap": 0.029333000000065113,
+  "stream_gap": 0.034667000000013104,
   "silence_intervals": 0,
   "mean_volume": -26.4,
-  "max_volume": -5.3,
+  "max_volume": -5.7,
   "scenes": 9,
-  "cues": 116,
-  "max_scene_duration_gap": 6.207301339600235e-11,
+  "cues": 123,
+  "max_scene_duration_gap": 7.257483503053663e-11,
   "frames": [
     {
       "label": "scene01-beat01",
       "time": 6.206666666666667,
-      "file": "000-scene01-beat01.png"
+      "file": "000-scene01-beat01.png",
+      "png_sha256": "c1c8065eaf7c8d068ebcdc1d08086a5a867501294514ff6c719e7c8f901dc2ce"
     },
     {
       "label": "scene01-beat02",
       "time": 14.839999999999987,
-      "file": "001-scene01-beat02.png"
+      "file": "001-scene01-beat02.png",
+      "png_sha256": "0487980fc2e8b6514e2b69352d56f1a85e3398275d0cb1152a57f29cd848e0db"
     },
     {
       "label": "scene01-beat03",
-      "time": 23.466666666666626,
-      "file": "002-scene01-beat03.png"
+      "time": 27.19999999999996,
+      "file": "002-scene01-beat03.png",
+      "png_sha256": "d2c86721d8a5aaa4801653019ab6ae0b16daaa1f18500270fb0c7b9f535ad840"
     },
     {
       "label": "scene01-beat04",
-      "time": 32.41333333333326,
-      "file": "003-scene01-beat04.png"
+      "time": 37.74666666666658,
+      "file": "003-scene01-beat04.png",
+      "png_sha256": "ec91b97cb170084d0ba757a5742cb11157c73bc344cde4a998b96f686c5bd019"
     },
     {
       "label": "scene01-beat05",
-      "time": 41.62000000000006,
-      "file": "004-scene01-beat05.png"
+      "time": 46.95333333333366,
+      "file": "004-scene01-beat05.png",
+      "png_sha256": "18040436ebcdca11ed9e35bc34c1dced0ac40a852bb08d972029b9358d832ca9"
     },
     {
       "label": "math-scene01-05-01",
-      "time": 36.97866666666667,
-      "file": "005-math-scene01-05-01.png"
+      "time": 42.312,
+      "file": "005-math-scene01-05-01.png",
+      "png_sha256": "3c32f191cd8b164111d87c225c321a89952a67ddbb16e79b54c7a4515f1742c5"
     },
     {
       "label": "scene01-beat06",
-      "time": 50.88666666666719,
-      "file": "006-scene01-beat06.png"
+      "time": 56.22000000000079,
+      "file": "006-scene01-beat06.png",
+      "png_sha256": "b9e06be9bb0cba3fd3573c4bba62262f7512aeee5bae4da6eec4e63d61acda8a"
+    },
+    {
+      "label": "review-scene01-03-01-0.15",
+      "time": 18.284799999999997,
+      "file": "007-review-scene01-03-01-0.15.png",
+      "png_sha256": "0d34b40779d9cb20ba6d58e7816fb8e8e38b8a2cd59bbca369d504836cbfc5a3"
+    },
+    {
+      "label": "review-scene01-03-01-0.85",
+      "time": 22.413866666666664,
+      "file": "008-review-scene01-03-01-0.85.png",
+      "png_sha256": "27b3d4a4491a6fc301914cb804da5729928cc16d3f83a879423874efea6b40b9"
+    },
+    {
+      "label": "review-scene01-03-02-0.15",
+      "time": 23.901866666666667,
+      "file": "009-review-scene01-03-02-0.15.png",
+      "png_sha256": "7be3cb5b98db1fae4e38d37c84cfeaa8bd86a3d2aac5a40ea5a625fdac75c050"
+    },
+    {
+      "label": "review-scene01-03-02-0.85",
+      "time": 26.7168,
+      "file": "010-review-scene01-03-02-0.85.png",
+      "png_sha256": "f196dcaee142e86c9c38f97cdc1519ef70510bc456b671f74c22eac4360d4850"
+    },
+    {
+      "label": "review-scene01-03-03-0.15",
+      "time": 27.8752,
+      "file": "011-review-scene01-03-03-0.15.png",
+      "png_sha256": "7497e79510c4cae92553221ef4c9915b948a5a10a9807883e0c0549094f9f83b"
+    },
+    {
+      "label": "review-scene01-03-03-0.85",
+      "time": 30.466133333333335,
+      "file": "012-review-scene01-03-03-0.85.png",
+      "png_sha256": "7ccec85382596d6946c31dab369990938913a9544a0ec8061d918d14b0338fb4"
+    },
+    {
+      "label": "review-scene01-before",
+      "time": 17.19999999999996,
+      "file": "013-review-scene01-before.png",
+      "png_sha256": "15985257b6ec2895d16071f64e682a9a85dcc186138a7a147f3ee713123106ce"
+    },
+    {
+      "label": "review-scene01-after",
+      "time": 31.59999999999996,
+      "file": "014-review-scene01-after.png",
+      "png_sha256": "16cfda312a045e0b2946b0fd068ee04da7bc2df8f3ebd0ad29c1c6e647f13c5f"
     },
     {
       "label": "scene02-beat01",
-      "time": 60.760000000000986,
-      "file": "007-scene02-beat01.png"
+      "time": 66.09333333333458,
+      "file": "015-scene02-beat01.png",
+      "png_sha256": "34628b36d460212943011d125b70ed4ff153a81c835f2c63a5d41b964acd2512"
     },
     {
       "label": "scene02-beat02",
-      "time": 69.12000000000148,
-      "file": "008-scene02-beat02.png"
+      "time": 74.45333333333453,
+      "file": "016-scene02-beat02.png",
+      "png_sha256": "290ebbf16e53d8b30fe152a33bf93b8a3e6425db8bce38eeabd2a2d9af7b69e3"
     },
     {
       "label": "scene02-beat03",
-      "time": 79.3333333333344,
-      "file": "009-scene02-beat03.png"
+      "time": 84.66666666666742,
+      "file": "017-scene02-beat03.png",
+      "png_sha256": "f4a0460816d29e94a7b25589c73da88ddb4a95f180499ea1a6dd5627e13c6ce9"
     },
     {
       "label": "scene02-beat04",
-      "time": 89.59333333333376,
-      "file": "010-scene02-beat04.png"
+      "time": 94.92666666666679,
+      "file": "018-scene02-beat04.png",
+      "png_sha256": "568cf347d4ac8a230f53ab566545747e7c4a6b395f671706e8f5c96d1910fdfb"
     },
     {
       "label": "math-scene02-04-01",
-      "time": 85.36266666666765,
-      "file": "011-math-scene02-04-01.png"
+      "time": 90.69600000000125,
+      "file": "019-math-scene02-04-01.png",
+      "png_sha256": "52f1ecb44543c63bcecee6ec51cabd5b85464a87b0f87a79a7d5e299bc5a57b6"
     },
     {
       "label": "scene02-beat05",
-      "time": 99.20666666666654,
-      "file": "012-scene02-beat05.png"
+      "time": 104.53999999999957,
+      "file": "020-scene02-beat05.png",
+      "png_sha256": "654d1add01a9ced93ed1198e8d547a3c8750538e44c0dc2e1a2f43fe8d0ef0f3"
     },
     {
       "label": "scene02-beat06",
-      "time": 109.29999999999933,
-      "file": "013-scene02-beat06.png"
+      "time": 114.63333333333236,
+      "file": "021-scene02-beat06.png",
+      "png_sha256": "e01645b0f46b964c44986840b83bbfe5caa1bd3f8de4a9627e02d606f702d271"
     },
     {
       "label": "scene02-beat07",
-      "time": 118.8866666666654,
-      "file": "014-scene02-beat07.png"
+      "time": 124.21999999999844,
+      "file": "022-scene02-beat07.png",
+      "png_sha256": "61ef95df1da96e83cf2d9f095629a2ebcbffcc0de1201e4114e0d0bdc4c91b92"
     },
     {
       "label": "sync-scene02-0",
-      "time": 84.20333333333376,
-      "file": "015-sync-scene02-0.png"
+      "time": 89.53666666666679,
+      "file": "023-sync-scene02-0.png",
+      "png_sha256": "3836c000fe62a4a6fd2423e49c536c8fd3631991159c36e4825942eaa98b06ce"
     },
     {
       "label": "sync-scene02-1",
-      "time": 91.06333333333376,
-      "file": "016-sync-scene02-1.png"
+      "time": 96.39666666666679,
+      "file": "024-sync-scene02-1.png",
+      "png_sha256": "50993e20f74a9335f7cf8ef34f3ae6bb305307f27c64b7058a072f0835d8ac54"
     },
     {
       "label": "scene03-beat01",
-      "time": 128.24666666666488,
-      "file": "017-scene03-beat01.png"
+      "time": 133.5799999999979,
+      "file": "025-scene03-beat01.png",
+      "png_sha256": "bba9114f5f799047b3f2b2102ea15778ea29b52581554975f543b93ae429787e"
     },
     {
       "label": "scene03-beat02",
-      "time": 137.64666666666437,
-      "file": "018-scene03-beat02.png"
+      "time": 142.9799999999974,
+      "file": "026-scene03-beat02.png",
+      "png_sha256": "9af7994f3f216736c266b1077a7361103ce16b3f2ceeae6089d83d390188a113"
     },
     {
       "label": "scene03-beat03",
-      "time": 146.90666666666382,
-      "file": "019-scene03-beat03.png"
+      "time": 152.23999999999685,
+      "file": "027-scene03-beat03.png",
+      "png_sha256": "c1b8aae527b8dfe8f8315e5e250dafa9bc6ee55611c0641e3d56950ee98d8365"
     },
     {
       "label": "scene03-beat04",
-      "time": 157.69333333332997,
-      "file": "020-scene03-beat04.png"
+      "time": 163.026666666663,
+      "file": "028-scene03-beat04.png",
+      "png_sha256": "f966dcb77f491cae004d0e86b83fc70b4459e5300b7c00b47d404192fd24d6ef"
     },
     {
       "label": "scene03-beat05",
-      "time": 167.619999999996,
-      "file": "021-scene03-beat05.png"
+      "time": 172.95333333332903,
+      "file": "029-scene03-beat05.png",
+      "png_sha256": "bd114d352eb0a96e62cf70ad513bd2cc6fcf07f1f7a299de9c838e196c5b5e84"
     },
     {
       "label": "math-scene03-05-02",
-      "time": 167.69333333333157,
-      "file": "022-math-scene03-05-02.png"
+      "time": 173.0266666666646,
+      "file": "030-math-scene03-05-02.png",
+      "png_sha256": "cc45c2662322568a36808ca0008c921694e1d7ebe099f5fff7d5752b5bc562c5"
     },
     {
       "label": "scene03-beat06",
-      "time": 177.7733333333288,
-      "file": "023-scene03-beat06.png"
+      "time": 183.10666666666182,
+      "file": "031-scene03-beat06.png",
+      "png_sha256": "10f212eac5cdbb8373d58f9fe792974c242f4759510c6ddb0578128d3ea3b340"
     },
     {
       "label": "scene03-beat07",
-      "time": 188.07333333332818,
-      "file": "024-scene03-beat07.png"
+      "time": 193.4066666666612,
+      "file": "032-scene03-beat07.png",
+      "png_sha256": "67996c1496622aa58f571e24818b969b7901239ef1dc9f0430ba70bfdec87c82"
     },
     {
       "label": "scene04-beat01",
-      "time": 198.8333333333276,
-      "file": "025-scene04-beat01.png"
+      "time": 204.16666666666063,
+      "file": "033-scene04-beat01.png",
+      "png_sha256": "ad1702313f896e67af8c97781a2002f0a0e8a8016247bf37850e1b3025c28548"
     },
     {
       "label": "scene04-beat02",
-      "time": 208.5266666666603,
-      "file": "026-scene04-beat02.png"
+      "time": 213.85999999999333,
+      "file": "034-scene04-beat02.png",
+      "png_sha256": "b58e69797b80bf22ac6cc5c348a0cf5058a90d7c002020b6f49ade3ce8db7902"
     },
     {
       "label": "scene04-beat03",
-      "time": 218.35999999999314,
-      "file": "027-scene04-beat03.png"
+      "time": 223.69333333332617,
+      "file": "035-scene04-beat03.png",
+      "png_sha256": "0990e6951ee2fac351e859854670865cdd8514f7a6fd029bfb7d64ff6235c904"
     },
     {
       "label": "scene04-beat04",
-      "time": 227.69999999999257,
-      "file": "028-scene04-beat04.png"
+      "time": 233.0333333333256,
+      "file": "036-scene04-beat04.png",
+      "png_sha256": "78557ff7ed896e7353fc5f45db9deae53789229241c1c593646688fa0d3663b3"
     },
     {
       "label": "scene04-beat05",
-      "time": 238.37999999999204,
-      "file": "029-scene04-beat05.png"
+      "time": 243.71333333332507,
+      "file": "037-scene04-beat05.png",
+      "png_sha256": "1521b5ac32d6daff34e5dbd87b06a9b19bc177407589096cb253a82cf337c865"
     },
     {
       "label": "scene04-beat06",
-      "time": 249.40666666665808,
-      "file": "030-scene04-beat06.png"
+      "time": 254.73999999999108,
+      "file": "038-scene04-beat06.png",
+      "png_sha256": "0923e1f6e6303489f607ebd820cb8864cbf301958f0eed9a161060b4e9980a3c"
     },
     {
       "label": "scene05-beat01",
-      "time": 260.50666666665745,
-      "file": "031-scene05-beat01.png"
+      "time": 265.8399999999905,
+      "file": "039-scene05-beat01.png",
+      "png_sha256": "1fc424e482bda62ed3c85ebcf23508c92a9ac8417b0e06f1c38e5a458aa1a53b"
     },
     {
       "label": "scene05-beat02",
-      "time": 270.86666666665684,
-      "file": "032-scene05-beat02.png"
+      "time": 278.15999999998985,
+      "file": "040-scene05-beat02.png",
+      "png_sha256": "73da53118e96ab6864132dd96ce88ede8b76a7eefcd62ef5469a03e148d778db"
+    },
+    {
+      "label": "math-scene05-recap-02",
+      "time": 275.5679999999905,
+      "file": "041-math-scene05-recap-02.png",
+      "png_sha256": "d44ec99fe7de4a84ec0b6c84ecf7516be521585b49757a696ba2c70ec4c0df62"
     },
     {
       "label": "scene05-beat03",
-      "time": 279.6999999999896,
-      "file": "033-scene05-beat03.png"
-    },
-    {
-      "label": "math-scene05-03-02",
-      "time": 279.5039999999908,
-      "file": "034-math-scene05-03-02.png"
+      "time": 288.99999999998914,
+      "file": "042-scene05-beat03.png",
+      "png_sha256": "15cfd5246f3514f71943ac6d79457b64689e76e36cb3e08bfc986002cc2d532d"
     },
     {
       "label": "scene05-beat04",
-      "time": 288.35999999998916,
-      "file": "035-scene05-beat04.png"
+      "time": 297.8333333333219,
+      "file": "043-scene05-beat04.png",
+      "png_sha256": "daf07e79ad3ef91377e038fe1df829a26b26cb9fc20c9b36074d4f349538c5ae"
+    },
+    {
+      "label": "math-scene05-03-02",
+      "time": 297.63733333332385,
+      "file": "044-math-scene05-03-02.png",
+      "png_sha256": "9277feb916fb2024dcf9757d1aac7349af6c25b265ef0d3e3a6ca56bdea8dbdb"
     },
     {
       "label": "scene05-beat05",
-      "time": 299.353333333322,
-      "file": "036-scene05-beat05.png"
+      "time": 306.49333333332146,
+      "file": "045-scene05-beat05.png",
+      "png_sha256": "3ac4b00f3c314cc1df698c10727d83bcad3afa252039e62b044326bdc7685014"
     },
     {
       "label": "scene05-beat06",
-      "time": 311.1933333333213,
-      "file": "037-scene05-beat06.png"
+      "time": 317.4866666666543,
+      "file": "046-scene05-beat06.png",
+      "png_sha256": "7f8484d0c087327839ec312a9386939ab3c76bbc89882788c9a89735907577bd"
+    },
+    {
+      "label": "scene05-beat07",
+      "time": 329.3266666666536,
+      "file": "047-scene05-beat07.png",
+      "png_sha256": "2c9b4354447934ed216097e51214233357298f48dc966e0461153f32a0daded5"
+    },
+    {
+      "label": "review-scene05-recap-01-0.15",
+      "time": 269.8191999999905,
+      "file": "048-review-scene05-recap-01-0.15.png",
+      "png_sha256": "f7badf182aad9aba274a39d0681e24fbfe8adcb82ea78771f928e6dc31d5a1f2"
+    },
+    {
+      "label": "review-scene05-recap-01-0.85",
+      "time": 272.7087999999905,
+      "file": "049-review-scene05-recap-01-0.85.png",
+      "png_sha256": "eb72776bcd79f3423268335e31732455a22fc5ab01e4afb39ce85cd60c204ea6"
+    },
+    {
+      "label": "review-scene05-recap-02-0.15",
+      "time": 273.9999999999905,
+      "file": "050-review-scene05-recap-02-0.15.png",
+      "png_sha256": "07be506ba4d83602a73d7daa99ad0cdb06b1d671fa3554318aadc191e8a9bd37"
+    },
+    {
+      "label": "review-scene05-recap-02-0.85",
+      "time": 277.1359999999905,
+      "file": "051-review-scene05-recap-02-0.85.png",
+      "png_sha256": "2c4548ac9bedf7166d1709a2996242fb1f1c7dc59d16124f0684b3a364327b84"
+    },
+    {
+      "label": "review-scene05-recap-03-0.15",
+      "time": 278.3743999999905,
+      "file": "052-review-scene05-recap-03-0.15.png",
+      "png_sha256": "1c40015a6588b53a02de581bc11234c7cdbddda076f558af28a141dc2a31b717"
+    },
+    {
+      "label": "review-scene05-recap-03-0.85",
+      "time": 281.0175999999905,
+      "file": "053-review-scene05-recap-03-0.85.png",
+      "png_sha256": "41c2644236550f5fe56f99846ecddb1f618efc4f09f1dfedd7ebbf8b4945f918"
+    },
+    {
+      "label": "review-scene05-before",
+      "time": 268.9999999999899,
+      "file": "054-review-scene05-before.png",
+      "png_sha256": "07912b3bb619c84df093d21e3cae9960ca575500fa08ecd353e0a0aa5ccc678d"
+    },
+    {
+      "label": "review-scene05-after",
+      "time": 282.19999999998987,
+      "file": "055-review-scene05-after.png",
+      "png_sha256": "7411ffc55689c23a8d35f1e1a27097f8684f49dd4c7ab5cf2620439b1ef03407"
+    },
+    {
+      "label": "output-normalization-before",
+      "time": 308.93333333332095,
+      "file": "056-output-normalization-before.png",
+      "png_sha256": "790c40dea8f6d7a355e4d573d0fdb9f339631f82decb2201daaa1ff0ae718628"
+    },
+    {
+      "label": "output-normalization-onset",
+      "time": 309.3333333333209,
+      "file": "057-output-normalization-onset.png",
+      "png_sha256": "5aa0c2604d3c12dd7fe5e2b34c9d2ffe4257743feaf13e27e07fb221f804ebc6"
+    },
+    {
+      "label": "output-normalization-during",
+      "time": 314.24533333332386,
+      "file": "058-output-normalization-during.png",
+      "png_sha256": "8a8e11119dac1f651a47f3a0e98d9a0116ad1d5c3e0a246bcfb2bafac82eaacd"
+    },
+    {
+      "label": "output-normalization-after",
+      "time": 321.26666666665426,
+      "file": "059-output-normalization-after.png",
+      "png_sha256": "101121c36ac1dbcfaeb5f481ac739edbebf32b0d18eaa556c093de93302b6f3a"
     },
     {
       "label": "scene06-beat01",
-      "time": 321.0799999999873,
-      "file": "038-scene06-beat01.png"
+      "time": 339.2133333333196,
+      "file": "060-scene06-beat01.png",
+      "png_sha256": "7181f0087195846072c13710ee6a2cf79b47de021758ee07de0f89a89bef7272"
     },
     {
       "label": "scene06-beat02",
-      "time": 330.33333333332007,
-      "file": "039-scene06-beat02.png"
+      "time": 348.4666666666524,
+      "file": "061-scene06-beat02.png",
+      "png_sha256": "78bd4a71637ac44f243fed1e52fffe10a8cd683c85fad081175fbfd36ad0ac1c"
     },
     {
       "label": "scene06-beat03",
-      "time": 341.1599999999862,
-      "file": "040-scene06-beat03.png"
+      "time": 359.2933333333185,
+      "file": "062-scene06-beat03.png",
+      "png_sha256": "286ac35176187f3b221574c1a223abdb6ca732e3d67daa1d9e1fb329da1a0dee"
     },
     {
       "label": "scene06-beat04",
-      "time": 352.48666666665224,
-      "file": "041-scene06-beat04.png"
+      "time": 370.61999999998454,
+      "file": "063-scene06-beat04.png",
+      "png_sha256": "67e407bba19ea7a4e79c91c27103ed1f2f5cbbd759b470ffb3247c287bc310c2"
     },
     {
       "label": "scene06-beat05",
-      "time": 363.0533333333183,
-      "file": "042-scene06-beat05.png"
+      "time": 381.1866666666506,
+      "file": "064-scene06-beat05.png",
+      "png_sha256": "345f5e50cdcf16d8311747330edf64a3ebc68ed14318cb2dac6bca9cbf19e349"
     },
     {
       "label": "scene06-beat06",
-      "time": 374.57999999998435,
-      "file": "043-scene06-beat06.png"
+      "time": 392.71333333331665,
+      "file": "065-scene06-beat06.png",
+      "png_sha256": "0df30b31e21eac8508ce1983b0701dfe97338242b8fb2cff4fffc5145e6f72cf"
     },
     {
       "label": "sync-scene06-0",
-      "time": 357.40666666665163,
-      "file": "044-sync-scene06-0.png"
+      "time": 375.53999999998393,
+      "file": "066-sync-scene06-0.png",
+      "png_sha256": "430ddc944ccdf43a7e1f86148e26a81392e5b74a6416d68e051d20d87bd225e8"
     },
     {
       "label": "sync-scene06-1",
-      "time": 364.59333333331824,
-      "file": "045-sync-scene06-1.png"
+      "time": 382.72666666665054,
+      "file": "067-sync-scene06-1.png",
+      "png_sha256": "f25345f8181782a0ce6ba2cf82d1bc4803d84d9e1f297d21ddd439469af379a6"
     },
     {
       "label": "scene07-beat01",
-      "time": 384.453333333317,
-      "file": "046-scene07-beat01.png"
+      "time": 402.5866666666493,
+      "file": "068-scene07-beat01.png",
+      "png_sha256": "2beec9e955fe712295a65f76f3df618f1ad5878380e4ba5852f145423165b539"
     },
     {
       "label": "scene07-beat02",
-      "time": 394.5533333333165,
-      "file": "047-scene07-beat02.png"
+      "time": 412.6866666666488,
+      "file": "069-scene07-beat02.png",
+      "png_sha256": "a0254915d439869df79271db5c42e948c3edce5fe14cf72e69acfc078666b09a"
     },
     {
       "label": "scene07-beat03",
-      "time": 405.01333333331587,
-      "file": "048-scene07-beat03.png"
+      "time": 423.1466666666482,
+      "file": "070-scene07-beat03.png",
+      "png_sha256": "b5dce158aeb15bf0b38f15c03ffec854437b79e58c697cc548430da35e79b96e"
     },
     {
       "label": "scene07-beat04",
-      "time": 415.9733333333153,
-      "file": "049-scene07-beat04.png"
+      "time": 434.1066666666476,
+      "file": "071-scene07-beat04.png",
+      "png_sha256": "3537a97bb326532ff32543c62bcecaccdc83bdbb8e01d41d10396e18b969c9ce"
     },
     {
       "label": "scene07-beat05",
-      "time": 426.51999999998134,
-      "file": "050-scene07-beat05.png"
+      "time": 444.65333333331364,
+      "file": "072-scene07-beat05.png",
+      "png_sha256": "c29852741170394d56631ad181decf37fcac95679aa0033b0209658700c09e91"
     },
     {
       "label": "scene07-beat06",
-      "time": 437.20666666664744,
-      "file": "051-scene07-beat06.png"
+      "time": 455.33999999997974,
+      "file": "073-scene07-beat06.png",
+      "png_sha256": "ae1708b577ace5bfcc42ac9e4a71adc4fe8bed684f33d66775c2aee519041095"
     },
     {
       "label": "scene08-beat01",
-      "time": 448.3066666666468,
-      "file": "052-scene08-beat01.png"
+      "time": 466.4399999999791,
+      "file": "074-scene08-beat01.png",
+      "png_sha256": "784c3635189709db13af894ddcd9bfe2b2066b7d5e21732e1fd9d72730fb239f"
     },
     {
       "label": "scene08-beat02",
-      "time": 459.4599999999795,
-      "file": "053-scene08-beat02.png"
+      "time": 477.5933333333118,
+      "file": "075-scene08-beat02.png",
+      "png_sha256": "e3b2395c4f5cbb7083e6f4a022fd1648b3eac0cce20f0431251ede5e9c61222c"
     },
     {
       "label": "scene08-beat03",
-      "time": 469.0533333333122,
-      "file": "054-scene08-beat03.png"
+      "time": 487.1866666666445,
+      "file": "076-scene08-beat03.png",
+      "png_sha256": "a86666e9b249a0213b0b1ceadc89752862c9d7f428b630a8c6360572b064fddd"
     },
     {
       "label": "scene08-beat04",
-      "time": 478.546666666645,
-      "file": "055-scene08-beat04.png"
+      "time": 496.6799999999773,
+      "file": "077-scene08-beat04.png",
+      "png_sha256": "bb2abeeb681600ec078428e83379fcd8b440486312630d4397e3d5c77781527b"
     },
     {
       "label": "scene08-beat05",
-      "time": 490.0533333333111,
-      "file": "056-scene08-beat05.png"
+      "time": 508.1866666666434,
+      "file": "078-scene08-beat05.png",
+      "png_sha256": "16d976dc579ec33779bb0d1decb04c38f4b55de290e1393defbc11cd243cd7bd"
     },
     {
       "label": "scene08-beat06",
-      "time": 503.06666666664375,
-      "file": "057-scene08-beat06.png"
+      "time": 521.1999999999761,
+      "file": "079-scene08-beat06.png",
+      "png_sha256": "468652ea7683404a09f2dd28ff523781a31b4edecedb1a1d0d23f568e47c37f2"
     },
     {
       "label": "scene08-beat07",
-      "time": 515.886666666643,
-      "file": "058-scene08-beat07.png"
+      "time": 534.0199999999866,
+      "file": "080-scene08-beat07.png",
+      "png_sha256": "d8c76cd987321e8a33172533a5670420d4988053402be93eb602a33d9ac66e94"
     },
     {
       "label": "scene09-beat01",
-      "time": 526.4799999999822,
-      "file": "059-scene09-beat01.png"
+      "time": 544.6133333333299,
+      "file": "081-scene09-beat01.png",
+      "png_sha256": "24189e010d475e15e52e9b37a0b7eb5d86c2be607035aa7bf117b80ad3236ada"
     },
     {
       "label": "scene09-beat02",
-      "time": 537.2399999999899,
-      "file": "060-scene09-beat02.png"
+      "time": 555.3733333333377,
+      "file": "082-scene09-beat02.png",
+      "png_sha256": "df046cc3050a306d9d34209d05475e86af2be986e1d69d6311fe7c26279f297c"
     },
     {
       "label": "scene09-beat03",
-      "time": 548.0666666666654,
-      "file": "061-scene09-beat03.png"
+      "time": 566.2000000000131,
+      "file": "083-scene09-beat03.png",
+      "png_sha256": "cbb54ecb5bacee06077dbe3c3c86475819ddcfe247534712521cad1b85b900b9"
     },
     {
       "label": "scene09-beat04",
-      "time": 559.4333333333406,
-      "file": "062-scene09-beat04.png"
+      "time": 577.5666666666883,
+      "file": "084-scene09-beat04.png",
+      "png_sha256": "ad454aee27e2c624d50bf6fb61e9c558dca5803cd9c802dbac09c464b2c14783"
     },
     {
       "label": "scene09-beat05",
-      "time": 569.9800000000166,
-      "file": "063-scene09-beat05.png"
+      "time": 588.1133333333644,
+      "file": "085-scene09-beat05.png",
+      "png_sha256": "a3bc0317b81211e91f2be9616edb3cb300d7cd480d360699a4c510eeba19572a"
     },
     {
       "label": "scene09-beat06",
-      "time": 581.2600000000245,
-      "file": "064-scene09-beat06.png"
+      "time": 599.3933333333723,
+      "file": "086-scene09-beat06.png",
+      "png_sha256": "fb5b76c0c977d73189f2cd9ad2531d53144cdd8528ea0f80e6f8266e65a3ba2a"
     },
     {
       "label": "math-scene09-06-01",
-      "time": 575.3466666666488,
-      "file": "065-math-scene09-06-01.png"
+      "time": 593.4799999999966,
+      "file": "087-math-scene09-06-01.png",
+      "png_sha256": "e80d119633fdc508e11d696417b07d14363228d0ebe4121e92d601de464c0d9c"
     },
     {
       "label": "scene09-beat07",
-      "time": 593.8066666667006,
-      "file": "066-scene09-beat07.png"
+      "time": 612.1733333333817,
+      "file": "088-scene09-beat07.png",
+      "png_sha256": "c0520e00523fc3a31676aec6f5ae62c4530cda6af7aae88d9a1e339c923aab33"
+    },
+    {
+      "label": "math-scene09-aid-01",
+      "time": 604.8959999999965,
+      "file": "089-math-scene09-aid-01.png",
+      "png_sha256": "7770011c719a068a0b468fe831cd4f11bfee5dd40f4769cb0da442c70fc9e5cc"
+    },
+    {
+      "label": "math-scene09-aid-02",
+      "time": 608.4853333333299,
+      "file": "090-math-scene09-aid-02.png",
+      "png_sha256": "8796601f3079f288b5fe627663e60053b79acf9a01f369acd8613d656442ce15"
+    },
+    {
+      "label": "math-scene09-aid-03",
+      "time": 612.9173333333299,
+      "file": "091-math-scene09-aid-03.png",
+      "png_sha256": "0f00f3234aa00954e981fe582d8195274ad5948cc5db28c22a31bf60389a81b8"
+    },
+    {
+      "label": "scene09-beat08",
+      "time": 625.1400000000589,
+      "file": "092-scene09-beat08.png",
+      "png_sha256": "38e48a20fda6fbb49d1f4266ac40bfb22905d54248387c22def5d73a6665c7de"
+    },
+    {
+      "label": "review-scene09-aid-01-0.15",
+      "time": 603.5221333333299,
+      "file": "093-review-scene09-aid-01-0.15.png",
+      "png_sha256": "b51d3cd316048244f7e5355dc602b16fbe0acd165b3158b49af5abc65745e060"
+    },
+    {
+      "label": "review-scene09-aid-01-0.85",
+      "time": 606.2698666666632,
+      "file": "094-review-scene09-aid-01-0.85.png",
+      "png_sha256": "3f222a2dd7a0e668f13b8db4c260e154c2f4a06868fb042b407cb6d77a8e8189"
+    },
+    {
+      "label": "review-scene09-aid-02-0.15",
+      "time": 607.3466666666632,
+      "file": "095-review-scene09-aid-02-0.15.png",
+      "png_sha256": "0b5145ea3f3a9e94f6db162ad78ce3d001cf07e185869bc35cb4ad23be8bdc0d"
+    },
+    {
+      "label": "review-scene09-aid-02-0.85",
+      "time": 609.6239999999966,
+      "file": "096-review-scene09-aid-02-0.85.png",
+      "png_sha256": "5e17af2006e43625128ced939603ee2748bb7c91f53077875139996627fc5123"
+    },
+    {
+      "label": "review-scene09-aid-03-0.15",
+      "time": 610.9535999999965,
+      "file": "097-review-scene09-aid-03-0.15.png",
+      "png_sha256": "1ce22aea97185b4b2d49d08e67feb82a559f5115e30dea23800ea300508b806c"
+    },
+    {
+      "label": "review-scene09-aid-03-0.85",
+      "time": 614.8810666666633,
+      "file": "098-review-scene09-aid-03-0.85.png",
+      "png_sha256": "ad056757669f0ccc045484e9211708f210529aef337a6e39f911cf7eac630e72"
+    },
+    {
+      "label": "review-scene09-before",
+      "time": 602.7333333333817,
+      "file": "099-review-scene09-before.png",
+      "png_sha256": "618def668ff17106d785da06cb158a02b287d67b5274eb0a39baddcc9d6d5c2a"
+    },
+    {
+      "label": "review-scene09-after",
+      "time": 616.3333333333818,
+      "file": "100-review-scene09-after.png",
+      "png_sha256": "2890c076243a983a9e7d6e3e2d451771792b24d8fee2f2598b20962b8ec2ddb4"
     },
     {
       "label": "sync-scene09-0",
-      "time": 542.1999999999988,
-      "file": "067-sync-scene09-0.png"
+      "time": 560.3333333333466,
+      "file": "101-sync-scene09-0.png",
+      "png_sha256": "17c9255f57e9ccd3410b71e4be066ebcf989016112cad190dcbcdf10483debed"
     },
     {
       "label": "sync-scene09-1",
-      "time": 549.6666666666654,
-      "file": "068-sync-scene09-1.png"
+      "time": 567.8000000000131,
+      "file": "102-sync-scene09-1.png",
+      "png_sha256": "6a4887516ff11ec6b3bae6178bf290a8e012754d159a511781fb17d927eb50e5"
     },
     {
       "label": "swap-0.2",
-      "time": 564.0085333333154,
-      "file": "069-swap-0.2.png"
+      "time": 582.1418666666632,
+      "file": "103-swap-0.2.png",
+      "png_sha256": "5c8f6c1ae41e86cc8dd51e99e9467641dd40a433905c07538870cc9a0e5304e5"
     },
     {
       "label": "swap-0.5",
-      "time": 565.6213333333154,
-      "file": "070-swap-0.5.png"
+      "time": 583.7546666666632,
+      "file": "104-swap-0.5.png",
+      "png_sha256": "6af52428a249b436366b44ea6739916d66e933144721764c30c10852de906e30"
     },
     {
       "label": "swap-0.8",
-      "time": 567.2341333333154,
-      "file": "071-swap-0.8.png"
+      "time": 585.3674666666632,
+      "file": "105-swap-0.8.png",
+      "png_sha256": "c548c537d93507c94a4d4e8893e1a85affcd3f513b3c59aeb806f5e4f965507c"
     }
   ],
   "sync": [
@@ -396,46 +672,188 @@
       "scene": "scene02",
       "beat": 4,
       "note": "重みを増やして傾きを急に",
-      "start": 82.73333333333376,
-      "end": 92.53333333333376,
-      "speech_onset": 82.82958333333431,
+      "start": 88.06666666666679,
+      "end": 97.86666666666679,
+      "speech_onset": 88.16291666666791,
       "frames": [
-        84.20333333333376,
-        91.06333333333376
+        89.53666666666679,
+        96.39666666666679
       ]
     },
     {
       "scene": "scene06",
       "beat": 5,
       "note": "一つの重みで等高線と境界を連動",
-      "start": 355.8666666666516,
-      "end": 366.13333333331826,
-      "speech_onset": 355.94999999998726,
+      "start": 373.9999999999839,
+      "end": 384.26666666665056,
+      "speech_onset": 374.08333333331956,
       "frames": [
-        357.40666666665163,
-        364.59333333331824
+        375.53999999998393,
+        382.72666666665054
       ]
     },
     {
       "scene": "scene09",
       "beat": 3,
       "note": "出力重みも反転して寄与を復元",
-      "start": 540.5999999999988,
-      "end": 551.2666666666654,
-      "speech_onset": 540.6849999999821,
+      "start": 558.7333333333465,
+      "end": 569.4000000000132,
+      "speech_onset": 558.8183333333299,
       "frames": [
-        542.1999999999988,
-        549.6666666666654
+        560.3333333333466,
+        567.8000000000131
       ]
     }
   ],
-  "visual_review": "Reviewed by the agent: all 72 extracted final-video frames, including every beat, all five mathematical subtitle sentences, early/late states in three scenes, and three in-motion swap frames. No unresolved overlap, clipping, missing formula glyphs, or mismatched values found in these frames.",
+  "review_cards": [
+    {
+      "scene": "scene01",
+      "note": "復習: 3.1 固定基底から学習する材料へ（R）",
+      "start": 17.39999999999996,
+      "end": 31.39999999999996,
+      "duration": 14.0,
+      "sentence_sync": [
+        {
+          "sentence": "scene01-03-01",
+          "cue_start": 17.4,
+          "speech_onset": 17.459125,
+          "speech_end": 23.183124999999997,
+          "action_start": 17.39999999999996,
+          "action_end": 23.266666666666627
+        },
+        {
+          "sentence": "scene01-03-02",
+          "cue_start": 23.298666666666666,
+          "speech_onset": 23.361166666666666,
+          "speech_end": 27.23475,
+          "action_start": 23.266666666666627,
+          "action_end": 27.333333333333293
+        },
+        {
+          "sentence": "scene01-03-03",
+          "cue_start": 27.32,
+          "speech_onset": 27.415791666666667,
+          "speech_end": 30.921083333333335,
+          "action_start": 27.333333333333293,
+          "action_end": 31.39999999999996
+        }
+      ]
+    },
+    {
+      "scene": "scene05",
+      "note": "復習: 4.3 スコアから確率へ（R）",
+      "start": 269.19999999998987,
+      "end": 281.9999999999899,
+      "duration": 12.800000000000011,
+      "sentence_sync": [
+        {
+          "sentence": "scene05-recap-01",
+          "cue_start": 269.1999999999905,
+          "speech_onset": 269.2704166666572,
+          "speech_end": 273.21579166665714,
+          "action_start": 269.19999999998987,
+          "action_end": 273.3333333333232
+        },
+        {
+          "sentence": "scene05-recap-02",
+          "cue_start": 273.3279999999905,
+          "speech_onset": 273.40116666665716,
+          "speech_end": 277.7077499999905,
+          "action_start": 273.3333333333232,
+          "action_end": 277.7999999999899
+        },
+        {
+          "sentence": "scene05-recap-03",
+          "cue_start": 277.8079999999905,
+          "speech_onset": 277.9047499999905,
+          "speech_end": 281.4748749999905,
+          "action_start": 277.7999999999899,
+          "action_end": 281.9999999999899
+        }
+      ]
+    },
+    {
+      "scene": "scene09",
+      "note": "補足: 符号の4組と順序の2通り（V15）",
+      "start": 602.9333333333817,
+      "end": 616.1333333333818,
+      "duration": 13.200000000000045,
+      "sentence_sync": [
+        {
+          "sentence": "scene09-aid-01",
+          "cue_start": 602.9333333333299,
+          "speech_onset": 603.0035833333299,
+          "speech_end": 606.7711249999966,
+          "action_start": 602.9333333333817,
+          "action_end": 606.866666666715
+        },
+        {
+          "sentence": "scene09-aid-02",
+          "cue_start": 606.8586666666632,
+          "speech_onset": 606.9396249999966,
+          "speech_end": 610.0139583333299,
+          "action_start": 606.866666666715,
+          "action_end": 610.1333333333818
+        },
+        {
+          "sentence": "scene09-aid-03",
+          "cue_start": 610.1119999999966,
+          "speech_onset": 610.2095416666632,
+          "speech_end": 615.6332499999966,
+          "action_start": 610.1333333333818,
+          "action_end": 616.1333333333818
+        }
+      ]
+    }
+  ],
+  "visual_review": "最終106画像を確認。初回102画像を目視し、最終版では同一79画像をバイト照合、差分・追加27画像を再目視。全9シーン・60beat、3カードの前後と各文15%/85%、数式字幕、softmax切替前後、既存3箇所の同期とユニット交換途中を含む。確認範囲で重なり・はみ出しなし。全フレームの人手検査と音声の聴覚確認は未実施。",
   "full_listening": false,
-  "visual_review_notes": [
-    "Scene 01 equation and legend have separate vertical space.",
-    "Scene 03 output is 0.71 after the sigmoid formula appears.",
-    "Scene 05 sigmoid values match the curve; softmax sums to 1.00 during its explanation.",
-    "Scene 02 weight changes from 0.76 to 2.95, scene 06 from 1.97 to 0.73, and scene 09 outgoing sign from 0.95 to -0.95 during their spoken intervals.",
-    "The exchanging summands stay separated above the subtitle."
-  ]
+  "frame_comparison": {
+    "identical": 79,
+    "changed": 27,
+    "changed_files": [
+      "002-scene01-beat03.png",
+      "007-review-scene01-03-01-0.15.png",
+      "008-review-scene01-03-01-0.85.png",
+      "009-review-scene01-03-02-0.15.png",
+      "010-review-scene01-03-02-0.85.png",
+      "011-review-scene01-03-03-0.15.png",
+      "012-review-scene01-03-03-0.85.png",
+      "040-scene05-beat02.png",
+      "041-math-scene05-recap-02.png",
+      "045-scene05-beat05.png",
+      "046-scene05-beat06.png",
+      "047-scene05-beat07.png",
+      "050-review-scene05-recap-02-0.15.png",
+      "051-review-scene05-recap-02-0.85.png",
+      "052-review-scene05-recap-03-0.15.png",
+      "053-review-scene05-recap-03-0.85.png",
+      "056-output-normalization-before.png",
+      "057-output-normalization-onset.png",
+      "058-output-normalization-during.png",
+      "059-output-normalization-after.png",
+      "088-scene09-beat07.png",
+      "090-math-scene09-aid-02.png",
+      "091-math-scene09-aid-03.png",
+      "095-review-scene09-aid-02-0.15.png",
+      "096-review-scene09-aid-02-0.85.png",
+      "097-review-scene09-aid-03-0.15.png",
+      "098-review-scene09-aid-03-0.85.png"
+    ]
+  },
+  "pcm_preservation": {
+    "unchanged_pcm_sentences": 114,
+    "changed_existing_ids": [
+      "scene01-03-01",
+      "scene01-03-02"
+    ],
+    "unchanged_wav_scenes": [
+      "scene02",
+      "scene03",
+      "scene04",
+      "scene06",
+      "scene07",
+      "scene08"
+    ]
+  }
 }

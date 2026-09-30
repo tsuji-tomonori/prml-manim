@@ -31,12 +31,12 @@
   ],
   "audio": {
     "scenes": 9,
-    "beats": 58,
-    "sentences": 116,
-    "duration": 597.6666666666666
+    "beats": 60,
+    "sentences": 123,
+    "duration": 629.0
   },
   "captions": {
-    "count": 116,
+    "count": 123,
     "max_width": 9.377343750000001,
     "max_height": 0.6995312499999997
   }
