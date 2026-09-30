@@ -8,24 +8,24 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "628.466011"
+        "duration": "668.932678"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "628.501333"
+        "duration": "668.970667"
       }
     ],
     "format": {
-      "duration": "628.502000"
+      "duration": "668.971000"
     }
   },
-  "stream_difference": 0.03532200000006469,
+  "stream_difference": 0.037989000000038686,
   "silences_over_3s": 0,
   "mean_volume": -26.3,
   "max_volume": -6.2,
-  "max_scene_clock_error": 5.915978817938594e-11,
+  "max_scene_clock_error": 6.563993792951806e-11,
   "sync": [
     {
       "id": "scene01-02-01",
@@ -56,34 +56,34 @@
       "pcm_onset": 140.15391666666414
     },
     {
-      "id": "scene05-02-01",
-      "display": "一つ目の勾配の向きに、曲率の情報を加えます。その方向の楕円が縮みます。",
+      "id": "scene05-recap-01",
+      "display": "4.4では、精度の逆行列がガウスの広がりを決めました。",
       "action_start": 285.9999999999889,
-      "action_end": 292.26666666665557,
-      "pcm_onset": 286.08687499998956
+      "action_end": 290.7999999999889,
+      "pcm_onset": 286.0782083333229
     },
     {
-      "id": "scene05-02-02",
-      "display": "楕円は、増やした行列を精度とみなした、逆行列の広がりを表しています。",
-      "action_start": 292.26666666665557,
-      "action_end": 298.5333333333223,
-      "pcm_onset": 292.3889166666562
+      "id": "scene05-recap-02",
+      "display": "今回の楕円も、情報を加えて曲率を大きくすると、その方向へ縮みます。",
+      "action_start": 290.7999999999889,
+      "action_end": 297.13333333332224,
+      "pcm_onset": 290.87537499998956
     },
     {
-      "id": "scene08-06-01",
-      "display": "方向を変えれば、もう一度この計算を行います。結果の矢印も連動して変わります。",
-      "action_start": 540.5999999999988,
-      "action_end": 546.9333333333321,
-      "pcm_onset": 540.7246666666441
+      "id": "scene08-05-01",
+      "display": "最後に、各重みの勾配の変化率を取り出します。これが欲しかった積です。",
+      "action_start": 570.2000000000223,
+      "action_end": 575.9333333333557,
+      "pcm_onset": 570.259124999976
     },
     {
-      "id": "scene08-06-02",
-      "display": "二階微分が対称なら、原文の横向きの積と、ここで使う縦向きの積は転置の関係です。",
-      "action_start": 546.9333333333321,
-      "action_end": 554.1333333333321,
-      "pcm_onset": 547.0027916666442
+      "id": "scene08-05-02",
+      "display": "画面の二つの成分は、行列を作って掛けた結果と一致します。",
+      "action_start": 575.9333333333557,
+      "action_end": 581.066666666689,
+      "pcm_onset": 576.0309583333094
     }
   ],
-  "sha256": "c87c555dbb0f2f7a7cae4eb19dd0d13abb7a3a6fd9a5fba7d2d9026dada7ed31",
+  "sha256": "3686dabdb01caa979d33d5c175518d83f65c36f886b9ef67da767c99623790c2",
   "full_listen": false
 }

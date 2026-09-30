@@ -179,6 +179,32 @@ SCENES=[]
 for si,(title,reference,beats) in enumerate(STORY,1):
     sid=f'scene{si:02}'
     SCENES.append(dict(id=sid,title=title,reference=reference,beats=[dict(seconds=10,visual_note=note,segments=[dict(id=f'{sid}-{bi:02}-{j:02}',display=d,speech=d if s is None else s) for j,(d,s) in enumerate(lines,1)]) for bi,(note,lines) in enumerate(beats,1)]))
+# Insert after assigning the original IDs, so existing PCM/caption anchors stay stable.
+def insert_card(scene_index, beat_index, key, note, lines, seconds):
+    sid = SCENES[scene_index]['id']
+    SCENES[scene_index]['beats'].insert(beat_index, dict(
+        seconds=seconds, visual_note=note,
+        segments=[dict(id=f'{sid}-{key}-{i:02}', display=d, speech=s or d)
+                  for i, (d, s) in enumerate(lines, 1)]))
+
+insert_card(4, 1, 'recap', '復習 R：4.4 精度を増やすと楕円が縮む', [
+    ('4.4では、精度の逆行列がガウスの広がりを決めました。',
+     '四章四節では、精度の逆行列がガウスの広がりを決めました。'),
+    ('今回の楕円も、情報を加えて曲率を大きくすると、その方向へ縮みます。', None),
+], 12)
+insert_card(6, 0, 'recap', '復習 R：5.3 前へ値、後ろへ感度', [
+    ('5.3では、値を前へ、感度を後ろへ伝えました。',
+     '五章三節では、あたいを前へ、感度を後ろへ伝えました。'),
+    ('小さな変化の倍率を掛けて、重みの微分を求めました。', None),
+    ('今度は、もう一度微分して、曲がり方まで求めます。', None),
+], 14)
+insert_card(7, 3, 'aid', '補足 V14b：積の微分を二本の面積帯で見る', [
+    ('積の変化は、片方ずつ変えた二本の帯と、角の小さな面積に分かれます。',
+     '積の変化は、片方ずつ変えた二本の帯と、すみの小さな面積に分かれます。'),
+    ('幅をゼロへ近づけると、角の寄与が消え、二本の帯が微分に残ります。',
+     '幅をゼロへ近づけると、すみの寄与が消え、二本の帯が微分に残ります。'),
+    ('出力の微分も、重みの変化と、入力の変化を足します。', None),
+], 18)
 READING_FIXES={'縦横':'たてよこ','負に':'ふに','負の':'ふの'}
 for scene in SCENES:
     for beat in scene['beats']:

@@ -171,6 +171,7 @@ class PRML54HessianMatrix(NarratedScene):
         self.add(rings,mat,arrow,knob('L=',n,0,3),jp('逆行列',25,PURPLE).move_to([3,1.35,0]))
         self.equation(r'H_0=\alpha I,\quad H_0^{-1}=\alpha^{-1}I,\quad\alpha=0.3')
         self.beat(actions=[lambda:Create(rings),lambda:Indicate(mat,color=PURPLE)])
+        self.precision_recap()
         self.equation(r'H_{L+1}=H_L+b_{L+1}b_{L+1}^{\mathsf T}\quad(5.87)')
         self.beat(actions=[lambda:n.animate.set_value(1),lambda:Indicate(rings,color=PURPLE)])
         self.beat(actions=[lambda:n.animate.set_value(2),lambda:n.animate.set_value(2.3)])
@@ -214,6 +215,7 @@ class PRML54HessianMatrix(NarratedScene):
         return VGroup(edges,nodes,labels,edge_labels)
 
     def exact(self):
+        self.backprop_recap()
         u=ValueTracker(.7);w=lambda:np.array([u.get_value(),1.2])
         network=self.network();self.add(network)
         self.equation(r'a=ux,\quad z=h(a),\quad y=vz,\quad E=\tfrac12(y-t)^2',size=30)
@@ -247,6 +249,7 @@ class PRML54HessianMatrix(NarratedScene):
         self.equation(r'Ra=v_u x,\quad Rz=h\prime Ra,\quad Ry=v_vz+vRz\quad(5.101)\text{–}(5.103)',size=28)
         self.add(VGroup(jp('方向の成分',22),tex(r'v_u,v_v',27),jp('出力重み',22),tex('v',27)).arrange(RIGHT,buff=.25).move_to([0,-2.45,0]))
         self.beat(actions=[lambda:AnimationGroup(Write(forward),flow(network[0],GREEN)),lambda:Indicate(forward,color=GREEN)])
+        self.product_rule_aid()
         self.remove(forward)
         delta_definition=tex(r'\delta=y-t,\quad\delta_h=h\prime v\delta',27,RED).move_to([0,-1.5,0])
         self.add(delta_definition)
@@ -302,3 +305,110 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:k.animate.set_value(4),lambda:k.animate.set_value(1)])
         self.equation(r'\text{gradient}\quad\longrightarrow\quad\text{curvature}\quad\longrightarrow\quad Hv',size=34)
         self.beat(actions=[lambda:k.animate.set_value(4),lambda:k.animate.set_value(2)])
+
+    def body_card(self, label):
+        """Replace the body during a spoken beat; restore its exact state afterward."""
+        saved = [m for m in self.mobjects if m is not self.subtitle]
+        formula = self.formula
+        self.clear()
+        self.add(self.title,
+                 RoundedRectangle(width=10.4, height=4.6, corner_radius=.12,
+                                  color='#FFFF00', stroke_width=1.2).move_to([0,.1,0]),
+                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+        return saved, formula
+
+    def restore_body(self, state):
+        self.clear()
+        self.add(*state[0])
+        self.formula = state[1]
+        self.subtitle = None
+
+    def precision_recap(self):
+        state = self.body_card('復習: 4.4 ラプラス近似の精度と広がり')
+        # PRML 4.4 multivariate(): red contours, gold narrow axis, blue wide axis.
+        red, gold, blue = '#FF6B77', '#FFE079', '#58B5ED'
+        a = ValueTracker(1)
+        theta = .65
+        rot = np.array([[np.cos(theta),-np.sin(theta)],
+                        [np.sin(theta),np.cos(theta)]])
+        H = lambda: rot @ np.diag([a.get_value(),1]) @ rot.T
+        ax = self.plot_axes(x=(-2.5,2.5,1),y=(-2.5,2.5,1),width=3.5,height=3.5,
+                            center=(-2.65,-.1,0),labels=('z_1','z_2'))
+        ax.x_axis.remove(ax.x_axis.numbers); ax.y_axis.remove(ax.y_axis.numbers)
+        rings = always_redraw(lambda:contours(ax,H(),red,levels=(.49,1.96,4.41)))
+        axes = always_redraw(lambda:VGroup(vector(ax,rot[:,0]*1.5/np.sqrt(a.get_value()),gold),
+                                           vector(ax,rot[:,1]*1.5,blue)))
+        eq = tex(r'\Sigma=A^{-1}',36,gold).move_to([2.2,1.15,0])
+        self.add(rings,axes,eq,
+                 number(r'\lambda_1=',a.get_value,[2.2,.4,0],gold),
+                 number(r'\sigma_1=1/\sqrt{\lambda_1}=',lambda:1/np.sqrt(a.get_value()),[2.2,-.3,0],gold,size=24),
+                 jp('説明用の例：精度は正定値',20).move_to([2.2,-1.05,0]))
+        mapping = VGroup(tex('A',28,gold),Arrow(LEFT*.35,RIGHT*.35,buff=0,color=MUTED),
+                         tex('H',28,BLUE),tex(r'\quad\Sigma',28,gold),
+                         Arrow(LEFT*.35,RIGHT*.35,buff=0,color=MUTED),tex('H^{-1}',28,PURPLE)
+                         ).arrange(RIGHT,buff=.2).move_to([2,-1.72,0])
+        self.beat(actions=[lambda:Indicate(eq,color=gold),
+                           lambda:AnimationGroup(a.animate.set_value(5),FadeIn(mapping),lag_ratio=.1)])
+        self.restore_body(state)
+
+    def backprop_recap(self):
+        state = self.body_card('復習: 5.3 値は前へ、感度は後ろへ')
+        # Retain chain()'s boxes and color roles; the last row maps to this section.
+        names = ['w','a','z','y','E_n']
+        colors = [YELLOW,BLUE,GREEN,BLUE,RED]
+        boxes = VGroup(*[VGroup(RoundedRectangle(width=1.25,height=.85,
+                           corner_radius=.12,color=c),tex(n,30,c)).move_to([x,.65,0])
+                         for x,n,c in zip([-4,-2,0,2,4],names,colors)])
+        edges = VGroup(*[Arrow(l.get_right(),r.get_left(),buff=.08,color=MUTED)
+                         for l,r in zip(boxes,boxes[1:])])
+        factors = VGroup(*[tex(t,26,c).move_to([x,-.12,0])
+                          for t,c,x in zip(['x',r'h\prime(a)','v',r'\delta'],
+                                           [BLUE,GREEN,BLUE,RED],[-3,-1,1,3])])
+        gradient = tex(r'g_u=x\,h\prime(a)\,v\,\delta',32).move_to([0,-.85,0])
+        result = tex(r'g_i=\frac{\partial E}{\partial w_i}\quad\longrightarrow\quad H_{ij}=\frac{\partial g_i}{\partial w_j}',30).move_to([0,-.85,0])
+        mapping = VGroup(jp('今回',20), *[VGroup(tex(old,23,c),tex(r'\to',23),tex(new,23,d)).arrange(RIGHT,buff=.1)
+                         for old,new,c,d in [('w','u',YELLOW,BLUE),('a','a',BLUE,GREEN),
+                                            ('z','z',GREEN,PURPLE),('y','y',BLUE,RED)]]
+                         ).arrange(RIGHT,buff=.4).move_to([0,-1.76,0])
+        self.add(boxes,edges,jp('一つの経路に沿って計算',20).move_to([0,1.5,0]))
+        self.beat(actions=[lambda:Succession(flow(edges,BLUE),flow(edges,RED,reverse=True)),
+                           lambda:Succession(FadeIn(factors),AnimationGroup(Write(gradient),flow(edges,RED,reverse=True))),
+                           lambda:AnimationGroup(ReplacementTransform(gradient,result),FadeIn(mapping))])
+        self.restore_body(state)
+
+    def product_rule_aid(self):
+        state = self.body_card('補足: 積の微分は、二本の帯から')
+        blue,yellow,green,purple = '#58C4DD','#FFFF00','#83C167','#9A72AC'
+        eps = ValueTracker(.6)
+        # Positive v,z and positive increments form an area example, not a
+        # restriction on the product rule. The direction is held fixed.
+        v,z,rv,rz = 2.8,1.6,1.,.8
+        origin = np.array([-4.3,-1.05,0])
+        def rect(w,h,x,y,color,opacity):
+            return Rectangle(width=w,height=h,stroke_width=1.5,color=color,
+                             fill_color=color,fill_opacity=opacity).move_to(origin+[x+w/2,y+h/2,0])
+        base = rect(v,z,0,0,blue,.13)
+        bottom = Line(origin,origin+[v,0,0],color=blue,stroke_width=4)
+        left = Line(origin,origin+[0,z,0],color=purple,stroke_width=4)
+        vertical = always_redraw(lambda:rect(eps.get_value()*rv,z,v,0,yellow,.45))
+        horizontal = always_redraw(lambda:rect(v,eps.get_value()*rz,0,z,yellow,.45))
+        corner = always_redraw(lambda:rect(eps.get_value()*rv,eps.get_value()*rz,v,z,MUTED,.18))
+        self.add(base,bottom,left,tex('v',29,blue).move_to(origin+[v/2,-.3,0]),
+                 tex('z',29,purple).move_to(origin+[-.3,z/2,0]),
+                 tex('vz',30).move_to(base),
+                 jp('説明用の面積：辺と増分は正',19).move_to([-2.5,-1.85,0]))
+        term1 = tex(r'z\,\Delta v',28,yellow).move_to([2.3,1.05,0])
+        term2 = tex(r'v\,\Delta z',28,yellow).move_to([2.3,.45,0])
+        small = tex(r'\Delta v\Delta z=\epsilon^2(Rv)(Rz)',25,MUTED).move_to([2.1,-.22,0])
+        rule = tex(r'R(vz)=z\,Rv+v\,Rz',31,green).move_to([1.9,-1.05,0])
+        limit = tex(r'\Delta v=\epsilon Rv,\ \Delta z=\epsilon Rz,\quad\epsilon\to0',24).move_to([1.7,-1.75,0])
+        def add_bands():
+            self.add(vertical,horizontal,corner)
+            return Succession(AnimationGroup(FadeIn(term1),Indicate(vertical,color=yellow)),
+                              AnimationGroup(FadeIn(term2),Indicate(horizontal,color=yellow)),FadeIn(small))
+        def take_limit():
+            self.add(limit)
+            return Succession(eps.animate.set_value(.025),AnimationGroup(FadeOut(small),Write(rule)))
+        output = tex(r'y=vz\quad\Rightarrow\quad Ry=z\,v_v+v\,Rz',29,green).move_to(rule)
+        self.beat(actions=[add_bands,take_limit,lambda:ReplacementTransform(rule,output)])
+        self.restore_body(state)

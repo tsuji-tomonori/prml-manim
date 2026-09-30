@@ -1,29 +1,15 @@
 {
-  "video_sha256": "c87c555dbb0f2f7a7cae4eb19dd0d13abb7a3a6fd9a5fba7d2d9026dada7ed31",
-  "frame_count": 69,
-  "inspected_frames": 69,
-  "math_caption_count": 6,
-  "scene_counts": {
-    "scene01": 9,
-    "scene02": 7,
-    "scene03": 8,
-    "scene04": 7,
-    "scene05": 9,
-    "scene06": 7,
-    "scene07": 6,
-    "scene08": 10,
-    "scene09": 6
-  },
-  "inspection": "view_image: 18 original-resolution contact sheets; 854x480 pixels per frame",
-  "full_frame_inspection": false,
+  "video_sha256": "3686dabdb01caa979d33d5c175518d83f65c36f886b9ef67da767c99623790c2",
+  "frame_count": 86,
+  "inspected_count": 86,
+  "method": "view_image: original-resolution 2x2 sheets 00–21; all panels directly inspected",
+  "full_frame_review": false,
   "full_listen": false,
-  "unresolved_findings_in_sample": [],
-  "notes": [
-    "完成式への切り替えによりW²字幕時の字形の崩れを解消",
-    "最小差分幅で四隅の符号を非表示にし重なりを解消",
-    "動く矢印と交差する内部の目盛り文字を除去",
-    "全6記号字幕の日本語との高さ・中心・余白を確認",
-    "scene01/03/05/08の前後画像と文PCM開始時刻を照合"
+  "findings": [
+    "追加3場面の前後・8文の序盤と終盤を確認",
+    "9シーン全57 beatと全6数式字幕を確認",
+    "確認画像で文字・数式・凡例の重なりやはみ出しなし",
+    "精度の増加と幅の縮小、前後の伝播、面積帯の縮小が該当文中に進行"
   ],
   "frames": [
     {
@@ -74,20 +60,6 @@
       "time": 60.666666666667695,
       "kind": "beat",
       "sha256": "d38a1ed9abfcfdaba62f5d67db52e9463d0d4ac766612788d8691437569d029f",
-      "inspected": true
-    },
-    {
-      "id": "scene01-early",
-      "time": 10.66666666666665,
-      "kind": "sync",
-      "sha256": "060c76cad7b88dd250a54a4038c629412ee1478bf3f96a99ff26c14a3fd750bf",
-      "inspected": true
-    },
-    {
-      "id": "scene01-late",
-      "time": 14.933333333333318,
-      "kind": "sync",
-      "sha256": "0760c2431599e104580afe914aa7bec2259068857e689457cc90cb657a6f03c0",
       "inspected": true
     },
     {
@@ -183,20 +155,6 @@
       "inspected": true
     },
     {
-      "id": "scene03-early",
-      "time": 135.38666666666415,
-      "kind": "sync",
-      "sha256": "d147cd814fde0700566f5a11f5ddedea052461d70c546dca34373d813bc2523c",
-      "inspected": true
-    },
-    {
-      "id": "scene03-late",
-      "time": 139.54666666666412,
-      "kind": "sync",
-      "sha256": "cedc49284ca91b6baf58927d7042584d46eb58bb1af465ae228d0ed3bcb01dc3",
-      "inspected": true
-    },
-    {
       "id": "scene04-beat1",
       "time": 209.1333333333269,
       "kind": "beat",
@@ -263,147 +221,245 @@
     },
     {
       "id": "scene05-beat2",
-      "time": 292.2666666666556,
+      "time": 291.5666666666556,
+      "kind": "beat",
+      "sha256": "486d656eee5bb7d2db80f787972e0ce285f2fdb5ac393ccc605b9e6e0a1d0daf",
+      "inspected": true
+    },
+    {
+      "id": "scene05-beat3",
+      "time": 303.39999999998827,
       "kind": "beat",
       "sha256": "b9981a15cd8ead4ec7a33da7f75ca127b5804af784e7add195311a266fa40de1",
       "inspected": true
     },
     {
-      "id": "scene05-beat3",
-      "time": 304.1999999999882,
+      "id": "scene05-beat4",
+      "time": 315.33333333332087,
       "kind": "beat",
       "sha256": "60993618aed83c9ad71fb7a08777914dd1c376f69d4f06116ffb6f1da6587920",
       "inspected": true
     },
     {
-      "id": "scene05-beat4",
-      "time": 316.16666666665424,
+      "id": "scene05-beat5",
+      "time": 327.29999999998694,
       "kind": "beat",
       "sha256": "80974e7bf15d0fa914e3afe35d8fa60f066cdc0486b87fe8993864fa841b903f",
       "inspected": true
     },
     {
-      "id": "scene05-beat5",
-      "time": 328.9666666666535,
+      "id": "scene05-beat6",
+      "time": 340.0999999999862,
       "kind": "beat",
       "sha256": "0678ad1b92fbfc6e536847bacb65b6c37a00e6330919cee6ae7b20204997ae34",
       "inspected": true
     },
     {
-      "id": "scene05-beat6",
-      "time": 341.2999999999861,
+      "id": "scene05-beat7",
+      "time": 352.43333333331884,
       "kind": "beat",
       "sha256": "f64a4feb03ee2d9c38b98cbd4a71bcead647cf2c7fb668e7bcba6c6ad5813395",
       "inspected": true
     },
     {
-      "id": "scene05-early",
-      "time": 286.6266666666556,
-      "kind": "sync",
-      "sha256": "81cbcdf768fdf9423c743b42ff1fea387d35ec632763fba9514fd3167314b43d",
+      "id": "scene05-before",
+      "time": 285.6999999999889,
+      "kind": "transition",
+      "sha256": "e2732549477d1f6decb775200e852c7518b49a807d6f672402df0c5e386c2eab",
       "inspected": true
     },
     {
-      "id": "scene05-late",
-      "time": 291.6399999999889,
+      "id": "scene05-after",
+      "time": 297.43333333332225,
+      "kind": "transition",
+      "sha256": "ac7fd6cac5e7c1f57f2986006e7a96c0ae6f63de3af2575bcb84142f7f49fff7",
+      "inspected": true
+    },
+    {
+      "id": "scene05-recap-01-early",
+      "time": 286.71999999998894,
       "kind": "sync",
-      "sha256": "721ac3a218c3771ca1f6fab3a83dd4127482d2e2f1f4fa2c5b96232849d8e935",
+      "sha256": "a70c7fb970383c153661a0b7154fce13a1007ea750eed5de2408c5541b32d426",
+      "inspected": true
+    },
+    {
+      "id": "scene05-recap-01-late",
+      "time": 290.0799999999889,
+      "kind": "sync",
+      "sha256": "17c9d822f1034cea9e887a02c2ae5a8a48eb4b34c2d429cee0f9905ee21af69b",
+      "inspected": true
+    },
+    {
+      "id": "scene05-recap-02-early",
+      "time": 291.7499999999889,
+      "kind": "sync",
+      "sha256": "819ee571e3d57aec4b6b203ef486bc89356d648e900e7c1527ec95109ba16e32",
+      "inspected": true
+    },
+    {
+      "id": "scene05-recap-02-late",
+      "time": 296.18333333332225,
+      "kind": "sync",
+      "sha256": "b3ac24f0d877707b7abc6e9209c2f90d957ee46fcd03eda2e5109110c426ff64",
       "inspected": true
     },
     {
       "id": "scene06-beat1",
-      "time": 352.7999999999854,
+      "time": 363.93333333331816,
       "kind": "beat",
       "sha256": "1c09631e72f1438203db74d02ac4c542a5c171a0783728109721fbfb935bc622",
       "inspected": true
     },
     {
       "id": "scene06-beat2",
-      "time": 363.8999999999848,
+      "time": 375.0333333333175,
       "kind": "beat",
       "sha256": "50a2fc02fad547a8f082d165b0447c9d0d387c7e744b3f82742f3bb3ad317a3c",
       "inspected": true
     },
     {
       "id": "scene06-beat3",
-      "time": 375.1999999999842,
+      "time": 386.3333333333169,
       "kind": "beat",
       "sha256": "7d56885c36462b76bb097ebd2cdc93d10a6c80ba0b7893a917a4e4cb95989351",
       "inspected": true
     },
     {
       "id": "scene06-beat4",
-      "time": 386.43333333331685,
+      "time": 397.56666666664955,
       "kind": "beat",
       "sha256": "74148a73000c0d333c1caf373a077b6cc065680ce4cf7f67e25478ab52c07cc6",
       "inspected": true
     },
     {
       "id": "scene06-beat5",
-      "time": 398.3333333333162,
+      "time": 409.46666666664896,
       "kind": "beat",
       "sha256": "98ff1eefe651464acec8bcb5a034e59f5787fb5484146003a18729e11a023ee4",
       "inspected": true
     },
     {
       "id": "scene06-beat6",
-      "time": 410.5666666666488,
+      "time": 421.6999999999815,
       "kind": "beat",
       "sha256": "5a9243813d105855cf31f899d5d9d330de4a187bba4f8fde6ccd60f999cfdeff",
       "inspected": true
     },
     {
       "id": "scene07-beat1",
-      "time": 422.86666666664814,
+      "time": 433.96666666664754,
+      "kind": "beat",
+      "sha256": "ca472a7329495915fa104a0836b178cec00305a25fe422841024d4f9fda6060e",
+      "inspected": true
+    },
+    {
+      "id": "scene07-beat2",
+      "time": 447.13333333331343,
       "kind": "beat",
       "sha256": "5ee49a207eeea30db8adf30ba681434c503500acb3fad27aa4f3f049f2ccc34e",
       "inspected": true
     },
     {
-      "id": "scene07-beat2",
-      "time": 435.1999999999807,
+      "id": "scene07-beat3",
+      "time": 459.466666666646,
       "kind": "beat",
       "sha256": "ec17f4a8642250b2c1e0e1aa8b2622dd230880a8353cd5d900c4502b98d186a0",
       "inspected": true
     },
     {
-      "id": "scene07-beat3",
-      "time": 446.9999999999801,
+      "id": "scene07-beat4",
+      "time": 471.2666666666454,
       "kind": "beat",
       "sha256": "91a19f16b7dfb90a3d6b963a349fc9cdfff262c3869901919ed426560090a39d",
       "inspected": true
     },
     {
-      "id": "scene07-beat4",
-      "time": 458.63333333331275,
+      "id": "scene07-beat5",
+      "time": 482.89999999997804,
       "kind": "beat",
       "sha256": "a2f49ad327c645c89f7733ef60d4719055a623cfcd322a46d61300046b94c621",
       "inspected": true
     },
     {
-      "id": "scene07-beat5",
-      "time": 469.6666666666455,
+      "id": "scene07-beat6",
+      "time": 493.93333333331077,
       "kind": "beat",
       "sha256": "76d8a4859a1adc9d8e250b15fc923e56d7c6b05c3ca6ad2b89d19074308f7fe5",
       "inspected": true
     },
     {
-      "id": "scene07-beat6",
-      "time": 481.1333333333115,
+      "id": "scene07-beat7",
+      "time": 505.3999999999768,
       "kind": "beat",
       "sha256": "54da71eed271cb7e424368302089646dd75ad91621c48784615e0993899698fd",
       "inspected": true
     },
     {
+      "id": "scene07-before",
+      "time": 427.09999999998087,
+      "kind": "transition",
+      "sha256": "bda4d515f98f646cd076b20106635ecf1806418403aa67322ab255659b1a5d14",
+      "inspected": true
+    },
+    {
+      "id": "scene07-after",
+      "time": 440.8333333333142,
+      "kind": "transition",
+      "sha256": "ac89edbd2beb9b39649c93ee7624a8a97c18c458939581942f8cc35e7ad7e1e4",
+      "inspected": true
+    },
+    {
+      "id": "scene07-recap-01-early",
+      "time": 428.0699999999809,
+      "kind": "sync",
+      "sha256": "bb2f546ae9f3cbc9a0020a38f7eb96f5c7eeb20511cb15789779d7fdfb70d26c",
+      "inspected": true
+    },
+    {
+      "id": "scene07-recap-01-late",
+      "time": 431.1966666666475,
+      "kind": "sync",
+      "sha256": "15a4017faad53793c9746ec28f9e5801d7390183c70424b8a1f803dac29935cf",
+      "inspected": true
+    },
+    {
+      "id": "scene07-recap-02-early",
+      "time": 432.4866666666475,
+      "kind": "sync",
+      "sha256": "b28d9484c494a7a3de0113dffd2aacf799161c348d7034f592f19443b0e34e41",
+      "inspected": true
+    },
+    {
+      "id": "scene07-recap-02-late",
+      "time": 435.3799999999809,
+      "kind": "sync",
+      "sha256": "359c7c5dac81fecb23c0b1901b26ef688f4aab7d1cf434e9ab7b927de692cce9",
+      "inspected": true
+    },
+    {
+      "id": "scene07-recap-03-early",
+      "time": 436.6799999999809,
+      "kind": "sync",
+      "sha256": "738ddc42004fa7535bf3a329def5c1d69da54198187325102e6387e296933d6d",
+      "inspected": true
+    },
+    {
+      "id": "scene07-recap-03-late",
+      "time": 439.8533333333142,
+      "kind": "sync",
+      "sha256": "0c8c137b98198f2d57e54241607e9c3ef8169d72fee403385980452d2406c122",
+      "inspected": true
+    },
+    {
       "id": "scene08-beat1",
-      "time": 492.4333333333108,
+      "time": 516.6999999999762,
       "kind": "beat",
       "sha256": "24d170026f9a2a8e3982d9b975d0352e53798563c2c6baa57dcd718f0775331e",
       "inspected": true
     },
     {
       "id": "scene08-01-02",
-      "time": 494.80266666664414,
+      "time": 519.0693333333095,
       "kind": "math",
       "display": "その方向を $v$ とすると、知りたい変化率は $Hv$ です。",
       "sha256": "078d44b8deb981a4cdf9039d460809453a1e1d9dd008cd83ea9f2baec27ae248",
@@ -411,14 +467,14 @@
     },
     {
       "id": "scene08-beat2",
-      "time": 503.19999999997685,
+      "time": 527.4666666666506,
       "kind": "beat",
       "sha256": "67ad5889b5c052d6636b6e5896934ba7ffacc442d8fa4033bc47cef98fe637a0",
       "inspected": true
     },
     {
       "id": "scene08-02-02",
-      "time": 505.30666666664416,
+      "time": 529.5733333333094,
       "kind": "math",
       "display": "ここでは $R$ と書きます。重みに作用させると、動かす方向そのものになります。",
       "sha256": "a59c6438564cce134ac32be3f429c140b704ade2c3ed51382e81056bf9fb10ac",
@@ -426,91 +482,140 @@
     },
     {
       "id": "scene08-beat3",
-      "time": 513.6333333333096,
+      "time": 537.8999999999926,
       "kind": "beat",
       "sha256": "e186829c2fee9c303ff221f3fdf397a59af7cecd989c2bed7f454271e9beab6c",
       "inspected": true
     },
     {
       "id": "scene08-beat4",
-      "time": 524.1666666666479,
+      "time": 550.9666666666673,
+      "kind": "beat",
+      "sha256": "b8693d8d60fbc0147b1b4f38737c7bbc43797413db29885001f8628286458fb1",
+      "inspected": true
+    },
+    {
+      "id": "scene08-beat5",
+      "time": 564.6333333333469,
       "kind": "beat",
       "sha256": "8fc3caa696f196c65d46af1084d68ffe6b266d1c1d11961936ab1edaf4c7e977",
       "inspected": true
     },
     {
-      "id": "scene08-beat5",
-      "time": 535.1666666666567,
+      "id": "scene08-beat6",
+      "time": 575.6333333333557,
       "kind": "beat",
       "sha256": "b7fc15c98d24a25acd7685a34de8ededf0655a87ce436cf26a106c7ee80fae8b",
       "inspected": true
     },
     {
-      "id": "scene08-beat6",
-      "time": 547.3666666666654,
+      "id": "scene08-beat7",
+      "time": 587.8333333333643,
       "kind": "beat",
       "sha256": "5ca1519fe621dcba04e22e191a13552811ec36c1c45564b943a66791391909ce",
       "inspected": true
     },
     {
-      "id": "scene08-early",
-      "time": 541.2333333333321,
-      "kind": "sync",
-      "sha256": "488162eb3c6cb8ea4d69c96a5946eb3d7315eb8b5c25aa6ef209da5291661c37",
+      "id": "scene08-before",
+      "time": 542.5666666666673,
+      "kind": "transition",
+      "sha256": "2625e279b6f14c31d6ef6bc593c2ece59334791385970281cdf179eb21a5b102",
       "inspected": true
     },
     {
-      "id": "scene08-late",
-      "time": 546.2999999999988,
+      "id": "scene08-after",
+      "time": 559.3666666666672,
+      "kind": "transition",
+      "sha256": "df8bb7c88db5240e354f33c025acffef494fc4caf9af00546ff1556494a13ba8",
+      "inspected": true
+    },
+    {
+      "id": "scene08-aid-01-early",
+      "time": 543.7366666666672,
       "kind": "sync",
-      "sha256": "973083d18fedc1589f091552898ef49f6be8a349c24c4233bc6c30a5693a0062",
+      "sha256": "5b7e7997fcd97ab563f120a5f59bd67d44b177da2e5f2577909095d09a5caadc",
+      "inspected": true
+    },
+    {
+      "id": "scene08-aid-01-late",
+      "time": 547.7966666666672,
+      "kind": "sync",
+      "sha256": "e2ee5b7ec4e12dab6f7a6b56f62b63bda0bcf9d82161d11d51f7108ffa58769e",
+      "inspected": true
+    },
+    {
+      "id": "scene08-aid-02-early",
+      "time": 549.4866666666672,
+      "kind": "sync",
+      "sha256": "bd7d500a32ad7de782341f71b70009dc3500999fe3d2f7d64467e27549602487",
+      "inspected": true
+    },
+    {
+      "id": "scene08-aid-02-late",
+      "time": 553.3133333333338,
+      "kind": "sync",
+      "sha256": "0638e477c2b8532ae00349e4e5b3b8435f6350b70242ad73f3a8823b52bceebc",
+      "inspected": true
+    },
+    {
+      "id": "scene08-aid-03-early",
+      "time": 554.8733333333339,
+      "kind": "sync",
+      "sha256": "f503cd1a8f36f39f486113730a5176bf904ab0af03b488551c400b0d2c553c71",
+      "inspected": true
+    },
+    {
+      "id": "scene08-aid-03-late",
+      "time": 558.3266666666673,
+      "kind": "sync",
+      "sha256": "629f76d51a78355ee5cc52c9d2611ba02aedbe800c9b2a49dd87b4c0528fdb8c",
       "inspected": true
     },
     {
       "id": "scene09-beat1",
-      "time": 559.1666666666763,
+      "time": 599.633333333375,
       "kind": "beat",
       "sha256": "e94d90407e6d6f9ef892282aa9a1e608f09490ec49dab81ec8256b681b519336",
       "inspected": true
     },
     {
       "id": "scene09-beat2",
-      "time": 570.4000000000176,
+      "time": 610.8666666667164,
       "kind": "beat",
       "sha256": "f5bcd5889d2e3f69f2d44a836d5da50edec816598a0263ee176abc62be718c15",
       "inspected": true
     },
     {
       "id": "scene09-beat3",
-      "time": 582.9000000000274,
+      "time": 623.3666666667264,
       "kind": "beat",
       "sha256": "7f46521f0b28293f6a4afeddc06fce2b0ec4d11c52a4c8f4ddafde3af2082c5f",
       "inspected": true
     },
     {
       "id": "scene09-beat4",
-      "time": 595.9333333333708,
+      "time": 636.4000000000697,
       "kind": "beat",
       "sha256": "860efbcd27a1dc3c1e5530b64f6dbe5a5976ff1d327770e8f341edeefc12c235",
       "inspected": true
     },
     {
       "id": "scene09-beat5",
-      "time": 608.6333333333814,
+      "time": 649.1000000000804,
       "kind": "beat",
       "sha256": "3a9c0128b88dadfdc3b0869414c9ea7c35616f9859a27f3e2152cb687e824a47",
       "inspected": true
     },
     {
       "id": "scene09-beat6",
-      "time": 621.533333333391,
+      "time": 662.0000000000898,
       "kind": "beat",
       "sha256": "7c29e87daf683b39db98bdfc78385ee9603c33e282991f15aa94de23ce82311f",
       "inspected": true
     },
     {
       "id": "scene06-smallest-epsilon",
-      "time": 369.13333333331815,
+      "time": 380.26666666665085,
       "kind": "detail",
       "sha256": "1fd4f34d209a6c487f985fba6c6a8ac17a2c57b541b1b475fda3f46985154664",
       "inspected": true
