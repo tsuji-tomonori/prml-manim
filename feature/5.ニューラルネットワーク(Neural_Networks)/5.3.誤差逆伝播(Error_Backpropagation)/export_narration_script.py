@@ -1,7 +1,7 @@
 """Export the independent caption/speech storyboard and measured durations."""
 import json
 from pathlib import Path
-from narration_content import SCENES
+from narration_content import SCENES, script_hash
 ROOT=Path(__file__).parent
 path=ROOT/'assets/voicevox/manifest.json'
 entries={e['id']:e for e in json.loads(path.read_text())['scenes']} if path.exists() else {}
@@ -10,7 +10,7 @@ lines=['# PRML 5.3 誤差逆伝播：問いから動き、式へ','',
 '前提：高校数学。微分は小さな変更の倍率として導入。字幕の $...$ は MathTex。各文の音声長に合わせて動作する。','']
 for s in SCENES:
     e=entries.get(s['id'],{})
-    duration=e.get('duration','生成前') if e.get('script_sha256') else '生成前'
+    duration=e.get('duration','生成前') if e.get('script_sha256') == script_hash(s) else '生成前'
     lines += [f"## {s['id']}：{s['title']}",'',f"原文：{s['reference']}。音声尺：{duration} 秒。",'']
     for i,b in enumerate(s['beats'],1):
         lines += [f"### {i}. {b['visual_note']}",'']

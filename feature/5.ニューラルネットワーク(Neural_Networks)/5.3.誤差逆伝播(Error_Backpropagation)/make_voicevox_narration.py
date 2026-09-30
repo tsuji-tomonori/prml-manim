@@ -144,6 +144,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:50021")
     parser.add_argument("--from-scene", choices=[s["id"] for s in SCENES], default="scene01")
+    parser.add_argument("--skip-valid", action="store_true", help="Keep scenes whose audio and script still match")
     parser.add_argument("--prepare-only", action="store_true", help="Invalidate stale audio without contacting Engine")
     args = parser.parse_args()
     if not args.prepare_only:
@@ -155,6 +156,8 @@ def main():
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if args.skip_valid and valid_entry(SCENES[i], entries[i]):
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")
