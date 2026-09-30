@@ -42,5 +42,33 @@
     14.089588291480286,
     11.241443599924732
   ],
-  "checks_passed": 10
+  "aid_convolution": {
+    "row_column_zero_based": [
+      5,
+      4
+    ],
+    "products": [
+      -1.0,
+      0.0,
+      0.0,
+      -0.0,
+      0.0,
+      0.0,
+      -1.0,
+      1.0,
+      0.0
+    ],
+    "sum": -1.0,
+    "bias": 0,
+    "response": 0.2689414213699951
+  },
+  "recap_prior_cost_at_w1": [
+    0.5,
+    2.0
+  ],
+  "recap_mixture_component_areas": [
+    0.44999999999999657,
+    0.5500000000000006
+  ],
+  "checks_passed": 13
 }

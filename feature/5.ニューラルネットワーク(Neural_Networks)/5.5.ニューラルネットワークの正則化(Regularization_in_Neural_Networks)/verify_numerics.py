@@ -63,7 +63,28 @@ def main():
         return 2*np.sum((w-target)**2)-np.log(m.mixture_components(w,mu,s,p).sum(1)).sum()
     assert loss(rows[-1])<loss(rows[0])
     results['joint_objective']=[float(loss(rows[0])),float(loss(rows[-1]))]
-    results['checks_passed']=10
+    # Visual-aid example: independently sum the nine paired cells at scan=44.
+    patch=m.IMAGE[5:8,4:7]
+    products=[float(patch[i,j]*m.KERNEL[i,j]) for i in range(3) for j in range(3)]
+    assert products==[-1.,0.,0.,0.,0.,0.,-1.,1.,0.]
+    total=sum(products);response=1/(1+np.exp(-total))
+    assert total==m.convolution(m.IMAGE)[5,4]==-1
+    assert abs(response-.2689414213699951)<1e-14
+    results['aid_convolution']={'row_column_zero_based':[5,4],'products':products,'sum':total,'bias':0,'response':response}
+    # Gaussian negative-log cost relative to w=0 cancels the alpha-dependent constant.
+    costs=[]
+    for alpha in [1.,4.]:
+        density=lambda w:np.sqrt(alpha/(2*np.pi))*np.exp(-alpha*w*w/2)
+        cost=-np.log(density(1))+np.log(density(0))
+        assert abs(cost-alpha/2)<1e-14
+        costs.append(float(cost))
+    results['recap_prior_cost_at_w1']=costs
+    u=np.linspace(-10,10,20001)
+    components=m.mixture_components(u,np.array([-1.7,1.5]),np.array([.55,.7]),np.array([.45,.55]))
+    areas=np.trapezoid(components,u,axis=0)
+    assert np.max(abs(areas-[.45,.55]))<1e-12
+    results['recap_mixture_component_areas']=areas.tolist()
+    results['checks_passed']=13
     Path('numerical_results.json').write_text(json.dumps(results,indent=2)+'\n')
     print(json.dumps(results,indent=2))
 if __name__=='__main__':main()

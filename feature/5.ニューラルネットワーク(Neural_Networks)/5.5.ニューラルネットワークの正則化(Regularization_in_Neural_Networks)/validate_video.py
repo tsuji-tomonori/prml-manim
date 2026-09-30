@@ -24,16 +24,22 @@ def main():
         for cue,expected in zip(cues,entry['subtitle_cues']):
             assert cue['id']==expected['id'] and cue['display']==expected['display']
             errors.append(abs(cue['start']-scene['start']-expected['start']));count+=1
+        selected=[]
         if scene['id'] in ('scene02','scene06','scene08'):
-            b=scene['beats'][1 if scene['id']=='scene08' else 3]
-            with wave.open(str(ROOT/entry['path'])) as wav:
-                rate=wav.getframerate();samples=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
+            # Preserve the existing checks by cue ID, independent of insertions.
+            anchor={'scene02':'scene02-04-01','scene06':'scene06-04-01','scene08':'scene08-02-01'}[scene['id']]
+            selected.extend(b for b in scene['beats'] if b['cues'][0]['id']==anchor)
+        selected.extend(b for b in scene['beats'] if 'recap-' in b['cues'][0]['id'] or 'aid-' in b['cues'][0]['id'] or b['cues'][0]['id']=='scene07-03-01')
+        with wave.open(str(ROOT/entry['path'])) as wav:
+            rate=wav.getframerate();samples=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
+        for b in selected:
             for cue,action in zip(b['cues'],b['actions']):
                 start=round((cue['start']-scene['start'])*rate);end=round((cue['end']-scene['start'])*rate)
                 active=np.flatnonzero(abs(samples[start:end].astype(float))/32768>10**(-45/20))
                 onset=scene['start']+(start+int(active[0]))/rate
-                assert action['start']<=onset<action['end']
-                sync.append(dict(id=cue['id'],display=cue['display'],action=action['name'],action_start=action['start'],action_end=action['end'],pcm_onset=onset))
+                offset=scene['start']+(start+int(active[-1]))/rate
+                assert action['start']<=onset<offset<=action['end']+1/15
+                sync.append(dict(id=cue['id'],display=cue['display'],action=action['name'],action_start=action['start'],action_end=action['end'],pcm_onset=onset,pcm_offset=offset))
     assert max(errors)<1e-6
     display='\n'.join(s['display'] for scene in SCENES for b in scene['beats'] for s in b['segments'])
     (ROOT/'media/display.txt').write_text(display)
