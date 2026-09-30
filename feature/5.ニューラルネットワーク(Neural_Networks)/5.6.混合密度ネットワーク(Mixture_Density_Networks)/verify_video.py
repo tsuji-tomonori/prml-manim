@@ -25,6 +25,7 @@ def main():
     volume=run(['ffmpeg','-hide_banner','-i',str(VIDEO),'-map','0:a:0','-af','volumedetect','-f','null','-']).stderr
     (args.output/'silence.log').write_text(silence);(args.output/'volume.log').write_text(volume)
     image_rows=[]; sync=[];max_error=0
+    recap_phases=[]
     for scene,entry in zip(tl,manifest['scenes']):
         assert scene['audio'] and scene['id']==entry['id']
         cues=[c for b in scene['beats'] for c in b['cues']]
@@ -36,6 +37,26 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:image_rows.append(dict(name=c['id']+'-math',time=(c['start']+c['end'])/2))
                 if c['id']=='scene06-04-01':image_rows.append(dict(name=c['id']+'-definition',time=(c['start']+c['end'])/2))
+            if b.get('phases'):
+                # Every added scene: before/after, and early/late in every sentence.
+                key=b['cues'][0]['id'].rsplit('-',1)[0]
+                image_rows.extend([dict(name=key+'-before',time=b['start']-.2),
+                                   dict(name=key+'-after',time=b['end']+.2)])
+                with wave.open(str(ROOT/entry['path'])) as wav:
+                    rate=wav.getframerate()
+                    pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype='<i2').astype(float)/32768
+                for phase,cue in zip(b['phases'],b['cues']):
+                    assert phase['id']==cue['id']
+                    assert abs(phase['start']-cue['start'])<1/15 and abs(phase['end']-cue['end'])<1/15
+                    first=round((cue['start']-scene['start'])*rate)
+                    last=round((cue['end']-scene['start'])*rate)
+                    active=np.flatnonzero(np.abs(pcm[first:last])>10**(-45/20))
+                    assert len(active)>0
+                    recap_phases.append(dict(**phase,pcm_onset=scene['start']+(first+int(active[0]))/rate,
+                        pcm_end=scene['start']+(first+int(active[-1]))/rate))
+                    for fraction in [.2,.8]:
+                        image_rows.append(dict(name=cue['id']+f'-phase-{fraction}',
+                            time=cue['start']+fraction*(cue['end']-cue['start'])))
     for scene_index,beat_index in [(1,1),(2,1),(6,2)]:
         scene=tl[scene_index];beat=scene['beats'][beat_index];entry=manifest['scenes'][scene_index]
         with wave.open(str(ROOT/entry['path'])) as wav:
@@ -64,7 +85,7 @@ def main():
                 long_silences=len(re.findall('silence_start:',silence)),
                 mean_volume_db=float(re.search(r'mean_volume: ([\-\d.]+)',volume)[1]),
                 peak_volume_db=float(re.search(r'max_volume: ([\-\d.]+)',volume)[1]),
-                timeline_max_error=max_error,sync=sync,frames=image_rows,
+                timeline_max_error=max_error,sync=sync,recap_phases=recap_phases,frames=image_rows,
                 visual_review='pending',full_listen=False)
     durations={s['codec_type']:float(s['duration']) for s in streams['streams']}
     result['av_duration_difference']=abs(durations['video']-durations['audio'])
