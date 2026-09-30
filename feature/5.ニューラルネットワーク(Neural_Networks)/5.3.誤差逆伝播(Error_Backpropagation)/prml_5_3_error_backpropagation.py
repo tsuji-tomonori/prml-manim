@@ -358,8 +358,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         factors=VGroup(numerator,denominator,rule,times,factor)
         crosses=VGroup(*[Line(m.get_corner(DL),m.get_corner(UR),color=YELLOW_ACC,stroke_width=3)
                           for m in [denominator,factor]])
-        result=tex('y-t',38,YELLOW_ACC).move_to([0,-.72,0])
-        mapping=VGroup(tex('y-t',32,YELLOW_ACC),Arrow(LEFT*.3,RIGHT*.3,color=MUTED),
+        result=tex('y-t',38,YELLOW_ACC).move_to([-1.75,-.72,0])
+        mapping=VGroup(tex('y-t',32,YELLOW_ACC),Arrow(LEFT*.3,RIGHT*.3,buff=0,color=MUTED),
                        tex(r'\delta_k=y_k-t_k',32,RED_CLASS)).arrange(RIGHT,buff=.23).move_to([0,-1.78,0])
         self.add(left,factors)
         def cancel():
@@ -377,14 +377,13 @@ class PRML53ErrorBackpropagation(NarratedScene):
                  number(r'\epsilon=',eps.get_value,[2.4,1.48,0],blue,places=4,size=25),
                  jp('他の入力・重みは固定',19).move_to([-3.1,-1.8,0]))
         inputs=always_redraw(lambda:VGroup(tex(r'\Delta\mathbf x=',27,blue),
-                    Matrix([[f'{v:.2f}'] for v in displacement()],v_buff=.8).scale(.55).set_color(blue)
+                    Matrix([[f'{v:.4f}'] for v in displacement()],v_buff=.8).scale(.55).set_color(blue)
                     ).arrange(RIGHT,buff=.15).move_to([-3.4,.1,0]))
         table=Matrix([[f'{v:.3f}' for v in row] for row in J],h_buff=1.8,v_buff=1.3).scale(.6).set_color(green).move_to([3.6,.05,0])
         columns=table.get_columns()
         label=tex('J=',30,green).next_to(table,LEFT,buff=.2)
         self.add(inputs,table,label,
                  tex(r'x_1\qquad x_2',25,blue).move_to([3.6,1.03,0]),
-                 jp('出力の変化',20,yellow).move_to([-.5,1.03,0]),
                  tex(r'\Delta\mathbf y/\epsilon\approx J_{:,i}',27,green).move_to([2.3,-1.8,0]))
         self.add(*[tex(r'\div\epsilon\;\longrightarrow',23,green).move_to([1.35,y,0]) for y in [.42,-.73]])
         current=[]
