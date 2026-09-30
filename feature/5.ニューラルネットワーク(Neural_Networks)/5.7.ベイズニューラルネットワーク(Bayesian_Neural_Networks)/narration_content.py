@@ -83,6 +83,44 @@ scene('境界は同じでも、自信の強さは変わる', 'pp.283–284 / (5.
  ('予測の連鎖をまとめる', [pair('データから重みの分布へ。重みの分布から、予測の分布へ。'),pair('ベイズニューラルネットワークは、このつながりを近似計算でたどり、答えの幅まで表す方法です。')]),
 ])
 
+
+# Keep all original sentence IDs stable when inserting recap beats.
+def insert_review(scene_index, before, kind, note, lines):
+    story = SCENES[scene_index]
+    story['beats'].insert(before, dict(seconds=12, visual_note=note,
+        segments=[dict(id=f"{story['id']}-{kind}-{i+1:02d}", display=d, speech=s)
+                  for i, (d, s) in enumerate(lines)]))
+
+insert_review(0, 5, 'recap', '復習: 3.3 候補曲線の高さを集めて平均', [
+    ('3.3では、重みの分布から候補の曲線を作り、予測を平均しました。',
+     '三章三節では、重みの分布から候補の曲線を作り、予測を平均しました。'),
+    pair('ネットワークでも、重みの広がりを予測へ持ち込みます。'),
+])
+insert_review(2, 1, 'recap', '復習: 4.4 放物線の曲率からガウスの幅へ', [
+    ('4.4では、谷底の曲がり方からガウスの幅を決めました。',
+     '四章四節では、谷底の曲がり方からガウスの幅を決めました。'),
+    ('今回も、負の対数事後の曲率が、すべての方向で正の場所で使います。',
+     '今回も、ふの対数事後の曲率が、すべての方向でせいの場所で使います。'),
+])
+insert_review(3, 5, 'aid', '補足: V09b 同じ雲で感度2倍・幅2倍・分散4倍', [
+    (r'同じ重みの雲でも、出力の感度が $2$ 倍なら、写した幅も $2$ 倍です。',
+     '同じ重みの雲でも、出力の感度が二倍なら、写した幅も二倍です。'),
+    (r'分散は幅の二乗なので、$4$ 倍になります。',
+     '分散は幅の二乗なので、四倍になります。'),
+])
+insert_review(6, 0, 'recap', '復習: 3.5 四方向の寄与を有効パラメータ数へ', [
+    ('3.5では、エビデンスで事前の強さを選びました。',
+     '三章五節では、エビデンスで事前の強さを選びました。'),
+    (r'データで決まる方向の寄与を $\gamma$ に足しました。',
+     'データで決まる方向の寄与をガンマに足しました。'),
+    pair('今回も同じ考え方を使いますが、更新式には近似が入ります。'),
+])
+insert_review(8, 1, 'recap', '復習: 4.5 シグモイドを通した後で平均', [
+    ('4.5では、候補のロジットをシグモイドに通してから平均しました。',
+     '四章五節では、候補のロジットをシグモイドに通してから平均しました。'),
+    pair('今回も、活性を線形化した後、この確率の平均を計算します。'),
+])
+
 SYNTHESIS_SETTINGS = dict(speedScale=1.08, intonationScale=.95, prePhonemeLength=.08, postPhonemeLength=.12, volumeScale=1.)
 def estimated_duration(beat): return max(beat['seconds'], sum(len(s['speech']) for s in beat['segments'])/6+.8)
 def script_hash(scene):
