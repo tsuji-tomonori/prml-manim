@@ -1,0 +1,107 @@
+name: Temporary Yatsukusa Park Blender Build
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-yatsukusa-park:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk xz-utils unzip libegl1 libgl1 libx11-6 libxi6 libxrender1 libxfixes3 libxxf86vm1
+
+      - name: Download Blender 4.5 LTS
+        run: |
+          curl --fail --location --retry 5 --retry-delay 4 \
+            https://download.blender.org/release/Blender4.5/blender-4.5.12-linux-x64.tar.xz \
+            --output /tmp/blender.tar.xz
+          mkdir -p /tmp/blender
+          tar -xJf /tmp/blender.tar.xz -C /tmp/blender --strip-components=1
+          /tmp/blender/blender --version
+
+      - name: Download generated native Blender scene from prior run
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --location --retry 4 \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/tsuji-tomonori/prml-manim/actions/artifacts/8615424804/zip \
+            --output /tmp/yatsukusa-base.zip
+          mkdir -p /tmp/yatsukusa-base
+          unzip -q /tmp/yatsukusa-base.zip -d /tmp/yatsukusa-base
+          test -s /tmp/yatsukusa-base/Yatsukusa_Park_VRChat.blend
+
+      - name: Materialize and patch resume script
+        run: |
+          cat .tmp-yatsukusa/part*.txt | base64 --decode | gzip --decompress > /tmp/yatsukusa_resume.py
+          test "$(sha256sum /tmp/yatsukusa_resume.py | cut -d' ' -f1)" = "d8275e2908ff7a109aeee92553adae51f5baa72547c6121f5a143a071ae23d88"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('/tmp/yatsukusa_resume.py')
+          source = path.read_text(encoding='utf-8')
+
+          old = 'create_house(f"{prefix}_House_{i}", (x, y, 0), dims, MATERIALS[mname], collection, rotate=math.radians(90) if x > 90 else 0)'
+          new = 'create_house(f"{prefix}_House_{i}", (x, y), dims, MATERIALS[mname], collection, rotate=math.radians(90) if x > 90 else 0)'
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          assert source.count('for obj in collection.all_objects:') == 1
+          source = source.replace('for obj in collection.all_objects:', 'for obj in list(collection.objects):')
+          assert source.count('for obj in coll.all_objects:') == 1
+          source = source.replace('for obj in coll.all_objects:', 'for obj in list(coll.objects):')
+
+          old = '''def export_collection(collection_name: str, stem: str) -> None:\n    coll = COLLECTIONS[collection_name]\n    selected = select_collection_objects(coll)'''
+          new = '''def export_collection(collection_name: str, stem: str) -> None:\n    coll = COLLECTIONS[collection_name]\n    previous_viewport = coll.hide_viewport\n    previous_render = coll.hide_render\n    coll.hide_viewport = False\n    coll.hide_render = False\n    bpy.context.view_layer.update()\n    selected = select_collection_objects(coll)'''
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          old = '''        path_mode="AUTO",\n    )\n    bpy.ops.object.select_all(action="DESELECT")\n\n\ndef render_cameras()'''
+          new = '''        path_mode="AUTO",\n    )\n    bpy.ops.object.select_all(action="DESELECT")\n    coll.hide_viewport = previous_viewport\n    coll.hide_render = previous_render\n    bpy.context.view_layer.update()\n\n\ndef render_cameras()'''
+          assert source.count(old) == 1
+          source = source.replace(old, new)
+
+          marker = '''if __name__ == "__main__":\n    main()\n'''
+          assert source.count(marker) == 1
+          resume = '''def resume_main() -> None:\n    global COLLECTIONS, MATERIALS\n    names = ["YATSUKUSA_PARK_WORLD", "PC_WORLD", "QUEST_WORLD", "COLLIDERS", "CAMERAS", "LIGHTS", "GUIDES"]\n    COLLECTIONS = {name: bpy.data.collections[name] for name in names}\n    MATERIALS = {material.name: material for material in bpy.data.materials}\n    for spec in CAMERA_SPECS:\n        cam = bpy.data.objects[spec["name"]]\n        cam.location = spec["location"]\n        cam.data.lens = spec["lens"]\n        direction = Vector(spec["target"]) - cam.location\n        cam.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()\n    COLLECTIONS["COLLIDERS"].hide_viewport = True\n    COLLECTIONS["COLLIDERS"].hide_render = True\n    COLLECTIONS["GUIDES"].hide_viewport = True\n    COLLECTIONS["GUIDES"].hide_render = True\n    set_collection_visibility(True, False)\n    blend_path = OUT_DIR / "Yatsukusa_Park_VRChat.blend"\n    bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))\n    export_collection("PC_WORLD", "Yatsukusa_Park_PC")\n    export_collection("QUEST_WORLD", "Yatsukusa_Park_Quest")\n    export_collection("COLLIDERS", "Yatsukusa_Park_Colliders")\n    render_paths = render_cameras()\n    write_manifest(render_paths)\n    set_collection_visibility(True, False)\n    COLLECTIONS["COLLIDERS"].hide_viewport = True\n    COLLECTIONS["COLLIDERS"].hide_render = True\n    bpy.context.scene.camera = bpy.data.objects[CAMERA_SPECS[0]["name"]]\n    bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))\n    print(json.dumps({"status": "ok", "mode": "resume", "out": str(OUT_DIR), "blender": bpy.app.version_string}, ensure_ascii=False))\n\n\nif __name__ == "__main__":\n    resume_main()\n'''
+          source = source.replace(marker, resume)
+          path.write_text(source, encoding='utf-8')
+          PY
+          python3 -m py_compile /tmp/yatsukusa_resume.py
+
+      - name: Export and render generated scene
+        env:
+          YATSUKUSA_OUT: ${{ github.workspace }}/yatsukusa-output
+        run: |
+          set -o pipefail
+          mkdir -p "$YATSUKUSA_OUT"
+          /tmp/blender/blender /tmp/yatsukusa-base/Yatsukusa_Park_VRChat.blend \
+            --background --python /tmp/yatsukusa_resume.py 2>&1 | tee "$YATSUKUSA_OUT/blender-build.log"
+          cp /tmp/yatsukusa_resume.py "$YATSUKUSA_OUT/build_yatsukusa_park.py"
+          test -s "$YATSUKUSA_OUT/Yatsukusa_Park_VRChat.blend"
+          test -s "$YATSUKUSA_OUT/Yatsukusa_Park_PC.glb"
+          test -s "$YATSUKUSA_OUT/Yatsukusa_Park_Quest.glb"
+          test -s "$YATSUKUSA_OUT/Yatsukusa_Park_Colliders.glb"
+          test -s "$YATSUKUSA_OUT/renders/01_front_entrance.png"
+          test "$(find "$YATSUKUSA_OUT/renders" -maxdepth 1 -name '*.png' | wc -l)" -eq 9
+          find "$YATSUKUSA_OUT" -maxdepth 2 -type f -printf '%p %k KB\n' | sort
+
+      - name: Upload Blender deliverables
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yatsukusa-park-vrchat-blender
+          path: yatsukusa-output/**
+          if-no-files-found: error
+          retention-days: 3
