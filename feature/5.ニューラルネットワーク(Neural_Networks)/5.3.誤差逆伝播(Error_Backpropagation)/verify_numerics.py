@@ -53,13 +53,27 @@ def main():
     for s in np.linspace(0,1.1,101):
         for point in [forward(X+s*direction)['y'],y0+s*J@direction]:
             assert .8<=point[0]<=2.15 and -.62<=point[1]<=-.3
+    # New cards: cancellation for both targets and one-input sensitivity columns.
+    cancellation=[]
+    for t in [0,1]:
+        for y in [.1,.5,.9]:
+            cancellation.append(abs((y-t)/(y*(1-y))*y*(1-y)-(y-t)))
+    assert max(cancellation)<1e-14
+    column_errors={}
+    for i in range(2):
+        errors_i=[]
+        for epsilon in [.02,.0005]:
+            change=forward(X+np.eye(2)[i]*epsilon)['y']-y0
+            errors_i.append(float(np.max(np.abs(change/epsilon-J[:,i]))))
+        assert errors_i[1]<errors_i[0]/30
+        column_errors[str(i+1)]=errors_i
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES) and all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     segments=[v for s in SCENES for b in s['beats'] for v in b['segments']]
     display='\n'.join(v['display'] for v in segments)
     assert not re.search('エックス|ダブリュー|デルタ|ラムダ|ミュー|シグマ|ゼット|ジェー',display)
     (ROOT/'media').mkdir(exist_ok=True);(ROOT/'media/display.txt').write_text(display)
-    result=dict(weight_derivatives=36,max_gradient_error=max(errors),jacobian_derivatives=12,max_jacobian_error=max(jerrors),max_softmax_seed_error=max(seeds),max_batch_error=max(batch_errors),loss_before=before,loss_after=after,central_difference_errors=cd_error,local_linear_errors=local_errors,branch_cancel_target=t2,scenes=len(SCENES),beats=sum(len(s['beats']) for s in SCENES),sentences=len(segments),math_captions=sum('$' in s['display'] for s in segments))
+    result=dict(max_cancellation_error=max(cancellation),aid_column_errors=column_errors,weight_derivatives=36,max_gradient_error=max(errors),jacobian_derivatives=12,max_jacobian_error=max(jerrors),max_softmax_seed_error=max(seeds),max_batch_error=max(batch_errors),loss_before=before,loss_after=after,central_difference_errors=cd_error,local_linear_errors=local_errors,branch_cancel_target=t2,scenes=len(SCENES),beats=sum(len(s['beats']) for s in SCENES),sentences=len(segments),math_captions=sum('$' in s['display'] for s in segments))
     if args.captions:
         from video_support import caption_mobject
         captions=[caption_mobject(v['display']) for v in segments]

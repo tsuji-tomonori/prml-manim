@@ -35,11 +35,28 @@ def main():
                 action=b['actions'][min(ci,len(b['actions'])-1)]
                 sync.append(dict(id=c['id'],display=c['display'],action_start=action['start'],action_end=action['end'],
                                  pcm_onset=s['start']+(start+int(indices[0]))/rate))
+    # Audit every added sentence against actual PCM onset and its own action.
+    added_sync=[]
+    for scene,e in zip(timeline,entries):
+        with wave.open(str(ROOT/e['path'])) as wav:
+            rate=wav.getframerate();data=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
+        for beat in scene['beats']:
+            for cue,action in zip(beat['cues'],beat['actions']):
+                if '-recap-' not in cue['id'] and '-aid-' not in cue['id']:continue
+                start=round((cue['start']-scene['start'])*rate);end=round((cue['end']-scene['start'])*rate)
+                audible=np.flatnonzero(np.abs(data[start:end].astype(float))/32768>10**(-45/20))
+                onset=scene['start']+(start+int(audible[0]))/rate
+                assert abs(action['start']-cue['start'])<=1/30+1e-7
+                assert action['start']<=onset<action['end']
+                added_sync.append(dict(id=cue['id'],cue_start=cue['start'],action_start=action['start'],
+                                       action_end=action['end'],pcm_onset=onset,
+                                       onset_after_action=onset-action['start']))
+    assert len(added_sync)==5
     assert max(errors)<1e-6
     display='\n'.join(v['display'] for s in SCENES for b in s['beats'] for v in b['segments'])
     (ROOT/'media/display.txt').write_text(display)
     result=dict(probe=probe,stream_difference=abs(durations['audio']-durations['video']),silences_over_3s=silence,
-                **volumes,max_scene_clock_error=max(errors),sync=sync,
+                **volumes,added_sync=added_sync,max_scene_clock_error=max(errors),sync=sync,
                 sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),full_listen=False)
     (ROOT/'validation_results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n');print(json.dumps(result,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()
