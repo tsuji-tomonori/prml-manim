@@ -1,144 +1,25 @@
 {
-  "video_sha256": "ab8e7663b73137978d3078c9d1002f712a6bfbcfafb617de713ecd4e731d1b28",
-  "reviewed_frames": 65,
-  "math_caption_frames": 6,
-  "scene_minimum_frames": 2,
-  "comparison": {
-    "identical": [
-      "scene01-beat1",
-      "scene01-beat2",
-      "scene01-beat3",
-      "scene01-beat4",
-      "scene01-beat5",
-      "scene01-early",
-      "scene01-late",
-      "scene02-beat1",
-      "scene02-beat2",
-      "scene02-02-02",
-      "scene02-beat3",
-      "scene02-beat4",
-      "scene02-beat5",
-      "scene02-beat6",
-      "scene03-beat1",
-      "scene03-beat2",
-      "scene03-beat3",
-      "scene03-03-02",
-      "scene03-beat4",
-      "scene03-beat5",
-      "scene03-05-02",
-      "scene03-beat6",
-      "scene04-beat1",
-      "scene04-beat2",
-      "scene04-beat3",
-      "scene04-beat4",
-      "scene04-04-02",
-      "scene04-beat5",
-      "scene04-beat6",
-      "scene04-early",
-      "scene04-late",
-      "scene05-beat1",
-      "scene05-beat2",
-      "scene05-beat3",
-      "scene05-beat4",
-      "scene05-beat5",
-      "scene05-beat6",
-      "scene06-beat1",
-      "scene06-beat2",
-      "scene06-beat3",
-      "scene06-beat4",
-      "scene06-beat5",
-      "scene06-beat6",
-      "scene07-beat1",
-      "scene07-beat2",
-      "scene07-beat3",
-      "scene07-beat4",
-      "scene07-beat5",
-      "scene08-beat3",
-      "scene08-beat4",
-      "scene08-04-01",
-      "scene08-beat5",
-      "scene08-beat6",
-      "scene09-beat1",
-      "scene09-beat2",
-      "scene09-02-02",
-      "scene09-beat3",
-      "scene09-beat4",
-      "scene09-beat5",
-      "scene09-beat6",
-      "scene09-beat7",
-      "scene09-early",
-      "scene09-late"
-    ],
-    "changed": [
-      "scene08-beat1",
-      "scene08-beat2"
-    ]
+  "video_sha256": "b69597284bdfc918f831dc8ab395e10ea381aec39b414756861ca52b446e50cf",
+  "extracted_frames": 83,
+  "reviewed_frames": 33,
+  "math_caption_frames": 8,
+  "original_scenes_reviewed": 9,
+  "added_scenes_reviewed": 2,
+  "added_sentence_early_late_pairs": 5,
+  "preservation": {
+    "unchanged_sentence_pcm": 106,
+    "unchanged_scene_wav_and_manifest": 7,
+    "baseline_video_seconds": 545.733333,
+    "new_manifest_seconds": 571.4
   },
-  "previous_reviewed_video_sha256": "a233262cdaac1e65538eb4fc2bba8320a54ffec0c9ed23c77cfd354d5891190f",
-  "findings": "63枚は直前に目視した画像との画素完全一致を確認。割線修正で変わった2枚を再目視。確認範囲で未解決の重なり・はみ出しは見つからなかった。",
+  "findings": "追加2場面の前後、全追加文の序盤・終盤、全数式字幕、既存9シーン、対数の参照ラベルを直接目視。確認範囲で未解決の重なり・はみ出しなし。音声聴取・全フレーム目視は未実施。",
   "frames": [
-    {
-      "id": "scene01-beat1",
-      "time": 5.366666666666666,
-      "kind": "beat",
-      "sha256": "6d8ba33cc2d509108a57d18a31ad2bae10d0f39119736418913ff09d221bb157",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene01-beat2",
-      "time": 14.433333333333316,
-      "kind": "beat",
-      "sha256": "15e26f8f6ebd94817d4806a0437491f5c0eb3ab2f4cea498ceea5332378a76c4",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
     {
       "id": "scene01-beat3",
       "time": 22.966666666666622,
       "kind": "beat",
       "sha256": "cc1504e46128610d1962337329c18a6d27bc1fe46f09d9888502be9390901d6b",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene01-beat4",
-      "time": 32.53333333333325,
-      "kind": "beat",
-      "sha256": "36d07740c5cbfd88f597263c0eab9cd8916c1b4a0e9044a19d797d737d2a7451",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene01-beat5",
-      "time": 42.100000000000165,
-      "kind": "beat",
-      "sha256": "4283e21c066d2b15a09b20ea84357fdfbdf5ea2888b5bb40f021a7f562d793cf",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene01-early",
-      "time": 11.473333333333315,
-      "kind": "sync",
-      "sha256": "1d911d8f747b8b1a226044e2aa2c549d2931cdcedcda60ab0c6c30bf81f132bd",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene01-late",
-      "time": 17.393333333333317,
-      "kind": "sync",
-      "sha256": "9fe373e144aa61183f10513d82377c4081cd11a7d901576b625c2d46075bb3b3",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene02-beat1",
-      "time": 52.63333333333398,
-      "kind": "beat",
-      "sha256": "d5b99ce85d240dacd8d9035be6ba9baed4d1eda6c8be779522fd2fb536522ccd",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene02-beat2",
-      "time": 63.36666666666788,
-      "kind": "beat",
-      "sha256": "f4679136e3380c46732e9f75f5e2093d12730c74f6106ac0feb9f152781286cc",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene02-02-02",
@@ -146,56 +27,21 @@
       "kind": "math",
       "display": "総入力を $a_j$ と書きます。添字は、どの丸かを示します。",
       "sha256": "abb4d852a84b69bffaf1c17d3a8ce1116cd0b08313bf18c85db3dc974b0bddf1",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene02-beat3",
       "time": 73.83333333333456,
       "kind": "beat",
       "sha256": "c3013d1f72a4cea57478af25db839e9964d4bb960d5f244abcb5f7a64df24c22",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene02-beat4",
-      "time": 84.23333333333396,
-      "kind": "beat",
-      "sha256": "500c20dc8bb6be100aeb33841b2c0b18fce0c882a06fc78d5408e59d244d69fa",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene02-beat5",
-      "time": 94.73333333333339,
-      "kind": "beat",
-      "sha256": "2ec89433fc156c8c1857523ba4d591584ef02e3862978841fc0493d999cbc920",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene02-beat6",
-      "time": 105.83333333333277,
-      "kind": "beat",
-      "sha256": "f3899700cd07b54b4f29982297d3d92e87eb83d9e2f718b7dd8c9702f7ca770b",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene03-beat1",
-      "time": 116.9999999999988,
-      "kind": "beat",
-      "sha256": "db2c2b1f87ff1282656e4aad238259887faccc901dbddcb67abac3317b6a5421",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene03-beat2",
-      "time": 128.09999999999815,
-      "kind": "beat",
-      "sha256": "0d4193fa51fe282d03751237cb1ab905a741d43be743f79ed55655f2ba4c7ec0",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene03-beat3",
       "time": 138.56666666666422,
       "kind": "beat",
       "sha256": "427cab602263bba2bb408f0bfd2cf60441d7497d92497d1b6ecfdf29960b069c",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene03-03-02",
@@ -203,21 +49,7 @@
       "kind": "math",
       "display": "この感度を $\\delta_j$ と呼び、誤差の総入力に関する微分と定義します。",
       "sha256": "c2ed667bfe7809011102a11949b2ff8ade2184341602f0bc3830a46d80a49c37",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene03-beat4",
-      "time": 149.46666666666366,
-      "kind": "beat",
-      "sha256": "468c52874fa3a1dba41c2eb1ca14fa65ea6ed023c46fa62bc832c9f89635fea7",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene03-beat5",
-      "time": 162.1999999999963,
-      "kind": "beat",
-      "sha256": "15f0209edc432fbcee0d17bd3b909fc3a6732ae4e88d09392cbfc459022e38b8",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene03-05-02",
@@ -225,42 +57,14 @@
       "kind": "math",
       "display": "式では $\\delta_j z_i$。接続の両端にある情報だけで求まります。",
       "sha256": "5ce186b9fd07b7b865f241bb83c4a6832ff3fb0f987f6ca02e51384521e6b8fd",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene03-beat6",
-      "time": 173.79999999999552,
-      "kind": "beat",
-      "sha256": "29bcd788e351e370e3c8f0c82c9a1a1a59d0e7e37723d61280b7f637c8ed1f5b",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-beat1",
-      "time": 183.199999999995,
-      "kind": "beat",
-      "sha256": "cb02f036f73ed4c0a65750488c34a9bbe1ccc9b535ae35600eb067aeb9df9250",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-beat2",
-      "time": 192.2333333333278,
-      "kind": "beat",
-      "sha256": "c5898e6ea1dee2b1b3db6fa49b502d851914c7ae25da97eb7685d171253bfc44",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene04-beat3",
       "time": 200.96666666666061,
       "kind": "beat",
       "sha256": "61d3abadcd8e0e37dace2a43925a1348bf399f7bde6b6ef37bffe393815915db",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-beat4",
-      "time": 211.1333333333268,
-      "kind": "beat",
-      "sha256": "9389b2c0edc37f24befe30493508bfd820b3caa963144d80b0c06680f7e9438c",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene04-04-02",
@@ -268,275 +72,186 @@
       "kind": "math",
       "display": "出力の感度は、予測から目標を引いた $y_k-t_k$ です。",
       "sha256": "51731d28622d0faf111b22fd59bd69edf6aecb01297b257cfa0cf66448f89ceb",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-beat5",
-      "time": 223.13333333332616,
-      "kind": "beat",
-      "sha256": "928918483b07c838e06a3fdc59ad02f62226179bf9a10c1306bc73bd8837965a",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-beat6",
-      "time": 233.9999999999921,
-      "kind": "beat",
-      "sha256": "3b68c502bddf46884aa19840eb0dac178eb63d7d518d054784906ed30e8832cf",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-early",
-      "time": 197.06666666666064,
-      "kind": "sync",
-      "sha256": "d21cc3991911297ef0abf89a9fd5f5a08b64ec926817138d232283173fa1dea0",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene04-late",
-      "time": 200.26666666666063,
-      "kind": "sync",
-      "sha256": "5a217bbd871dfcdd4229545347df08bb299cf2b376848cfeb2dc630a66e862b8",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene05-beat1",
-      "time": 243.09999999999155,
-      "kind": "beat",
-      "sha256": "69c4dcd0f9ee1b3ed23706ea7c797eeab84e221575b8adeed91d90268b45fd6a",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene05-beat2",
-      "time": 252.49999999999108,
-      "kind": "beat",
-      "sha256": "bfdd898883d212e920958ad0fdd98e67c1b06106b5cef8311a07601fea9d3ca7",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene05-beat3",
-      "time": 261.4666666666572,
-      "kind": "beat",
-      "sha256": "6704f73fe1cabe892e052417fa8ff5e29d27ddbc216626bb91ef5b93a51d89c1",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene05-beat4",
-      "time": 269.3333333333234,
-      "kind": "beat",
-      "sha256": "12dfa7bf95ba84920fe144808c4a2911c1f993d2d899d99cf4622fb039553284",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene05-beat5",
-      "time": 277.5666666666563,
-      "kind": "beat",
-      "sha256": "4f5e29a35bed74950865051712bbfa7ef9a79269ee28d10a0d736e69557635e8",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene05-beat6",
-      "time": 288.29999999998915,
-      "kind": "beat",
-      "sha256": "ed063e3844f193095c3638ce43ffeb69718c6e8cc2a0b034d54e82663dd074cb",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene06-beat1",
-      "time": 299.6666666666551,
-      "kind": "beat",
-      "sha256": "c9763feec953943a8c0a98cad7758bd72d812787450be73ecff86b8b8d84b647",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene06-beat2",
-      "time": 308.3666666666545,
-      "kind": "beat",
-      "sha256": "6eb05a74bd7523a6afb69df3ce45ab3add871084bad18ddce5e4d982714c65a6",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene06-beat3",
-      "time": 316.4333333333208,
-      "kind": "beat",
-      "sha256": "c397c789fe014ed666af9348246b2830be1ecccdbec7626cee97afd6a2f9b4d4",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene06-beat4",
-      "time": 326.2333333333203,
-      "kind": "beat",
-      "sha256": "0b044c92d28b03b986de295898e8edfd9adea74762277fc3c8b6f0fee225568c",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene06-beat5",
-      "time": 337.5999999999863,
-      "kind": "beat",
-      "sha256": "a937df12b4e489592c9b6760a9e0574f2757839287f5629be96cabc60cd0ab28",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene06-beat6",
-      "time": 349.133333333319,
-      "kind": "beat",
-      "sha256": "b56be51628269c53bc71679a18b3ae8f9f504e526ab18e7a074358137629954c",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene07-beat1",
-      "time": 359.1333333333183,
-      "kind": "beat",
-      "sha256": "dc4ece72b5aa73d2a08ebe0528003822ae3eae36a9eb60499d33250fc3eb05d7",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene07-beat2",
-      "time": 367.9666666666512,
-      "kind": "beat",
-      "sha256": "5dec5c12960d0a86d22c96c4252a15f2c5eda2ab23ac32bb372087361be91e84",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene07-beat3",
-      "time": 376.2333333333173,
-      "kind": "beat",
-      "sha256": "ada922a6244d66c19163b887342c5f19e64a8e3bc7ab31f5862fcc3ea4964c5d",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene07-beat4",
-      "time": 385.56666666665024,
-      "kind": "beat",
-      "sha256": "83e195cd35d4281d9c500ab0864f381785c51f676a372d1881ec196ff86b70ec",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene07-beat5",
-      "time": 396.7666666666496,
-      "kind": "beat",
-      "sha256": "b89c556e54891c964d5f075dc03ec7a4cd1092e885da1919f5479c9c3583c19f",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene08-beat1",
-      "time": 407.46666666664896,
-      "kind": "beat",
-      "sha256": "0219a40505ddcb5dca1e116453b4f18ee1eccdd73247789514728cedf2f2f075",
       "review_method": "direct_final_image"
     },
     {
-      "id": "scene08-beat2",
-      "time": 417.36666666664837,
+      "id": "scene04-recap-cancellation-01-before",
+      "time": 216.5999999999928,
+      "kind": "context",
+      "sha256": "3ae347371f78d0e5d1252b9767426da2e7b61dc03f29b914097f1b7e45d46c2b",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-early",
+      "time": 217.683199999995,
+      "kind": "aid-sync",
+      "sha256": "d7825c701edb5f8de14e9d230669654d99fc85731ad4cd4d3f55d7c94f19065a",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-late",
+      "time": 220.87146666666166,
+      "kind": "aid-sync",
+      "sha256": "383f7cbd3e0c67f8cf913a51a61a5a90442e28c8b7fa181d6aa5703c5569f0c4",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-02-early",
+      "time": 222.31946666666167,
+      "kind": "aid-sync",
+      "sha256": "60fedeb923f4ce61d1d58d61ffb8860cf634e467020719988c553780f00afb34",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-beat5",
+      "time": 223.96666666665948,
       "kind": "beat",
-      "sha256": "862bafcdeea2bee39a151c52aec6488f06bcb4c04d78a6a14ec186422a7411bf",
+      "sha256": "0c1f8795642fd100d16ed83c63ce8bc0fb111d6a9dff060a3162b604b9b133db",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-02",
+      "time": 224.10399999999498,
+      "kind": "math",
+      "display": "微分の共通因子が打ち消し合い、$y-t$ が残ります。",
+      "sha256": "acb81b9231dfb8c4d919d9da2a8ada733b983144790ba3db5da6d02a4e8595e9",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-02-late",
+      "time": 225.88853333332833,
+      "kind": "aid-sync",
+      "sha256": "d8cd5b474513e75bd0b14e7a570eea0b0523e6de9d46b13a5c8b19067557fda6",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-03-early",
+      "time": 227.24053333332833,
+      "kind": "aid-sync",
+      "sha256": "55b7f0a376f67124583f9e80f557b6597fc2661f6cf524b1bb4951f8e4254155",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-03",
+      "time": 228.61066666666164,
+      "kind": "math",
+      "display": "これが、出力から戻す感度 $\\delta_k$ です。",
+      "sha256": "8f297cf2969024a2d35ab4f128a6ba208aba5c974db632772de8aee1c8aa9a52",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-03-late",
+      "time": 229.98079999999499,
+      "kind": "aid-sync",
+      "sha256": "3cd093028aa360604a2aa5fb28b873a87b6a9063e3ace8a651c64ba55eff04cf",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-after",
+      "time": 231.33333333332615,
+      "kind": "context",
+      "sha256": "7fb2a36fd8ed2a4650f68a7db1da2739c618400ffa65aa8db393eae2ef0c2bdc",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene05-beat3",
+      "time": 275.39999999998975,
+      "kind": "beat",
+      "sha256": "6704f73fe1cabe892e052417fa8ff5e29d27ddbc216626bb91ef5b93a51d89c1",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene06-beat3",
+      "time": 330.3666666666533,
+      "kind": "beat",
+      "sha256": "c397c789fe014ed666af9348246b2830be1ecccdbec7626cee97afd6a2f9b4d4",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene07-beat3",
+      "time": 390.1666666666499,
+      "kind": "beat",
+      "sha256": "ada922a6244d66c19163b887342c5f19e64a8e3bc7ab31f5862fcc3ea4964c5d",
       "review_method": "direct_final_image"
     },
     {
       "id": "scene08-beat3",
-      "time": 427.7333333333145,
+      "time": 441.6666666666471,
       "kind": "beat",
       "sha256": "d2d5390f381407df49b0f125c2204d6ccffc4416fe972290cc00a9e16b0fd009",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene08-beat4",
-      "time": 439.19999999998055,
-      "kind": "beat",
-      "sha256": "98c28b7d526f73eab4572880780e1105ac064ed9ccd3ec77501d0e3151ef5fd7",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene08-04-01",
-      "time": 436.4933333333156,
+      "time": 450.4266666666482,
       "kind": "math",
       "display": "重みの総数を $W$ とします。一例の前向き計算は、おおむね重み数に比例します。",
-      "sha256": "a46bdd866ce610c4858c695c6e33957715f95a731105cdbd0fb74a716fadb3f9",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "sha256": "26724e9ba3671cdfd44f736a0679c5cc306b501e7c2fff3e8f9b018a41a2607d",
+      "review_method": "direct_final_image"
     },
     {
-      "id": "scene08-beat5",
-      "time": 450.26666666664653,
+      "id": "scene08-beat4",
+      "time": 453.1333333333131,
       "kind": "beat",
-      "sha256": "ead1ca95e4d40615910db5249e06f9225ddb4920e75c6ff5034a8f4896413291",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene08-beat6",
-      "time": 460.76666666664596,
-      "kind": "beat",
-      "sha256": "6334d73686d40bb09415610c4dbfb128d06b812ef8609b5e9db1a38bec01617a",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene09-beat1",
-      "time": 470.53333333331204,
-      "kind": "beat",
-      "sha256": "f9d92c79031b00ccdb797617d6674ba2de4bac54eda0318c39fbcdc742cd2b3a",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene09-beat2",
-      "time": 480.9999999999782,
-      "kind": "beat",
-      "sha256": "44f30e1917e78fad2d1bbac1b8ee54c2591982f4c6d7cab4579aec1a85b64810",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "sha256": "a6214da3f80cc42a5052678e66ab8d4742bf610b7aedbc85e7e3172e257d621b",
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene09-02-02",
-      "time": 483.65866666664533,
+      "time": 497.59199999997793,
       "kind": "math",
       "display": "この感度の表が、ヤコビ行列 $J$ です。他の入力は固定して微分します。",
       "sha256": "6756a35ce0abb96a7eb3177857ebd20f374f850495feb619c9fe9980a9339136",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene09-aid-columns-01-before",
+      "time": 500.5999999999767,
+      "kind": "context",
+      "sha256": "a62f33b955d57879bc09f6deb2f8494ae1ec55a1cf3d2d17f6cba272619b654b",
+      "review_method": "direct_final_image"
+    },
+    {
+      "id": "scene09-aid-columns-01-early",
+      "time": 502.10719999997787,
+      "kind": "aid-sync",
+      "sha256": "aec5f9847b42aecfa123e127f12b270614015ffd231f8d3808817c49bf510b5f",
+      "review_method": "direct_final_image"
     },
     {
       "id": "scene09-beat3",
-      "time": 491.9666666666442,
+      "time": 506.86666666664337,
       "kind": "beat",
-      "sha256": "28f096b8630ce6c86fcc69f422e2b62254801ea838c5f2324acbd2a29e079bc2",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "sha256": "fac6ca7764efb17836752ff1e280a74c11b82c0d8722f8472de2abb828c45447",
+      "review_method": "direct_final_image"
     },
     {
-      "id": "scene09-beat4",
-      "time": 502.19999999997697,
-      "kind": "beat",
-      "sha256": "6d8f7569b58fa5dc087d5a0c9d93cfe76ddba4cc74d712945ccc718f172d8219",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "id": "scene09-aid-columns-01-late",
+      "time": 507.2741333333112,
+      "kind": "aid-sync",
+      "sha256": "d5c4e5f5d5938dd7b4a900eb4a036817a1dde8983e6c06fa646c8e6f070bce16",
+      "review_method": "direct_final_image"
     },
     {
-      "id": "scene09-beat5",
-      "time": 513.7999999999763,
-      "kind": "beat",
-      "sha256": "2a2c17c99c4d7965151a09590fbd01c1d37f981f6cff7774da3e5e32687dd120",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "id": "scene09-aid-columns-02-early",
+      "time": 508.9765333333112,
+      "kind": "aid-sync",
+      "sha256": "eda8f89c30c05cbd8818513232469fcb72f3682ee9713391eb4b2ee468bd0e2f",
+      "review_method": "direct_final_image"
     },
     {
-      "id": "scene09-beat6",
-      "time": 526.0999999999824,
-      "kind": "beat",
-      "sha256": "738d645a080e4d28143355b907207cf85d8f7b3e1876dc315daf2e6890cc406d",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "id": "scene09-aid-columns-02-late",
+      "time": 511.7541333333112,
+      "kind": "aid-sync",
+      "sha256": "6403cc18550e06c1d84aeb80c8e5adae9a473f5685527ce8cb8b6eb903b8f850",
+      "review_method": "direct_final_image"
     },
     {
-      "id": "scene09-beat7",
-      "time": 538.9333333333254,
-      "kind": "beat",
-      "sha256": "292029d30f61fda3d0da7e823f4e49d50da4566e18142904756fc272185d3e54",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene09-early",
-      "time": 497.33999999997695,
-      "kind": "sync",
-      "sha256": "3302d76ce17e2bda3f3c73b656748a29b23faa1ea0a68d52e1e717fc8f039f29",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
-    },
-    {
-      "id": "scene09-late",
-      "time": 501.1266666666436,
-      "kind": "sync",
-      "sha256": "ff95e142b91da8a32107ad2554218eccf97b99ee5d75029f4c436bc38c11e79e",
-      "review_method": "pixel_identical_to_directly_reviewed_previous_image"
+      "id": "scene09-aid-columns-01-after",
+      "time": 513.13333333331,
+      "kind": "context",
+      "sha256": "255e9d37113a0193aa6e384494726c5c84857f899b87c049ccf617a487cfd759",
+      "review_method": "direct_final_image"
     }
   ]
 }

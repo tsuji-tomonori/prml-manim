@@ -8,24 +8,66 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "545.733333"
+        "duration": "571.400000"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "545.770667"
+        "duration": "571.434667"
       }
     ],
     "format": {
-      "duration": "545.771000"
+      "duration": "571.435000"
     }
   },
-  "stream_difference": 0.0373339999999871,
+  "stream_difference": 0.034667000000013104,
   "silences_over_3s": 0,
   "mean_volume": -26.5,
   "max_volume": -6.0,
-  "max_scene_clock_error": 2.418687472527381e-11,
+  "added_sync": [
+    {
+      "id": "scene04-recap-cancellation-01",
+      "cue_start": 216.999999999995,
+      "action_start": 216.9999999999928,
+      "action_end": 221.53333333332614,
+      "pcm_onset": 217.07041666666166,
+      "onset_after_action": 0.07041666666884794
+    },
+    {
+      "id": "scene04-recap-cancellation-02",
+      "cue_start": 221.55466666666166,
+      "action_start": 221.53333333332614,
+      "action_end": 226.66666666665947,
+      "pcm_onset": 221.649124999995,
+      "onset_after_action": 0.11579166666885499
+    },
+    {
+      "id": "scene04-recap-cancellation-03",
+      "cue_start": 226.65333333332833,
+      "action_start": 226.66666666665947,
+      "action_end": 230.93333333332615,
+      "pcm_onset": 226.755874999995,
+      "onset_after_action": 0.08920833333553446
+    },
+    {
+      "id": "scene09-aid-columns-01",
+      "cue_start": 500.9999999999779,
+      "action_start": 500.9999999999767,
+      "action_end": 508.39999999997667,
+      "pcm_onset": 501.0830833333112,
+      "onset_after_action": 0.08308333333451401
+    },
+    {
+      "id": "scene09-aid-columns-02",
+      "cue_start": 508.3813333333112,
+      "action_start": 508.39999999997667,
+      "action_end": 512.73333333331,
+      "pcm_onset": 508.4682499999779,
+      "onset_after_action": 0.06825000000122827
+    }
+  ],
+  "max_scene_clock_error": 4.54036808150704e-11,
   "sync": [
     {
       "id": "scene01-02-01",
@@ -56,20 +98,20 @@
       "pcm_onset": 200.788499999995
     },
     {
-      "id": "scene09-04-01",
-      "display": "入力の変化を大きくすると、曲がり方の影響で近似がずれます。",
-      "action_start": 496.8666666666436,
-      "action_end": 501.59999999997694,
-      "pcm_onset": 496.940583333312
+      "id": "scene09-03-01",
+      "display": "基準点からの小さな入力変化に、ヤコビ行列を掛けます。",
+      "action_start": 512.7333333333099,
+      "action_end": 517.33333333331,
+      "pcm_onset": 512.8226249999778
     },
     {
-      "id": "scene09-04-02",
-      "display": "ヤコビ行列は場所によって変わるので、新しい基準点では計算し直します。",
-      "action_start": 501.59999999997694,
-      "action_end": 507.5333333333103,
-      "pcm_onset": 501.6771249999787
+      "id": "scene09-03-02",
+      "display": "黄色がその近似、青がネットワークを実際に計算した結果です。",
+      "action_start": 517.33333333331,
+      "action_end": 522.5333333333099,
+      "pcm_onset": 517.4362083333112
     }
   ],
-  "sha256": "ab8e7663b73137978d3078c9d1002f712a6bfbcfafb617de713ecd4e731d1b28",
+  "sha256": "b69597284bdfc918f831dc8ab395e10ea381aec39b414756861ca52b446e50cf",
   "full_listen": false
 }
