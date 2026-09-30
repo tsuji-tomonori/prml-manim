@@ -34,15 +34,26 @@ def main():
             # Every beat is sampled near its end, after formula transitions.
             t=b['start']+.80*(b['end']-b['start'])
             records.append(dict(id=b['id'],time=t,display=b['display'],symbol='$' in b['display']))
-        if scene['id'] in ['scene03','scene06','scene08']:
-            index={'scene03':2,'scene06':3,'scene08':3}[scene['id']]
-            b=scene['beats'][index];cue=entry['subtitle_cues'][index]
+        selected = [b for b in scene['beats'] if b['id'] in
+                    ['scene03-03-01','scene06-04-01','scene08-04-01',
+                     'scene05-aid-02','scene06-aid-01']]
+        for b in selected:
+            cue=next(c for c in entry['subtitle_cues'] if c['id']==b['id'])
             with wave.open(str(ROOT/'assets/voicevox'/f"{scene['id']}.wav"),'rb') as audio:
                 rate=audio.getframerate();pcm=np.frombuffer(audio.readframes(audio.getnframes()),dtype=np.int16)/32768.
             region=pcm[round(cue['start']*rate):round(cue['end']*rate)]
             active=np.flatnonzero(abs(region)>10**(-45/20))
             sync.append(dict(id=b['id'],action=b['action'],animation_start=b['start'],voice_start=scene['start']+cue['start']+active[0]/rate,voice_end=scene['start']+cue['start']+active[-1]/rate,animation_end=b['end']))
-            for fraction in [.1,.5]:records.append(dict(id=b['id']+f'-sync-{fraction}',time=b['start']+fraction*(b['end']-b['start']),display=b['display'],symbol=False))
+        added = [i for i,b in enumerate(scene['beats']) if '-aid-' in b['id'] or '-recap-' in b['id']]
+        for i in added:
+            b=scene['beats'][i]
+            for fraction in [.1,.5]:
+                records.append(dict(id=b['id']+f'-sync-{fraction}',time=b['start']+fraction*(b['end']-b['start']),display=b['display'],symbol=False))
+        if added:
+            # Include both neighbours of each inserted card, or previous scene.
+            first,last=scene['beats'][added[0]],scene['beats'][added[-1]]
+            for suffix,t in [('before',max(0,first['start']-.15)),('after',last['end']+.15)]:
+                records.append(dict(id=scene['id']+'-card-'+suffix,time=t,display='',symbol=False))
     for r in records:
         dst=OUT/(r['id']+'.png')
         subprocess.run(['ffmpeg','-loglevel','error','-y','-ss',str(r['time']),'-i',str(VIDEO),'-frames:v','1',str(dst)],check=True)

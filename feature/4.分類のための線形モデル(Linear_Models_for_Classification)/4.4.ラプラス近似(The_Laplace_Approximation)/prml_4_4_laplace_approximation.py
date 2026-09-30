@@ -5,6 +5,11 @@ from scene_support import NarratedScene, jp, tex, polyline, BLUE, RED, GOLD, GRE
 from laplace_model import *
 
 
+AID_INPUT="#58C4DD"
+AID_OPERATION="#FFFF00"
+AID_RESULT="#83C167"
+AID_COMPARE="#9A72AC"
+
 class PRML44LaplaceApproximation(NarratedScene):
     def construct(self):
         for i,method in enumerate([self.question,self.mode_and_log,self.curvature,self.normalization,
@@ -29,6 +34,7 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(scan.animate.set_value(3),self.equation(r'p(z)=\frac{f(z)}{Z}',r',\quad Z=\int f(z)\,dz',colors={0:BLUE,1:GOLD}))
         focus=Circle(radius=.5,color=GOLD).move_to(ax.c2p(Z0,pdf(Z0)))
         self.beat(Create(focus),t.animate.set_value(Z0))
+        self.gaussian_recap()
         q=self.curve(ax,gaussian,RED)
         self.beat(Create(q),FadeOut(area),FadeOut(focus))
         self.beat(t.animate.set_value(Z0+.45),self.equation(r'q(z)=\mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
@@ -117,7 +123,7 @@ class PRML44LaplaceApproximation(NarratedScene):
 
     def multivariate(self):
         self.legend(('同じ高さの等高線',RED),('曲率の大きい方向',GOLD),('小さい方向',BLUE))
-        ax=self.axes(x=(-2.5,2.5,1),y=(-2.5,2.5,1),width=4.4,height=4.4,center=(-2.1,.25,0),xlabel='z_1',ylabel='z_2')
+        ax=self.axes(x=(-2.5,2.5,1),y=(-2.5,2.5,1),width=4.0,height=4.0,center=(-2.1,.4,0),xlabel='z_1',ylabel='z_2')
         a=ValueTracker(1);theta=ValueTracker(0)
         def contours():
             r=rotation(theta.get_value());out=VGroup();t=np.linspace(0,2*np.pi,161)
@@ -131,6 +137,7 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(theta.animate.set_value(.65))
         mat=tex(r'A=-\nabla\nabla\ln f(z_0)',30,GOLD).move_to([3,1.5,0])
         self.beat(Write(mat),self.equation(r'\ln f(z)\simeq\ln f(z_0)-\frac12(z-z_0)^TA(z-z_0)',size=28))
+        self.hessian_aid()
         def vectors():
             r=rotation(theta.get_value())
             return VGroup(Arrow(ax.c2p(0,0),ax.c2p(*(r[:,0]/np.sqrt(a.get_value())*1.5)),buff=0,color=GOLD),Arrow(ax.c2p(0,0),ax.c2p(*(r[:,1]*1.5)),buff=0,color=BLUE))
@@ -167,10 +174,12 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(h.animate.set_value(1.4),sigma.animate.set_value(.85))
         self.beat(self.equation(r'Z_{\rm L}=',r'f(z_0)',r'\sqrt{2\pi/A}',colors={0:PURPLE,1:RED,2:GOLD}),sigma.animate.set_value(.7))
         self.beat(sigma.animate.set_value(.9),self.equation(r'|A|=\prod_{i=1}^{M}\lambda_i',r',\quad \prod_i\lambda_i^{-1/2}=|A|^{-1/2}',colors={1:GOLD},size=30))
+        self.determinant_aid()
         self.beat(self.equation(r'Z\simeq',r'f(z_0)',r'\frac{(2\pi)^{M/2}}{|A|^{1/2}}',colors={0:PURPLE,1:RED,2:GOLD}),sigma.animate.set_value(.6))
         self.beat(sigma.animate.set_value(.85),self.equation(r'Z\simeq Z_{\rm L}',colors={0:PURPLE}))
 
     def model_evidence(self):
+        self.evidence_recap()
         self.legend(('尤度',GOLD),('事前',BLUE),('積・証拠',PURPLE))
         ax=self.axes(x=(-4.5,4.5,1.5),y=(0,1.1,.5),height=3.25,center=(0,.5,0),xlabel=r'\theta')
         width=ValueTracker(.8);prior=ValueTracker(5)
@@ -241,8 +250,13 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.remove(pc,qc)
         skew=self.curve(ax,pdf);q=self.curve(ax,gaussian,RED)
         self.beat(Create(skew),Create(q),self.equation(r'p(z)\ne q(z)',colors={0:GOLD}))
+        # Reference label runs inside the existing beat; no extra narration.
+        recap=VGroup(jp("復習: 1.2 密度の変換",22))
+        recap.add(SurroundingRectangle(recap[0],color="#FFFF00",buff=.12,stroke_width=1.5))
+        recap.move_to([-2.8,2.2,0]);self.add(recap)
         # Positive-variable mapping is shown explicitly with its Jacobian.
         self.beat(self.equation(r'u=\ln\tau',r',\quad p_\tau(\tau)=\frac{p_u(\ln\tau)}{\tau}\quad(\tau>0)',colors={0:GOLD,1:PURPLE},size=29),FadeOut(skew),FadeOut(q))
+        self.remove(recap)
         power=ValueTracker(1)
         # A normalized powered target illustrates concentration; no claim of all datasets.
         def concentrated(z):
@@ -263,3 +277,120 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(power.animate.set_value(12),self.equation(r'p_n(z)\propto f(z)^n',r',\quad\mathrm{standardized}',colors={0:BLUE},size=30))
         self.beat(power.animate.set_value(20),self.equation(r'z_0\ \longrightarrow\ A\ \longrightarrow\ \mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
         self.beat(power.animate.set_value(30),self.equation(r'p(w\mid D)\approx\mathcal N(w\mid w_{\rm MAP},S_N)',colors={0:PURPLE}))
+
+    def gaussian_recap(self):
+        saved=self.body_card('復習: 2.3 ガウス分布')
+        # 2.3 shape(): red normalized bell, yellow centre, red width control.
+        ax=Axes(x_range=(-5,5,2),y_range=(0,.7,.2),x_length=5.4,y_length=2.15,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=18)).move_to([-2.3,.1,0])
+        mu=ValueTracker(0);sd=ValueTracker(.75)
+        bell=always_redraw(lambda:self.curve(ax,lambda x:gaussian(x,mu.get_value(),sd.get_value()**-2),RED))
+        centre=always_redraw(lambda:DashedLine(ax.c2p(mu.get_value(),0),ax.c2p(mu.get_value(),gaussian(mu.get_value(),mu.get_value(),sd.get_value()**-2)),color=GOLD))
+        def knob(tr,lo,hi,x,label,color):
+            rail=Line([x-1,-1.55,0],[x+1,-1.55,0],color=MUTED)
+            dot=always_redraw(lambda:Dot(rail.point_from_proportion((tr.get_value()-lo)/(hi-lo)),color=color,radius=.065))
+            return VGroup(rail,dot,tex(label,25,color).move_to([x,-1.95,0]))
+        self.add(ax,bell,centre,tex('z',23).next_to(ax.x_axis,RIGHT),
+                 knob(mu,-1.5,1.5,-3.8,r'\mu',GOLD),knob(sd,.55,1.4,-.8,r'\sigma',RED),
+                 jp('密度の面積 = 1',21,MUTED).move_to([-2.3,1.55,0]))
+        source=VGroup(VGroup(tex(r'\mu',30,GOLD),jp('中心',23,GOLD)).arrange(RIGHT,buff=.3),
+                      VGroup(tex(r'\sigma^2',30,RED),jp('分散',23,RED)).arrange(RIGHT,buff=.3)).arrange(DOWN,buff=.6).move_to([3,.4,0])
+        self.add(source)
+        self.beat(Succession(mu.animate.set_value(1.2),sd.animate.set_value(1.3)))
+        target=VGroup(tex(r'\mu=z_0',32,GOLD),tex(r'\sigma^2=A^{-1}',32,RED)).arrange(DOWN,buff=.6).move_to(source)
+        labels=VGroup(jp('今回：元の山のモード',21,GOLD).move_to([3,1.55,0]),
+                      jp('負の対数の曲率 A > 0',21,RED).move_to([3,-1.05,0]))
+        self.beat(self.brief(Succession(FadeOut(source),AnimationGroup(FadeIn(target),FadeIn(labels)))),
+                  mu.animate.set_value(Z0),sd.animate.set_value(A**-.5))
+        self.restore_body(saved)
+
+    def hessian_aid(self):
+        saved=self.body_card('補足: 縦へ動くと、横の傾きは？')
+        self.add(jp('負の対数の説明用の例',20,MUTED).move_to([2.65,1.45,0]))
+        ax=Axes(x_range=(-1.5,1.5,1),y_range=(-.2,2.8,1),x_length=4.7,y_length=2.35,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=18)).move_to([-2.65,.1,0])
+        y=ValueTracker(0);x=ValueTracker(-.6)
+        h=lambda u:.5*(u*u+u*y.get_value()+y.get_value()**2)
+        graph=always_redraw(lambda:self.curve(ax,h,AID_INPUT))
+        def tangent():
+            u=x.get_value();slope=u+.5*y.get_value()
+            return Line(ax.c2p(u-.6,h(u)-.6*slope),ax.c2p(u+.6,h(u)+.6*slope),color=AID_OPERATION,stroke_width=4)
+        line=always_redraw(tangent)
+        dot=always_redraw(lambda:Dot(ax.c2p(x.get_value(),h(x.get_value())),color=AID_OPERATION))
+        self.add(ax,graph,line,dot,tex('x',24).next_to(ax.x_axis,RIGHT),
+                 jp('y を固定した断面：横軸 x、縦軸 h',18,MUTED).move_to([-2.65,1.55,0]),
+                 tex(r'h(x,y)=\frac{x^2+xy+y^2}{2}',29,AID_INPUT).move_to([2.7,.85,0]))
+        self.number('y=',y.get_value,[-4,-1.55,0],AID_COMPARE)
+        self.number(r'\partial h/\partial x=',lambda:x.get_value()+.5*y.get_value(),[-1,-1.55,0],AID_OPERATION)
+        self.beat(x.animate.set_value(0))
+        atzero=tex(r'x=0:\quad h_x=\tfrac12y',29,AID_OPERATION).move_to([2.7,-.05,0])
+        self.add(atzero)
+        self.beat(y.animate.set_value(1))
+        mat=Matrix([['1','0.5'],['0.5','1']],h_buff=1.0,v_buff=.65).scale(.65).move_to([2.95,-1.1,0])
+        entries=mat.get_entries();entries[1].set_color(AID_COMPARE);entries[2].set_color(AID_COMPARE)
+        label=tex('H=',28).next_to(mat,LEFT,buff=.15)
+        cross=tex(r'\frac{\Delta h_x}{\Delta y}=\frac{0.5}{1}=0.5',28,AID_COMPARE).move_to([2.7,-.05,0])
+        self.beat(self.brief(Succession(FadeOut(atzero),AnimationGroup(FadeIn(cross),FadeIn(mat),FadeIn(label)))),
+                  AnimationGroup(Circumscribe(entries[1],color=AID_COMPARE,buff=.08),
+                                 Circumscribe(entries[2],color=AID_COMPARE,buff=.08)),
+                  self.equation(r'H=\nabla\nabla h=A\succ0',colors={0:AID_RESULT},size=29))
+        self.restore_body(saved)
+
+    def determinant_aid(self):
+        saved=self.body_card('補足: 行列式から、幅の積へ')
+        self.add(jp('説明用の二方向：主軸に沿って測る',21,MUTED).move_to([0,1.4,0]))
+        a=ValueTracker(1)
+        square=Square(side_length=2,color=MUTED,stroke_width=1.5).move_to([-2.7,-.1,0])
+        rect=always_redraw(lambda:Rectangle(width=2/np.sqrt(a.get_value()),height=2,
+                    stroke_color=AID_INPUT,fill_color=AID_INPUT,fill_opacity=.35).move_to(square.get_left(),aligned_edge=LEFT))
+        self.add(square,rect,tex(r'\sigma_2=1',28,AID_INPUT).move_to([-4.55,-.1,0]))
+        width=always_redraw(lambda:Brace(rect,DOWN,color=AID_INPUT,buff=.08))
+        self.add(width)
+        self.number(r'\sigma_1=',lambda:a.get_value()**-.5,[-2.7,-1.85,0],AID_INPUT)
+        self.number(r'\lambda_1=',a.get_value,[2.6,.75,0],AID_OPERATION)
+        self.add(tex(r'\lambda_2=1',28,AID_OPERATION).move_to([2.6,.05,0]))
+        self.beat(a.animate.set_value(4))
+        determinant=tex(r'|A|=4\times1=4',30,AID_OPERATION).move_to([2.6,-.65,0])
+        result=tex(r'\sigma_1\sigma_2=|A|^{-1/2}=\frac12',30,AID_COMPARE).move_to([2.6,-1.5,0])
+        self.beat(self.brief(AnimationGroup(FadeIn(determinant),FadeIn(result))),
+                  Circumscribe(rect,color=AID_OPERATION),
+                  self.equation(r'Z_{\rm L}=f(z_0)(2\pi)^{M/2}',r'|A|^{-1/2}',colors={1:AID_RESULT},size=29))
+        self.restore_body(saved)
+
+    def evidence_recap(self):
+        saved=self.body_card('復習: 3.4 モデル証拠')
+        # Reproduce 3.4 integral(): observation 1, noise .35, uniform prior 1/4.
+        ax=Axes(x_range=(-2,2,1),y_range=(0,1.3,.5),x_length=5.2,y_length=2.65,
+                tips=False,axis_config=dict(color=MUTED,include_numbers=True,font_size=18)).move_to([-2.45,-.1,0])
+        like=lambda w:gaussian(w,1,.35**-2)
+        product=lambda w:like(w)/4
+        lc=self.curve(ax,like,BLUE)
+        prior=polyline([ax.c2p(-2,0),ax.c2p(-2,.25),ax.c2p(2,.25),ax.c2p(2,0)],PURPLE)
+        pc=self.curve(ax,product,GOLD)
+        self.add(ax,lc,prior,tex('w',24).next_to(ax.x_axis,RIGHT),
+                 jp('尤度',22,BLUE).move_to([2.5,1.25,0]),jp('事前',22,PURPLE).move_to([2.5,.65,0]),
+                 jp('積の面積 = 証拠',22,GOLD).move_to([2.5,.05,0]))
+        scan=ValueTracker(-1.95)
+        def rectangles():
+            out=VGroup()
+            for w in np.arange(-1.95,2,.1):
+                if w>scan.get_value():break
+                v=product(w)
+                out.add(Polygon(ax.c2p(w-.05,0),ax.c2p(w-.05,v),ax.c2p(w+.05,v),ax.c2p(w+.05,0),
+                                fill_color=GOLD,fill_opacity=.5,stroke_color=GOLD,stroke_width=.4))
+            return out
+        bars=always_redraw(rectangles)
+        self.add(bars)
+        self.beat(Create(pc),scan.animate.set_value(2))
+        maximum=Dot(ax.c2p(1,product(1)),color=RED,radius=.07)
+        label=jp('頂上の高さ',20,RED).move_to([2.5,-.6,0])
+        bridge=VGroup(jp('今回の図の色へ',20).move_to([2.5,-1.15,0]),
+                      tex(r'L:\ ',23,BLUE),tex(r'\longrightarrow',23),tex('L',23,GOLD),
+                      tex(r'p:\ ',23,PURPLE),tex(r'\longrightarrow',23),tex('p',23,BLUE))
+        VGroup(*bridge[1:]).arrange(RIGHT,buff=.14).move_to([2.5,-1.6,0])
+        product_bridge=VGroup(jp('積',19,GOLD),tex(r'\longrightarrow',21),jp('積・証拠',19,PURPLE)).arrange(RIGHT,buff=.12).move_to([2.5,-1.97,0])
+        bridge.add(product_bridge)
+        self.beat(self.brief(AnimationGroup(FadeIn(maximum),FadeIn(label),FadeIn(bridge))),
+                  self.equation(r'p(D)=\int',r'L(w)',r'p(w)',r'\,dw',colors={1:BLUE,2:PURPLE}),
+                  Circumscribe(bars,color=GOLD))
+        self.restore_body(saved)
