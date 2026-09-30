@@ -1,4 +1,9 @@
 {
+  "aid_projection_measured_variances": [
+    3.991028483693578,
+    15.964113934774312
+  ],
+  "aid_variance_ratio": 4.0,
   "contour_linear_error": 1.6653345369377348e-16,
   "jacobian_max_error": 4.404832054660801e-11,
   "hessian_direction_error": 1.5686824781369069e-06,

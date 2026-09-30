@@ -55,7 +55,13 @@ def main():
     segments=contours(xx,yy,gx+2*gy,.3)
     contour_error=float(max(np.max(abs(seg[:,0]+2*seg[:,1]-.3)) for seg in segments))
     assert contour_error<1e-12
-    result=dict(contour_linear_error=contour_error,jacobian_max_error=jac_error,hessian_direction_error=hessian_error,
+    # Independent sample projection for the added diag(4,1) sensitivity example.
+    cloud=np.random.default_rng(5704).multivariate_normal([0,0],np.diag([4.,1.]),120000)
+    illustrative_variances=np.array([(cloud@np.array([k,0])).var() for k in [1,2]])
+    assert np.allclose(illustrative_variances,[4,16],rtol=.02)
+    assert abs(illustrative_variances[1]/illustrative_variances[0]-4)<1e-12
+    result=dict(aid_projection_measured_variances=illustrative_variances.tolist(),
+        aid_variance_ratio=float(illustrative_variances[1]/illustrative_variances[0]),contour_linear_error=contour_error,jacobian_max_error=jac_error,hessian_direction_error=hessian_error,
         minimum_regression_curvature=float(np.linalg.eigvalsh(a).min()),map_gradient_norm=float(np.linalg.norm(objective(w,X,T,ALPHA,BETA)[1])),
         projection_relative_error=projection_error,evidence_quadrature_error=max(integral_errors),
         hyperparameter_update_error=float(max(update_errors)),permutation_error=symmetry_error,

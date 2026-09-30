@@ -82,11 +82,16 @@ def post_json(base, endpoint, params, body=None):
         return response.read()
 
 
-def sentence_audio(base, text):
+def sentence_cache(base, text):
     key = hashlib.sha256(json.dumps([base, "0.25.2", 23, SYNTHESIS_SETTINGS, text],
                                   ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache = CACHE_DIR / f"{key}.wav"
+    return cache
+
+
+def sentence_audio(base, text):
+    cache = sentence_cache(base, text)
     if cache.exists():
         return cache.read_bytes()
     query = json.loads(post_json(base, "audio_query", {"speaker": 23, "text": text}))
@@ -94,6 +99,31 @@ def sentence_audio(base, text):
     data = post_json(base, "synthesis", {"speaker": 23}, json.dumps(query).encode())
     cache.write_bytes(data)
     return data
+
+
+def preserve_sentence_pcm(base):
+    """Reuse verified old PCM by exact speech, preserving unchanged sentence timing."""
+    if not MANIFEST.exists():
+        return
+    manifest = json.loads(MANIFEST.read_text())
+    if manifest.get("speaker") != SPEAKER:
+        return
+    for entry in manifest.get("scenes", []):
+        path = OUTPUT_DIR / f"{entry['id']}.wav"
+        if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != entry.get("wav_sha256"):
+            continue
+        with wave.open(str(path), "rb") as source:
+            params = source.getparams()
+            pcm = source.readframes(source.getnframes())
+        stride = params.nchannels * params.sampwidth
+        for cue in entry.get("subtitle_cues", []):
+            cache = sentence_cache(base, cue['speech'])
+            if cache.exists():
+                continue
+            a, b = [round(cue[k] * params.framerate) for k in ('start', 'end')]
+            with wave.open(str(cache), "wb") as output:
+                output.setparams(params)
+                output.writeframes(pcm[a*stride:b*stride])
 
 
 def generate_scene(base, scene):
@@ -149,12 +179,16 @@ def main():
     if not args.prepare_only:
         with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
             print("VOICEVOX Engine", response.read().decode(), flush=True)
+    if not args.prepare_only:
+        preserve_sentence_pcm(args.base_url)
     entries = prepare_manifest()
     if args.prepare_only:
         print("Manifest prepared. Audio not regenerated.")
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if valid_entry(SCENES[i], entries[i]):
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")

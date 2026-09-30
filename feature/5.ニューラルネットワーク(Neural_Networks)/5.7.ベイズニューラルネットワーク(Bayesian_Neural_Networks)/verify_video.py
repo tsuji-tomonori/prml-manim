@@ -25,20 +25,35 @@ for s in timeline:
   for c in b['cues']:
    if '$' in c['display']:
     shots.append(dict(id=c['id'],time=(c['start']+c['end'])/2,display=c['display']))
-# Three scene actions, before/after positions and measured PCM onset.
+# Added cards: each sentence, early/middle/late action, and both transitions.
 sync=[]
-for i,j,k in [(0,2,1),(4,3,0),(8,4,0)]:
- scene=timeline[i];beat=scene['beats'][j];cue=beat['cues'][k]
- entry=manifest['scenes'][i]; audio_cue=next(c for c in entry['subtitle_cues'] if c['id']==cue['id'])
- with wave.open(str(d/entry['path'])) as wav:
-  rate=wav.getframerate();pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)/32768
- start=int(audio_cue['start']*rate);end=int(audio_cue['end']*rate)
- idx=np.flatnonzero(abs(pcm[start:end])>10**(-45/20))
- onset=scene['start']+(start+int(idx[0]))/rate
- sync.append(dict(id=cue['id'],sentence_start=cue['start'],pcm_onset=onset,
-                  action_start=beat['action_start'],action_end=beat['action_end']))
- for suffix,fraction in [('early',.08),('middle',.5),('late',.88)]:
-  shots.append(dict(id=cue['id']+'-'+suffix,time=beat['action_start']+fraction*(beat['action_end']-beat['action_start']),display=cue['display']))
+for scene,entry in zip(timeline,manifest['scenes']):
+ for beat in scene['beats']:
+  added=any('-recap-' in c['id'] or '-aid-' in c['id'] for c in beat['cues'])
+  selected=[c for c in beat['cues'] if added or c['id'] in
+            ['scene01-03-02','scene05-04-01','scene09-05-01']]
+  if added:
+   low,high=(5,20) if '-aid-' in beat['cues'][0]['id'] else (10,30)
+   assert low<=beat['end']-beat['start']<=high
+   for suffix,t in [('before',max(0,beat['start']-.2)),('after',beat['end']+.2)]:
+    shots.append(dict(id=beat['cues'][0]['id']+'-'+suffix,time=t,display='transition'))
+  for cue in selected:
+   audio_cue=next(c for c in entry['subtitle_cues'] if c['id']==cue['id'])
+   with wave.open(str(d/entry['path'])) as wav:
+    rate=wav.getframerate();pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)/32768
+   start=int(audio_cue['start']*rate);end=int(audio_cue['end']*rate)
+   idx=np.flatnonzero(abs(pcm[start:end])>10**(-45/20))
+   onset=scene['start']+(start+int(idx[0]))/rate
+   if added:
+    action=next(a for a in beat['actions'] if abs(a['start']-cue['start'])<1/15)
+    assert abs(action['end']-cue['end'])<=1/15
+   else:
+    action=dict(start=beat['action_start'],end=beat['action_end'])
+   sync.append(dict(id=cue['id'],sentence_start=cue['start'],pcm_onset=onset,
+                    action_start=action['start'],action_end=action['end']))
+   for suffix,fraction in [('early',.08),('middle',.5),('late',.94)]:
+    shots.append(dict(id=cue['id']+'-'+suffix,time=action['start']+fraction*(action['end']-action['start']),display=cue['display']))
+assert sum('-recap-' in c['id'] or '-aid-' in c['id'] for c in sync)==11
 for s in shots:
  p=out/(s['id']+'.png')
  subprocess.run(['ffmpeg','-v','error','-y','-ss',str(s['time']),'-i',str(video),'-frames:v','1',str(p)],check=True)
@@ -82,5 +97,31 @@ result=dict(scene_timing_max_error=max(scene_timing_errors),ffprobe=probe,stream
             frames=shots,sync=sync,
             manual_review='Frame extraction only; see the work report for actual review.',
             full_audio_listening=False)
+# Locate each new sentence in the actual AAC stream, independently of the timeline.
+from scipy.signal import correlate
+rate=24000
+raw=subprocess.check_output(['ffmpeg','-v','error','-i',str(video),'-map','0:a:0',
+                             '-f','s16le','-ac','1','-ar',str(rate),'-'])
+decoded=np.frombuffer(raw,dtype=np.int16).astype(float)
+correlations=[]
+for scene,entry in zip(timeline,manifest['scenes']):
+ with wave.open(str(d/entry['path'])) as wav:
+  assert wav.getframerate()==rate and wav.getnchannels()==1
+  source=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16).astype(float)
+ for cue in entry['subtitle_cues']:
+  if '-recap-' not in cue['id'] and '-aid-' not in cue['id']:continue
+  a,b=[round(cue[k]*rate) for k in ('start','end')]
+  template=source[a:b];expected=scene['start']+cue['start']
+  start=max(0,round((expected-.12)*rate));end=round((expected+.12)*rate)+len(template)
+  window=decoded[start:end]
+  scores=correlate(window,template,mode='valid',method='fft')
+  k=int(np.argmax(scores));match=window[k:k+len(template)]
+  coefficient=float(np.dot(match,template)/(np.linalg.norm(match)*np.linalg.norm(template)))
+  error=(start+k)/rate-expected
+  assert abs(error)<.1 and coefficient>.98
+  correlations.append(dict(id=cue['id'],offset_seconds=error,correlation=coefficient))
+result['added_sentence_audio_correlation']=correlations
+print('AAC sync',len(correlations),'max offset',max(abs(c['offset_seconds']) for c in correlations),
+      'min correlation',min(c['correlation'] for c in correlations))
 (d/'video_validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print('media checks passed',difference,silence_count)
