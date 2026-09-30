@@ -107,9 +107,11 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         samples=VGroup(*[line(ax,GRID,output(w,GRID),POST,1.5,.48) for w in D['samples']])
         self.beat(LaggedStart(*[Create(m) for m in samples],lag_ratio=.12))
         self.beat(x.animate.set_value(-2.35))
+        self.curves_recap()
         self.beat(x.animate.set_value(.5),self.eq(r'p(t\mid x,D)=',r'\int p(t\mid x,w)',r'p(w\mid D)\,dw'))
 
     def update(self):
+        self.add(jp('復習: 1.2 ベイズ更新',18).move_to([0,2.96,0]))
         ax=self.axes(x=(-3,3,1),y=(0,1.5,.5),height=3.1,center=(0,.35,0),xlabel=r'w_\parallel',ylabel=r'\mathrm{density}')
         self.legend([('事前',PRIOR),('尤度（最大値を1へ換算）',NOISE),('条件付き事後',POST)])
         grid=np.linspace(-3,3,501);direction=U[:,0];coordinate=float(W@direction);mu=0.
@@ -144,6 +146,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         actual_curve=always_redraw(lambda:line(ax,grid,actual(),DATA))
         self.add(actual_curve)
         self.beat(Create(Dot(ax.c2p(0,0),color=MAP)),self.note_anim('谷底を通る断面。横軸の s は重みの変位'))
+        self.laplace_recap()
         quad=always_redraw(lambda:line(ax,grid,.5*(direction()@A@direction())*grid**2,GOLD))
         self.add(quad)
         self.beat(self.eq(r'E(w)\simeq E(w_{\rm MAP})+',r'\frac12\Delta w^TA\Delta w'))
@@ -175,9 +178,11 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         x=ValueTracker(-2.3);scan=self.scan(ax,x,noise_scale=lambda:0);self.add(scan)
         self.beat(x.animate.set_value(2.3))
         self.beat(x.animate.set_value(0),self.eq(r'\operatorname{Var}_q[y_{\rm lin}]=',r'g^TA^{-1}g'))
+        self.projection_aid()
         self.beat(theta.animate.set_value(4*PI),self.note_anim('① 重みの分布をガウス化　② 出力を重みについて線形化'))
 
     def two_variances(self):
+        self.add(jp('復習: 3.3 予測分散',18).move_to([0,2.96,0]))
         ax=self.axes(y=(-1.4,1.4,1),center=(-1.3,.3,0),width=7.6,height=3.25)
         self.legend([('重み ±2標準偏差',POST),('観測ノイズ',NOISE),('予測全体',DATA)])
         scale=ValueTracker(1);noise=ValueTracker(0)
@@ -201,6 +206,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(x.animate.set_value(-2.4),self.note_anim('±2標準偏差は、近似ガウス予測の約95%の範囲'))
 
     def evidence(self):
+        self.add(jp('復習: 3.5 エビデンス',18).move_to([0,2.96,0]))
         ax=self.axes(x=(-3,4,1),y=(0,1.7,.5),height=3.1,center=(0,.3,0),xlabel='w',ylabel=r'\mathrm{density}')
         self.legend([('事前',PRIOR),('尤度',NOISE),('積と面積',POST)])
         sd=ValueTracker(1.1);end=ValueTracker(-3);grid=np.linspace(-3,4,401)
@@ -231,6 +237,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(Indicate(formula[2]),self.eq(r'\log|A|=\sum_i\log a_i',r'\qquad(a_i>0)'))
 
     def hyper(self):
+        self.effective_recap()
         alpha=ValueTracker(1);lam=np.array([.1,1,10,100]);base=-.8
         def bars():
             vals=lam/(alpha.get_value()+lam)
@@ -300,6 +307,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         grid=np.linspace(-7,9,321);sig=line(ax,grid,expit(grid),DATA);self.add(sig)
         self.legend([('シグモイド',DATA),('活性の密度',PRIOR),('平均した確率',POST)])
         self.beat(self.eq(r'a(x,w)\simeq a_{\rm MAP}+b^T(w-w_{\rm MAP}),\quad b=\nabla_w a'))
+        self.sigmoid_recap()
         var=ValueTracker(.2)
         density=always_redraw(lambda:line(ax,grid,gaussian(grid,2,var.get_value()),PRIOR))
         self.add(density)
@@ -318,3 +326,139 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.add(jp('緑：0.5の境界',23,POST).move_to([3.8,1.2,0]),jp('黄：周囲の確率',23,GOLD).move_to([3.8,.65,0]))
         self.beat(scale.animate.set_value(1),self.note_anim('同じ MAP を固定し、共分散を0倍から1倍へ'))
         self.beat(Indicate(contours,scale_factor=1),self.eq(r'D\ \longrightarrow\ p(w\mid D)\ \longrightarrow\ p(t\mid x,D)'),self.note_anim('代表値とともに、不確かさを予測へ渡す',POST))
+
+    def body_card(self, label):
+        """Suspend the body without changing its trackers or formula references."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        self.clear();self.subtitle=None
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]),
+                 RoundedRectangle(width=10.6,height=4.8,corner_radius=.12,
+                                  color='#FFFF00',stroke_width=1.2),
+                 jp(label,23).move_to([-4.95,2.08,0],aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self, saved):
+        self.clear();self.add(*saved);self.subtitle=None
+
+    def card_phases(self, *actions):
+        """Lazy sentence actions share the PCM clock, including sentence boundaries."""
+        assert len(actions)==len(self.beat_cues())
+        self.beat(phases=[(name,self.sentence_duration(i),factory)
+                          for i,(name,factory) in enumerate(actions)])
+
+    def curves_recap(self):
+        saved=self.body_card('復習: 3.3 重みの分布から予測へ')
+        # Reproduce the six RBF posterior samples in 3.3 curves(), N=25.
+        colors=[MAP,GOLD,PRIOR,NOISE,DATA,ManimColor('#77D49A')]
+        xr=np.r_[.35,.75,.15,.9,np.random.default_rng(331).uniform(0,1,21)]
+        tr=np.sin(2*PI*xr)+np.random.default_rng(332).normal(0,.2,25)
+        phi=lambda x:np.exp(-.5*((np.atleast_1d(x)[:,None]-np.linspace(0,1,9))/.14)**2)
+        f=phi(xr);cov=np.linalg.inv(2*np.eye(9)+25*f.T@f);mu=cov@(25*f.T@tr)
+        weights=mu+np.random.default_rng(339).normal(size=(6,9))@np.linalg.cholesky(cov).T
+        ax=self.axes(x=(0,1,.5),y=(-1.5,1.5,1),width=6.1,height=2.3,center=(-1.6,.1,0),ylabel='y')
+        x=np.linspace(0,1,161);ys=phi(x)@weights.T;x0=.6;values=phi(x0)@weights.T
+        curves=VGroup(*[line(ax,x,ys[:,i],colors[i],2,.75) for i in range(6)])
+        guide=DashedLine(ax.c2p(x0,-1.4),ax.c2p(x0,1.4),color=MUTED)
+        dots=VGroup(*[Dot(ax.c2p(x0,v),radius=.06,color=colors[i]) for i,v in enumerate(values[0])])
+        axis=NumberLine(x_range=[-1.5,1.5,1],length=2.3,rotation=PI/2,include_ticks=False,color=MUTED).move_to([3.5,.1,0])
+        targets=VGroup(*[Dot(axis.n2p(v),color=colors[i],radius=.06) for i,v in enumerate(values[0])])
+        average=Dot(axis.n2p(values.mean()),color=MAP,radius=.1)
+        mapping=jp('重みの候補 → ネットワークの予測の幅',22,POST).move_to([0,-2.02,0])
+        self.add(curves,guide,axis,jp('同じ入力',18).move_to([-.6,1.53,0]),
+                 jp('予測の高さ',20).move_to([3.5,1.53,0]),
+                 jp('事後分布からの6標本',19,MUTED).move_to([-1.6,-1.63,0]))
+        self.card_phases(
+            ('候補の高さを集めて標本平均へ',lambda:Succession(FadeIn(dots),Transform(dots,targets),
+              Transform(dots,VGroup(*[Dot(average.get_center(),color=c,radius=.055) for c in colors])),FadeIn(average))),
+            ('今回のネットワークへ対応',lambda:AnimationGroup(FadeIn(mapping),
+              FadeIn(jp('標本の平均',20,MAP).move_to([3.5,-1.63,0])))))
+        self.restore_body(saved)
+
+    def laplace_recap(self):
+        saved=self.body_card('復習: 4.4 ラプラス近似')
+        a=ValueTracker(1.)
+        left=self.axes(x=(-1.5,1.5,1),y=(0,5,2),width=3.4,height=2.05,center=(-2.7,.12,0),xlabel='s',ylabel='h(s)')
+        right=self.axes(x=(-2.5,2.5,2),y=(0,1,.5),width=3.4,height=2.05,center=(2.7,.12,0),xlabel='s',ylabel='q(s)')
+        x=np.linspace(-1.5,1.5,161);z=np.linspace(-2.5,2.5,161)
+        bowl=always_redraw(lambda:line(left,x,.5*a.get_value()*x*x,MAP))
+        bell=always_redraw(lambda:line(right,z,gaussian(z,0,1/a.get_value()),MAP))
+        span=always_redraw(lambda:Line(right.c2p(-1/np.sqrt(a.get_value()),.12),right.c2p(1/np.sqrt(a.get_value()),.12),color=GOLD,stroke_width=5))
+        transform=tex(r'e^{-h}\ \longrightarrow',24,GOLD).move_to([0,.45,0])
+        condition=jp('条件：負の対数事後の曲率が全方向で正（正定値）',19).move_to([0,-2.04,0])
+        mapping=VGroup(jp('本編の近似',18),Dot(color=MAP),tex(r'\to',22),Dot(color=GOLD),
+                       jp('ガウス',18),Dot(color=MAP),tex(r'\to',22),Dot(color=POST)).arrange(RIGHT,buff=.15).move_to([0,-1.62,0])
+        self.add(bowl,bell,span,transform,
+                 tex(r'h(s)=\tfrac12 A s^2',25,MAP).move_to([-2.7,1.52,0]),
+                 tex(r'\sigma=1/\sqrt A',25,GOLD).move_to([2.7,1.52,0]),condition)
+        self.card_phases(
+            ('曲率を増やすとガウスの幅が狭まる',lambda:a.animate.set_value(4)),
+            ('正定値の条件と本編の配色へ',lambda:AnimationGroup(Indicate(condition,scale_factor=1),FadeIn(mapping))))
+        self.restore_body(saved)
+
+    def projection_aid(self):
+        saved=self.body_card('補足: 感度と予測の広がり')
+        blue,yellow,green='#58C4DD','#FFFF00','#83C167'
+        scale=ValueTracker(1)
+        # Same covariance determines ellipse, projection extent and variance.
+        cov=np.diag([4.,1.]);radius=np.sqrt(np.diag(cov));center=np.array([-3.,.2,0])
+        ellipse=Ellipse(width=2*radius[0]*.65,height=2*radius[1]*.65,color=blue).move_to(center)
+        shadow=Line(center+[-radius[0]*.65,-1.,0],center+[radius[0]*.65,-1.,0],color=yellow,stroke_width=5)
+        guides=VGroup(*[DashedLine(center+[sign*radius[0]*.65,0,0],center+[sign*radius[0]*.65,-1,0],color=yellow) for sign in [-1,1]])
+        ax=NumberLine(x_range=[-4,4,2],length=4.1,include_numbers=True,font_size=19,color=MUTED).move_to([2.55,-.3,0])
+        sd=lambda:np.sqrt(np.array([scale.get_value(),0])@cov@np.array([scale.get_value(),0]))
+        width=always_redraw(lambda:Line(ax.n2p(-sd()),ax.n2p(sd()),color=green,stroke_width=6))
+        nums=readout(r'\mathrm{SD}=',sd,(2.5,.6,0),green)
+        var=tex(r'\mathrm{Var}:\ 4\ \longrightarrow\ 16\quad(\times4)',29,green).move_to([1.4,-1.63,0])
+        self.add(ellipse,shadow,guides,ax,width,nums,
+                 tex(r'C=A^{-1}=\mathrm{diag}(4,1)',26,blue).move_to([-2.6,1.48,0]),
+                 tex(r'g=(1,0)\ \longrightarrow\ (2,0)',26,yellow).move_to([2.4,1.48,0]),
+                 Arrow([-1.2,.2,0],[.1,.2,0],color=yellow),
+                 jp('単位方向への影',19,yellow).move_to([-3,-1.18,0]),
+                 jp('説明用の2重み。雲は固定。幅は標準偏差。',19,MUTED).move_to([0,-2.04,0]))
+        self.card_phases(
+            ('感度1から2で標準偏差2から4へ',lambda:scale.animate.set_value(2)),
+            ('標準偏差を二乗して分散4から16へ',lambda:Write(var)))
+        self.restore_body(saved)
+
+    def effective_recap(self):
+        saved=self.body_card('復習: 3.5 エビデンスと有効パラメータ数')
+        colors=[DATA,MAP,PRIOR,ManimColor('#77D49A')]
+        a=ValueTracker(.1);lam=np.array([.1,1,10,100])
+        ax=self.axes(x=(.5,4.5,1),y=(0,1,.5),width=6,height=1.8,center=(-1,.05,0),xlabel='i',ylabel='q_i')
+        def bars():
+            q=lam/(a.get_value()+lam)
+            return VGroup(*[Rectangle(width=.55,height=max(.005,1.8*v),fill_color=colors[i],fill_opacity=.85,stroke_width=0).move_to(ax.c2p(i+1,v/2)) for i,v in enumerate(q)])
+        bs=always_redraw(bars)
+        count=readout(r'\gamma=',lambda:sum(lam/(a.get_value()+lam)),(3.55,.35,0),GOLD)
+        mapping=VGroup(jp('本編の寄与の棒',19),*[Dot(color=c,radius=.05) for c in colors],
+                       tex(r'\to',23),Dot(color=POST)).arrange(RIGHT,buff=.14).move_to([0,-1.67,0])
+        self.add(bs,count,tex(r'q_i=\frac{\lambda_i}{\alpha+\lambda_i},\qquad\gamma=\sum_i q_i',28,GOLD).move_to([0,1.48,0]),
+                 jp('説明用の4方向：事前が強いほど0、データが強いほど1',19,MUTED).move_to([0,-1.27,0]),
+                 jp('今回の更新式は、固有値の変化を無視した近似',20).move_to([0,-2.07,0]))
+        self.card_phases(
+            ('事前の強さを増やして寄与を縮める',lambda:a.animate.set_value(10)),
+            ('四方向の寄与を合計する',lambda:AnimationGroup(a.animate.set_value(1),Indicate(count,scale_factor=1))),
+            ('今回の近似へつなぐ',lambda:FadeIn(mapping)))
+        self.restore_body(saved)
+
+    def sigmoid_recap(self):
+        saved=self.body_card('復習: 4.5 シグモイドに通してから平均')
+        red,purple,yellow,green='#FF7884','#C5A0F4','#FFE18B','#7CDBAD'
+        ax=self.axes(x=(-7,11,4),y=(0,1,.5),width=6.2,height=2.1,center=(-1.5,.1,0),xlabel='a',ylabel='')
+        x=np.linspace(-7,11,301);var=9.;end=ValueTracker(-7)
+        sig=line(ax,x,expit(x),red);pdf=line(ax,x,gaussian(x,2,var),purple)
+        def area():
+            xx=np.linspace(-7,max(-6.999,end.get_value()),181)
+            return Polygon(ax.c2p(xx[0],0),*[ax.c2p(v,p) for v,p in zip(xx,expit(xx)*gaussian(xx,2,var))],ax.c2p(xx[-1],0),fill_color=yellow,fill_opacity=.65,stroke_width=0)
+        fill=always_redraw(area)
+        p=integrated_sigmoid(2,var)
+        summary=VGroup(tex(r'\sigma(2)=0.881',25,red),tex(r'\mathbb E[\sigma(a)]=0.717',25,green)).arrange(DOWN,buff=.4).move_to([3.05,.25,0])
+        mapping=VGroup(jp('本編のシグモイド',18),Dot(color=red),tex(r'\to',22),Dot(color=DATA),
+                       jp('平均',18,green),tex(r'\to',22),Dot(color=POST)).arrange(RIGHT,buff=.14).move_to([0,-2.02,0])
+        self.add(sig,pdf,fill,Dot(ax.c2p(2,expit(2)),color=red),
+                 jp('赤：確率　紫：密度　黄：積の面積',20).move_to([0,1.54,0]),
+                 tex(r'a\sim\mathcal N(2,9),\qquad p=\int\sigma(a)q(a)\,da',26).move_to([0,-1.57,0]))
+        self.card_phases(
+            ('積の面積を足して確率を平均',lambda:Succession(end.animate.set_value(11),FadeIn(summary))),
+            ('活性の線形化から同じ平均へ',lambda:FadeIn(mapping)))
+        self.restore_body(saved)
