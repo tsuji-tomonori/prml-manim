@@ -49,6 +49,7 @@ def main():
                 rate=f.getframerate()
                 pcm=np.frombuffer(f.readframes(f.getnframes()),dtype='<i2')/32768.
             checks=[]
+            assert len(b['cues'])==len(b['actions'])
             for c,action in zip(b['cues'],b['actions']):
                 lo=round((c['start']-s['start'])*rate)
                 hi=round((c['end']-s['start'])*rate)
@@ -58,7 +59,7 @@ def main():
                 end=c['start']+float(hits[-1])/rate
                 assert abs(action['start']-c['start'])<=1/15
                 assert action['start']<=onset<end<=action['end']+1/15
-                checks.append(dict(sentence=c['id'],speech_onset=onset,speech_end=end,
+                checks.append(dict(sentence=c['id'],cue_start=c['start'],speech_onset=onset,speech_end=end,
                                    action_start=action['start'],action_end=action['end']))
                 for q in [.15,.85]:
                     frames.append(dict(label=f"review-{c['id']}-{q}",
