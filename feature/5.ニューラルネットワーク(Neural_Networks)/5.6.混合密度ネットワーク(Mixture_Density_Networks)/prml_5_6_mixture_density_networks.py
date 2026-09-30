@@ -447,7 +447,7 @@ class PRML56MixtureDensityNetworks(Scene):
         dot=always_redraw(lambda:Dot(right.c2p(pred.get_value(),pred.get_value()**2+.36+sep.get_value()**2),color=YELLOW))
         optimum=Dot(left.c2p(0,0),color='#77D49A')
         mapping=VGroup(jp('条件付き平均',21,'#77D49A'),tex(r'\longrightarrow',25),
-                       jp('本編の赤い予測線',21,RED)).arrange(RIGHT,buff=.22).move_to([0,-2.04,0])
+                       jp('本編の赤い予測線',21,RED)).arrange(RIGHT,buff=.22).move_to([0,-2.16,0])
         self.add(left,ll,right,rl,pdf,risk,marker,dot,
                  jp('条件付き密度',21,C[0]).move_to([-2.6,1.55,0]),
                  jp('期待二乗損失',21,YELLOW).move_to([2.5,1.55,0]),
