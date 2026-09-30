@@ -26,7 +26,27 @@
   "boundary_x": 0.4921881599859207,
   "threshold08_map_x": 1.818739088385239,
   "threshold08_bayes_x": 2.159243724228819,
-  "sentences": 96,
-  "symbol_captions": 15,
-  "audio_duration": 481.0
+  "aid_observation_precision": [
+    [
+      0.25,
+      0.5
+    ],
+    [
+      0.5,
+      1.0
+    ]
+  ],
+  "recap_curvature_variance": [
+    [
+      1,
+      1
+    ],
+    [
+      4,
+      0.25
+    ]
+  ],
+  "sentences": 103,
+  "symbol_captions": 16,
+  "audio_duration": 516.3333333333334
 }
