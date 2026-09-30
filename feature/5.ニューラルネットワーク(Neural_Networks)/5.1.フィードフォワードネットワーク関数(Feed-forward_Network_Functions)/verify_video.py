@@ -29,7 +29,7 @@ def main():
     volumes={k:float(re.search(k+r':\s*([-\d.]+)',audio)[1]) for k in ['mean_volume','max_volume']}
     streams={s['codec_type']:s for s in probe['streams']}
     gap=abs(float(streams['video']['duration'])-float(streams['audio']['duration']));assert gap<1/15
-    frames=[];sync=[];max_gap=0.;cue_count=0
+    frames=[];sync=[];reviews=[];max_gap=0.;cue_count=0
     for si,(s,e) in enumerate(zip(timeline,manifest)):
         max_gap=max(max_gap,abs(s['end']-s['start']-e['duration']))
         assert abs(s['end']-s['start']-e['duration'])<1/15
@@ -42,6 +42,31 @@ def main():
                 assert abs(c['start']-s['start']-expected['start'])<1e-5
                 if '$' in c['display']:
                     frames.append(dict(label='math-'+c['id'],time=(c['start']+c['end'])/2))
+        for b in s['beats']:
+            if not b['note'].startswith(('復習:', '補足:')):
+                continue
+            with wave.open(str(ROOT/e['path'])) as f:
+                rate=f.getframerate()
+                pcm=np.frombuffer(f.readframes(f.getnframes()),dtype='<i2')/32768.
+            checks=[]
+            for c,action in zip(b['cues'],b['actions']):
+                lo=round((c['start']-s['start'])*rate)
+                hi=round((c['end']-s['start'])*rate)
+                hits=np.flatnonzero(abs(pcm[lo:hi])>10**(-45/20))
+                assert len(hits)>0
+                onset=c['start']+float(hits[0])/rate
+                end=c['start']+float(hits[-1])/rate
+                assert abs(action['start']-c['start'])<=1/15
+                assert action['start']<=onset<end<=action['end']+1/15
+                checks.append(dict(sentence=c['id'],speech_onset=onset,speech_end=end,
+                                   action_start=action['start'],action_end=action['end']))
+                for q in [.15,.85]:
+                    frames.append(dict(label=f"review-{c['id']}-{q}",
+                                       time=c['start']+q*(c['end']-c['start'])))
+            for label,t in [('before',b['start']-.2),('after',b['end']+.2)]:
+                frames.append(dict(label=f"review-{s['id']}-{label}",time=t))
+            reviews.append(dict(scene=s['id'],note=b['note'],start=b['start'],end=b['end'],
+                                duration=b['end']-b['start'],sentence_sync=checks))
         # Compare early/late animation states against the first sentence's PCM onset.
         selected={1:3,5:4,8:2}
         if si in selected:
@@ -69,7 +94,7 @@ def main():
         sheet.save(dest/f'sheet-{start//6:02}.png')
     result=dict(video_sha256=hashlib.sha256(VIDEO.read_bytes()).hexdigest(),probe=probe,stream_gap=gap,
                 silence_intervals=silence,**volumes,scenes=len(timeline),cues=cue_count,max_scene_duration_gap=max_gap,
-                frames=frames,sync=sync,visual_review='Pending human inspection of extracted frames',full_listening=False)
+                frames=frames,sync=sync,review_cards=reviews,visual_review='Pending human inspection of extracted frames',full_listening=False)
     (ROOT/'validation_results.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k not in ['frames','probe']},indent=2,ensure_ascii=False))
 

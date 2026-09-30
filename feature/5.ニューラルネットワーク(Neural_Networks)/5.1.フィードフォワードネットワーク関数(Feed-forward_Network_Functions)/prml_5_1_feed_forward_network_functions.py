@@ -71,7 +71,8 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(Create(h1),Create(h2))
         total=always_redraw(lambda:curve(ax,lambda x:bump(x,c.get_value(),v.get_value()),color=OUT))
         self.add(total,knob('v=',v,0,1,color=OUT))
-        self.beat(v.animate.set_value(.85))
+        self.basis_recap()
+        v.set_value(.85)
         # Replace only the explicitly owned control, not the plotted data or title.
         for m in list(self.mobjects):
             if isinstance(m,VGroup) and len(m)==3 and any(isinstance(z,NumberLine) for z in m): self.remove(m)
@@ -180,6 +181,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         dot=always_redraw(lambda:Dot(ax.c2p(a.get_value(),fn(a.get_value())),color=YELLOW_ACC,radius=.09))
         self.equation('y=a'); self.add(g,dot,number('a=',a.get_value,[5,.7,0],YELLOW_ACC),number('y=',lambda:fn(a.get_value()),[5,0,0],OUT))
         self.beat(a.animate.set_value(2))
+        self.output_recap()
         self.equation(r'y=\sigma(a)=\frac{1}{1+\exp(-a)}\qquad(5.5),(5.6)')
         self.beat(actions=[lambda:t.animate.set_value(1),lambda:a.animate.set_value(-2)])
         self.remove(ax,axis_names)
@@ -320,6 +322,100 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
                            lambda:pulse(total,color=YELLOW_ACC)])
         self.equation(r'2^M M!\qquad M=2:\quad 2^2\cdot2!=8')
         self.beat(pulse(self.formula,color=YELLOW_ACC))
+        self.symmetry_aid()
         self.remove(left,right)
         self.equation(r'\mathbf x\ \xrightarrow{\ W^{(1)},\,h\ }\ \mathbf z\ \xrightarrow{\ W^{(2)},\,f\ }\ \mathbf y')
         self.beat(pulse(one,color=C1),pulse(two,color=C2))
+
+
+    def body_card(self, label):
+        """Preserve the body and its trackers; the card uses the same PCM clock."""
+        saved = [m for m in self.mobjects if m is not self.subtitle]
+        self.clear()
+        self.add(*[m for m in saved if m.get_center()[1] > 3])
+        frame = RoundedRectangle(width=10.4, height=4.5, corner_radius=.12,
+                                 color='#FFFF00', stroke_width=1.2).move_to([0, .1, 0])
+        self.add(frame, jp(label, 23).move_to([-4.85, 2.03, 0], aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self, saved):
+        self.clear()
+        self.add(*saved)
+        self.subtitle = None
+
+    def basis_recap(self):
+        saved = self.body_card('復習: 3.1 固定した基底に重みを掛けて足す')
+        # 3.1 bases(): x, x^2, x^3 retain blue, purple, orange; model is red.
+        colors = ['#58B5ED', '#C29AFF', '#FFB45B']
+        red = '#FF6B77'
+        ax = self.plot_axes(x=(0,1,.5), y=(0,1,.5), width=5.2, height=2.2,
+                            center=(-1.7,-.1,0), labels=('x','y'))
+        polys = VGroup(*[curve(ax, lambda x,j=j:x**j, color=c).set_stroke(width=2)
+                        for j,c in zip([1,2,3],colors)])
+        w = ValueTracker(.1)
+        total = always_redraw(lambda:curve(ax,lambda x:.25*x+w.get_value()*x*x+.1*x**3,color=red))
+        labels = VGroup(*[tex(f'x^{j}',24,c) for j,c in zip([1,2,3],colors)]).arrange(RIGHT,buff=.6).move_to([-1.7,1.35,0])
+        weight = number('w_2=',w.get_value,[3,.7,0],red)
+        rail = NumberLine(x_range=[0,.7,.1],length=2,color=MUTED).move_to([3,.15,0])
+        marker = always_redraw(lambda:Dot(rail.n2p(w.get_value()),radius=.075,color=red))
+        formula = tex(r'y=0.25x+w_2x^2+0.1x^3',26,red).move_to([-1.5,-1.75,0])
+        mapping = VGroup(jp('今回：材料の形も調整',22,C2),tex(r'c\ \longrightarrow\ \tanh(3(x-c))',26,C2)).arrange(DOWN,buff=.2).move_to([2.8,-1.0,0])
+        self.add(polys,total,labels,weight,rail,marker,formula)
+        self.beat(actions=[lambda:pulse(polys,color='#FFE079'),
+                           lambda:w.animate.set_value(.6),
+                           lambda:FadeIn(mapping,shift=UP*.1)])
+        self.restore_body(saved)
+
+    def output_recap(self):
+        saved = self.body_card('復習: 4.3 スコアからクラスの確率へ')
+        ax = self.plot_axes(x=(-3,3,3),y=(0,1,.5),width=6,height=2.2,
+                            center=(-.6,-.15,0),labels=('a','p'))
+        names = self.mobjects[-1]
+        a = ValueTracker(-2)
+        graph = curve(ax,sigmoid,color=YELLOW_ACC)
+        dot = always_redraw(lambda:Dot(ax.c2p(a.get_value(),sigmoid(a.get_value())),color=WHITE))
+        binary = VGroup(ax,names,graph,dot,jp('2クラス：一方の確率',22).move_to([0,1.45,0]),
+                        number('p=',lambda:sigmoid(a.get_value()),[3.65,.25,0],YELLOW_ACC))
+        score = ValueTracker(-1)
+        probs = lambda:softmax([score.get_value(),.5,0])
+        # Match 4.3 multiclass(): class 1 red, class 2 blue, class 3 green.
+        colors = [RED_CLASS,BLUE_CLASS,GREEN_CLASS]
+        bars = always_redraw(lambda:VGroup(*[
+            Rectangle(width=1.3,height=2.3*p,fill_color=c,fill_opacity=.85,stroke_width=0)
+            .move_to([-2.8+2.8*i,-1.15,0],aligned_edge=DOWN)
+            for i,(p,c) in enumerate(zip(probs(),colors))]))
+        labels = VGroup(*[tex(f'C_{i+1}',25,c).move_to([-2.8+2.8*i,-1.48,0]) for i,c in enumerate(colors)])
+        values = VGroup(*[number('p=',lambda i=i:probs()[i],[-2.8+2.8*i,1.15,0],c,size=24) for i,c in enumerate(colors)])
+        bracket = BraceBetweenPoints([-3.6,-1.8,0],[3.6,-1.8,0],direction=DOWN,color=YELLOW_ACC)
+        total = tex(r'\sum_k p(C_k)=1',26,YELLOW_ACC).move_to([0,-2.55,0])
+        multi = VGroup(bars,labels,values,bracket,total,jp('排他的な3クラス',22).move_to([0,1.55,0]))
+        mapping = tex(r'\mathbf z\longrightarrow a_k\longrightarrow p(C_k)',26,YELLOW_ACC).move_to([0,2.65,0])
+        self.add(binary)
+        def show_multiclass():
+            self.remove(*binary.get_family())
+            self.add(multi)
+            return score.animate.set_value(2)
+        self.beat(actions=[lambda:a.animate.set_value(2),show_multiclass,lambda:FadeIn(mapping)])
+        self.restore_body(saved)
+
+    def symmetry_aid(self):
+        saved = self.body_card('補足: 符号の選び方 × 並べる順序')
+        blue,purple,yellow,green = '#58C4DD','#9A72AC','#FFFF00','#83C167'
+        self.add(jp('説明用の例：全結合・隠れユニット2個・tanh',20,MUTED).move_to([0,1.5,0]))
+        def pair(sa,sb,reverse=False):
+            a = VGroup(RoundedRectangle(width=.75,height=.42,corner_radius=.06,color=blue),tex(sa+'A',23,blue))
+            b = VGroup(RoundedRectangle(width=.75,height=.42,corner_radius=.06,color=purple),tex(sb+'B',23,purple))
+            return VGroup(*( [b,a] if reverse else [a,b])).arrange(RIGHT,buff=.12)
+        signs = [('+','+'),('+','-'),('-','+'),('-','-')]
+        left = VGroup(*[pair(*sg).move_to([-2.8+(i%2)*2, .65-(i//2)*.85,0]) for i,sg in enumerate(signs)])
+        right = VGroup(*[pair(*sg,reverse=True).move_to([1.1+(i%2)*2,.65-(i//2)*.85,0]) for i,sg in enumerate(signs)])
+        order1 = tex('AB',24,yellow).move_to([-1.8,1.05,0])
+        order2 = tex('BA',24,yellow).move_to([2.1,1.05,0])
+        count = tex(r'2^2\times2!=4\times2=8',32,green).move_to([0,-1.05,0])
+        rule = jp('−：入る重み・バイアス・出る重みを一緒に反転',19).move_to([0,-1.62,0])
+        condition = jp('一般的な重みでは8通りが異なる／特別な重みでは重複も',18,MUTED).move_to([0,-2.55,0])
+        self.add(order1,rule)
+        self.beat(actions=[lambda:LaggedStart(*[FadeIn(p) for p in left],lag_ratio=.22),
+                           lambda:AnimationGroup(FadeIn(order2),TransformFromCopy(left,right)),
+                           lambda:AnimationGroup(Write(count),FadeIn(condition))])
+        self.restore_body(saved)
