@@ -180,6 +180,27 @@ for si,(title,reference,beats) in enumerate(STORY,1):
     SCENES.append(dict(id=sid,title=title,reference=reference,beats=[
         dict(seconds=10,visual_note=note,segments=[dict(id=f'{sid}-{bi:02}-{j:02}',display=d,speech=d if s is None else s)
              for j,(d,s) in enumerate(lines,1)]) for bi,(note,lines) in enumerate(beats,1)]))
+# Assign new IDs after building the original beats so existing cues stay stable.
+def review_beat(sid, kind, seconds, note, *lines):
+    return dict(seconds=seconds, visual_note=note, segments=[
+        dict(id=f'{sid}-{kind}-{i:02}', display=d, speech=s)
+        for i,(d,s) in enumerate(lines,1)])
+
+SCENES[3]['beats'].insert(4, review_beat('scene04','recap-cancellation',15,
+    '復習 R：4.3の a→y→損失、共通因子の相殺から出力感度へ',
+    ('4.3では、シグモイドと交差エントロピーを組み合わせました。',
+     '四章三節では、シグモイドと交差エントロピーを組み合わせました。'),
+    (r'微分の共通因子が打ち消し合い、$y-t$ が残ります。',
+     '微分の共通因子が打ち消し合い、予測から目標を引いた差が残ります。'),
+    (r'これが、出力から戻す感度 $\delta_k$ です。',
+     'これが、出力から戻す感度、デルタ、ケーです。')))
+SCENES[8]['beats'].insert(2, review_beat('scene09','aid-columns',15,
+    '補足 V08e：一つの入力変位→二つの出力変位→Jの列',
+    ('一つ目の入力だけを少し動かし、出力の変化を動かした幅で割ると、第一列に近づきます。',
+     '一つ目の入力だけを少し動かし、出力の変化を動かした幅で割ると、第一列に近づきます。'),
+    ('第二列も、二つ目の入力だけを動かして調べます。',
+     '第二列も、二つ目の入力だけを動かして調べます。')))
+
 # Speech-only corrections after checking every audio_query mora sequence.
 READING_FIXES = {'二値':'にち', '黄色':'きいろ', '値':'あたい', '二乗和':'にじょうわ',
                  '正になります':'せいになります', '負になります':'ふになります',

@@ -1,4 +1,15 @@
 {
+  "max_cancellation_error": 1.1102230246251565e-16,
+  "aid_column_errors": {
+    "1": [
+      0.0045577338358648856,
+      0.0001139926519411194
+    ],
+    "2": [
+      0.004302323232512673,
+      0.00010749640872365074
+    ]
+  },
   "weight_derivatives": 36,
   "max_gradient_error": 4.787559237939831e-11,
   "jacobian_derivatives": 12,
@@ -19,9 +30,9 @@
   },
   "branch_cancel_target": -0.8508732281636923,
   "scenes": 9,
-  "beats": 53,
-  "sentences": 106,
-  "math_captions": 6,
+  "beats": 55,
+  "sentences": 111,
+  "math_captions": 8,
   "max_caption_width": 9.38984375,
   "max_caption_height": 0.6987499999999995
 }

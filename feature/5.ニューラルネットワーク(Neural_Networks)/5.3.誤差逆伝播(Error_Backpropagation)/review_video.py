@@ -22,6 +22,17 @@ def main():
             action=b['actions'][0]
             for phase,alpha in [('early',.1),('late',.9)]:
                 frames.append(dict(id=s['id']+'-'+phase,time=action['start']+alpha*(action['end']-action['start']),kind='sync'))
+    # Inspect each new sentence at both ends, plus the adjacent main-story frames.
+    for scene in timeline:
+        for b in scene['beats']:
+            if not any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+                continue
+            for side,time in [('before',b['start']-.4),('after',b['end']+.4)]:
+                frames.append(dict(id=b['cues'][0]['id']+'-'+side,time=time,kind='context'))
+            for c in b['cues']:
+                for phase,alpha in [('early',.15),('late',.85)]:
+                    frames.append(dict(id=c['id']+'-'+phase,
+                                       time=c['start']+alpha*(c['end']-c['start']),kind='aid-sync'))
     for f in frames:
         subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(OUT/(f['id']+'.png'))],check=True)
     (OUT/'frames.json').write_text(json.dumps(frames,ensure_ascii=False,indent=2)+'\n')
