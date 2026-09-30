@@ -291,12 +291,13 @@ class PRML52NetworkTraining(NarratedScene):
         square=always_redraw(lambda:Square(side_length=obs.get_value(),color=gold,fill_opacity=.4).move_to([-.55,-.45,0]))
         formula=tex(r'-\ln p=\frac{\beta}{2}\sum_n(t_n-y_n)^2+\mathrm{const}',28,gold).move_to([1.05,1.23,0])
         mapping=VGroup(tex(r'y=\mathbf w^T\boldsymbol\phi(x)',29,model),
-                       Arrow(UP*.25,DOWN*.25,color=gold),
+                       Arrow(UP*.4,DOWN*.4,buff=.05,color=gold),
                        tex(r'y=y(x,\mathbf w)',29,model)).arrange(DOWN,buff=.2).move_to([2.45,-.35,0])
-        self.add(profile,residual,dot,Dot(ax.c2p(0,0),color=model),
+        self.add(profile,residual,dot,square,Dot(ax.c2p(0,0),color=model),
+                 tex(r"(t-y)^2",23,gold).move_to([-.55,.4,0]),
                  jp('赤：予測の中心',19,model).move_to([-3,1.5,0]),
                  jp('独立・共通の精度を固定',20).move_to([.6,-1.77,0]))
-        self.beat(actions=[lambda:AnimationGroup(obs.animate.set_value(.45),FadeIn(square)),
+        self.beat(actions=[lambda:obs.animate.set_value(.45),
                            lambda:Write(formula),lambda:FadeIn(mapping)])
         self.restore_body(saved)
 
@@ -325,6 +326,7 @@ class PRML52NetworkTraining(NarratedScene):
         for _ in range(30): z0+=grad(z0)/prec(z0)
         ax=self.plot_axes(x=(-.8,1.8,1),y=(-2,2,1),width=5.2,height=2.5,
                           center=(-1.5,-.1,0),labels=('z','g'))
+        axis_names=self.mobjects[-1]
         q=ValueTracker(z0);sign=ValueTracker(1)
         f=lambda z:sign.get_value()*logf(z)
         local=lambda z:sign.get_value()*(logf(q.get_value())+grad(q.get_value())*(z-q.get_value())-.5*prec(q.get_value())*(z-q.get_value())**2)
@@ -339,6 +341,8 @@ class PRML52NetworkTraining(NarratedScene):
         def to_error():
             sign.set_value(-1)
             self.remove(label)
+            axis_names[0].become(tex('w',25).move_to(axis_names[0]))
+            axis_names[1].become(tex('E',25).move_to(axis_names[1]))
             self.add(tex(r'E=-\ln f,\quad \delta=w-\widehat w',27,blue).move_to([0,1.47,0]),tangent,terms)
             return q.animate.set_value(.9)
         self.beat(actions=[lambda:Create(approx),to_error])
@@ -359,25 +363,31 @@ class PRML52NetworkTraining(NarratedScene):
         dot=always_redraw(lambda:Dot(ax.c2p(a.get_value(),b.get_value()),color=yellow,radius=.07))
         horizontal=DashedLine(ax.c2p(-.4,-1),ax.c2p(2,-1),color=yellow)
         vertical=DashedLine(ax.c2p(1,-1.8),ax.c2p(1,.8),color=yellow)
-        cut1=self.plot_axes(x=(.6,1.4,.4),y=(.6,2.6,1),width=2.1,height=1.0,center=(.05,.54,0),labels=('w_1','E'))
-        cut2=self.plot_axes(x=(-1.4,-.6,.4),y=(1,2.2,.6),width=2.1,height=1.0,center=(.05,-1.02,0),labels=('w_2','E'))
+        # Sparse axis labels keep the two slices readable at 480p.
+        cut1=Axes(x_range=(.6,1.4,.4),y_range=(.6,2.6,1),x_length=2.1,y_length=.9,
+                  tips=False,axis_config=dict(color=MUTED,stroke_width=1.2)).move_to([.05,.35,0])
+        cut2=Axes(x_range=(-1.4,-.6,.4),y_range=(1,2.2,.6),x_length=2.1,y_length=.9,
+                  tips=False,axis_config=dict(color=MUTED,stroke_width=1.2)).move_to([.05,-1.1,0])
+        self.add(cut1,cut2,tex(r'E(w_1,-1)',22,blue).move_to([.05,1.05,0]),
+                 tex(r'E(1,w_2)',22,blue).move_to([.05,-.4,0]),
+                 tex('w_1',22).move_to([1.38,-.15,0]),tex('w_2',22).move_to([1.38,-1.6,0]))
         c1=curve(cut1,lambda w:w*w+.5,color=blue)
         c2=curve(cut2,lambda w:1+.5*w*w,color=blue)
-        t1=curve(cut1,lambda w:1.5+2*(w-1),color=yellow)
-        t2=curve(cut2,lambda w:1.5-(w+1),color=yellow)
+        t1=always_redraw(lambda:curve(cut1,lambda w:a.get_value()**2+.5+2*a.get_value()*(w-a.get_value()),color=yellow))
+        t2=always_redraw(lambda:curve(cut2,lambda w:1+.5*b.get_value()**2+b.get_value()*(w-b.get_value()),color=yellow))
         p1=always_redraw(lambda:Dot(cut1.c2p(a.get_value(),a.get_value()**2+.5),color=yellow,radius=.06))
         p2=always_redraw(lambda:Dot(cut2.c2p(b.get_value(),1+.5*b.get_value()**2),color=yellow,radius=.06))
-        v1=tex(r'\frac{\partial E}{\partial w_1}=2',26,yellow).move_to([2.65,.6,0])
-        v2=tex(r'\frac{\partial E}{\partial w_2}=-1',26,yellow).move_to([2.65,-.55,0])
+        v1=number(r'\frac{\partial E}{\partial w_1}=',lambda:2*a.get_value(),[2.85,.6,0],yellow,places=1,size=25)
+        v2=number(r'\frac{\partial E}{\partial w_2}=',b.get_value,[2.85,-.55,0],yellow,places=1,size=25)
         vector=tex(r'\nabla E=\begin{pmatrix}2\\-1\end{pmatrix}',31,yellow).move_to([3.05,0,0])
         arrow=Arrow(ax.c2p(1,-1),ax.c2p(1.8,-1.4),buff=0,color=yellow,stroke_width=3)
         self.add(contours,dot,horizontal,c1,c2,p1,p2)
         def first():
             self.add(t1,v1)
-            return a.animate.set_value(1.2)
+            return a.animate.set_value(1)
         def second():
             a.set_value(1);b.set_value(-1.2);self.remove(horizontal);self.add(vertical,t2,v2)
-            return b.animate.set_value(-.8)
+            return b.animate.set_value(-1)
         def collect():
             b.set_value(-1);self.remove(vertical)
             return AnimationGroup(ReplacementTransform(VGroup(v1,v2),vector),GrowArrow(arrow))
