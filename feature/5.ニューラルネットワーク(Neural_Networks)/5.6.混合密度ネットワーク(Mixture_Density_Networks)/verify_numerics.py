@@ -53,6 +53,24 @@ def main():
     p=np.array([.65,.35]);m=np.array([.04,.96]);s=np.array([.22,.055]);mode=grid[np.argmax(density(grid,p,m,s))]
     result['mode_counterexample']={'largest_weight_center':float(m[np.argmax(p)]),'numeric_mode':float(mode)}
     assert abs(mode-m[np.argmax(p)])>.8
+    # Independent quadrature of the added mean/mixture recaps and nested-sum example.
+    u=np.linspace(-8,8,64001)
+    for separation in [0,1.3]:
+        pdf=.5*normal(u,-separation,.6)+.5*normal(u,separation,.6)
+        for prediction in [-1.7,0,.8]:
+            risk=trapezoid((u-prediction)**2*pdf,u)
+            assert abs(risk-(prediction**2+.36+separation**2))<1e-9
+    areas=[trapezoid(weight*normal(u,mean,sigma),u)
+           for weight,mean,sigma in [(.45,-1.7,.55),(.55,1.5,.7)]]
+    assert np.allclose(areas,[.45,.55],atol=1e-12)
+    contributions=np.array([[.2,.3,.5],[.1,.1,.3]])
+    losses=-np.log(contributions.sum(axis=1))
+    assert np.allclose(losses,[0,np.log(2)])
+    assert not np.isclose(losses.sum(),-np.log(contributions).sum())
+    posterior=np.array([.3*.75,.7*.2]);posterior/=posterior.sum()
+    assert np.allclose(posterior,[45/73,28/73])
+    result['visual_aid_examples']={'component_areas':areas,'observation_losses':losses.tolist(),
+                                 'total_loss':float(losses.sum()),'bayes_posterior':posterior.tolist()}
     manifest=json.loads(MANIFEST.read_text()); entries={e['id']:e for e in manifest['scenes']}
     assert all(valid_entry(s,entries[s['id']]) for s in SCENES)
     assert {p.stem for p in (ROOT/'assets/voicevox').glob('*.wav')}==set(entries)

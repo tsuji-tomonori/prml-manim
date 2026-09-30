@@ -127,6 +127,9 @@ def generate_scene(base, scene):
             # Only a short breath after actual speech; never pad to the old
             # silent-storyboard duration. Align to the 15fps preview boundaries.
             target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            # Recaps have a ten-second reading budget, including the short breath.
+            if beat['visual_note'].startswith('復習:'):
+                target_seconds = max(10.0, target_seconds)
             target_frames = round(target_seconds * params[2])
             padding = target_frames - (total_frames - beat_start)
             output.writeframes(b"\0" * (padding * params[0] * params[1]))
@@ -145,6 +148,7 @@ def main():
     parser.add_argument("--base-url", default="http://127.0.0.1:50021")
     parser.add_argument("--from-scene", choices=[s["id"] for s in SCENES], default="scene01")
     parser.add_argument("--prepare-only", action="store_true", help="Invalidate stale audio without contacting Engine")
+    parser.add_argument("--only-changed", action="store_true", help="Keep validated scenes and synthesize only changed scenes")
     args = parser.parse_args()
     if not args.prepare_only:
         with urllib.request.urlopen(f"{args.base_url.rstrip('/')}/version", timeout=5) as response:
@@ -155,6 +159,8 @@ def main():
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if args.only_changed and valid_entry(SCENES[i], entries[i]):
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")

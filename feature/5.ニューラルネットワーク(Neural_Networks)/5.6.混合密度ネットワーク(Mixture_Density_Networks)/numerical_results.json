@@ -13,8 +13,23 @@
     "largest_weight_center": 0.04,
     "numeric_mode": 0.96
   },
+  "visual_aid_examples": {
+    "component_areas": [
+      0.45000000000000007,
+      0.55
+    ],
+    "observation_losses": [
+      -0.0,
+      0.6931471805599453
+    ],
+    "total_loss": 0.6931471805599453,
+    "bayes_posterior": [
+      0.6164383561643835,
+      0.3835616438356164
+    ]
+  },
   "audio_scenes": 9,
-  "sentences": 108,
+  "sentences": 118,
   "caption_max_width": 9.34765625,
   "caption_max_height": 0.70265625
 }

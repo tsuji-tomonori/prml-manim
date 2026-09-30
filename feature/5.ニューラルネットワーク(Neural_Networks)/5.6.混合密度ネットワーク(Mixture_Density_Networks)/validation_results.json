@@ -1,5 +1,5 @@
 {
-  "video_sha256": "e59dce7201b0025c7a34c5243635460a454a159b08284103ea71b055e91b3c9b",
+  "video_sha256": "be72f954bbee188cd182d17aca69a21793372be2e149cefb32f02a55e2e959c4",
   "probe": {
     "programs": [],
     "streams": [
@@ -9,23 +9,23 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "539.599344"
+        "duration": "587.599344"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "539.626667"
+        "duration": "587.626667"
       }
     ],
     "format": {
-      "duration": "539.627000"
+      "duration": "587.627000"
     }
   },
   "long_silences": 0,
-  "mean_volume_db": -26.5,
-  "peak_volume_db": -5.8,
-  "timeline_max_error": 1.0544454198679887e-11,
+  "mean_volume_db": -26.6,
+  "peak_volume_db": -5.9,
+  "timeline_max_error": 4.226308192301076e-11,
   "sync": [
     {
       "scene": "scene02",
@@ -37,16 +37,140 @@
     {
       "scene": "scene03",
       "visual": "中心を動かす",
-      "action_start": 120.99999999999825,
-      "action_end": 129.82133333333158,
-      "pcm_onset": 121.09808333333223
+      "action_start": 131.333333333331,
+      "action_end": 140.15466666666435,
+      "pcm_onset": 131.43141666666497
     },
     {
       "scene": "scene07",
       "visual": "中央の断面",
-      "action_start": 375.93333333331714,
-      "action_end": 384.4026666666505,
-      "pcm_onset": 376.0027916666515
+      "action_start": 423.9333333333144,
+      "action_end": 432.40266666664775,
+      "pcm_onset": 424.00279166664876
+    }
+  ],
+  "recap_phases": [
+    {
+      "id": "scene02-recap-mean-01",
+      "start": 81.9333333333338,
+      "end": 87.74666666666714,
+      "pcm_onset": 81.98266666666777,
+      "pcm_end": 87.62908333333442
+    },
+    {
+      "id": "scene02-recap-mean-02",
+      "start": 87.74666666666714,
+      "end": 91.90666666666714,
+      "pcm_onset": 87.8471250000011,
+      "pcm_end": 91.79933333333443
+    },
+    {
+      "id": "scene03-recap-mixture-01",
+      "start": 151.53333333332986,
+      "end": 156.50399999999652,
+      "pcm_onset": 151.60270833333163,
+      "pcm_end": 156.38845833333164
+    },
+    {
+      "id": "scene03-recap-mixture-02",
+      "start": 156.50399999999652,
+      "end": 161.0586666666632,
+      "pcm_onset": 156.60029166666496,
+      "pcm_end": 160.95133333333163
+    },
+    {
+      "id": "scene05-aid-sums-01",
+      "start": 291.9333333333219,
+      "end": 296.39199999998857,
+      "pcm_onset": 292.0214166666574,
+      "pcm_end": 296.28466666665736
+    },
+    {
+      "id": "scene05-aid-sums-02",
+      "start": 296.39199999998857,
+      "end": 300.90399999998857,
+      "pcm_onset": 296.4892499999907,
+      "pcm_end": 300.79895833332404
+    },
+    {
+      "id": "scene05-aid-sums-03",
+      "start": 300.90399999998857,
+      "end": 304.5413333333219,
+      "pcm_onset": 300.96358333332404,
+      "pcm_end": 304.43320833332405
+    },
+    {
+      "id": "scene06-recap-bayes-01",
+      "start": 344.99999999998556,
+      "end": 350.8453333333189,
+      "pcm_onset": 345.05020833332,
+      "pcm_end": 350.7184166666533
+    },
+    {
+      "id": "scene06-recap-bayes-02",
+      "start": 350.8453333333189,
+      "end": 355.91199999998554,
+      "pcm_onset": 350.9421249999866,
+      "pcm_end": 355.7984166666533
+    },
+    {
+      "id": "scene06-recap-bayes-03",
+      "start": 355.91199999998554,
+      "end": 359.30399999998554,
+      "pcm_onset": 356.00945833331997,
+      "pcm_end": 359.21399999998664
+    }
+  ],
+  "final_audio_alignment": [
+    {
+      "id": "scene02-recap-mean-01",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9998041480574051
+    },
+    {
+      "id": "scene02-recap-mean-02",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9997486954928546
+    },
+    {
+      "id": "scene03-recap-mixture-01",
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9996876668665295
+    },
+    {
+      "id": "scene03-recap-mixture-02",
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9997484854393885
+    },
+    {
+      "id": "scene05-aid-sums-01",
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9998847692212449
+    },
+    {
+      "id": "scene05-aid-sums-02",
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9998506328539731
+    },
+    {
+      "id": "scene05-aid-sums-03",
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9997979361203373
+    },
+    {
+      "id": "scene06-recap-bayes-01",
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9997689293135458
+    },
+    {
+      "id": "scene06-recap-bayes-02",
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9999604398366366
+    },
+    {
+      "id": "scene06-recap-bayes-03",
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9997795419264677
     }
   ],
   "frames": [
@@ -92,203 +216,331 @@
     },
     {
       "name": "scene02-beat04",
-      "time": 88.65333333333379
+      "time": 89.16666666666713
+    },
+    {
+      "name": "scene02-recap-mean-before",
+      "time": 81.7333333333338
+    },
+    {
+      "name": "scene02-recap-mean-after",
+      "time": 92.46666666666714
+    },
+    {
+      "name": "scene02-recap-mean-01-phase-0.2",
+      "time": 83.09600000000047
+    },
+    {
+      "name": "scene02-recap-mean-01-phase-0.8",
+      "time": 86.58400000000047
+    },
+    {
+      "name": "scene02-recap-mean-02-phase-0.2",
+      "time": 88.57866666666713
+    },
+    {
+      "name": "scene02-recap-mean-02-phase-0.8",
+      "time": 91.07466666666714
     },
     {
       "name": "scene02-beat05",
-      "time": 97.36666666666659
+      "time": 98.98666666666654
     },
     {
       "name": "scene02-beat06",
-      "time": 106.81999999999945
+      "time": 107.69999999999933
+    },
+    {
+      "name": "scene02-beat07",
+      "time": 117.1533333333322
     },
     {
       "name": "scene03-beat01",
-      "time": 117.63999999999888
+      "time": 127.97333333333162
     },
     {
       "name": "scene03-beat02",
-      "time": 127.43999999999825
+      "time": 137.773333333331
     },
     {
       "name": "scene03-02-01-math",
-      "time": 123.55466666666493
+      "time": 133.88799999999767
     },
     {
       "name": "scene03-beat03",
-      "time": 137.89999999999773
+      "time": 148.23333333333048
     },
     {
       "name": "scene03-03-01-math",
-      "time": 132.95199999999772
+      "time": 143.28533333333047
     },
     {
       "name": "scene03-beat04",
-      "time": 146.98666666666378
+      "time": 158.53333333332984
+    },
+    {
+      "name": "scene03-recap-mixture-before",
+      "time": 151.33333333332988
+    },
+    {
+      "name": "scene03-recap-mixture-after",
+      "time": 161.73333333332985
+    },
+    {
+      "name": "scene03-recap-mixture-01-phase-0.2",
+      "time": 152.5274666666632
+    },
+    {
+      "name": "scene03-recap-mixture-01-phase-0.8",
+      "time": 155.50986666666319
+    },
+    {
+      "name": "scene03-recap-mixture-02-phase-0.2",
+      "time": 157.41493333332986
+    },
+    {
+      "name": "scene03-recap-mixture-02-phase-0.8",
+      "time": 160.14773333332988
     },
     {
       "name": "scene03-beat05",
-      "time": 157.67999999999662
-    },
-    {
-      "name": "scene03-05-01-math",
-      "time": 152.52799999999667
+      "time": 167.31999999999596
     },
     {
       "name": "scene03-beat06",
-      "time": 169.4133333333293
+      "time": 178.0133333333288
+    },
+    {
+      "name": "scene03-05-01-math",
+      "time": 172.86133333332884
+    },
+    {
+      "name": "scene03-beat07",
+      "time": 189.74666666666147
     },
     {
       "name": "scene04-beat01",
-      "time": 179.32666666666196
+      "time": 199.6599999999941
     },
     {
       "name": "scene04-beat02",
-      "time": 189.62666666666146
+      "time": 209.95999999999364
     },
     {
       "name": "scene04-beat03",
-      "time": 200.3333333333275
+      "time": 220.66666666665967
     },
     {
       "name": "scene04-beat04",
-      "time": 211.65333333332688
+      "time": 231.98666666665906
     },
     {
       "name": "scene04-beat05",
-      "time": 220.9199999999929
+      "time": 241.2533333333251
     },
     {
       "name": "scene04-beat06",
-      "time": 230.4466666666591
+      "time": 250.77999999999128
     },
     {
       "name": "scene05-beat01",
-      "time": 239.20666666665852
+      "time": 259.5399999999907
     },
     {
       "name": "scene05-beat02",
-      "time": 248.0599999999914
+      "time": 268.3933333333236
     },
     {
       "name": "scene05-beat03",
-      "time": 258.49999999999085
+      "time": 278.8333333333231
     },
     {
       "name": "scene05-beat04",
-      "time": 268.6599999999903
+      "time": 288.9933333333225
     },
     {
       "name": "scene05-beat05",
-      "time": 278.7399999999897
+      "time": 301.03333333332193
+    },
+    {
+      "name": "scene05-aid-sums-before",
+      "time": 291.7333333333219
+    },
+    {
+      "name": "scene05-aid-sums-after",
+      "time": 305.1333333333219
+    },
+    {
+      "name": "scene05-aid-sums-01-phase-0.2",
+      "time": 292.82506666665523
+    },
+    {
+      "name": "scene05-aid-sums-01-phase-0.8",
+      "time": 295.50026666665525
+    },
+    {
+      "name": "scene05-aid-sums-02-phase-0.2",
+      "time": 297.29439999998857
+    },
+    {
+      "name": "scene05-aid-sums-02-phase-0.8",
+      "time": 300.00159999998857
+    },
+    {
+      "name": "scene05-aid-sums-03-phase-0.2",
+      "time": 301.63146666665523
+    },
+    {
+      "name": "scene05-aid-sums-03-phase-0.8",
+      "time": 303.81386666665526
     },
     {
       "name": "scene05-beat06",
-      "time": 289.49999999998914
+      "time": 312.07333333332116
+    },
+    {
+      "name": "scene05-beat07",
+      "time": 322.8333333333206
     },
     {
       "name": "scene06-beat01",
-      "time": 298.8666666666552
+      "time": 332.19999999998663
     },
     {
       "name": "scene06-beat02",
-      "time": 308.6066666666547
+      "time": 341.9399999999861
     },
     {
       "name": "scene06-02-02-math",
-      "time": 308.127999999988
+      "time": 341.46133333331943
     },
     {
       "name": "scene06-beat03",
-      "time": 318.9933333333208
+      "time": 355.2666666666522
+    },
+    {
+      "name": "scene06-recap-bayes-before",
+      "time": 344.7999999999856
+    },
+    {
+      "name": "scene06-recap-bayes-after",
+      "time": 359.86666666665224
+    },
+    {
+      "name": "scene06-recap-bayes-01-phase-0.2",
+      "time": 346.1690666666522
+    },
+    {
+      "name": "scene06-recap-bayes-01-phase-0.8",
+      "time": 349.6762666666522
+    },
+    {
+      "name": "scene06-recap-bayes-02-phase-0.2",
+      "time": 351.8586666666522
+    },
+    {
+      "name": "scene06-recap-bayes-02-phase-0.8",
+      "time": 354.8986666666522
+    },
+    {
+      "name": "scene06-recap-bayes-03-phase-0.2",
+      "time": 356.59039999998555
+    },
+    {
+      "name": "scene06-recap-bayes-03-phase-0.8",
+      "time": 358.6255999999855
     },
     {
       "name": "scene06-beat04",
-      "time": 332.4466666666535
-    },
-    {
-      "name": "scene06-04-01-definition",
-      "time": 326.4533333333202
+      "time": 366.99333333331805
     },
     {
       "name": "scene06-beat05",
-      "time": 344.659999999986
+      "time": 380.4466666666508
+    },
+    {
+      "name": "scene06-04-01-definition",
+      "time": 374.45333333331746
     },
     {
       "name": "scene06-beat06",
-      "time": 354.8599999999854
+      "time": 392.65999999998326
+    },
+    {
+      "name": "scene06-beat07",
+      "time": 402.8599999999826
     },
     {
       "name": "scene07-beat01",
-      "time": 364.4733333333181
+      "time": 412.4733333333154
     },
     {
       "name": "scene07-beat02",
-      "time": 373.3533333333176
+      "time": 421.3533333333149
     },
     {
       "name": "scene07-beat03",
-      "time": 382.1399999999838
+      "time": 430.13999999998106
     },
     {
       "name": "scene07-beat04",
-      "time": 390.6333333333166
+      "time": 438.6333333333139
     },
     {
       "name": "scene07-beat05",
-      "time": 400.36666666664945
+      "time": 448.3666666666468
     },
     {
       "name": "scene07-beat06",
-      "time": 410.5599999999822
+      "time": 458.5599999999795
     },
     {
       "name": "scene08-beat01",
-      "time": 420.4599999999816
+      "time": 468.4599999999789
     },
     {
       "name": "scene08-beat02",
-      "time": 430.77333333331444
+      "time": 478.7733333333117
     },
     {
       "name": "scene08-beat03",
-      "time": 441.3066666666472
+      "time": 489.30666666664445
     },
     {
       "name": "scene08-beat04",
-      "time": 451.2333333333132
+      "time": 499.2333333333105
     },
     {
       "name": "scene08-beat05",
-      "time": 460.6199999999793
+      "time": 508.6199999999766
     },
     {
       "name": "scene08-beat06",
-      "time": 471.4266666666455
+      "time": 519.4266666666427
     },
     {
       "name": "scene09-beat01",
-      "time": 483.17333333331146
+      "time": 531.1733333333179
     },
     {
       "name": "scene09-beat02",
-      "time": 494.05999999997744
+      "time": 542.0599999999941
     },
     {
       "name": "scene09-beat03",
-      "time": 503.9666666666435
+      "time": 551.9666666666691
     },
     {
       "name": "scene09-beat04",
-      "time": 514.7066666666431
+      "time": 562.7066666666768
     },
     {
       "name": "scene09-beat05",
-      "time": 524.9733333333141
+      "time": 572.9733333333523
     },
     {
       "name": "scene09-beat06",
-      "time": 536.0999999999887
+      "time": 584.1000000000269
     },
     {
       "name": "scene02-sync-0.15",
@@ -300,22 +552,30 @@
     },
     {
       "name": "scene03-sync-0.15",
-      "time": 122.32319999999825
+      "time": 132.65653333333103
     },
     {
       "name": "scene03-sync-0.85",
-      "time": 128.4981333333316
+      "time": 138.83146666666434
     },
     {
       "name": "scene07-sync-0.15",
-      "time": 377.20373333331713
+      "time": 425.2037333333144
     },
     {
       "name": "scene07-sync-0.85",
-      "time": 383.1322666666505
+      "time": 431.13226666664775
     }
   ],
-  "visual_review": "66 final frames inspected; all symbolic captions and three motion pairs checked",
+  "visual_review": "reviewed",
   "full_listen": false,
-  "av_duration_difference": 0.027323000000023967
+  "av_duration_difference": 0.027323000000023967,
+  "reviewed_frame_count": 98,
+  "review_scope": "全58 beat、追加4場面の前後、追加10文の20%/80%、全記号字幕、既存3動作のペアを目視。確認画像で重なり・はみ出しなし。全フレーム目視と聴覚確認は未実施。",
+  "reviewed_sync_scenes": [
+    "scene02-recap-mean",
+    "scene03-recap-mixture",
+    "scene05-aid-sums",
+    "scene06-recap-bayes"
+  ]
 }
