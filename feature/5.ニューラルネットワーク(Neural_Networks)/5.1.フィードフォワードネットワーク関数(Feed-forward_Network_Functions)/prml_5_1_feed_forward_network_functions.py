@@ -418,6 +418,8 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         condition = jp('一般的な重みでは8通りが異なる／特別な重みでは重複も',18,MUTED).move_to([0,-1.97,0])
         self.add(order1,rule)
         self.beat(actions=[lambda:LaggedStart(*[FadeIn(p) for p in left],lag_ratio=.22),
-                           lambda:AnimationGroup(FadeIn(order2),TransformFromCopy(left,right)),
-                           lambda:AnimationGroup(Write(count),FadeIn(condition))])
+                           lambda:AnimationGroup(FadeIn(order2),LaggedStart(*[FadeIn(p) for p in right],lag_ratio=.18)),
+                           lambda:AnimationGroup(
+                               FadeIn(count,rate_func=lambda t:smooth(min(1,t/.25))),
+                               FadeIn(condition,rate_func=lambda t:smooth(np.clip((t-.35)/.25,0,1))))])
         self.restore_body(saved)
