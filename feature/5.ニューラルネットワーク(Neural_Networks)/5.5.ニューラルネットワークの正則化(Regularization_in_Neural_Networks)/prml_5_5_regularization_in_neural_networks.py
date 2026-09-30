@@ -413,7 +413,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.add(rows[0],rows[1],rows[2],lock)
         self.beat(lambda:Succession(Indicate(rows[0],color=BLUE_DATA,scale_factor=1.03),
                                     Indicate(rows[1],color=ORANGE_VAL,scale_factor=1.03)),
-                  lambda:Succession(FadeIn(setting),Indicate(lock,color=GREEN_TRUE,scale_factor=1.03)))
+                  lambda:Succession(FadeIn(setting),Circumscribe(lock,color=GREEN_TRUE,buff=.08)))
         self.restore_body(state)
 
     def prior_recap(self):
@@ -429,8 +429,8 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         arrow=Arrow([-.55,.2,0],[.35,.2,0],buff=.03,color=YELLOW_TERM)
         probe=always_redraw(lambda:VGroup(Dot(right.c2p(1,alpha.get_value()/2),color=YELLOW_TERM),
                     Line(right.c2p(1,0),right.c2p(1,alpha.get_value()/2),color=YELLOW_TERM)))
-        self.add(lg,rg,density,jp('重みによるコスト',21,PURPLE_REG).move_to([2.45,1.45,0]),
-                 jp('C は重みに依存しない定数',18,MUTED).move_to([0,-2.13,0]))
+        self.add(lg,rg,density,jp('重みによるコスト',21,PURPLE_REG).move_to([2.45,1.62,0]),
+                 jp('C は重みに依存しない定数',18,MUTED).move_to([0,-2.55,0]))
         self.beat(lambda:AnimationGroup(Create(cost),Create(arrow),Write(equation)),
                   lambda:AnimationGroup(alpha.animate.set_value(4),FadeIn(probe)))
         self.restore_body(state)
@@ -466,8 +466,9 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:LaggedStart(*[AnimationGroup(Indicate(inputs[j],color=yellow,scale_factor=1.04),
                            Indicate(weights[j],color=yellow,scale_factor=1.04),FadeIn(bars[j])) for j in range(9)],lag_ratio=.45),
                   lambda:Succession(Indicate(bars,color=yellow,scale_factor=1.02),Write(sum_label)),
-                  lambda:Succession(FadeOut(sum_label),Write(processing),AnimationGroup(FadeIn(cell),FadeIn(destination),
-                            GrowArrow(Arrow([2,-1.68,0],[3.8,-1.68,0],buff=.05,color=green)))))
+                  lambda:Succession(AnimationGroup(FadeOut(sum_label),Write(processing)),
+                            AnimationGroup(FadeIn(cell),FadeIn(destination),
+                            GrowArrow(Arrow([2,-1.68,0],[3.8,-1.68,0],buff=.05,color=green))),Wait(.8)))
         self.restore_body(state)
 
     def mixture_recap(self):
@@ -477,12 +478,15 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         # Reuse mixtures()'s means, widths, blue/yellow components, purple sum.
         components=model.mixture_components(u,np.array([-1.7,1.5]),np.array([.55,.7]),np.array([.45,.55]))
         parts=VGroup(curve(ax,u,components[:,0],BLUE_DATA),curve(ax,u,components[:,1],YELLOW_TERM))
-        total=curve(ax,u,components.sum(1),PURPLE_REG)
+        parts.set_stroke(width=6,opacity=.7)
+        total=curve(ax,u,components.sum(1),PURPLE_REG).set_stroke(width=2.5)
         formula=tex(r'p(x)=0.45\,\mathcal N(x|-1.7,0.55^2)+0.55\,\mathcal N(x|1.5,0.7^2)',25,PURPLE_REG).move_to([0,-1.5,0])
         mapping=VGroup(tex(r'x\ \longrightarrow\ w',28),jp('今回は重みの事前分布',22)).arrange(RIGHT,buff=.4).move_to([0,-1.93,0])
         color_mapping=VGroup(jp('成分2',18),Dot(color=YELLOW_TERM),tex(r'\longrightarrow',22),
                              Dot(color=ORANGE_VAL),jp('本編',18)).arrange(RIGHT,buff=.18).move_to([0,-2.55,0])
-        self.add(g,parts,formula)
+        legend=VGroup(*[VGroup(Line(LEFT*.18,RIGHT*.18,color=c,stroke_width=3),jp(t,18,c)).arrange(RIGHT,buff=.12)
+                        for t,c in [('成分1',BLUE_DATA),('成分2',YELLOW_TERM),('合計',PURPLE_REG)]]).arrange(RIGHT,buff=.55).move_to([.2,1.62,0])
+        self.add(g,parts,formula,legend)
         self.beat(lambda:Create(total),lambda:AnimationGroup(FadeIn(mapping),FadeIn(color_mapping),
                   Transform(g[1][0],tex('w',24,MUTED).move_to(g[1][0])),
                   Transform(g[1][1],tex('p(w)',24,MUTED).move_to(g[1][1])),
