@@ -247,7 +247,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
                         4.7, 3.2, ('a', 'p(a)'))
         self.add(contours(ax))
         x = ValueTracker(.3)
-        self.slider(x, -.8, 2, [0, 2.4, 0], 'x', YELLOW, width=2.7)
+        slider = self.slider(x, -.8, 2, [0, 2.4, 0], 'x', YELLOW, width=2.7)
         phi = lambda: np.array([1, x.get_value()])
         origin = ax.c2p(*MAP)
         direction = always_redraw(lambda: Arrow(origin,
@@ -263,11 +263,15 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.beat(TransformFromCopy(cloud, projected))
         u = np.linspace(-5, 7, 221)
         density = always_redraw(lambda: curve(out, u, normal(u, *[float(v[0]) for v in stats([x.get_value()])]), GREEN))
-        recap = jp("復習: 2.3 ガウス分布の線形変換", 21).move_to([-3.0, 2.45, 0])
-        border = SurroundingRectangle(recap, color="#FFFF00", buff=.12, stroke_width=1.2)
+        self.remove(slider)
+        recap = jp("復習: 2.3 ガウス分布の線形変換", 21).move_to([0, 2.45, 0])
+        # Fixed box avoids invisible space glyphs expanding Text bounds.
+        border = RoundedRectangle(width=5.0, height=.55, corner_radius=.08,
+                                  color="#FFFF00", stroke_width=1.2).move_to([0,2.45,0])
         self.add(recap, border)
         self.beat(Create(density))
         self.remove(recap, border)
+        self.add(slider)
         self.remove(f)
         f = self.equation(r'\mu_a=w_{\mathrm{MAP}}^{\mathsf T}\phi',
                           r',\qquad\sigma_a^2=\phi^{\mathsf T}S_N\phi')
@@ -420,6 +424,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         colors = ['#FF6B77', '#FFE079', '#C29AFF', '#FFB45B', '#58B5ED', '#77D49A']
         left = self.axes((-1, 1, 1), (-3, 3, 1), (-2.8, .0, 0), 3.5, 2.35, ('x', 'y'))
         right = self.axes((-1, 1, 1), (0, 1, .5), (2.6, .0, 0), 3.5, 2.35, ('x', 'p'))
+        right.labels[-1].next_to(right.c2p(-1, 1), LEFT, buff=.15)
         self.add(jp('説明用の候補：同じ重みの組を使う', 19, MUTED).move_to([0, 1.45, 0]))
         xx = np.linspace(-1, 1, 101)
         values = np.array([b+w*xx for b, w in [(-.8,1.4),(-.3,1.1),(.4,1.8),(.6,.9),(-.5,1.9),(.1,1.3)]])
@@ -446,6 +451,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         red, gold = '#FF6B77', '#FFE079'
         left = self.axes((-1.4,1.4,1),(0,4,1),(-2.8,0,0),3.5,2.25,('z','h(z)'))
         right = self.axes((-1.4,1.4,1),(0,.9,.3),(2.65,0,0),3.5,2.25,('z','q(z)'))
+        right.labels[-1].next_to(right.c2p(-1.4, .9), LEFT, buff=.15)
         xx = np.linspace(-1.4,1.4,121); a = ValueTracker(1)
         bowl = always_redraw(lambda:curve(left,xx,.5*a.get_value()*xx**2,red))
         bell = always_redraw(lambda:curve(right,xx,normal(xx,0,1/a.get_value()),red))
@@ -476,6 +482,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.add(column,row,eq[1],eq[3],product.get_brackets())
         factors = [(column.get_entries()[i],row.get_entries()[j]) for i in range(2) for j in range(2)]
         coefficient = tex(r'y(1-y)=0.25',29,yellow).move_to([-2.6,-.95,0])
+        factor = tex('0.25',29,yellow).next_to(column,LEFT,buff=.2)
         weighted = Matrix([['0.25','0.5'],['0.5','1']],h_buff=1.05,v_buff=.65).scale(.65).set_color(green).move_to(product)
         caption = jp('観測の精度',20,green).next_to(weighted,UP,buff=.13)
         result = MathTex(r'S_0^{-1}', '+', r'0.25\phi\phi^{\mathsf T}', '=H',
@@ -486,7 +493,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
             ('four outer product cells', first,
              lambda:LaggedStart(*[TransformFromCopy(VGroup(*pair),cell) for pair,cell in zip(factors,entries)],lag_ratio=.3)),
             ('coefficient on all cells', second,
-             lambda:AnimationGroup(FadeIn(coefficient),Transform(product,weighted),FadeIn(caption))),
+             lambda:AnimationGroup(FadeIn(coefficient),FadeIn(factor),Transform(product,weighted),FadeIn(caption))),
             ('add precision then invert', third, lambda:Write(result)),
         ])
         self.restore_body(saved)
