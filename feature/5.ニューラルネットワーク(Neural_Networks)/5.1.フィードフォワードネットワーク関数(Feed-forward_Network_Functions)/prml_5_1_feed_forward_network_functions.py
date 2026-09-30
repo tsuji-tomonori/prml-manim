@@ -192,14 +192,15 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         scores=[ValueTracker(1.3),ValueTracker(.7),ValueTracker(-.6)]; mode=ValueTracker(0)
         probs=lambda:(1-mode.get_value())*sigmoid([v.get_value() for v in scores])+mode.get_value()*softmax([v.get_value() for v in scores])
-        bars=always_redraw(lambda:VGroup(*[Rectangle(width=1.35,height=max(.01,2.5*p),fill_color=c,fill_opacity=.8,stroke_width=0).move_to([-3.2+i*3.2,-1.65+1.25*p,0]) for i,(p,c) in enumerate(zip(probs(),[C1,C2,C3]))]))
-        labels=VGroup(*[tex('C_'+str(i+1),25,c).move_to([-3.2+i*3.2,-1.98,0]) for i,c in enumerate([C1,C2,C3])])
-        numbers=VGroup(*[number('y_'+str(i+1)+'=',lambda i=i:probs()[i],[-3.2+i*3.2,1.3,0],c) for i,c in enumerate([C1,C2,C3])])
+        bars=always_redraw(lambda:VGroup(*[Rectangle(width=1.35,height=max(.01,2.5*p),fill_color=c,fill_opacity=.8,stroke_width=0).move_to([-3.2+i*3.2,-1.65+1.25*p,0]) for i,(p,c) in enumerate(zip(probs(),[RED_CLASS,BLUE_CLASS,GREEN_CLASS]))]))
+        labels=VGroup(*[tex('C_'+str(i+1),25,c).move_to([-3.2+i*3.2,-1.98,0]) for i,c in enumerate([RED_CLASS,BLUE_CLASS,GREEN_CLASS])])
+        numbers=VGroup(*[number('y_'+str(i+1)+'=',lambda i=i:probs()[i],[-3.2+i*3.2,1.3,0],c) for i,c in enumerate([RED_CLASS,BLUE_CLASS,GREEN_CLASS])])
         self.equation(r'y_k=\sigma(a_k)\qquad\sum_k y_k\ \text{need not equal}\ 1')
         self.add(labels,numbers,number(r'\sum_k y_k=',lambda:probs().sum(),[0,-2.55,0],YELLOW_ACC))
         self.beat(FadeIn(bars),scores[0].animate.set_value(2.2))
         self.equation(r'y_k=\frac{e^{a_k}}{\sum_l e^{a_l}},\qquad\sum_k y_k=1\quad(4.62)')
-        self.beat(actions=[lambda:mode.animate.set_value(1),lambda:pulse(numbers)])
+        mode.set_value(1)
+        self.beat(actions=[lambda:pulse(bars),lambda:pulse(numbers)])
         self.beat(scores[2].animate.set_value(3.2))
 
     def classification(self):
@@ -359,7 +360,8 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         rail = NumberLine(x_range=[0,.7,.1],length=2,color=MUTED).move_to([3,.15,0])
         marker = always_redraw(lambda:Dot(rail.n2p(w.get_value()),radius=.075,color=red))
         formula = tex(r'y=0.25x+w_2x^2+0.1x^3',26,red).move_to([-1.5,-1.75,0])
-        mapping = VGroup(jp('今回：材料の形も調整',22,C2),tex(r'c\ \longrightarrow\ \tanh(3(x-c))',26,C2)).arrange(DOWN,buff=.2).move_to([2.8,-1.0,0])
+        mapping = VGroup(jp('今回：材料の形も調整',22,C2),tex(r'c\ \longrightarrow\ \tanh(3(x-c))',26,C2)).arrange(DOWN,buff=.2).move_to([2.8,-.55,0])
+        self.add(jp('説明用の例',18,MUTED).move_to([3.75,2.03,0]))
         self.add(polys,total,labels,weight,rail,marker,formula)
         self.beat(actions=[lambda:pulse(polys,color='#FFE079'),
                            lambda:w.animate.set_value(.6),
@@ -382,13 +384,13 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         colors = [RED_CLASS,BLUE_CLASS,GREEN_CLASS]
         bars = always_redraw(lambda:VGroup(*[
             Rectangle(width=1.3,height=2.3*p,fill_color=c,fill_opacity=.85,stroke_width=0)
-            .move_to([-2.8+2.8*i,-1.15,0],aligned_edge=DOWN)
+            .move_to([-2.8+2.8*i,-.75,0],aligned_edge=DOWN)
             for i,(p,c) in enumerate(zip(probs(),colors))]))
-        labels = VGroup(*[tex(f'C_{i+1}',25,c).move_to([-2.8+2.8*i,-1.48,0]) for i,c in enumerate(colors)])
-        values = VGroup(*[number('p=',lambda i=i:probs()[i],[-2.8+2.8*i,1.15,0],c,size=24) for i,c in enumerate(colors)])
-        bracket = BraceBetweenPoints([-3.6,-1.8,0],[3.6,-1.8,0],direction=DOWN,color=YELLOW_ACC)
-        total = tex(r'\sum_k p(C_k)=1',26,YELLOW_ACC).move_to([0,-2.55,0])
-        multi = VGroup(bars,labels,values,bracket,total,jp('排他的な3クラス',22).move_to([0,1.55,0]))
+        labels = VGroup(*[tex(f'C_{i+1}',25,c).move_to([-2.8+2.8*i,-1.05,0]) for i,c in enumerate(colors)])
+        values = VGroup(*[number('p=',lambda i=i:probs()[i],[-2.8+2.8*i,1.25,0],c,size=24) for i,c in enumerate(colors)])
+        bracket = BraceBetweenPoints([-3.6,-1.35,0],[3.6,-1.35,0],direction=DOWN,color=YELLOW_ACC)
+        total = tex(r'p_1+p_2+p_3=1',26,YELLOW_ACC).move_to([0,-1.96,0])
+        multi = VGroup(bars,labels,values,bracket,total,jp('排他的な3クラス',22).move_to([0,1.65,0]))
         mapping = tex(r'\mathbf z\longrightarrow a_k\longrightarrow p(C_k)',26,YELLOW_ACC).move_to([0,2.65,0])
         self.add(binary)
         def show_multiclass():
@@ -413,7 +415,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         order2 = tex('BA',24,yellow).move_to([2.1,1.05,0])
         count = tex(r'2^2\times2!=4\times2=8',32,green).move_to([0,-1.05,0])
         rule = jp('−：入る重み・バイアス・出る重みを一緒に反転',19).move_to([0,-1.62,0])
-        condition = jp('一般的な重みでは8通りが異なる／特別な重みでは重複も',18,MUTED).move_to([0,-2.55,0])
+        condition = jp('一般的な重みでは8通りが異なる／特別な重みでは重複も',18,MUTED).move_to([0,-1.97,0])
         self.add(order1,rule)
         self.beat(actions=[lambda:LaggedStart(*[FadeIn(p) for p in left],lag_ratio=.22),
                            lambda:AnimationGroup(FadeIn(order2),TransformFromCopy(left,right)),
