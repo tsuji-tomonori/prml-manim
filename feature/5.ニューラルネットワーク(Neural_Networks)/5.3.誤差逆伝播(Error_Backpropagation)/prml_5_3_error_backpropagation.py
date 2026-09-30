@@ -144,6 +144,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.beat(actions=[lambda:u.animate.set_value(-.3),lambda:u.animate.set_value(.1)])
         self.equation(r'\delta_k=\frac{\partial E_n}{\partial a_k}=\frac12\cdot2(y_k-t_k)=y_k-t_k')
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(t)])
+        self.cancellation_recap()
         self.add(note('図：線形出力＋二乗和誤差',at=(3.5,1.85,0)))
         self.equation(r'\sigma+\mathrm{binary\ CE}\quad;\quad\mathrm{softmax}+\mathrm{multiclass\ CE}\quad\Rightarrow\delta_k=y_k-t_k',size=27)
         glossary=VGroup(jp('σ：一つの確率',19),jp('softmax：確率の和が１',19),jp('CE：確率予測の誤差',19)).arrange(DOWN,buff=.2).move_to([5,-.5,0])
@@ -273,6 +274,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         ax=self.plot_axes(x=(0,3,1),y=(0,7,1),width=8.5,height=3.4,labels=(r'\log_{10}W',r'\log_{10}C'))
         bp=curve(ax,lambda q:q,color=BLUE_CLASS);cd=curve(ax,lambda q:np.log10(2)+2*q,color=RED_CLASS)
         dots=always_redraw(lambda:VGroup(Dot(ax.c2p(u.get_value(),u.get_value()),color=BLUE_CLASS),Dot(ax.c2p(u.get_value(),np.log10(2)+2*u.get_value()),color=RED_CLASS)))
+        self.add(jp('復習: 1.1 対数の目盛り',20).move_to([0,2.98,0]))
         self.add(bp,cd,dots,note('計算量の模型：青 C = W ／ 赤 C = 2W²（両軸は常用対数）'))
         self.equation(r'\mathrm{backprop}:O(W)\qquad\mathrm{central\ difference}:O(W^2)',size=31)
         self.beat(u.animate.set_value(2))
@@ -296,6 +298,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         matrix=Matrix([[f'{v:.3f}' for v in row] for row in J],h_buff=1.8,v_buff=.75).scale(.52).move_to([4.8,1.25,0])
         self.add(matrix)
         self.beat(actions=[lambda:Indicate(matrix.get_rows()[0]),lambda:Indicate(matrix.get_rows()[1])])
+        self.jacobian_columns_aid()
         self.equation(r'\Delta\mathbf y\simeq J(\mathbf x_0)\Delta\mathbf x',size=37)
         self.add(pred,note('青：実際の出力　黄色：基準点での線形近似',at=(0,-2.05,0)))
         self.beat(actions=[lambda:u.animate.set_value(.2),lambda:u.animate.set_value(.05)])
@@ -321,3 +324,86 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.add(Arrow([-3.7,1,0],[-3,1,0],buff=0),Arrow([-3.7,-1,0],[-3,-1,0],buff=0))
         self.equation(r'\frac{\partial E}{\partial w}=\sum_{k,j}\frac{\partial E}{\partial y_k}\frac{\partial y_k}{\partial z_j}\frac{\partial z_j}{\partial w}',size=34)
         self.beat(actions=[lambda:pulse(arrows,BLUE_CLASS),lambda:pulse(VGroup(*[Line(p.get_end(),p.get_start()) for p in arrows[::-1]]))])
+
+    def body_card(self,label):
+        """Replace the body for one PCM-timed beat, preserving the title."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        self.clear()
+        self.add(*[m for m in saved if m.get_center()[1]>3.1])
+        self.add(RoundedRectangle(width=10.4,height=4.6,corner_radius=.12,
+                                  color='#FFFF00',stroke_width=1.2).move_to([0,.1,0]),
+                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self,saved):
+        self.clear();self.add(*saved);self.subtitle=None
+
+    def cancellation_recap(self):
+        saved=self.body_card('復習: 4.3 シグモイドと交差エントロピー')
+        # 4.3 cross_entropy: yellow residual, green feature; source palette.
+        nodes=VGroup(*[VGroup(RoundedRectangle(width=1.7,height=.8,
+                         corner_radius=.08,color=c),tex(label,32,c)).move_to([x,.85,0])
+                       for x,label,c in [(-3.7,'a',BLUE_CLASS),(0,'y',YELLOW_ACC),(3.7,'E_n',RED_CLASS)]])
+        paths=VGroup(Arrow([-2.8,.85,0],[-.9,.85,0],buff=.05,color=MUTED),
+                     Arrow([.9,.85,0],[2.8,.85,0],buff=.05,color=MUTED))
+        self.add(nodes,paths,tex(r'y=\sigma(a),\quad t\in\{0,1\},\quad 0<y<1',26).move_to([0,1.5,0]),
+                 jp('シグモイド',19).move_to([-1.85,.32,0]),
+                 jp('交差エントロピー',19).move_to([1.95,.32,0]))
+        numerator=tex('y-t',34,YELLOW_ACC).move_to([-1.75,-.4,0])
+        denominator=tex('y(1-y)',30).move_to([-1.75,-1.08,0])
+        rule=Line([-2.5,-.72,0],[-1,-.72,0],color=WHITE,stroke_width=1.5)
+        factor=tex('y(1-y)',30).move_to([1.15,-.72,0])
+        times=tex(r'\cdot',34).move_to([-.25,-.72,0])
+        left=tex(r'\frac{\partial E_n}{\partial a}=',31).move_to([-3.8,-.72,0])
+        factors=VGroup(numerator,denominator,rule,times,factor)
+        crosses=VGroup(*[Line(m.get_corner(DL),m.get_corner(UR),color=YELLOW_ACC,stroke_width=3)
+                          for m in [denominator,factor]])
+        result=tex('y-t',38,YELLOW_ACC).move_to([0,-.72,0])
+        mapping=VGroup(tex('y-t',32,YELLOW_ACC),Arrow(LEFT*.3,RIGHT*.3,color=MUTED),
+                       tex(r'\delta_k=y_k-t_k',32,RED_CLASS)).arrange(RIGHT,buff=.23).move_to([0,-1.78,0])
+        self.add(left,factors)
+        def cancel():
+            return Succession(Create(crosses),AnimationGroup(FadeOut(crosses),ReplacementTransform(factors,result)))
+        self.beat(actions=[lambda:pulse(paths,YELLOW_ACC),cancel,lambda:FadeIn(mapping,shift=DOWN*.1)])
+        self.restore_body(saved)
+
+    def jacobian_columns_aid(self):
+        saved=self.body_card('補足: 一つの入力を動かすと、行列の一列へ')
+        blue,yellow,green='#58C4DD','#FFFF00','#83C167'
+        J=jacobian();y0=forward()['y'];column=[0];eps=ValueTracker(.0005)
+        displacement=lambda:np.eye(2)[column[0]]*eps.get_value()
+        change=lambda:forward(X+displacement())['y']-y0
+        self.add(tex(r'\mathbf x_0=(0.6,-0.4)^T',25).move_to([-1.2,1.48,0]),
+                 number(r'\epsilon=',eps.get_value,[2.4,1.48,0],blue,places=4,size=25),
+                 jp('他の入力・重みは固定',19).move_to([-3.1,-1.8,0]))
+        inputs=always_redraw(lambda:VGroup(tex(r'\Delta\mathbf x=',27,blue),
+                    Matrix([[f'{v:.2f}'] for v in displacement()],v_buff=.8).scale(.55).set_color(blue)
+                    ).arrange(RIGHT,buff=.15).move_to([-3.4,.1,0]))
+        table=Matrix([[f'{v:.3f}' for v in row] for row in J],h_buff=1.8,v_buff=1.3).scale(.6).set_color(green).move_to([3.6,.05,0])
+        columns=table.get_columns()
+        label=tex('J=',30,green).next_to(table,LEFT,buff=.2)
+        self.add(inputs,table,label,
+                 tex(r'x_1\qquad x_2',25,blue).move_to([3.6,1.03,0]),
+                 jp('出力の変化',20,yellow).move_to([-.5,1.03,0]),
+                 tex(r'\Delta\mathbf y/\epsilon\approx J_{:,i}',27,green).move_to([2.3,-1.8,0]))
+        self.add(*[tex(r'\div\epsilon\;\longrightarrow',23,green).move_to([1.35,y,0]) for y in [.42,-.73]])
+        current=[]
+        def show_column(i):
+            self.remove(*current);current.clear();column[0]=i;eps.set_value(.0005)
+            # Separate scales expose the small y2 response without changing values.
+            for k in range(2):
+                span=max(abs(J[k,i])*.027,.0004)
+                line=NumberLine(x_range=[-span,span,span],length=2.0,include_numbers=False,
+                                color=MUTED).move_to([-.4,.42-1.15*k,0])
+                arrow=always_redraw(lambda k=k,line=line:Arrow(line.n2p(0),line.n2p(change()[k]),
+                                     buff=0,color=yellow,stroke_width=4,max_tip_length_to_length_ratio=.3))
+                value=number(fr'\Delta y_{k+1}=',lambda k=k:change()[k],[-.45,.82-1.15*k,0],yellow,places=5,size=23)
+                current.extend([line,arrow,value])
+            highlight=SurroundingRectangle(columns[i],color=yellow,buff=.13)
+            fixed=tex(fr'\Delta x_{{{2-i}}}=0',25,blue).move_to([-3.4,-1.03,0])
+            current.extend([highlight,fixed]);self.add(*current)
+            return Succession(eps.animate.set_value(.02),
+                AnimationGroup(*[TransformFromCopy(current[3*k+2][1],columns[i][k]) for k in range(2)]))
+        self.add(jp('矢印の尺度は各出力で拡大',17,MUTED).move_to([-.4,-1.4,0]))
+        self.beat(actions=[lambda:show_column(0),lambda:show_column(1)])
+        self.restore_body(saved)
