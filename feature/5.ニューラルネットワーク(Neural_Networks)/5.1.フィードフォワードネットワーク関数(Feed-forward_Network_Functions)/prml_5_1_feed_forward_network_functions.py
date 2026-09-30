@@ -200,6 +200,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.beat(FadeIn(bars),scores[0].animate.set_value(2.2))
         self.equation(r'y_k=\frac{e^{a_k}}{\sum_l e^{a_l}},\qquad\sum_k y_k=1\quad(4.62)')
         mode.set_value(1)
+        bars.update(0)  # Indicate suspends updaters: set normalized geometry first.
         self.beat(actions=[lambda:pulse(bars),lambda:pulse(numbers)])
         self.beat(scores[2].animate.set_value(3.2))
 
