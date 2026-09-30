@@ -123,7 +123,7 @@ class PRML44LaplaceApproximation(NarratedScene):
 
     def multivariate(self):
         self.legend(('同じ高さの等高線',RED),('曲率の大きい方向',GOLD),('小さい方向',BLUE))
-        ax=self.axes(x=(-2.5,2.5,1),y=(-2.5,2.5,1),width=4.4,height=4.4,center=(-2.1,.25,0),xlabel='z_1',ylabel='z_2')
+        ax=self.axes(x=(-2.5,2.5,1),y=(-2.5,2.5,1),width=4.0,height=4.0,center=(-2.1,.4,0),xlabel='z_1',ylabel='z_2')
         a=ValueTracker(1);theta=ValueTracker(0)
         def contours():
             r=rotation(theta.get_value());out=VGroup();t=np.linspace(0,2*np.pi,161)
@@ -300,7 +300,7 @@ class PRML44LaplaceApproximation(NarratedScene):
         target=VGroup(tex(r'\mu=z_0',32,GOLD),tex(r'\sigma^2=A^{-1}',32,RED)).arrange(DOWN,buff=.6).move_to(source)
         labels=VGroup(jp('今回：元の山のモード',21,GOLD).move_to([3,1.55,0]),
                       jp('負の対数の曲率 A > 0',21,RED).move_to([3,-1.05,0]))
-        self.beat(self.brief(AnimationGroup(FadeOut(source),FadeIn(target),FadeIn(labels))),
+        self.beat(self.brief(Succession(FadeOut(source),AnimationGroup(FadeIn(target),FadeIn(labels)))),
                   mu.animate.set_value(Z0),sd.animate.set_value(A**-.5))
         self.restore_body(saved)
 
@@ -330,7 +330,7 @@ class PRML44LaplaceApproximation(NarratedScene):
         entries=mat.get_entries();entries[1].set_color(AID_COMPARE);entries[2].set_color(AID_COMPARE)
         label=tex('H=',28).next_to(mat,LEFT,buff=.15)
         cross=tex(r'\frac{\Delta h_x}{\Delta y}=\frac{0.5}{1}=0.5',28,AID_COMPARE).move_to([2.7,-.05,0])
-        self.beat(self.brief(AnimationGroup(FadeOut(atzero),FadeIn(cross),FadeIn(mat),FadeIn(label))),
+        self.beat(self.brief(Succession(FadeOut(atzero),AnimationGroup(FadeIn(cross),FadeIn(mat),FadeIn(label)))),
                   AnimationGroup(Circumscribe(entries[1],color=AID_COMPARE,buff=.08),
                                  Circumscribe(entries[2],color=AID_COMPARE,buff=.08)),
                   self.equation(r'H=\nabla\nabla h=A\succ0',colors={0:AID_RESULT},size=29))

@@ -67,7 +67,7 @@ class NarratedScene(Scene):
         if colors:
             for i,c in colors.items():target[i].set_color(c)
         old=self.formula;self.formula=target
-        animation=FadeIn(target) if old is None else AnimationGroup(FadeOut(old),FadeIn(target))
+        animation=FadeIn(target) if old is None else Succession(FadeOut(old),FadeIn(target))
         animation.quick_formula=True
         return animation
 
