@@ -7,6 +7,7 @@ import argparse,hashlib,json,re,subprocess,wave
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 from PIL import Image,ImageDraw
+from scipy.signal import correlate
 
 ROOT=Path(__file__).resolve().parent
 VIDEO=ROOT/'media/videos/prml_5_6_mixture_density_networks/480p15/PRML56MixtureDensityNetworks.mp4'
@@ -25,7 +26,7 @@ def main():
     volume=run(['ffmpeg','-hide_banner','-i',str(VIDEO),'-map','0:a:0','-af','volumedetect','-f','null','-']).stderr
     (args.output/'silence.log').write_text(silence);(args.output/'volume.log').write_text(volume)
     image_rows=[]; sync=[];max_error=0
-    recap_phases=[]
+    recap_phases=[];audio_alignment=[]
     for scene,entry in zip(tl,manifest['scenes']):
         assert scene['audio'] and scene['id']==entry['id']
         cues=[c for b in scene['beats'] for c in b['cues']]
@@ -54,6 +55,20 @@ def main():
                     assert len(active)>0
                     recap_phases.append(dict(**phase,pcm_onset=scene['start']+(first+int(active[0]))/rate,
                         pcm_end=scene['start']+(first+int(active[-1]))/rate))
+                    # Locate a voiced one-second excerpt in the final AAC stream,
+                    # independently of the animation/manifest clock comparison.
+                    offset=.4; margin=.15
+                    expected=pcm[first+round(offset*rate):first+round((offset+1)*rate)]
+                    raw=subprocess.run(['ffmpeg','-v','error','-ss',str(cue['start']+offset-margin),
+                        '-i',str(VIDEO),'-t',str(1+2*margin),'-vn','-ar',str(rate),'-ac','1',
+                        '-f','s16le','pipe:1'],check=True,capture_output=True).stdout
+                    decoded=np.frombuffer(raw,dtype='<i2').astype(float)/32768
+                    corr=correlate(decoded,expected,mode='valid',method='fft')
+                    lag=int(np.argmax(corr));match=decoded[lag:lag+len(expected)]
+                    score=float(corr[lag]/(np.linalg.norm(expected)*np.linalg.norm(match)))
+                    error=lag/rate-margin
+                    assert abs(error)<1/15 and score>.9
+                    audio_alignment.append(dict(id=cue['id'],offset_error_seconds=error,correlation=score))
                     for fraction in [.2,.8]:
                         image_rows.append(dict(name=cue['id']+f'-phase-{fraction}',
                             time=cue['start']+fraction*(cue['end']-cue['start'])))
@@ -85,7 +100,8 @@ def main():
                 long_silences=len(re.findall('silence_start:',silence)),
                 mean_volume_db=float(re.search(r'mean_volume: ([\-\d.]+)',volume)[1]),
                 peak_volume_db=float(re.search(r'max_volume: ([\-\d.]+)',volume)[1]),
-                timeline_max_error=max_error,sync=sync,recap_phases=recap_phases,frames=image_rows,
+                timeline_max_error=max_error,sync=sync,recap_phases=recap_phases,
+                final_audio_alignment=audio_alignment,frames=image_rows,
                 visual_review='pending',full_listen=False)
     durations={s['codec_type']:float(s['duration']) for s in streams['streams']}
     result['av_duration_difference']=abs(durations['video']-durations['audio'])
