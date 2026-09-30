@@ -39,6 +39,15 @@ def main():
     assert abs(b[-1]-TARGETS.mean())<1e-5
     assert np.isclose(np.sum(TARGETS.mean()-TARGETS),0)
     assert np.all(np.abs(TARGETS.mean()-TARGETS)>0)
+    # Independent finite differences for the new explanatory slice at (1,-1).
+    example=lambda w:w[0]**2+.5*w[1]**2
+    point=np.array([1.,-1.])
+    gradient=np.array([(example(point+np.eye(2)[i]*eps)-example(point-np.eye(2)[i]*eps))/(2*eps) for i in range(2)])
+    assert np.allclose(gradient,[2,-1],atol=1e-9)
+    residual=.45; beta=2.
+    density=np.sqrt(beta/(2*np.pi))*np.exp(-.5*beta*residual**2)
+    gaussian_error=abs(-np.log(density)-(.5*beta*residual**2+.5*np.log(2*np.pi/beta)))
+    assert gaussian_error<1e-12
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES) and all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     actual={p.stem for p in Path('assets/voicevox').glob('*.wav')}
@@ -47,6 +56,8 @@ def main():
                 binary_gradient_max_error=max(errors),stationary_points=STATIONARY.tolist(),
                 hessian_eigenvalues=eig.tolist(),descent=results,batch_final=float(b[-1]),
                 online_final=float(o[-1]),scalar_optimum=float(TARGETS.mean()),
-                audio_seconds=sum(e['duration'] for e in entries),sentences=sum(len(e['subtitle_cues']) for e in entries))
+                audio_seconds=sum(e['duration'] for e in entries),sentences=sum(len(e['subtitle_cues']) for e in entries),
+                visual_aid_gradient=gradient.tolist(),visual_aid_gradient_max_error=float(max(abs(gradient-[2,-1]))),
+                recap_gaussian_error=gaussian_error,recap_binary_losses=(-np.log([.9,.1])).tolist())
     Path('numerical_results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

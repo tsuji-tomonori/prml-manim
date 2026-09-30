@@ -1,5 +1,6 @@
 """Extract each beat, all math captions and early/late synchronization frames."""
 import json
+import argparse
 import subprocess
 from pathlib import Path
 from PIL import Image,ImageDraw
@@ -8,12 +9,22 @@ VIDEO=ROOT/'media/videos/prml_5_2_network_training/480p15/PRML52NetworkTraining.
 OUT=ROOT/'media/review'
 
 def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--recap",action="store_true",help="Review additions with context, all math captions and one frame per scene")
+    args=parser.parse_args()
     OUT.mkdir(parents=True,exist_ok=True)
     timeline=json.loads((ROOT/'media/prml52_timeline.json').read_text())
     frames=[]
     for s in timeline:
         for i,b in enumerate(s['beats']):
-            frames.append(dict(id=f"{s['id']}-beat{i+1}",time=(b['start']+b['end'])/2,kind='beat'))
+            if not args.recap or i==len(s["beats"])//2:
+                frames.append(dict(id=f"{s['id']}-beat{i+1}",time=(b['start']+b['end'])/2,kind='beat'))
+            if any("-recap-" in c["id"] or "-aid-" in c["id"] for c in b["cues"]):
+                for phase,t in [("before",b["start"]-.2),("after",b["end"]+.2)]:
+                    frames.append(dict(id=b["cues"][0]["id"]+"-"+phase,time=t,kind="context"))
+                for c in b["cues"]:
+                    for phase,alpha in [("early",.15),("late",.85)]:
+                        frames.append(dict(id=c["id"]+"-"+phase,time=c["start"]+alpha*(c["end"]-c["start"]),kind="addition-sync"))
             for c in b['cues']:
                 if '$' in c['display']:
                     frames.append(dict(id=c['id'],time=(c['start']+c['end'])/2,kind='math',display=c['display']))

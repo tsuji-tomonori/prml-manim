@@ -32,6 +32,16 @@
   "batch_final": 0.29999194475172486,
   "online_final": 0.5208715633389208,
   "scalar_optimum": 0.29999999999999993,
-  "audio_seconds": 590.3333333333334,
-  "sentences": 120
+  "audio_seconds": 637.4666666666667,
+  "sentences": 130,
+  "visual_aid_gradient": [
+    2.000000000002,
+    -1.0000000000065512
+  ],
+  "visual_aid_gradient_max_error": 6.551204023708124e-12,
+  "recap_gaussian_error": 0.0,
+  "recap_binary_losses": [
+    0.10536051565782628,
+    2.3025850929940455
+  ]
 }
