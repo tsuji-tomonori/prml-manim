@@ -470,8 +470,10 @@ class PRML56MixtureDensityNetworks(Scene):
         for ys,color in zip(parts,[C[0],YELLOW]):
             area=curve(ax,np.r_[u[0],u,u[-1],u[0]],np.r_[0,ys,0,0],color)
             areas.add(area.set_fill(color,.22).set_stroke(width=0))
-        labels=VGroup(tex(r'\mathrm{area}_1=0.45',24,C[0]),tex(r'\mathrm{area}_2=0.55',24,YELLOW),
-                      tex(r'\mathrm{total}=1',24,'#C29AFF')).arrange(RIGHT,buff=.45).move_to([0,1.53,0])
+        labels=VGroup(*[VGroup(jp(label,19,color),tex(value,24,color)).arrange(RIGHT,buff=.12)
+                        for label,value,color in [('面積1','0.45',C[0]),('面積2','0.55',YELLOW),
+                                                   ('合計面積','1','#C29AFF')]])
+        labels.arrange(RIGHT,buff=.45).move_to([0,1.56,0])
         mapping=tex(r'x\ \longrightarrow\ (\pi_k(x),\mu_k(x),\sigma_k(x))',29).move_to([0,-1.46,0])
         color_map=VGroup(jp('本編へ：成分2',18),Dot(color=YELLOW),tex(r'\to',22),Dot(color=C[1]),
                          jp('合計',18),Dot(color='#C29AFF'),tex(r'\to',22),Dot(color=WHITE))
@@ -509,10 +511,10 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(sentence_actions=[
             lambda:Succession(*[AnimationGroup(
                 Circumscribe(rows[i],color=yellow,buff=.08),
-                TransformFromCopy(rows[i],sums[i]),GrowArrow(arrows[3*i])) for i in range(2)]),
+                FadeIn(sums[i]),GrowArrow(arrows[3*i])) for i in range(2)]),
             lambda:Succession(*[AnimationGroup(FadeIn(boxes[i]),GrowArrow(arrows[3*i+1]),
-                GrowArrow(arrows[3*i+2]),TransformFromCopy(sums[i],losses[i])) for i in range(2)]),
-            lambda:AnimationGroup(GrowArrow(collect),TransformFromCopy(losses,result))])
+                GrowArrow(arrows[3*i+2]),FadeIn(losses[i])) for i in range(2)]),
+            lambda:AnimationGroup(GrowArrow(collect),Write(result))])
         self.restore_body(saved)
 
     def bayes_recap(self):
@@ -528,17 +530,22 @@ class PRML56MixtureDensityNetworks(Scene):
         blocks=strip(joint)
         legend=VGroup(jp('赤い箱',21,RED),jp('青い箱',21,C[0])).arrange(RIGHT,buff=.55).move_to([0,1.6,0])
         prior_rule=tex(r'0.30\times0.75=0.225,\quad0.70\times0.20=0.140',27).move_to([0,-.85,0])
-        rule=tex(r'\text{prior}\times\text{likelihood}\ \longrightarrow\ \text{normalize}',25).move_to([0,-1.45,0])
+        rule=jp('事前 × 観測の出やすさ → 合計で割る',22).move_to([0,-1.45,0])
         component_legend=VGroup(tex(r'\pi_1\mathcal N_1',26,RED),tex(r'\pi_2\mathcal N_2',26,C[0])).arrange(RIGHT,buff=1).move_to(legend)
         density_rule=tex(r'\pi_k\,\mathcal N(t_n\mid\mu_k,\sigma_k^2)',31,YELLOW).move_to(rule)
         normalized_rule=tex(r'\gamma_k={\pi_k\mathcal N_k\over\sum_l\pi_l\mathcal N_l},\quad\sum_k\gamma_k=1',29,YELLOW).move_to(rule)
         proportions=VGroup(tex(r'\gamma_1=0.6164',26,RED),tex(r'\gamma_2=0.3836',26,C[0])).arrange(RIGHT,buff=.6).move_to(prior_rule)
-        condition=jp('説明用：2成分、入力を固定した連続観測',18,MUTED).move_to([0,-2.14,0])
+        condition=jp('説明用：2成分、入力を固定した連続観測',18,MUTED).move_to([0,1.13,0])
+        color_map=VGroup(jp('本編へ：成分1',18),Dot(color=RED),tex(r'\to',22),Dot(color=C[0]),
+                         jp('成分2',18),Dot(color=C[0]),tex(r'\to',22),Dot(color=C[1]))
+        color_map.arrange(RIGHT,buff=.18).move_to([0,-2.12,0])
         self.add(blocks,legend,prior_rule,rule)
         self.beat(sentence_actions=[
             lambda:Transform(blocks,strip(posterior)),
-            lambda:AnimationGroup(Transform(blocks,strip(joint)),Transform(legend,component_legend),
-                                  Transform(rule,density_rule),FadeIn(condition)),
-            lambda:AnimationGroup(Transform(blocks,strip(posterior)),Transform(rule,normalized_rule),
-                                  Transform(prior_rule,proportions))])
+            lambda:AnimationGroup(Transform(blocks,strip(joint),run_time=4),
+                                  Transform(legend,component_legend,run_time=.65),
+                                  Transform(rule,density_rule,run_time=.65),FadeIn(condition,run_time=.65)),
+            lambda:AnimationGroup(Transform(blocks,strip(posterior),run_time=3),
+                                  Transform(rule,normalized_rule,run_time=.65),
+                                  Transform(prior_rule,proportions,run_time=.65),FadeIn(color_map,run_time=.65))])
         self.restore_body(saved)
