@@ -390,6 +390,7 @@ class PRML52NetworkTraining(NarratedScene):
             return b.animate.set_value(-1)
         def collect():
             b.set_value(-1);self.remove(vertical)
-            return AnimationGroup(ReplacementTransform(VGroup(v1,v2),vector),GrowArrow(arrow))
+            self.remove(v1,v2)
+            return AnimationGroup(FadeIn(vector,run_time=.45),GrowArrow(arrow,run_time=3.5))
         self.beat(actions=[first,second,collect])
         self.restore_body(saved)
