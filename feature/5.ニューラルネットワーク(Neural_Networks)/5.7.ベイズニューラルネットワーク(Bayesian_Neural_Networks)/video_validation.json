@@ -1,5 +1,5 @@
 {
-  "scene_timing_max_error": 3.7140068798180437e-11,
+  "scene_timing_max_error": 5.840661287948024e-11,
   "ffprobe": {
     "programs": [],
     "streams": [
@@ -10,26 +10,26 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "559.799344"
+        "duration": "613.132678"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "559.829333"
+        "duration": "613.162667"
       }
     ],
     "format": {
-      "duration": "559.830000",
-      "size": "12623798"
+      "duration": "613.163000",
+      "size": "14033771"
     }
   },
   "stream_duration_difference": 0.029989000000000487,
   "long_silence_count": 0,
   "mean_volume_db": -26.4,
   "max_volume_db": -6.4,
-  "video_sha256": "652f1a7258506ef9f0d59b43db44196945ec24444b1f71b72bc51026cbc50b2b",
+  "video_sha256": "41fda4c55733330504ca05464c4c5d542a07356a92b6aa21583a1d6e71d4800e",
   "frames": [
     {
       "id": "scene01-beat1",
@@ -69,379 +69,427 @@
     },
     {
       "id": "scene01-beat6",
-      "time": 55.81333333333403,
+      "time": 55.914666666667365,
+      "display": "ネットワークでも、重みの広がりを予測へ持ち込みます。",
+      "image_sha256": "1f9e4f9c50ee2d848794cea47075f242445e745c507302c8549d049984d3684e"
+    },
+    {
+      "id": "scene01-beat7",
+      "time": 66.14666666666787,
       "display": "重みの候補を積分で足し合わせる操作を、周辺化と呼びます。",
       "image_sha256": "76aaa365261404d653bfbc48afad536ec3ee9d3283eb516d3c854e58aef35790"
     },
     {
       "id": "scene02-beat1",
-      "time": 65.1546666666679,
+      "time": 75.48800000000122,
       "display": "$\\alpha$ を大きくすると、ゼロの近くに集まります。",
-      "image_sha256": "30824754e06d15175cffda948e3aadfd7ed5b74a13678cadb2177be1758abd29"
+      "image_sha256": "16c5457cf38b0f37902af64326fdb27221d3a3a7bdd90b515ddc0f580e77abb0"
     },
     {
       "id": "scene02-01-02",
-      "time": 65.1546666666679,
+      "time": 75.48800000000122,
       "display": "$\\alpha$ を大きくすると、ゼロの近くに集まります。",
-      "image_sha256": "30824754e06d15175cffda948e3aadfd7ed5b74a13678cadb2177be1758abd29"
+      "image_sha256": "16c5457cf38b0f37902af64326fdb27221d3a3a7bdd90b515ddc0f580e77abb0"
     },
     {
       "id": "scene02-beat2",
-      "time": 74.97333333333464,
+      "time": 85.30666666666738,
       "display": "$\\beta$ は観測ノイズの分散の逆数です。",
-      "image_sha256": "30a190e3a5626ed0544d20a972a3c19545f54fc6f4fc864dc30629b064581385"
+      "image_sha256": "a4665081d8523646ad2271f0c28ea7478807e86d08b9a5ba89e043f382b23547"
     },
     {
       "id": "scene02-02-02",
-      "time": 74.97333333333464,
+      "time": 85.30666666666738,
       "display": "$\\beta$ は観測ノイズの分散の逆数です。",
-      "image_sha256": "30a190e3a5626ed0544d20a972a3c19545f54fc6f4fc864dc30629b064581385"
+      "image_sha256": "a4665081d8523646ad2271f0c28ea7478807e86d08b9a5ba89e043f382b23547"
     },
     {
       "id": "scene02-beat3",
-      "time": 85.33066666666743,
+      "time": 95.66400000000017,
       "display": "ここでは仕組みを見るため、重み空間の一本の軸に沿って動かします。",
-      "image_sha256": "31196df2ab51fee6f5775c50406249b6afc5a36de3b35a7e225141704fe67723"
+      "image_sha256": "2ec5a3c76ec359ea4d15930a8820450ba18f7fce545cdf0bf0a255760eec4257"
     },
     {
       "id": "scene02-beat4",
-      "time": 94.28533333333344,
+      "time": 104.61866666666619,
       "display": "面積を一にそろえると、観測後のありやすさ、事後分布になります。",
-      "image_sha256": "d830b3b4f5d44d21fd9f833a4ed6e8e718e41dba0f3614141f445f6e15db26f9"
+      "image_sha256": "2f7094d1a580bd89bc9236ad1a10ee8ac99087f196b8149f7bda1b9bb2b65a7d"
     },
     {
       "id": "scene02-beat5",
-      "time": 103.5359999999996,
+      "time": 113.86933333333235,
       "display": "山の頂上を探すことは、二乗誤差と重みの大きさを足した量の最小化と同じです。",
-      "image_sha256": "e2a1629b149008f21c9f8a6c06dd93679b8bef6a46ac3cc20b1b52b68209ec70"
+      "image_sha256": "a93d455739de3d42ceb9586b8cdd2a234304f0e3604e6f33b5f9da801cc36227"
     },
     {
       "id": "scene02-beat6",
-      "time": 114.44266666666572,
+      "time": 124.77599999999846,
       "display": "ただし、予測に必要なのは、頂上の周囲に残る広がりも含めた分布です。",
-      "image_sha256": "3d07e1b214565841de9f3658dc159ff18cf7aab5d68a840991f93afef66962aa"
+      "image_sha256": "d2b8f97bedfb18a63ef96da363d402576ebf31fdde71c7ce8ba2f040ee5e4736"
     },
     {
       "id": "scene02-06-01",
-      "time": 109.23199999999906,
+      "time": 119.56533333333181,
       "display": "事後密度が局所的に最大となる点を $w_{\\mathrm{MAP}}$ と書きます。",
-      "image_sha256": "ff8f5d2d7c4ba85dd2208430caffeedd070fec56d38396b9c37a33fa4d28c6ca"
+      "image_sha256": "4eba9ffb613b8314201b3928cb77fdae866002564712d2207d359270ad6cca3f"
     },
     {
       "id": "scene03-beat1",
-      "time": 125.81866666666511,
+      "time": 136.15199999999786,
       "display": "ここでは、求めた谷底を通る一本の断面を見ています。",
       "image_sha256": "dc1dee80bf5f67a38ec91bc6ce1a78c312f3a949f6a868eb8dee9031650760ef"
     },
     {
       "id": "scene03-beat2",
-      "time": 134.82666666666452,
+      "time": 146.0453333333306,
+      "display": "今回も、負の対数事後の曲率が、すべての方向で正の場所で使います。",
+      "image_sha256": "a3208ba60b3b76e10b86264841e73a9fa599d65cfbed0613f8b049aded15f053"
+    },
+    {
+      "id": "scene03-beat3",
+      "time": 155.82666666666333,
       "display": "この局所的な二次近似から、ガウス分布を作るのがラプラス近似です。",
       "image_sha256": "cb56fc8823a4c83bfcdb15da24e7759c3c043ae05211b1ae504923a4509d3c27"
     },
     {
-      "id": "scene03-beat3",
-      "time": 144.674666666664,
+      "id": "scene03-beat4",
+      "time": 165.6746666666628,
       "display": "その方向には、重みの候補は狭く集まります。",
       "image_sha256": "0b49c221fcd0ba6e4dd329159ac352d22294b08e43ec694c4f8954c8ba5af6d7"
     },
     {
-      "id": "scene03-beat4",
-      "time": 152.38666666666347,
+      "id": "scene03-beat5",
+      "time": 173.38666666666228,
       "display": "多くの重みがあると、この方向ごとの曲がり方を行列でまとめます。",
       "image_sha256": "ccd56ed3b811c3e5e81e74d75b3778efa0e9b64e6aa0ce2b592582ad04b9d865"
     },
     {
-      "id": "scene03-beat5",
-      "time": 161.96266666666298,
+      "id": "scene03-beat6",
+      "time": 182.9626666666618,
       "display": "$A=\\alpha I+\\beta H$、共分散は $A^{-1}$ です。",
       "image_sha256": "09590b6d636c1a5fa37ba3c2a3ed10ded575cd169f0fb2041908b0d68f04cb4d"
     },
     {
       "id": "scene03-05-01",
-      "time": 156.91733333332965,
+      "time": 177.91733333332846,
       "display": "負の対数事後のヘッセ行列を $A$ とします。",
       "image_sha256": "02ac7b70bd8874f477a2ad4acee1804bdebbfd74741d7dc4945fec0761995aca"
     },
     {
       "id": "scene03-05-02",
-      "time": 161.96266666666298,
+      "time": 182.9626666666618,
       "display": "$A=\\alpha I+\\beta H$、共分散は $A^{-1}$ です。",
       "image_sha256": "09590b6d636c1a5fa37ba3c2a3ed10ded575cd169f0fb2041908b0d68f04cb4d"
     },
     {
-      "id": "scene03-beat6",
-      "time": 175.16533333332904,
+      "id": "scene03-beat7",
+      "time": 196.16533333332785,
       "display": "一つの谷の近似なので、離れた別の山や、大きく曲がった裾までは表しません。",
       "image_sha256": "ed18f5e208c88a05bc9c689f9b39d16a3ee572722b5a1c1994ae68e392977fa8"
     },
     {
       "id": "scene04-beat1",
-      "time": 186.391999999995,
+      "time": 207.3919999999938,
       "display": "そこで、もう一つ近似を入れます。",
       "image_sha256": "8071f33d113e748c9ddef8a4cb1ed7acb7a45b98fc994d724493d4ba63b83036"
     },
     {
       "id": "scene04-beat2",
-      "time": 196.95733333332777,
+      "time": 217.95733333332657,
       "display": "画面では、同じ小さな重みの変化から、元の曲線と線形化した曲線を描いています。",
       "image_sha256": "2d0f404eb20cb1ccbb1b4a0b10d7353b95cfa211bedfa48b4b182b5aaef64ebb"
     },
     {
       "id": "scene04-beat3",
-      "time": 206.5306666666604,
+      "time": 227.53066666665922,
       "display": "この変化率は、これまでの逆伝播で計算できます。",
       "image_sha256": "8c771d968e11dc0b563b51eeda6a923ea5fba338fc29e72e871895a8f2c19331"
     },
     {
       "id": "scene04-03-01",
-      "time": 202.6106666666604,
+      "time": 223.6106666666592,
       "display": "$g$ は、各重みを動かしたときの出力の変化率です。",
       "image_sha256": "955135f51dbc4ce4b00b2e1a2f8cc38da735670f084624d999aa8bda945a2fea"
     },
     {
       "id": "scene04-beat4",
-      "time": 216.8373333333266,
+      "time": 237.8373333333254,
       "display": "縦の断面の幅が、場所によって変わる様子を見てください。",
       "image_sha256": "976f4023d0694b29ff32a872fbc1abe19b3f664d0b51706a6d75df21ad269399"
     },
     {
       "id": "scene04-beat5",
-      "time": 227.41866666665936,
+      "time": 248.41866666665817,
       "display": "重みの広がりと、出力が動きやすい方向を組み合わせた量です。",
       "image_sha256": "706900045edbfef04b0a98d173e2e3002a455557dc2b229053c2ea532057c5bd"
     },
     {
       "id": "scene04-05-01",
-      "time": 222.19733333332601,
+      "time": 243.19733333332482,
       "display": "重みに由来する予測分散は $g^T A^{-1}g$ です。",
       "image_sha256": "8338855c3cc8538a91d1c16330857ddae30fd24c68aeedd31a00b143dc626b2a"
     },
     {
       "id": "scene04-beat6",
-      "time": 238.26666666665872,
+      "time": 258.03999999999087,
+      "display": "分散は幅の二乗なので、$4$ 倍になります。",
+      "image_sha256": "7001cd6690650baf971b9d280895d58aa24cefdefe266b610b5a535b54924e6b"
+    },
+    {
+      "id": "scene04-aid-01",
+      "time": 253.76266666665754,
+      "display": "同じ重みの雲でも、出力の感度が $2$ 倍なら、写した幅も $2$ 倍です。",
+      "image_sha256": "6832c0544159a70ce976e2982c8801fe6015f9edd4756adf277022f9bb1b9627"
+    },
+    {
+      "id": "scene04-aid-02",
+      "time": 258.03999999999087,
+      "display": "分散は幅の二乗なので、$4$ 倍になります。",
+      "image_sha256": "7001cd6690650baf971b9d280895d58aa24cefdefe266b610b5a535b54924e6b"
+    },
+    {
+      "id": "scene04-beat7",
+      "time": 268.1999999999904,
       "display": "元のネットワークをそのまま厳密に平均した結果とは、区別して考えます。",
       "image_sha256": "f0c7fd27ade1970bf4c62c265c4f6c594a96eee62fa9896a57fae32b71ad1dc2"
     },
     {
       "id": "scene05-beat1",
-      "time": 247.66933333332474,
+      "time": 277.60266666665643,
       "display": "中心の線から上下に、標準偏差の二倍を取っています。",
-      "image_sha256": "4e3d300429604e631e90bfee31fdfb7b41c6edff48ec7339ee394e6e57061854"
+      "image_sha256": "795f186766e96d5b534bc4a7f54cd229bc559280510e9c4fdcdeed64a2f38b61"
     },
     {
       "id": "scene05-beat2",
-      "time": 258.17066666665755,
+      "time": 288.10399999998924,
       "display": "オレンジで示したノイズの分散が加わり、予測全体の帯が広がります。",
-      "image_sha256": "e9616c2dc7672b7a6cc32dbe2ab8fd5ae3719a0d3e2387385025f90906d1b09a"
+      "image_sha256": "24ca56cc05b9801282c7cd0663924af4bc78f584f3fb696cd1a18977b8c0b0f0"
     },
     {
       "id": "scene05-beat3",
-      "time": 271.0079999999903,
+      "time": 300.94133333332195,
       "display": "足し合わせているのは分散です。標準偏差は、その和の平方根になります。",
-      "image_sha256": "24bfa7f6a9452c45c9b413a97a0b3feb39fb20617ceab9c696831835a8e6b91a"
+      "image_sha256": "6e4c90975e5f795c951db512c40a20bd7038d44769a778f0cb7b62bb85bc16bc"
     },
     {
       "id": "scene05-03-01",
-      "time": 264.7093333333237,
+      "time": 294.64266666665526,
       "display": "予測分散は $\\beta^{-1}+g^T A^{-1}g$ です。",
-      "image_sha256": "b41b733ac286511d0f146b648e1f6333a6be99abdf12a52dd641f5b75e1d1afe"
+      "image_sha256": "af73264c0fbc87366602951a970ea3e7148e339f6ff078238fd00bd638c6594e"
     },
     {
       "id": "scene05-beat4",
-      "time": 283.3786666666563,
+      "time": 313.31199999998785,
       "display": "これは、今回、観測ノイズの大きさを入力によらず一定と仮定したためです。",
-      "image_sha256": "395848a4524d69494ac76bebaff2dbd212106001d1d38ea1842a9fdb349e657e"
+      "image_sha256": "9c4bfb055065c68418047b9447f3c8781492eceb7d917ff8ba81c8d8fa27065c"
     },
     {
       "id": "scene05-beat5",
-      "time": 293.65599999998886,
+      "time": 323.5893333333205,
       "display": "重みがほぼ決まっても、次の観測のノイズは残ります。",
-      "image_sha256": "3651162d60afbae1bf6d13ab5eb57de8d2238fa839c74bb49b69279e7e9614a1"
+      "image_sha256": "0a645d46d5ff2206a1b4415f3984272663b6e72b34c37948b2145b55cdfb08ed"
     },
     {
       "id": "scene05-beat6",
-      "time": 303.1599999999883,
+      "time": 333.09333333332,
       "display": "データから遠いほど必ず広がる保証ではありません。選んだモデルの性質も反映します。",
-      "image_sha256": "c4179272bfcba256337aef8417e6474422d990bf81d84eaa6b408e507b97084d"
+      "image_sha256": "80f3225c954317b2e0c02fea3c13ca6e75c5f9710665bddd7c8b19357daf579b"
     },
     {
       "id": "scene06-beat1",
-      "time": 312.91199999998776,
+      "time": 342.84533333331933,
       "display": "重みについて積分したデータの確率を、エビデンスと呼びます。",
-      "image_sha256": "c0ec60e22c2cc3edfbd1d5d05652f403ddfae443964c7f9faa7e03c9a075fa10"
+      "image_sha256": "4cd79131325ef038d7ce65604027228b2c2d0c969b036cb9571b8699c1e1a55f"
     },
     {
       "id": "scene06-beat2",
-      "time": 321.7733333333206,
+      "time": 351.7066666666522,
       "display": "尤度と事前分布の積の面積が、エビデンスです。",
-      "image_sha256": "c8dce609818866b68dff5975bd2952b89a717b837d2e62a6dd02ffec044cb946"
+      "image_sha256": "f1e9e9d7f77bf0f298d3f167532b4843f9774fd9b1f71574418d0bd3d9484435"
     },
     {
       "id": "scene06-beat3",
-      "time": 331.00799999998674,
+      "time": 360.9413333333184,
       "display": "尤度の頂上が同じでも、平均としての当てはまりは変わります。",
-      "image_sha256": "ee7ea807bb84373d9f871ce84c61152eebcb20e91c3a6f85a2239f405bc999fe"
+      "image_sha256": "88067e4ff3f8c97fe7d36bede0fb36ccfcc9e9f82b7f64f292f7c5b729c7d997"
     },
     {
       "id": "scene06-beat4",
-      "time": 340.86399999998616,
+      "time": 370.79733333331785,
       "display": "この例では、中間の幅で面積が大きくなります。",
-      "image_sha256": "0142b1805b7144f0a8583c6cc01daa6864a2a45d698134cc7b258dac48e76903"
+      "image_sha256": "e8a5eabfa759a531a099ad8b0c9c67a6743883c40715faa4f6a6516e623cbbea"
     },
     {
       "id": "scene06-beat5",
-      "time": 350.16533333331904,
+      "time": 380.0986666666506,
       "display": "式には、谷底での誤差に加えて、分布の広がりを表す行列式が入ります。",
       "image_sha256": "befe0a5705804b1482d14d86042b7097edddfea4d2d4b6b406d4590d9ff21089"
     },
     {
       "id": "scene06-beat6",
-      "time": 360.46666666665175,
+      "time": 390.3999999999834,
       "display": "小さな固有値の誤差にも敏感なので、数値計算の精度が大切になります。",
       "image_sha256": "c605279947b1fc250a3590eb873463ac5b907a69de30a591d46f4f90d9fc73d3"
     },
     {
       "id": "scene07-beat1",
-      "time": 371.1253333333178,
+      "time": 403.13866666664944,
+      "display": "今回も同じ考え方を使いますが、更新式には近似が入ります。",
+      "image_sha256": "b2d2b49b07eb0cbc468b614505accfb44d58208180d0650cc31b7a2926c78171"
+    },
+    {
+      "id": "scene07-recap-02",
+      "time": 399.06933333331614,
+      "display": "データで決まる方向の寄与を $\\gamma$ に足しました。",
+      "image_sha256": "65ecd329f09b1f757b09911bcd3974ce6a4fe8c6c782d7813c7a6b5ca9a9ee16"
+    },
+    {
+      "id": "scene07-beat2",
+      "time": 413.65866666664874,
       "display": "ここでは、曲がり方が非負である説明用の四方向を使います。",
       "image_sha256": "b759b519e90bea1eb7532eeaf5b69b1bf53f82f6211f95737df993f2f455b817"
     },
     {
-      "id": "scene07-beat2",
-      "time": 383.8959999999839,
+      "id": "scene07-beat3",
+      "time": 426.42933333331484,
       "display": "これは、データによって実質的に決まったパラメータ数の目安です。",
       "image_sha256": "6c232e0f94f2a4d554ea63f22500f40e0e1de622d69548f49d6c04d0a89d5561"
     },
     {
       "id": "scene07-02-01",
-      "time": 377.75733333331726,
+      "time": 420.2906666666482,
       "display": "各方向の寄与 $\\lambda_i/(\\alpha+\\lambda_i)$ を足すと $\\gamma$ です。",
       "image_sha256": "1cab228aa527838c66cc7803ccab891c48da34fbb894be5935b4aeafc42cb234"
     },
     {
-      "id": "scene07-beat3",
-      "time": 393.30933333331654,
+      "id": "scene07-beat4",
+      "time": 435.84266666664746,
       "display": "重みを学習し直すと、曲がり方も変わるので、この計算を交互に繰り返します。",
       "image_sha256": "a374dd2625f77a97ba8894e399f0be5a5085a07d1932736110d676be304955f7"
     },
     {
       "id": "scene07-03-01",
-      "time": 388.3973333333165,
+      "time": 430.9306666666474,
       "display": "$\\alpha$ は $\\gamma$ を重みの二乗和で割って更新します。",
       "image_sha256": "31c426104c9746aff7e18c4e73a8827d9c30f6638b16c9b216e1331d85d77190"
     },
     {
-      "id": "scene07-beat4",
-      "time": 405.36533333331596,
+      "id": "scene07-beat5",
+      "time": 447.8986666666469,
       "display": "画面の数値は、小さなネットワークで実際に再推定した結果です。",
       "image_sha256": "394c6c7cdbcd0283d4e58671b1b9ef6a077a52b62b3193af83a5e338908388ab"
     },
     {
       "id": "scene07-04-01",
-      "time": 399.7973333333159,
+      "time": 442.33066666664683,
       "display": "$\\beta^{-1}$ は、残差の二乗和を $N-\\gamma$ で割って更新します。",
       "image_sha256": "8f6ab4b39ffaebf7ab47cfa87430277ebaa7e1df59428f6d7777dc21cb197924"
     },
     {
-      "id": "scene07-beat5",
-      "time": 415.2293333333153,
+      "id": "scene07-beat6",
+      "time": 457.7626666666462,
       "display": "事前の強さを変えたときの、固有値そのものの変化を無視しています。",
       "image_sha256": "b94ac24c185f3b231cc3db1e988ecb69438dff12023abda4ddb5d883e5b6b5ec"
     },
     {
-      "id": "scene07-beat6",
-      "time": 431.7973333333148,
+      "id": "scene07-beat7",
+      "time": 474.3306666666457,
       "display": "モデルを比較するときは、同じ予測を表す山の数も考慮します。",
       "image_sha256": "88b9ecd83e521b597f7b2420d95fd77c55e37fee89f1273e48f3b19549ab7564"
     },
     {
       "id": "scene07-06-02",
-      "time": 425.8719999999814,
+      "time": 468.40533333331234,
       "display": "原文の二層ネットワークでは、同等な山が $M!2^M$ 個あります。",
       "image_sha256": "03a53197ac3a5ba8760c9e11c526b21d58fd9ad7e66f08411c77ed9ed3b08a34"
     },
     {
       "id": "scene08-beat1",
-      "time": 440.5253333333138,
+      "time": 483.05866666664474,
       "display": "点に合わせすぎると、境界が細かく曲がることがあります。",
       "image_sha256": "aa20d90c72660c1f0d504ef8993659777402aee0d86ff5bf7dd617acfec5fceb"
     },
     {
       "id": "scene08-beat2",
-      "time": 450.69866666664666,
+      "time": 493.2319999999776,
       "display": "これは原文の図と同じ比較を、自作データで計算したものです。",
       "image_sha256": "4b59345c04598321923423b079edb92a94312f5c50620b0d6c52462f0de3e369"
     },
     {
       "id": "scene08-beat3",
-      "time": 462.71733333331275,
+      "time": 505.25066666664367,
       "display": "尤度はベルヌーイ分布になります。回帰で使ったノイズ精度は、このモデルにはありません。",
       "image_sha256": "152c6bb6cd73f3434644b76ce307ef5fd5dc18aaec35190510ff93fc598575aa"
     },
     {
       "id": "scene08-beat4",
-      "time": 473.58933333331197,
+      "time": 516.122666666643,
       "display": "そこからヘッセ行列を計算し、重みの事後分布をガウス形で近似します。",
       "image_sha256": "9e2ef6d328d48e1e719e2ea3c1a6abef000ba889c034050f99afa9774f8eda26"
     },
     {
       "id": "scene08-beat5",
-      "time": 483.95466666664475,
+      "time": 526.4879999999818,
       "display": "ここでは、複数の候補を実際に学習し、近似エビデンスを比較しました。",
       "image_sha256": "aaac4537904cc58015fe948cabd4a1f094a4a3fdc2383394c9efdd9e1ca57dbc"
     },
     {
       "id": "scene08-beat6",
-      "time": 494.4773333333108,
+      "time": 537.0106666666568,
       "display": "重みの広がりを平均に入れると、確率の線はどう変わるでしょう。",
       "image_sha256": "f9a54426ba78534703e01e0a883ea0c374339b78ee250c2a87a36d41d5fda444"
     },
     {
       "id": "scene09-beat1",
-      "time": 505.8399999999769,
+      "time": 548.3733333333314,
       "display": "そこで、シグモイドに入る前の値 $a$ を線形化します。",
       "image_sha256": "f62b15c6116f2f3739f7197c8db5cbcd3129215039c95cee5e4ce43a826a6735"
     },
     {
       "id": "scene09-01-02",
-      "time": 505.8399999999769,
+      "time": 548.3733333333314,
       "display": "そこで、シグモイドに入る前の値 $a$ を線形化します。",
       "image_sha256": "f62b15c6116f2f3739f7197c8db5cbcd3129215039c95cee5e4ce43a826a6735"
     },
     {
       "id": "scene09-beat2",
-      "time": 515.9573333333096,
+      "time": 558.752000000007,
+      "display": "今回も、活性を線形化した後、この確率の平均を計算します。",
+      "image_sha256": "f9c1b2d0f1cc2ce5fcc5807ea8c6822ddcd556830047fd28d1f69020548aea6b"
+    },
+    {
+      "id": "scene09-beat3",
+      "time": 569.2906666666823,
       "display": "候補の活性をシグモイドに通してから平均し、クラスの予測確率を求めます。",
       "image_sha256": "a4d93de5d8718042b1179b3ffcaaad212709ee2a23b1993ef467d32499e365b2"
     },
     {
-      "id": "scene09-beat3",
-      "time": 525.6026666666485,
+      "id": "scene09-beat4",
+      "time": 578.9360000000243,
       "display": "この例では、平均した確率が、二分の一に近づいていきます。",
       "image_sha256": "9ebdb92776d2dbf9cff7e6c0777ea3e08c5e8b99e3bcbc78b32b85134e1dd8f7"
     },
     {
-      "id": "scene09-beat4",
-      "time": 534.9626666666557,
+      "id": "scene09-beat5",
+      "time": 588.2960000000314,
       "display": "この係数で中心の活性を縮めると、積分の結果を手軽に近似できます。",
       "image_sha256": "ecb654344214ed3dd030d5d90aeda3231e71eacc2ece30fc26ea2827953978ef"
     },
     {
       "id": "scene09-04-01",
-      "time": 530.215999999989,
+      "time": 583.5493333333648,
       "display": "$\\kappa$ は、分散が大きいほど小さくなる係数です。",
       "image_sha256": "7a1c7af780cecd60ccf2668fc6bbd73a83ccf80111ffece7fc6dcea92c953b04"
     },
     {
-      "id": "scene09-beat5",
-      "time": 544.9466666666635,
+      "id": "scene09-beat6",
+      "time": 598.2800000000393,
       "display": "二分の一の境界は保たれ、その周囲の確率の線が広がります。",
       "image_sha256": "2ed00ce1043eea7550d556285271d2e578541a80a1e1b34a399fdcd4f76f342c"
     },
     {
-      "id": "scene09-beat6",
-      "time": 555.9813333333378,
+      "id": "scene09-beat7",
+      "time": 609.3146666667136,
       "display": "ベイズニューラルネットワークは、このつながりを近似計算でたどり、答えの幅まで表す方法です。",
       "image_sha256": "7620417a3ff995d881871a624205db7b795cf572b4725d52b69ce53cde00347d"
     },
@@ -459,45 +507,303 @@
     },
     {
       "id": "scene01-03-02-late",
-      "time": 27.670613333333282,
+      "time": 28.229973333333284,
       "display": "一本の結びつきを動かすだけでも、曲線全体が連動して変わります。",
-      "image_sha256": "b2ea2b9927c4b0535b83ba5b4c6416962319b1e57e2e19563813db43e32bcb3c"
+      "image_sha256": "71d3c44688c02b468e393a2146182fb523d2bf788d8261a13bda073c9bb39de1"
+    },
+    {
+      "id": "scene01-recap-01-before",
+      "time": 47.66666666666736,
+      "display": "transition",
+      "image_sha256": "2695277fcd1a6352ac5e0fbf81be3aeafaa9a98d9c7ae268d0845cdd18e0b98f"
+    },
+    {
+      "id": "scene01-recap-01-after",
+      "time": 58.4000000000007,
+      "display": "transition",
+      "image_sha256": "a943ac8d7e3fc1de931066e8e745a2173e7f16b070d22fc32223c934ae0d1470"
+    },
+    {
+      "id": "scene01-recap-01-early",
+      "time": 48.357333333334054,
+      "display": "3.3では、重みの分布から候補の曲線を作り、予測を平均しました。",
+      "image_sha256": "7ed99da66839c3d8fefe32987c74a1b52fdade40ebb43cbadfeb29aa498e9d6a"
+    },
+    {
+      "id": "scene01-recap-01-middle",
+      "time": 50.93333333333418,
+      "display": "3.3では、重みの分布から候補の曲線を作り、予測を平均しました。",
+      "image_sha256": "13c6db52bd9fe7fe4639fbe5cece366815c8b0899a74689f69d814c4245676fb"
+    },
+    {
+      "id": "scene01-recap-01-late",
+      "time": 53.632000000000986,
+      "display": "3.3では、重みの分布から候補の曲線を作り、予測を平均しました。",
+      "image_sha256": "ac8721222626bf9398fb43470e5d8e475c2c6f61e845ea7ad224b300e253c337"
+    },
+    {
+      "id": "scene01-recap-02-early",
+      "time": 54.30933333333435,
+      "display": "ネットワークでも、重みの広がりを予測へ持ち込みます。",
+      "image_sha256": "09ea31451677e70ecef72345051887607b6cb8c7fd53c8bf3e1253a32ee0ec1a"
+    },
+    {
+      "id": "scene01-recap-02-middle",
+      "time": 55.93333333333443,
+      "display": "ネットワークでも、重みの広がりを予測へ持ち込みます。",
+      "image_sha256": "1f9e4f9c50ee2d848794cea47075f242445e745c507302c8549d049984d3684e"
+    },
+    {
+      "id": "scene01-recap-02-late",
+      "time": 57.63466666666785,
+      "display": "ネットワークでも、重みの広がりを予測へ持ち込みます。",
+      "image_sha256": "85ceb9fed3d288c23cf20f386ed1628a4faf3175e3b0c956d89058a1bf613192"
+    },
+    {
+      "id": "scene03-recap-01-before",
+      "time": 138.39999999999728,
+      "display": "transition",
+      "image_sha256": "dc1dee80bf5f67a38ec91bc6ce1a78c312f3a949f6a868eb8dee9031650760ef"
+    },
+    {
+      "id": "scene03-recap-01-after",
+      "time": 149.4666666666639,
+      "display": "transition",
+      "image_sha256": "c49e056435cdc09ada7ca7eac025547d9ffbf0b9d13ffd07b8e28feb71520fb0"
+    },
+    {
+      "id": "scene03-recap-01-early",
+      "time": 138.96799999999723,
+      "display": "4.4では、谷底の曲がり方からガウスの幅を決めました。",
+      "image_sha256": "7258d89434cc49fd6bb6f994aa014c6b92684c91a002ff3768682c6a6db2e551"
+    },
+    {
+      "id": "scene03-recap-01-middle",
+      "time": 140.89999999999714,
+      "display": "4.4では、谷底の曲がり方からガウスの幅を決めました。",
+      "image_sha256": "82efd240a38ca7f858cd47b148fc3e6f874efc0b291a43be6fd1a248a62bc9bd"
+    },
+    {
+      "id": "scene03-recap-01-late",
+      "time": 142.92399999999702,
+      "display": "4.4では、谷底の曲がり方からガウスの幅を決めました。",
+      "image_sha256": "53dba61fe045b15d2afb045dde18036c10690f6b7e6ba4b159d33fd462fecc1b"
+    },
+    {
+      "id": "scene03-recap-02-early",
+      "time": 143.65866666666363,
+      "display": "今回も、負の対数事後の曲率が、すべての方向で正の場所で使います。",
+      "image_sha256": "b4a15897039cd91c1217b0a7cd740f31e98e2c87c3ffa5e490574d18129e4acd"
+    },
+    {
+      "id": "scene03-recap-02-middle",
+      "time": 146.0666666666635,
+      "display": "今回も、負の対数事後の曲率が、すべての方向で正の場所で使います。",
+      "image_sha256": "a3208ba60b3b76e10b86264841e73a9fa599d65cfbed0613f8b049aded15f053"
+    },
+    {
+      "id": "scene03-recap-02-late",
+      "time": 148.58933333333002,
+      "display": "今回も、負の対数事後の曲率が、すべての方向で正の場所で使います。",
+      "image_sha256": "6790618b0ae6145905cb68c7ba6b5eef967f6d5b62c4b6c426f67f1ba2384465"
+    },
+    {
+      "id": "scene04-aid-01-before",
+      "time": 250.9333333333242,
+      "display": "transition",
+      "image_sha256": "2ce91fadb69ce7ba9c01d5db867fb60efd1eb02de66b343effbe4310b5607cb1"
+    },
+    {
+      "id": "scene04-aid-01-after",
+      "time": 260.2666666666575,
+      "display": "transition",
+      "image_sha256": "2c84126713a9c61045485c9ece70b9106a3bd6f4923125fdb17902c19992b241"
+    },
+    {
+      "id": "scene04-aid-01-early",
+      "time": 251.5546666666575,
+      "display": "同じ重みの雲でも、出力の感度が $2$ 倍なら、写した幅も $2$ 倍です。",
+      "image_sha256": "29278cd505f7b22e9cb12002953caae9c996a9688a8dd4bdf3a5e50fb5e8fc4d"
+    },
+    {
+      "id": "scene04-aid-01-middle",
+      "time": 253.7666666666574,
+      "display": "同じ重みの雲でも、出力の感度が $2$ 倍なら、写した幅も $2$ 倍です。",
+      "image_sha256": "6832c0544159a70ce976e2982c8801fe6015f9edd4756adf277022f9bb1b9627"
+    },
+    {
+      "id": "scene04-aid-01-late",
+      "time": 256.0839999999906,
+      "display": "同じ重みの雲でも、出力の感度が $2$ 倍なら、写した幅も $2$ 倍です。",
+      "image_sha256": "16ecf3c55b588d71f7a6d95325223e400e69e142eecbe718359a596dfd37a63a"
+    },
+    {
+      "id": "scene04-aid-02-early",
+      "time": 256.6613333333239,
+      "display": "分散は幅の二乗なので、$4$ 倍になります。",
+      "image_sha256": "f8c6340f5423bdd4b5b3aa3fbff912ea784abd19a1f0de234a27ac4da43399d0"
+    },
+    {
+      "id": "scene04-aid-02-middle",
+      "time": 258.03333333332387,
+      "display": "分散は幅の二乗なので、$4$ 倍になります。",
+      "image_sha256": "7001cd6690650baf971b9d280895d58aa24cefdefe266b610b5a535b54924e6b"
+    },
+    {
+      "id": "scene04-aid-02-late",
+      "time": 259.4706666666571,
+      "display": "分散は幅の二乗なので、$4$ 倍になります。",
+      "image_sha256": "20e376427a03d4b80a59023060e013d750928bc148e6c65488faefbe9331e6ae"
     },
     {
       "id": "scene05-04-01-early",
-      "time": 275.1702399999896,
+      "time": 305.1035733333212,
       "display": "入力のつまみを動かすと、緑の項は変化し、オレンジの項は一定のままです。",
-      "image_sha256": "3633f5d4d6d85df81ec4c5a3d610831953d97307f0461361fa475ee65656570e"
+      "image_sha256": "914edd9ad48544e4ecea1f77cd902479c95d2ba48e0e5124abe7558c36771174"
     },
     {
       "id": "scene05-04-01-middle",
-      "time": 280.26399999998955,
+      "time": 310.19733333332124,
       "display": "入力のつまみを動かすと、緑の項は変化し、オレンジの項は一定のままです。",
-      "image_sha256": "e374b9bf4fd436db36a3e1c14290b73f48dbc7f8a3e286f7782c7264398fb22b"
+      "image_sha256": "c8359b31748cdb77f7c1d7f58a9f1e9d9806c3e2dccaee5b9c8a92e1eb503fe2"
     },
     {
       "id": "scene05-04-01-late",
-      "time": 284.8726399999896,
+      "time": 315.5336533333212,
       "display": "入力のつまみを動かすと、緑の項は変化し、オレンジの項は一定のままです。",
-      "image_sha256": "e368097b41b2c3f5f480d399fbc02d99195d091eab0de7640f407e9039eb1fa6"
+      "image_sha256": "8d4132b07c4ba6481e1ff1c8c31ef12fff1963c29b728594aa6d20ab96735d48"
+    },
+    {
+      "id": "scene07-recap-01-before",
+      "time": 393.33333333331615,
+      "display": "transition",
+      "image_sha256": "4b48ccd9684783f3b634d9cef073f69c9f27f78a8f0f51c19e75b6a45910d53d"
+    },
+    {
+      "id": "scene07-recap-01-after",
+      "time": 406.33333333331615,
+      "display": "transition",
+      "image_sha256": "7a34ec12cbab0e8463f85ebadb1a8525e00cfafe9ef618e4a444e9550fc78f01"
+    },
+    {
+      "id": "scene07-recap-01-early",
+      "time": 393.85866666664947,
+      "display": "3.5では、エビデンスで事前の強さを選びました。",
+      "image_sha256": "85b593c82b1d856e5c5f8ff8c9ef9a61eb6c13ae3bbbeac258444bd391c3a4d3"
+    },
+    {
+      "id": "scene07-recap-01-middle",
+      "time": 395.5666666666493,
+      "display": "3.5では、エビデンスで事前の強さを選びました。",
+      "image_sha256": "fe875efcb37adb86bbc6633f223d0d7b924ebd34e2520fc1ff0c88a542de1569"
+    },
+    {
+      "id": "scene07-recap-01-late",
+      "time": 397.3559999999826,
+      "display": "3.5では、エビデンスで事前の強さを選びました。",
+      "image_sha256": "d197b61d0652370c8d7bf31caa14e8142ac181e5d85c0e2a14d29493bcb5cd31"
+    },
+    {
+      "id": "scene07-recap-02-early",
+      "time": 397.83466666664924,
+      "display": "データで決まる方向の寄与を $\\gamma$ に足しました。",
+      "image_sha256": "430526729e9bfd1cb16293e1ea7277122b2db21dec2aab5b9e1c9685d9e361af"
+    },
+    {
+      "id": "scene07-recap-02-middle",
+      "time": 399.06666666664916,
+      "display": "データで決まる方向の寄与を $\\gamma$ に足しました。",
+      "image_sha256": "65ecd329f09b1f757b09911bcd3974ce6a4fe8c6c782d7813c7a6b5ca9a9ee16"
+    },
+    {
+      "id": "scene07-recap-02-late",
+      "time": 400.35733333331575,
+      "display": "データで決まる方向の寄与を $\\gamma$ に足しました。",
+      "image_sha256": "0e8cbe15b91a2b378510aca7e9d69b3d2e68c4707a9dd8c53cdf2ea434da3fd5"
+    },
+    {
+      "id": "scene07-recap-03-early",
+      "time": 400.94933333331574,
+      "display": "今回も同じ考え方を使いますが、更新式には近似が入ります。",
+      "image_sha256": "3e6e28434de0e99fc8a82121a15b168363981706df020cf0613e38c69c0b4706"
+    },
+    {
+      "id": "scene07-recap-03-middle",
+      "time": 403.1333333333156,
+      "display": "今回も同じ考え方を使いますが、更新式には近似が入ります。",
+      "image_sha256": "b2d2b49b07eb0cbc468b614505accfb44d58208180d0650cc31b7a2926c78171"
+    },
+    {
+      "id": "scene07-recap-03-late",
+      "time": 405.4213333333155,
+      "display": "今回も同じ考え方を使いますが、更新式には近似が入ります。",
+      "image_sha256": "16f2da5bf8defddaa7469d0542cabcbbaa99f9e90add825191f390deea57da9d"
+    },
+    {
+      "id": "scene09-recap-01-before",
+      "time": 550.8666666666737,
+      "display": "transition",
+      "image_sha256": "72b7e8b65c73329018aa75da181a9d0c47b4f3194cbcd823bc39cbdbc0fe88cf"
+    },
+    {
+      "id": "scene09-recap-01-after",
+      "time": 562.0666666666738,
+      "display": "transition",
+      "image_sha256": "34aa245b1e9051d6969329398cb19fc156ef3544a0ac5b9f5b400fcf0088035a"
+    },
+    {
+      "id": "scene09-recap-01-early",
+      "time": 551.4666666666741,
+      "display": "4.5では、候補のロジットをシグモイドに通してから平均しました。",
+      "image_sha256": "2743b2404b267c2047e38ef36bccabff5d448770c1aafee93022ffecee8395d5"
+    },
+    {
+      "id": "scene09-recap-01-middle",
+      "time": 553.5666666666757,
+      "display": "4.5では、候補のロジットをシグモイドに通してから平均しました。",
+      "image_sha256": "1355d3dc5d9e33116b16c1cdf70397c564f58f01fa7a180fe55ca2edd5263545"
+    },
+    {
+      "id": "scene09-recap-01-late",
+      "time": 555.7666666666776,
+      "display": "4.5では、候補のロジットをシグモイドに通してから平均しました。",
+      "image_sha256": "76533abf117ef65aee2ab19c35f97816931cad0246691985bd2c3acf0d93d3a5"
+    },
+    {
+      "id": "scene09-recap-02-early",
+      "time": 556.4986666666781,
+      "display": "今回も、活性を線形化した後、この確率の平均を計算します。",
+      "image_sha256": "3b81c6f4c5ac3630f87f2eb801b79fb4b6b03ebee7ee743a7962d2be1db7ea2a"
+    },
+    {
+      "id": "scene09-recap-02-middle",
+      "time": 558.7666666666798,
+      "display": "今回も、活性を線形化した後、この確率の平均を計算します。",
+      "image_sha256": "f9c1b2d0f1cc2ce5fcc5807ea8c6822ddcd556830047fd28d1f69020548aea6b"
+    },
+    {
+      "id": "scene09-recap-02-late",
+      "time": 561.1426666666817,
+      "display": "今回も、活性を線形化した後、この確率の平均を計算します。",
+      "image_sha256": "c0b3de40ec3237ef05f5e10614ba4294f397483c6c1e013fec188a73e5a875fd"
     },
     {
       "id": "scene09-05-01-early",
-      "time": 538.9389866666635,
+      "time": 592.2723200000393,
       "display": "先ほどの分類図へ戻り、重みの不確かさを入れていきます。",
       "image_sha256": "ffc48445b35abbc59baa67b6333396754860c0aaf0907d0949a4efb572e05bc0"
     },
     {
       "id": "scene09-05-01-middle",
-      "time": 542.8186666666636,
+      "time": 596.1520000000394,
       "display": "先ほどの分類図へ戻り、重みの不確かさを入れていきます。",
       "image_sha256": "a39b97b9f6672e7d14a9d82e121ebf2671d7bb593220877c1f2b8e945e1fbda2"
     },
     {
       "id": "scene09-05-01-late",
-      "time": 546.3288533333302,
+      "time": 600.216426666706,
       "display": "先ほどの分類図へ戻り、重みの不確かさを入れていきます。",
-      "image_sha256": "7fe201635d54148dc0be6aa13db742d71350b31d677a4e6c12eabe5fb23899b6"
+      "image_sha256": "68276c4830e6b6d05fc87da867b5f051084b56686fefc81657a009f48937aecf"
     }
   ],
   "sync": [
@@ -509,20 +815,154 @@
       "action_end": 28.789333333333282
     },
     {
+      "id": "scene01-recap-01",
+      "sentence_start": 47.86666666666736,
+      "pcm_onset": 47.91654166666667,
+      "action_start": 47.86666666666736,
+      "action_end": 54.000000000001
+    },
+    {
+      "id": "scene01-recap-02",
+      "sentence_start": 53.98933333333403,
+      "pcm_onset": 54.053666666666665,
+      "action_start": 54.000000000001,
+      "action_end": 57.86666666666786
+    },
+    {
+      "id": "scene03-recap-01",
+      "sentence_start": 138.59999999999727,
+      "pcm_onset": 138.67041666666452,
+      "action_start": 138.59999999999727,
+      "action_end": 143.199999999997
+    },
+    {
+      "id": "scene03-recap-02",
+      "sentence_start": 143.18666666666394,
+      "pcm_onset": 143.28429166666453,
+      "action_start": 143.199999999997,
+      "action_end": 148.93333333333
+    },
+    {
+      "id": "scene04-aid-01",
+      "sentence_start": 251.1333333333242,
+      "pcm_onset": 251.1948749999938,
+      "action_start": 251.1333333333242,
+      "action_end": 256.3999999999906
+    },
+    {
+      "id": "scene04-aid-02",
+      "sentence_start": 256.39199999999084,
+      "pcm_onset": 256.4792083333271,
+      "action_start": 256.3999999999906,
+      "action_end": 259.6666666666571
+    },
+    {
       "id": "scene05-04-01",
-      "sentence_start": 274.1999999999896,
-      "pcm_onset": 274.27349999999143,
-      "action_start": 274.1999999999896,
-      "action_end": 286.3279999999896
+      "sentence_start": 304.1333333333212,
+      "pcm_onset": 304.20683333332306,
+      "action_start": 304.1333333333212,
+      "action_end": 316.2613333333212
+    },
+    {
+      "id": "scene07-recap-01",
+      "sentence_start": 393.53333333331614,
+      "pcm_onset": 393.58316666664945,
+      "action_start": 393.53333333331614,
+      "action_end": 397.5999999999826
+    },
+    {
+      "id": "scene07-recap-02",
+      "sentence_start": 397.59733333331616,
+      "pcm_onset": 397.6871249999828,
+      "action_start": 397.5999999999826,
+      "action_end": 400.53333333331574
+    },
+    {
+      "id": "scene07-recap-03",
+      "sentence_start": 400.5413333333161,
+      "pcm_onset": 400.63991666664947,
+      "action_start": 400.53333333331574,
+      "action_end": 405.73333333331544
+    },
+    {
+      "id": "scene09-recap-01",
+      "sentence_start": 551.0666666666738,
+      "pcm_onset": 551.1366666666647,
+      "action_start": 551.0666666666738,
+      "action_end": 556.0666666666777
+    },
+    {
+      "id": "scene09-recap-02",
+      "sentence_start": 556.048000000007,
+      "pcm_onset": 556.1460833333314,
+      "action_start": 556.0666666666777,
+      "action_end": 561.466666666682
     },
     {
       "id": "scene09-05-01",
-      "sentence_start": 538.1999999999969,
-      "pcm_onset": 538.2847916666436,
-      "action_start": 538.1999999999969,
-      "action_end": 547.4373333333302
+      "sentence_start": 591.5333333333726,
+      "pcm_onset": 591.618124999998,
+      "action_start": 591.5333333333726,
+      "action_end": 600.770666666706
     }
   ],
   "manual_review": "Frame extraction only; see the work report for actual review.",
-  "full_audio_listening": false
+  "full_audio_listening": false,
+  "added_sentence_audio_correlation": [
+    {
+      "id": "scene01-recap-01",
+      "offset_seconds": 0.021333333333330984,
+      "correlation": 0.9998732881220773
+    },
+    {
+      "id": "scene01-recap-02",
+      "offset_seconds": 0.021333333333330984,
+      "correlation": 0.9998898974030582
+    },
+    {
+      "id": "scene03-recap-01",
+      "offset_seconds": 0.020666666668802236,
+      "correlation": 0.9998344882900957
+    },
+    {
+      "id": "scene03-recap-02",
+      "offset_seconds": 0.020666666668802236,
+      "correlation": 0.9998917372726722
+    },
+    {
+      "id": "scene04-aid-01",
+      "offset_seconds": 0.020333333339550563,
+      "correlation": 0.9998284311159185
+    },
+    {
+      "id": "scene04-aid-02",
+      "offset_seconds": 0.02033333333952214,
+      "correlation": 0.9998030310761236
+    },
+    {
+      "id": "scene07-recap-01",
+      "offset_seconds": 0.02100000001718172,
+      "correlation": 0.9997967111618575
+    },
+    {
+      "id": "scene07-recap-02",
+      "offset_seconds": 0.02100000001718172,
+      "correlation": 0.9997350285821346
+    },
+    {
+      "id": "scene07-recap-03",
+      "offset_seconds": 0.021000000017238563,
+      "correlation": 0.9997967510397809
+    },
+    {
+      "id": "scene09-recap-01",
+      "offset_seconds": 0.02100000000189084,
+      "correlation": 0.9998196294641932
+    },
+    {
+      "id": "scene09-recap-02",
+      "offset_seconds": 0.02100000000189084,
+      "correlation": 0.9998270943872558
+    }
+  ]
 }
