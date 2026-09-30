@@ -119,8 +119,9 @@ class PRML56MixtureDensityNetworks(Scene):
 
     def begin(self,index):
         self.clear(); self.story=SCENES[index]; self.beat_index=0; self.subtitle=None
-        self.add(jp(self.story['title'],32).move_to([0,3.35,0]))
-        self.add(jp(self.story['reference'],15,MUTED).move_to([0,2.83,0]))
+        self.heading=VGroup(jp(self.story['title'],32).move_to([0,3.35,0]),
+                            jp(self.story['reference'],15,MUTED).move_to([0,2.83,0]))
+        self.add(self.heading)
         entry=self.manifest[self.story['id']]
         if not valid_entry(self.story,entry):raise RuntimeError('Missing or stale narration: '+self.story['id'])
         self.audio_entry=entry; self.durations=entry['beat_durations']
@@ -135,7 +136,7 @@ class PRML56MixtureDensityNetworks(Scene):
         return [dict(id=c['id'],display=c['display'],start=c['start']-offset,end=c['end']-offset)
                 for c in self.audio_entry['subtitle_cues'] if c['beat_index']==self.beat_index]
 
-    def beat(self,*animations,start_sentence=0):
+    def beat(self,*animations,start_sentence=0,sentence_actions=None):
         if self.subtitle is not None:self.remove(self.subtitle)
         cues=self.beat_cues(); captions=VGroup(*[caption_mobject(c['display']).set_opacity(0) for c in cues])
         self.subtitle=captions; self.add(captions)
@@ -149,14 +150,25 @@ class PRML56MixtureDensityNetworks(Scene):
         self.timeline[-1]['beats'].append(dict(start=start,end=start+duration,visual=self.story['beats'][self.beat_index]['visual_note'],
             action_start=start+a,action_end=start+b,cues=[dict(c,start=start+c['start'],end=start+c['end']) for c in cues]))
         visual=[]
-        if a>0:visual.append(Wait(a))
-        prepared=[prepare_animation(a) for a in animations]
-        for anim in prepared:
-            if isinstance(anim,(Write,FadeIn,FadeOut,Create)) or (isinstance(anim,Transform) and isinstance(anim.mobject,MathTex)):
-                anim.set_run_time(min(1.8,(b-a)*.25))
-            else:
-                anim.set_run_time(b-a)
-        visual.append(AnimationGroup(*prepared,Wait(b-a)) if prepared else Wait(b-a))
+        if sentence_actions is not None:
+            assert not animations and len(sentence_actions)==len(cues)
+            self.timeline[-1]['beats'][-1]['phases']=[]
+            for cue,factory in zip(cues,sentence_actions):
+                span=cue['end']-cue['start']
+                action=prepare_animation(factory())
+                action.set_run_time(span)
+                visual.append(action)
+                self.timeline[-1]['beats'][-1]['phases'].append(dict(
+                    id=cue['id'],start=start+cue['start'],end=start+cue['end']))
+        else:
+            if a>0:visual.append(Wait(a))
+            prepared=[prepare_animation(a) for a in animations]
+            for anim in prepared:
+                if isinstance(anim,(Write,FadeIn,FadeOut,Create)) or (isinstance(anim,Transform) and isinstance(anim.mobject,MathTex)):
+                    anim.set_run_time(min(1.8,(b-a)*.25))
+                else:
+                    anim.set_run_time(b-a)
+            visual.append(AnimationGroup(*prepared,Wait(b-a)) if prepared else Wait(b-a))
         visual.append(Wait(max(.001,duration-b)))
         self.play(Succession(*visual),UpdateFromAlphaFunc(captions,caption_at,rate_func=linear),
                   run_time=(frames-1e-5)/fps,rate_func=linear)
@@ -216,6 +228,7 @@ class PRML56MixtureDensityNetworks(Scene):
         scan=always_redraw(lambda:Line(ax.c2p(xv.get_value(),0),ax.c2p(xv.get_value(),1),color=YELLOW))
         self.add(scan,readout('x=',xv.get_value,[4.9,2,0],YELLOW))
         self.beat(xv.animate.set_value(.5))
+        self.mean_recap()
         mean=curve(ax,u,mean_prediction(self.model['mean_weights'],u),RED,4)
         formula=self.formula(r'\min_y\ \mathbb{E}[(t-y)^2\mid x]\quad\Rightarrow\quad y=\mathbb{E}[t\mid x]',size=28)
         self.beat(Create(mean),Write(formula))
@@ -238,6 +251,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.add(slider(mu,.15,.85,(-3,-2.3,0),label=r'\mu',color=C[1]),readout(r'\mu=',mu.get_value,[3,-2.3,0],C[1]))
         self.beat(mu.animate.set_value(.22))
         self.beat(sig.animate.set_value(.16))
+        self.mixture_recap()
         self.beat(blend.animate.set_value(1),sig.animate.set_value(.095))
         prob=bars(lambda:pars()[0],[0,2.15,0],width=5)
         self.add(prob)
@@ -297,6 +311,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.remove(nll)
         eq=self.formula(r'E(w)=-\sum_{n=1}^{N}\ln\left[\sum_{k=1}^{K}\pi_k(x_n,w)\mathcal{N}(t_n\mid\mu_k,\sigma_k^2)\right]',size=30)
         self.beat(Write(eq),mu.animate.set_value(.62))
+        self.sums_aid()
         self.remove(graph,guide)
         step=ValueTracker(0)
         def w_now():
@@ -325,6 +340,7 @@ class PRML56MixtureDensityNetworks(Scene):
         eq=self.formula(r'\gamma_k={\pi_k\mathcal{N}_k\over\sum_l\pi_l\mathcal{N}_l}',size=32)
         self.add(bs,nums)
         self.beat(Write(eq),tv.animate.set_value(.46))
+        self.bayes_recap()
         prior=jp('観測前',21,MUTED).move_to([3.8,1.65,0]);post=jp('観測後',21,YELLOW).move_to([3.8,1,0])
         priorbar=bars(lambda:p,[3.8,1.35,0],width=3.1,labels=False)
         self.beat(FadeIn(priorbar),Write(prior),Write(post),tv.animate.set_value(.3))
@@ -403,3 +419,126 @@ class PRML56MixtureDensityNetworks(Scene):
         distinction=self.formula(r'p(t\mid x,w_{\mathrm{ML}})\qquad\qquad p(w\mid\mathcal{D})',size=34)
         self.beat(Transform(eq,distinction),xv.animate.set_value(.85))
         self.beat(Transform(eq,self.formula(r'x\quad\longrightarrow\quad p(t\mid x)',size=36)),xv.animate.set_value(.5),Indicate(upper),Indicate(lower))
+
+    def body_card(self,label):
+        """Temporarily remove the body, keeping its objects and tracker states intact."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        self.clear();self.subtitle=None
+        self.add(self.heading,
+                 RoundedRectangle(width=10.6,height=4.8,corner_radius=.12,
+                                  color='#FFFF00',stroke_width=1.2).move_to([0,0,0]),
+                 jp(label,23).move_to([-4.95,2.08,0],aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self,saved):
+        self.clear();self.add(*saved);self.subtitle=None
+
+    def mean_recap(self):
+        saved=self.body_card('復習: 1.5 二乗損失と条件付き平均')
+        # 1.5 regression(): blue density, yellow prediction/loss, green optimum.
+        pred=ValueTracker(-1.7);sep=ValueTracker(0)
+        left,ll=axes((-3,3,1),(0,.8,.4),3.7,2.1,(-2.65,.15,0),'t','p')
+        right,rl=axes((-2,2,1),(0,6,2),3.7,2.1,(2.55,.15,0),'y','')
+        ll[1].move_to([-4.5,1.4,0]);rl[1].set_opacity(0)
+        u=np.linspace(-3,3,241);v=np.linspace(-2,2,161)
+        pdf=always_redraw(lambda:curve(left,u,.5*normal(u,-sep.get_value(),.6)+.5*normal(u,sep.get_value(),.6),C[0]))
+        risk=always_redraw(lambda:curve(right,v,v*v+.36+sep.get_value()**2,YELLOW))
+        marker=always_redraw(lambda:DashedLine(left.c2p(pred.get_value(),0),left.c2p(pred.get_value(),.75),color=YELLOW))
+        dot=always_redraw(lambda:Dot(right.c2p(pred.get_value(),pred.get_value()**2+.36+sep.get_value()**2),color=YELLOW))
+        optimum=Dot(left.c2p(0,0),color='#77D49A')
+        mapping=VGroup(jp('条件付き平均',21,'#77D49A'),tex(r'\longrightarrow',25),
+                       jp('本編の赤い予測線',21,RED)).arrange(RIGHT,buff=.22).move_to([0,-2.04,0])
+        self.add(left,ll,right,rl,pdf,risk,marker,dot,
+                 jp('条件付き密度',21,C[0]).move_to([-2.6,1.55,0]),
+                 jp('期待二乗損失',21,YELLOW).move_to([2.5,1.55,0]),
+                 tex(r'\mathbb E[(t-y)^2\mid x]=y^2+\mathrm{Var}[t\mid x]',26,YELLOW).move_to([0,-1.45,0]),
+                 jp('説明用：平均0、左右同じ重み',17,MUTED).move_to([0,-1.79,0]))
+        self.beat(sentence_actions=[
+            lambda:AnimationGroup(pred.animate.set_value(0),FadeIn(optimum)),
+            lambda:AnimationGroup(sep.animate.set_value(1.3),FadeIn(mapping))])
+        self.restore_body(saved)
+
+    def mixture_recap(self):
+        saved=self.body_card('復習: 2.3 ガウス混合')
+        # 2.3 mixtures(): blue/yellow weighted bells, purple sum; original parameters.
+        ax,lab=axes((-4,4,2),(0,.6,.2),8.1,2.15,(0,.15,0),'t','p')
+        lab[1].move_to([-4.45,1.5,0]);u=np.linspace(-4,4,241)
+        parts=[.45*normal(u,-1.7,.55),.55*normal(u,1.5,.7)]
+        components=VGroup(curve(ax,u,parts[0],C[0]),curve(ax,u,parts[1],YELLOW))
+        total=curve(ax,u,parts[0]+parts[1],'#C29AFF')
+        areas=VGroup()
+        for ys,color in zip(parts,[C[0],YELLOW]):
+            area=curve(ax,np.r_[u[0],u,u[-1],u[0]],np.r_[0,ys,0,0],color)
+            areas.add(area.set_fill(color,.22).set_stroke(width=0))
+        labels=VGroup(tex(r'\mathrm{area}_1=0.45',24,C[0]),tex(r'\mathrm{area}_2=0.55',24,YELLOW),
+                      tex(r'\mathrm{total}=1',24,'#C29AFF')).arrange(RIGHT,buff=.45).move_to([0,1.53,0])
+        mapping=tex(r'x\ \longrightarrow\ (\pi_k(x),\mu_k(x),\sigma_k(x))',29).move_to([0,-1.46,0])
+        color_map=VGroup(jp('本編へ：成分2',18),Dot(color=YELLOW),tex(r'\to',22),Dot(color=C[1]),
+                         jp('合計',18),Dot(color='#C29AFF'),tex(r'\to',22),Dot(color=WHITE))
+        color_map.arrange(RIGHT,buff=.18).move_to([0,-2.03,0])
+        self.add(ax,lab,components,labels)
+        self.beat(sentence_actions=[
+            lambda:Succession(FadeIn(areas),Create(total)),
+            lambda:Succession(Write(mapping),FadeIn(color_map))])
+        self.restore_body(saved)
+
+    def sums_aid(self):
+        saved=self.body_card('補足: 成分を足す → 負の対数 → 観測を足す')
+        blue,yellow,green='#58C4DD','#FFFF00','#83C167'
+        contributions=np.array([[.2,.3,.5],[.1,.1,.3]])
+        rows=VGroup();sums=VGroup();losses=VGroup();arrows=VGroup()
+        for i,values in enumerate(contributions):
+            y=.65-i*1.05
+            row=VGroup(*[VGroup(Rectangle(width=.83,height=.63,color=blue,stroke_width=1.2),
+                         tex(f'{v:.1f}',29,blue)).move_to([-3.15+j*.9,y,0]) for j,v in enumerate(values)])
+            rows.add(row)
+            self.add(tex(rf'n={i+1}',25).move_to([-4.35,y,0]))
+            sums.add(tex(f'{values.sum():.1f}',30,yellow).move_to([.25,y,0]))
+            losses.add(tex('0' if i==0 else r'0.693\ldots',28,green).move_to([3.8,y,0]))
+            arrows.add(Arrow([- .65,y,0],[-.12,y,0],buff=.02,color=yellow),
+                       Arrow([.7,y,0],[1.35,y,0],buff=.02,color=yellow),
+                       Arrow([2.35,y,0],[2.95,y,0],buff=.02,color=green))
+        boxes=VGroup(*[VGroup(RoundedRectangle(width=1.0,height=.68,corner_radius=.08,color=yellow),
+                             tex(r'-\ln',28,yellow)).move_to([1.85,.65-i*1.05,0]) for i in range(2)])
+        headers=VGroup(jp('成分の密度の寄与',20,blue).move_to([-2.25,1.43,0]),
+                       jp('合計',20,yellow).move_to([.25,1.43,0]),
+                       jp('損失',20,green).move_to([3.8,1.43,0]))
+        result=tex(r'E=0+0.693\ldots=0.693\ldots',31,green).move_to([.6,-1.56,0])
+        collect=Arrow([3.8,-.8,0],[2.7,-1.4,0],buff=.03,color=green)
+        self.add(rows,headers,jp('説明用：2観測 × 3成分。数値は密度の寄与',18,MUTED).move_to([0,-2.1,0]))
+        self.beat(sentence_actions=[
+            lambda:Succession(*[AnimationGroup(
+                Circumscribe(rows[i],color=yellow,buff=.08),
+                TransformFromCopy(rows[i],sums[i]),GrowArrow(arrows[3*i])) for i in range(2)]),
+            lambda:Succession(*[AnimationGroup(FadeIn(boxes[i]),GrowArrow(arrows[3*i+1]),
+                GrowArrow(arrows[3*i+2]),TransformFromCopy(sums[i],losses[i])) for i in range(2)]),
+            lambda:AnimationGroup(GrowArrow(collect),TransformFromCopy(losses,result))])
+        self.restore_body(saved)
+
+    def bayes_recap(self):
+        saved=self.body_card('復習: 1.2 ベイズ更新から責務へ')
+        # 1.2 bayes(): equal-height red/blue areas, expanded to a whole of one.
+        joint=np.array([.225,.140]);posterior=joint/joint.sum()
+        def strip(values):
+            group=VGroup();left=-3.6
+            for value,color in zip(values,[RED,C[0]]):
+                r=Rectangle(width=7.2*value,height=1.25,color=color,fill_opacity=.55,stroke_width=1.5)
+                r.move_to([left+r.width/2,.25,0]);left+=r.width;group.add(r)
+            return group
+        blocks=strip(joint)
+        legend=VGroup(jp('赤い箱',21,RED),jp('青い箱',21,C[0])).arrange(RIGHT,buff=.55).move_to([0,1.6,0])
+        prior_rule=tex(r'0.30\times0.75=0.225,\quad0.70\times0.20=0.140',27).move_to([0,-.85,0])
+        rule=tex(r'\text{prior}\times\text{likelihood}\ \longrightarrow\ \text{normalize}',25).move_to([0,-1.45,0])
+        component_legend=VGroup(tex(r'\pi_1\mathcal N_1',26,RED),tex(r'\pi_2\mathcal N_2',26,C[0])).arrange(RIGHT,buff=1).move_to(legend)
+        density_rule=tex(r'\pi_k\,\mathcal N(t_n\mid\mu_k,\sigma_k^2)',31,YELLOW).move_to(rule)
+        normalized_rule=tex(r'\gamma_k={\pi_k\mathcal N_k\over\sum_l\pi_l\mathcal N_l},\quad\sum_k\gamma_k=1',29,YELLOW).move_to(rule)
+        proportions=VGroup(tex(r'\gamma_1=0.6164',26,RED),tex(r'\gamma_2=0.3836',26,C[0])).arrange(RIGHT,buff=.6).move_to(prior_rule)
+        condition=jp('説明用：2成分、入力を固定した連続観測',18,MUTED).move_to([0,-2.14,0])
+        self.add(blocks,legend,prior_rule,rule)
+        self.beat(sentence_actions=[
+            lambda:Transform(blocks,strip(posterior)),
+            lambda:AnimationGroup(Transform(blocks,strip(joint)),Transform(legend,component_legend),
+                                  Transform(rule,density_rule),FadeIn(condition)),
+            lambda:AnimationGroup(Transform(blocks,strip(posterior)),Transform(rule,normalized_rule),
+                                  Transform(prior_rule,proportions))])
+        self.restore_body(saved)
