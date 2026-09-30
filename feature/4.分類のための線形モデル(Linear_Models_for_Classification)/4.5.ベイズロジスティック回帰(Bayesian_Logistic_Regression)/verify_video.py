@@ -16,6 +16,18 @@ for s in timeline:
   for c in b['cues']:
    if '$' in c['display']:
     shots.append(dict(id=c['id'],time=(c['start']+c['end'])/2,display=c['display']))
+# Every inserted card and the changed reference label: before, during, after.
+for scene in timeline:
+ for beat in scene['beats']:
+  changed = any('-recap-' in c['id'] or '-aid-' in c['id'] or c['id']=='scene05-03-01' for c in beat['cues'])
+  if not changed:
+   continue
+  for suffix,time in [('before',beat['start']-.2),('after',beat['end']+.2)]:
+   shots.append(dict(id=beat['cues'][0]['id']+'-'+suffix,time=time,display='transition'))
+  for cue in beat['cues']:
+   for suffix,fraction in [('early',.12),('late',.88)]:
+    shots.append(dict(id=cue['id']+'-'+suffix,time=cue['start']+fraction*(cue['end']-cue['start']),display=cue['display']))
+
 # Three scene actions, before/after positions and measured PCM onset.
 sync=[]
 for i,j,k in [(0,2,0),(4,3,1),(7,0,1)]:
@@ -30,6 +42,23 @@ for i,j,k in [(0,2,0),(4,3,1),(7,0,1)]:
                   action_start=beat['action_start'],action_end=beat['action_end']))
  for suffix,fraction in [('early',.12),('late',.85)]:
   shots.append(dict(id=cue['id']+'-'+suffix,time=beat['action_start']+fraction*(beat['action_end']-beat['action_start']),display=cue['display']))
+# Two added operations measured against their own PCM sentence.
+for sid,cid,phase_name in [('scene01','scene01-recap-02','sigmoid each candidate then average'),
+                           ('scene04','scene04-aid-02','coefficient on all cells')]:
+ scene=next(s for s in timeline if s['id']==sid)
+ beat=next(b for b in scene['beats'] if any(c['id']==cid for c in b['cues']))
+ cue=next(c for c in beat['cues'] if c['id']==cid)
+ action=next(a for a in beat['actions'] if a['name']==phase_name)
+ entry=next(e for e in manifest['scenes'] if e['id']==sid)
+ audio_cue=next(c for c in entry['subtitle_cues'] if c['id']==cid)
+ with wave.open(str(d/entry['path'])) as wav:
+  rate=wav.getframerate();pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)/32768
+ start=round(audio_cue['start']*rate);end=round(audio_cue['end']*rate)
+ idx=np.flatnonzero(abs(pcm[start:end])>10**(-45/20))
+ onset=scene['start']+(start+int(idx[0]))/rate
+ assert abs(action['start']-cue['start'])<=1/15+.001
+ sync.append(dict(id=cid,sentence_start=cue['start'],pcm_onset=onset,
+                  action_start=action['start'],action_end=action['end'],phase=phase_name))
 for s in shots:
  p=out/(s['id']+'.png')
  subprocess.run(['ffmpeg','-v','error','-y','-ss',str(s['time']),'-i',str(video),'-frames:v','1',str(p)],check=True)
