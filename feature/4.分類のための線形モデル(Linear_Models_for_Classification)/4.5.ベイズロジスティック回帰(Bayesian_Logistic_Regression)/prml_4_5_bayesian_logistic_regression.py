@@ -119,6 +119,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         s1 = self.slider(w, .3, 2, [2.7, -2.1, 0], 'w_1', YELLOW)
         self.beat(b.animate.set_value(.4), end_sentence=1)
         self.beat(w.animate.set_value(1.8), end_sentence=1)
+        self.regression_recap()
         self.remove(line, s0, s1, f)
         cloud = VGroup(*[curve(ax, u, sigmoid(design(u)@v), GREEN, 1.5, .48) for v in SAMPLES])
         self.equation(r'p(C_1\mid x,\mathbf t)\simeq\int\sigma(w^{\mathsf T}\phi)q(w)\,dw')
@@ -180,6 +181,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
                                         color=RED, radius=.09))
         self.add(dot)
         self.beat(p.animate.set_value(SW), end_sentence=1)
+        self.laplace_recap()
         quad = curve(ax, u, .5*(u-SW)**2/SV, GREEN)
         self.remove(f)
         f = self.equation(r'E(w)\simeq E(w_{\mathrm{MAP}})+',
@@ -235,6 +237,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
                           r'\phi_n\phi_n^{\mathsf T}', size=30)
         f[1].set_color(PURPLE); f[3].set_color(YELLOW); f[4].set_color(BLUE)
         self.beat(Circumscribe(f[1], color=PURPLE), Circumscribe(f[2:], color=YELLOW))
+        self.precision_aid()
         self.beat(Indicate(f[3], color=YELLOW), theta.animate.set_value(2*TAU))
 
     def projection(self):
@@ -244,7 +247,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
                         4.7, 3.2, ('a', 'p(a)'))
         self.add(contours(ax))
         x = ValueTracker(.3)
-        self.slider(x, -.8, 2, [0, 2.4, 0], 'x', YELLOW, width=2.7)
+        slider = self.slider(x, -.8, 2, [0, 2.4, 0], 'x', YELLOW, width=2.7)
         phi = lambda: np.array([1, x.get_value()])
         origin = ax.c2p(*MAP)
         direction = always_redraw(lambda: Arrow(origin,
@@ -260,7 +263,15 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.beat(TransformFromCopy(cloud, projected))
         u = np.linspace(-5, 7, 221)
         density = always_redraw(lambda: curve(out, u, normal(u, *[float(v[0]) for v in stats([x.get_value()])]), GREEN))
+        self.remove(slider)
+        recap = jp("復習: 2.3 ガウス分布の線形変換", 21).move_to([0, 2.45, 0])
+        # Fixed box avoids invisible space glyphs expanding Text bounds.
+        border = RoundedRectangle(width=5.0, height=.55, corner_radius=.08,
+                                  color="#FFFF00", stroke_width=1.2).move_to([0,2.45,0])
+        self.add(recap, border)
         self.beat(Create(density))
+        self.remove(recap, border)
+        self.add(slider)
         self.remove(f)
         f = self.equation(r'\mu_a=w_{\mathrm{MAP}}^{\mathsf T}\phi',
                           r',\qquad\sigma_a^2=\phi^{\mathsf T}S_N\phi')
@@ -390,3 +401,99 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.beat(scale.animate.set_value(1), Circumscribe(f, color=GREEN))
         cloud = VGroup(*[curve(ax, u, sigmoid(design(u)@v), GREEN, 1.2, .23) for v in SAMPLES])
         self.beat(Create(cloud), ShowPassingFlash(line.copy().clear_updaters().set_stroke(GREEN, 5), time_width=.35))
+
+
+    def body_card(self, label):
+        """Temporarily replace the body; keep the title and the PCM clock."""
+        saved = [m for m in self.mobjects if m is not self.subtitle]
+        self.clear()
+        self.add(*[m for m in saved if m.get_center()[1] > 3])
+        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
+                                 color='#FFFF00', stroke_width=1.2).move_to([0, .1, 0])
+        self.add(frame, jp(label, 23).move_to([-4.85, 2.02, 0], aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self, saved):
+        self.clear()
+        self.add(*saved)
+        self.subtitle = None
+
+    def regression_recap(self):
+        saved = self.body_card('復習: 3.3 候補ごとの予測を平均')
+        # 3.3 curves()/candidates(): preserve candidate colors and red mean.
+        colors = ['#FF6B77', '#FFE079', '#C29AFF', '#FFB45B', '#58B5ED', '#77D49A']
+        left = self.axes((-1, 1, 1), (-3, 3, 1), (-2.8, .0, 0), 3.5, 2.35, ('x', 'y'))
+        right = self.axes((-1, 1, 1), (0, 1, .5), (2.6, .0, 0), 3.5, 2.35, ('x', 'p'))
+        right.labels[-1].next_to(right.c2p(-1, 1), RIGHT, buff=.15)
+        self.add(jp('説明用の候補：同じ重みの組を使う', 19, MUTED).move_to([0, 1.45, 0]))
+        xx = np.linspace(-1, 1, 101)
+        values = np.array([b+w*xx for b, w in [(-.8,1.4),(-.3,1.1),(.4,1.8),(.6,.9),(-.5,1.9),(.1,1.3)]])
+        candidates = VGroup(*[curve(left, xx, v, c, 1.5, .6) for v,c in zip(values,colors)])
+        mean = curve(left, xx, values.mean(axis=0), colors[0], 4)
+        probabilities = VGroup(*[curve(right, xx, sigmoid(v), c, 1.5, .6) for v,c in zip(values,colors)])
+        average = curve(right, xx, sigmoid(values).mean(axis=0), colors[0], 4)
+        arrow = Arrow([-.8,.25,0],[.5,.25,0],color='#FFE079',buff=.08)
+        label = tex(r'\sigma',28,'#FFE079').next_to(arrow,UP,buff=.1)
+        legend = jp('細線：分布からの候補　太い赤線：平均',20).move_to([0,-1.85,0])
+        self.add(candidates, legend)
+        first, second = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('3.3 prediction mean', first, lambda: Create(mean)),
+            ('sigmoid each candidate then average', second*.7,
+             lambda: AnimationGroup(GrowArrow(arrow),FadeIn(label),TransformFromCopy(candidates,probabilities))),
+            ('mean of class probabilities', second*.3, lambda: Create(average)),
+        ])
+        self.restore_body(saved)
+
+    def laplace_recap(self):
+        saved = self.body_card('復習: 4.4 ラプラス近似')
+        # 4.4 curvature(): red quadratic/Gaussian and gold width.
+        red, gold = '#FF6B77', '#FFE079'
+        left = self.axes((-1.4,1.4,1),(0,4,1),(-2.8,0,0),3.5,2.25,('z','h(z)'))
+        right = self.axes((-1.4,1.4,1),(0,.9,.3),(2.65,0,0),3.5,2.25,('z','q(z)'))
+        right.labels[-1].next_to(right.c2p(-1.4, .9), RIGHT, buff=.15)
+        xx = np.linspace(-1.4,1.4,121); a = ValueTracker(1)
+        bowl = always_redraw(lambda:curve(left,xx,.5*a.get_value()*xx**2,red))
+        bell = always_redraw(lambda:curve(right,xx,normal(xx,0,1/a.get_value()),red))
+        width = always_redraw(lambda:Line(right.c2p(-1/np.sqrt(a.get_value()),.12),
+                                         right.c2p(1/np.sqrt(a.get_value()),.12),color=gold,stroke_width=4))
+        self.add(jp('説明用の一変数：谷底の近く、曲率は正',19,MUTED).move_to([0,1.45,0]),
+                 tex(r'h(z)\simeq\tfrac12Az^2',26,red).move_to([-2.7,-1.65,0]),
+                 tex(r'\mathrm{Var}[z]=A^{-1}',26,red).move_to([2.6,-1.65,0]))
+        mapping = tex(r'A>0\quad\longrightarrow\quad H>0',25,gold).move_to([0,2.6,0])
+        first, second = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('local quadratic', first, lambda:Create(bowl)),
+            ('Gaussian with inverse curvature', second*.45, lambda:AnimationGroup(Create(bell),Create(width))),
+            ('curvature and width', second*.3, lambda:a.animate.set_value(4)),
+            ('A becomes H', second*.25, lambda:FadeIn(mapping)),
+        ])
+        self.restore_body(saved)
+
+    def precision_aid(self):
+        saved = self.body_card('補足: 観測一つが加える精度')
+        blue, yellow, green, purple = '#58C4DD', '#FFFF00', '#83C167', '#9A72AC'
+        self.add(jp('説明用の例：特徴 (1, 2)、予測確率 0.5',20,MUTED).move_to([0,1.45,0]))
+        column = Matrix([['1'],['2']],v_buff=.65).scale(.65).set_color(blue)
+        row = Matrix([['1','2']],h_buff=.85).scale(.65).set_color(purple)
+        product = Matrix([['1','2'],['2','4']],h_buff=.85,v_buff=.65).scale(.65).set_color(yellow)
+        eq = VGroup(column,tex(r'\times',28),row,tex('=',28),product).arrange(RIGHT,buff=.35).move_to([0,.35,0])
+        entries = product.get_entries()
+        self.add(column,row,eq[1],eq[3],product.get_brackets())
+        factors = [(column.get_entries()[i],row.get_entries()[j]) for i in range(2) for j in range(2)]
+        coefficient = tex(r'y(1-y)=0.25',29,yellow).move_to([-2.6,-.95,0])
+        factor = tex('0.25',29,yellow).next_to(column,LEFT,buff=.2)
+        weighted = Matrix([['0.25','0.5'],['0.5','1']],h_buff=1.05,v_buff=.65).scale(.65).set_color(green).move_to(product)
+        caption = jp('観測の精度',20,green).next_to(weighted,UP,buff=.13)
+        result = MathTex(r'S_0^{-1}', '+', r'0.25\phi\phi^{\mathsf T}', '=H',
+                         r'\quad\longrightarrow\quad', r'S_N=H^{-1}',font_size=29).move_to([0,-1.8,0])
+        result[0].set_color(purple);result[2].set_color(green);result[5].set_color(green)
+        first,second,third = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('four outer product cells', first,
+             lambda:LaggedStart(*[TransformFromCopy(VGroup(*pair),cell) for pair,cell in zip(factors,entries)],lag_ratio=.3)),
+            ('coefficient on all cells', second,
+             lambda:AnimationGroup(FadeIn(coefficient),FadeIn(factor),Transform(product,weighted),FadeIn(caption))),
+            ('add precision then invert', third, lambda:Write(result)),
+        ])
+        self.restore_body(saved)

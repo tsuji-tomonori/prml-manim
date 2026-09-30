@@ -70,6 +70,20 @@ report['threshold08_map_x'] = float((np.log(4)-MAP[0])/MAP[1])
 report['threshold08_bayes_x'] = float(np.interp(.8,predict(grid),grid))
 assert report['threshold08_bayes_x'] > report['threshold08_map_x']
 
+# The precision card is an illustrative observation, independent of the fitted data.
+phi_example = np.array([1.,2.])
+outer_example = np.outer(phi_example,phi_example)
+assert np.array_equal(outer_example,[[1,2],[2,4]])
+precision_example = .5*(1-.5)*outer_example
+assert np.array_equal(precision_example,[[.25,.5],[.5,1]])
+assert np.linalg.eigvalsh(np.eye(2)+precision_example).min()>0
+assert np.allclose(np.linalg.inv(np.eye(2)+precision_example)@(np.eye(2)+precision_example),np.eye(2))
+report['aid_observation_precision'] = precision_example.tolist()
+for a in [1.,4.]:
+ z=np.linspace(-10,10,20001)
+ assert abs(np.trapezoid(z*z*normal(z,0,1/a),z)-1/a)<1e-10
+report['recap_curvature_variance'] = [[1,1],[4,.25]]
+
 entries = json.loads(MANIFEST.read_text())['scenes']
 assert all(valid_entry(s,e) for s,e in zip(SCENES,entries))
 assert len(entries)==len(SCENES)
