@@ -358,12 +358,13 @@ class PRML53ErrorBackpropagation(NarratedScene):
         factors=VGroup(numerator,denominator,rule,times,factor)
         crosses=VGroup(*[Line(m.get_corner(DL),m.get_corner(UR),color=YELLOW_ACC,stroke_width=3)
                           for m in [denominator,factor]])
-        result=tex('y-t',38,YELLOW_ACC).move_to([-1.75,-.72,0])
         mapping=VGroup(tex('y-t',32,YELLOW_ACC),Arrow(LEFT*.3,RIGHT*.3,buff=0,color=MUTED),
                        tex(r'\delta_k=y_k-t_k',32,RED_CLASS)).arrange(RIGHT,buff=.23).move_to([0,-1.78,0])
         self.add(left,factors)
         def cancel():
-            return Succession(Create(crosses),AnimationGroup(FadeOut(crosses),ReplacementTransform(factors,result)))
+            return Succession(Create(crosses),AnimationGroup(
+                FadeOut(VGroup(denominator,rule,times,factor,crosses)),
+                numerator.animate.move_to([-1.75,-.72,0])))
         self.beat(actions=[lambda:pulse(paths,YELLOW_ACC),cancel,lambda:FadeIn(mapping,shift=DOWN*.1)])
         self.restore_body(saved)
 
@@ -402,7 +403,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
             fixed=tex(fr'\Delta x_{{{2-i}}}=0',25,blue).move_to([-3.4,-1.03,0])
             current.extend([highlight,fixed]);self.add(*current)
             return Succession(eps.animate.set_value(.02),
-                AnimationGroup(*[TransformFromCopy(current[3*k+2][1],columns[i][k]) for k in range(2)]))
+                AnimationGroup(*[Indicate(columns[i][k],color=yellow,scale_factor=1.05) for k in range(2)]))
         self.add(jp('矢印の尺度は各出力で拡大',17,MUTED).move_to([-.4,-1.4,0]))
         self.beat(actions=[lambda:show_column(0),lambda:show_column(1)])
         self.restore_body(saved)
