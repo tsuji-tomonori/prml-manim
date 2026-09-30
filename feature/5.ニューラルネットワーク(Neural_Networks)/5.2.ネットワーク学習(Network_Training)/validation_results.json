@@ -8,24 +8,24 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "590.333333"
+        "duration": "637.466344"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "590.357333"
+        "duration": "637.504000"
       }
     ],
     "format": {
-      "duration": "590.358000"
+      "duration": "637.504000"
     }
   },
-  "stream_difference": 0.02400000000000091,
+  "stream_difference": 0.037655999999969936,
   "silences_over_3s": 0,
-  "mean_volume": -26.4,
-  "max_volume": -6.7,
-  "max_scene_clock_error": 4.843769829676603e-11,
+  "mean_volume": -26.5,
+  "max_volume": -6.2,
+  "max_scene_clock_error": 5.013589543523267e-11,
   "sync": [
     {
       "id": "scene01-03-01",
@@ -44,40 +44,114 @@
     {
       "id": "scene04-03-01",
       "display": "一つが増えると、ほかの確率は減り、合計は一のままです。",
-      "action_start": 185.79999999999458,
-      "action_end": 195.5999999999946,
-      "pcm_onset": 185.8874166666623
+      "action_start": 208.46666666665996,
+      "action_end": 218.26666666665997,
+      "pcm_onset": 208.55408333332767
     },
     {
       "id": "scene04-03-02",
       "display": "正解クラスの確率の対数にマイナスを付けて、誤差を作ります。",
-      "action_start": 185.79999999999458,
-      "action_end": 195.5999999999946,
-      "pcm_onset": 190.63462499999562
+      "action_start": 208.46666666665996,
+      "action_end": 218.26666666665997,
+      "pcm_onset": 213.301291666661
     },
     {
       "id": "scene09-03-01",
       "display": "同じ出発点に戻り、学習率だけを大きくします。",
-      "action_start": 486.4666666666442,
-      "action_end": 495.99999999997755,
-      "pcm_onset": 486.53062499997867
+      "action_start": 533.5999999999932,
+      "action_end": 543.1333333333265,
+      "pcm_onset": 533.6639583333106
     },
     {
       "id": "scene09-03-02",
       "display": "細い谷では、向こう岸を越えて戻る、ジグザグの動きが見えてきます。",
-      "action_start": 486.4666666666442,
-      "action_end": 495.99999999997755,
-      "pcm_onset": 490.61987499997866
+      "action_start": 533.5999999999932,
+      "action_end": 543.1333333333265,
+      "pcm_onset": 537.7532083333106
     }
   ],
-  "sha256": "cc66ee37832aa904cbbc00199356a83b3ecac4eae4c52f31bd2a7b0f648c5a01",
-  "full_listen": false,
-  "visual_review": {
-    "inspected_frames": 73,
-    "beat_frames": 60,
-    "math_caption_frames": 6,
-    "sync_frames": 6,
-    "divergence_endpoint_frames": 1,
-    "unresolved_findings": []
-  }
+  "addition_sync": [
+    {
+      "id": "scene02-recap-01",
+      "display": "3.1では、ガウスのノイズから二乗誤差が現れました。",
+      "action_start": 51.53333333333421,
+      "action_end": 55.93333333333421,
+      "pcm_onset": 51.592458333334214,
+      "onset_minus_action": 0.05912500000000165
+    },
+    {
+      "id": "scene02-recap-02",
+      "display": "精度を固定すると、最尤推定は二乗誤差の最小化です。",
+      "action_start": 55.93333333333421,
+      "action_end": 60.40000000000088,
+      "pcm_onset": 56.012791666667546,
+      "onset_minus_action": 0.07945833333333496
+    },
+    {
+      "id": "scene02-recap-03",
+      "display": "予測をネットワークに替えても、同じ関係です。",
+      "action_start": 60.40000000000088,
+      "action_end": 64.1333333333342,
+      "pcm_onset": 60.46945833333422,
+      "onset_minus_action": 0.06945833333333695
+    },
+    {
+      "id": "scene03-recap-01",
+      "display": "4.3では、正解クラスの確率の負の対数を、損失にしました。",
+      "action_start": 123.66666666666477,
+      "action_end": 129.26666666666478,
+      "pcm_onset": 123.73666666666476,
+      "onset_minus_action": 0.06999999999999318
+    },
+    {
+      "id": "scene03-recap-02",
+      "display": "確信して外した予測ほど、損失が大きくなります。",
+      "action_start": 129.26666666666478,
+      "action_end": 133.73333333333144,
+      "pcm_onset": 129.37591666666478,
+      "onset_minus_action": 0.10925000000000296
+    },
+    {
+      "id": "scene06-recap-01",
+      "display": "4.4では、対数の山を頂上の近くで二次式に近似しました。",
+      "action_start": 310.7999999999875,
+      "action_end": 316.1333333333208,
+      "pcm_onset": 310.87129166665414,
+      "onset_minus_action": 0.07129166666663878
+    },
+    {
+      "id": "scene06-recap-02",
+      "display": "今回は誤差の一点の近くを、傾きも残して近似します。",
+      "action_start": 316.1333333333208,
+      "action_end": 320.9999999999875,
+      "pcm_onset": 316.1996249999875,
+      "onset_minus_action": 0.06629166666670017
+    },
+    {
+      "id": "scene06-aid-01",
+      "display": "ほかを固定し、まず $w_1$ だけ動かして傾きを測ります。",
+      "action_start": 362.6666666666512,
+      "action_end": 367.1999999999846,
+      "pcm_onset": 362.77045833332085,
+      "onset_minus_action": 0.10379166666962192
+    },
+    {
+      "id": "scene06-aid-02",
+      "display": "次は $w_1$ を固定し、$w_2$ の傾きを測ります。",
+      "action_start": 367.1999999999846,
+      "action_end": 371.59999999998456,
+      "pcm_onset": 367.3156249999875,
+      "onset_minus_action": 0.11562500000292175
+    },
+    {
+      "id": "scene06-aid-03",
+      "display": "二つの傾き $2$ と $-1$ を並べると、勾配です。",
+      "action_start": 371.59999999998456,
+      "action_end": 376.5333333333179,
+      "pcm_onset": 371.6641666666542,
+      "onset_minus_action": 0.06416666666962101
+    }
+  ],
+  "sha256": "6033fa58b0b5afc1c57835145bcf3d2110ff34dc454aeefe9985c142075add20",
+  "full_listen": false
 }

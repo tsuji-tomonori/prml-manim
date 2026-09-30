@@ -126,7 +126,8 @@ def generate_scene(base, scene):
             speech_ends.append((total_frames - beat_start) / params[2])
             # Only a short breath after actual speech; never pad to the old
             # silent-storyboard duration. Align to the 15fps preview boundaries.
-            target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            target_seconds = math.ceil(max((total_frames - beat_start) / params[2] + .35,
+                                           beat.get("min_seconds", 0)) * 15) / 15
             target_frames = round(target_seconds * params[2])
             padding = target_frames - (total_frames - beat_start)
             output.writeframes(b"\0" * (padding * params[0] * params[1]))
@@ -155,6 +156,9 @@ def main():
         return
     start = next(i for i, s in enumerate(SCENES) if s["id"] == args.from_scene)
     for i in range(start, len(SCENES)):
+        if valid_entry(SCENES[i], entries[i]):
+            print(f"Keep unchanged {SCENES[i]['id']}", flush=True)
+            continue
         entries[i] = generate_scene(args.base_url, SCENES[i])
         save_manifest(entries)  # Safe to resume after each completed scene.
     print(f"Saved {MANIFEST}")

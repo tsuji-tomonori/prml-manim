@@ -41,6 +41,7 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(w.animate.set_value(REG_W))
 
     def gaussian(self):
+        self.gaussian_recap()
         ax=self.plot_axes(x=(-2.5,2.5,1),y=(0,1.5,.5),width=8,height=3.15,center=(-1,-.15,0),labels=('t',r'p(t\mid x,w)'))
         mu=ValueTracker(-.6);beta=ValueTracker(2)
         density=lambda t:np.sqrt(beta.get_value()/(2*np.pi))*np.exp(-.5*beta.get_value()*(t-mu.get_value())**2)
@@ -61,6 +62,7 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(beta.animate.set_value(3))
 
     def binary(self):
+        self.loss_recap()
         ax=self.plot_axes(x=(-4,4,2),y=(0,1,.5),width=8,height=3.3,center=(-1,-.1,0),labels=('a','y'))
         a=ValueTracker(-3);target=ValueTracker(1)
         g=curve(ax,sigmoid,color=RED)
@@ -134,6 +136,7 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(q.animate.set_value(STATIONARY[0]),r.animate.set_value(STATIONARY[2]))
 
     def quadratic(self):
+        self.taylor_recap()
         ax=self.plot_axes(x=(-2.3,2.3,1),y=(-.3,2.7,1),width=9,height=3.3,center=(-.5,-.1,0),labels=('w','E'))
         q=ValueTracker(-1.2); span=ValueTracker(.35)
         g=curve(ax,landscape,color=BLUE)
@@ -151,6 +154,8 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(q.animate.set_value(-1.05))
         self.equation(r'b=\nabla E(\widehat w)',r'\quad H_{ij}=\frac{\partial^2 E}{\partial w_i\partial w_j}',size=31)
         self.beat(q.animate.set_value(-1.4))
+        self.gradient_aid()
+        self.beat(Indicate(self.formula[1],color=YELLOW,scale_factor=1.04))
         self.equation(r'E(w)\approx E(w^*)+\frac12(w-w^*)^T H(w-w^*)',size=30)
         self.beat(q.animate.set_value(STATIONARY[0]))
 
@@ -235,6 +240,7 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(q.animate.set_value(20))
 
     def online(self):
+        self.add(jp('復習: 3.1 一例ずつの勾配で更新',20).move_to([0,2.94,0]))
         ax=self.plot_axes(x=(-1.6,1.8,.8),y=(0,10,2),width=8.4,height=3.2,center=(-.7,-.1,0),labels=('w','E'))
         total=curve(ax,scalar_error,color=BLUE)
         pieces=VGroup(*[curve(ax,lambda w,t=t:.5*(w-t)**2,color=co).set_stroke(width=1.6) for t,co in zip(TARGETS,[RED,GREEN,PURPLE,YELLOW])])
@@ -257,3 +263,134 @@ class PRML52NetworkTraining(NarratedScene):
         q.set_value(0);self.beat(q.animate.set_value(16))
         self.equation(r'p(t\mid x,w)\ \longrightarrow\ E(w)\ \longrightarrow\ \nabla E\ \longrightarrow\ w_{\rm new}',size=32)
         self.beat(q.animate.set_value(24))
+
+    def body_card(self,label):
+        """Temporarily replace the body; keep trackers and the original PCM clock."""
+        saved=[m for m in self.mobjects if m is not self.subtitle]
+        self.clear()
+        self.add(*[m for m in saved if m.get_center()[1]>3.1])
+        self.add(RoundedRectangle(width=10.4,height=4.6,corner_radius=.12,
+                                  color='#FFFF00',stroke_width=1.2).move_to([0,.1,0]),
+                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+        return saved
+
+    def restore_body(self,saved):
+        self.clear();self.add(*saved);self.subtitle=None
+
+    def gaussian_recap(self):
+        saved=self.body_card('復習: 3.1 ガウスのノイズと二乗誤差')
+        # 3.1 likelihood(): horizontal green density, red prediction,
+        # blue observation and gold residual / square, at one fixed input.
+        data,model,basis,gold='#58B5ED','#FF6B77','#77D49A','#FFE079'
+        ax=self.plot_axes(x=(0,1.2,.6),y=(-1.5,1.5,1),width=2.3,height=2.45,
+                          center=(-3.15,-.05,0),labels=('p','t'))
+        obs=ValueTracker(1.1);ts=np.linspace(-1.5,1.5,161)
+        profile=VMobject().set_points_as_corners([ax.c2p(np.exp(-t*t)/np.sqrt(np.pi),t) for t in ts]).set_stroke(basis,3)
+        residual=always_redraw(lambda:Line(ax.c2p(.08,0),ax.c2p(.08,obs.get_value()),color=gold,stroke_width=4))
+        dot=always_redraw(lambda:Dot(ax.c2p(0,obs.get_value()),color=data,radius=.075))
+        square=always_redraw(lambda:Square(side_length=obs.get_value(),color=gold,fill_opacity=.4).move_to([-.55,-.45,0]))
+        formula=tex(r'-\ln p=\frac{\beta}{2}\sum_n(t_n-y_n)^2+\mathrm{const}',28,gold).move_to([1.05,1.23,0])
+        mapping=VGroup(tex(r'y=\mathbf w^T\boldsymbol\phi(x)',29,model),
+                       Arrow(UP*.4,DOWN*.4,buff=.05,color=gold),
+                       tex(r'y=y(x,\mathbf w)',29,model)).arrange(DOWN,buff=.2).move_to([2.45,-.35,0])
+        self.add(profile,residual,dot,square,Dot(ax.c2p(0,0),color=model),
+                 tex(r"(t-y)^2",23,gold).move_to([-.55,.4,0]),
+                 jp('赤：予測の中心',19,model).move_to([-3,1.5,0]),
+                 jp('独立・共通の精度を固定',20).move_to([.6,-1.77,0]))
+        self.beat(actions=[lambda:obs.animate.set_value(.45),
+                           lambda:Write(formula),lambda:FadeIn(mapping)])
+        self.restore_body(saved)
+
+    def loss_recap(self):
+        saved=self.body_card('復習: 4.3 正解クラスの確率と損失')
+        ax=self.plot_axes(x=(0,1,.2),y=(0,3,1),width=5.4,height=2.45,
+                          center=(-1.5,-.15,0),labels=('y','E_n'))
+        p=ValueTracker(.9)
+        graph=curve(ax,lambda y:-np.log(y),lo=.05,hi=1,color=RED)
+        dot=always_redraw(lambda:Dot(ax.c2p(p.get_value(),-np.log(p.get_value())),color=YELLOW,radius=.09))
+        self.add(dot,tex(r't=1:\quad E_n=-\ln y',30,RED).move_to([0,1.4,0]),
+                 number('y=',p.get_value,[3,.5,0],RED),
+                 number('E_n=',lambda:-np.log(p.get_value()),[3,-.25,0],YELLOW),
+                 tex(r'\text{network}\ \longrightarrow\ y=\sigma(a)',27).move_to([0,-1.86,0]))
+        self.beat(actions=[lambda:Create(graph),lambda:p.animate.set_value(.1)])
+        self.restore_body(saved)
+
+    def taylor_recap(self):
+        saved=self.body_card('復習: 4.4 頂上の近くを二次式で近似')
+        blue,red,gold='#58B5ED','#FF6B77','#FFE079'
+        # Copy just the reviewed 4.4 example, without importing another section.
+        logf=lambda z:-.5*(np.asarray(z)/1.1)**2-np.logaddexp(0,-(4*np.asarray(z)+.8))
+        grad=lambda z:-z/1.1**2+4*sigmoid(-(4*z+.8))
+        prec=lambda z:1/1.1**2+16*sigmoid(4*z+.8)*(1-sigmoid(4*z+.8))
+        z0=0.
+        for _ in range(30): z0+=grad(z0)/prec(z0)
+        ax=self.plot_axes(x=(-.8,1.8,1),y=(-2,2,1),width=5.2,height=2.5,
+                          center=(-1.5,-.1,0),labels=('z','g'))
+        axis_names=self.mobjects[-1]
+        q=ValueTracker(z0);sign=ValueTracker(1)
+        f=lambda z:sign.get_value()*logf(z)
+        local=lambda z:sign.get_value()*(logf(q.get_value())+grad(q.get_value())*(z-q.get_value())-.5*prec(q.get_value())*(z-q.get_value())**2)
+        graph=always_redraw(lambda:curve(ax,f,color=blue))
+        approx=always_redraw(lambda:curve(ax,local,lo=q.get_value()-.5,hi=q.get_value()+.5,color=red))
+        point=always_redraw(lambda:Dot(ax.c2p(q.get_value(),f(q.get_value())),color=gold))
+        tangent=always_redraw(lambda:curve(ax,lambda z:f(q.get_value())+sign.get_value()*grad(q.get_value())*(z-q.get_value()),lo=q.get_value()-.35,hi=q.get_value()+.35,color=gold))
+        bracket=always_redraw(lambda:BraceBetweenPoints(ax.c2p(q.get_value()-.5,-1.7),ax.c2p(q.get_value()+.5,-1.7),direction=DOWN,color=red))
+        terms=VGroup(tex(r'E(\widehat w)',28,blue),tex(r'+b\delta',30,gold),tex(r'+\frac12H\delta^2',29,red)).arrange(DOWN,buff=.26).move_to([3.15,.05,0])
+        label=tex(r'g(z)=\ln f(z)',28,blue).move_to([0,1.47,0])
+        self.add(graph,point,label,bracket,jp('基準点の近くだけ',20,red).move_to([-1.5,-1.92,0]))
+        def to_error():
+            sign.set_value(-1)
+            self.remove(label)
+            axis_names[0].become(tex('w',25).move_to(axis_names[0]))
+            axis_names[1].become(tex('E',25).move_to(axis_names[1]))
+            self.add(tex(r'E=-\ln f,\quad \delta=w-\widehat w',27,blue).move_to([0,1.47,0]),tangent,terms)
+            return q.animate.set_value(.9)
+        self.beat(actions=[lambda:Create(approx),to_error])
+        self.restore_body(saved)
+
+    def gradient_aid(self):
+        saved=self.body_card('補足: ほかを固定して測る傾き → 勾配')
+        blue,yellow,green,purple='#58C4DD','#FFFF00','#83C167','#9A72AC'
+        self.add(tex(r'E=w_1^2+\frac12w_2^2,\quad (w_1,w_2)=(1,-1)',25,blue).move_to([0,1.47,0]),
+                 jp('説明用の例',18,MUTED).move_to([3.95,1.47,0]))
+        ax=self.plot_axes(x=(-2,2.5,1),y=(-2.4,2.4,1),width=2.45,height=2.45,
+                          center=(-3.35,-.05,0),labels=('w_1','w_2'))
+        contours=VGroup()
+        for r in [.5,1,1.5]:
+            angles=np.linspace(0,TAU,121)
+            contours.add(VMobject().set_points_as_corners([ax.c2p(r*np.cos(t),np.sqrt(2)*r*np.sin(t)) for t in angles]).set_stroke(blue,1.4))
+        a=ValueTracker(.8);b=ValueTracker(-1)
+        dot=always_redraw(lambda:Dot(ax.c2p(a.get_value(),b.get_value()),color=yellow,radius=.07))
+        horizontal=DashedLine(ax.c2p(-.4,-1),ax.c2p(2,-1),color=yellow)
+        vertical=DashedLine(ax.c2p(1,-1.8),ax.c2p(1,.8),color=yellow)
+        # Sparse axis labels keep the two slices readable at 480p.
+        cut1=Axes(x_range=(.6,1.4,.4),y_range=(.6,2.6,1),x_length=2.1,y_length=.9,
+                  tips=False,axis_config=dict(color=MUTED,stroke_width=1.2)).move_to([.05,.35,0])
+        cut2=Axes(x_range=(-1.4,-.6,.4),y_range=(1,2.2,.6),x_length=2.1,y_length=.9,
+                  tips=False,axis_config=dict(color=MUTED,stroke_width=1.2)).move_to([.05,-1.1,0])
+        self.add(cut1,cut2,tex(r'E(w_1,-1)',22,blue).move_to([.05,1.05,0]),
+                 tex(r'E(1,w_2)',22,blue).move_to([.05,-.4,0]),
+                 tex('w_1',22).move_to([1.38,-.15,0]),tex('w_2',22).move_to([1.38,-1.6,0]))
+        c1=curve(cut1,lambda w:w*w+.5,color=blue)
+        c2=curve(cut2,lambda w:1+.5*w*w,color=blue)
+        t1=always_redraw(lambda:curve(cut1,lambda w:a.get_value()**2+.5+2*a.get_value()*(w-a.get_value()),color=yellow))
+        t2=always_redraw(lambda:curve(cut2,lambda w:1+.5*b.get_value()**2+b.get_value()*(w-b.get_value()),color=yellow))
+        p1=always_redraw(lambda:Dot(cut1.c2p(a.get_value(),a.get_value()**2+.5),color=yellow,radius=.06))
+        p2=always_redraw(lambda:Dot(cut2.c2p(b.get_value(),1+.5*b.get_value()**2),color=yellow,radius=.06))
+        v1=number(r'\frac{\partial E}{\partial w_1}=',lambda:2*a.get_value(),[2.85,.6,0],yellow,places=1,size=25)
+        v2=number(r'\frac{\partial E}{\partial w_2}=',b.get_value,[2.85,-.55,0],yellow,places=1,size=25)
+        vector=tex(r'\nabla E=\begin{pmatrix}2\\-1\end{pmatrix}',31,yellow).move_to([3.05,0,0])
+        arrow=Arrow(ax.c2p(1,-1),ax.c2p(1.8,-1.4),buff=0,color=yellow,stroke_width=3)
+        self.add(contours,dot,horizontal,c1,c2,p1,p2)
+        def first():
+            self.add(t1,v1)
+            return a.animate.set_value(1)
+        def second():
+            a.set_value(1);b.set_value(-1.2);self.remove(horizontal);self.add(vertical,t2,v2)
+            return b.animate.set_value(-1)
+        def collect():
+            b.set_value(-1);self.remove(vertical)
+            self.remove(v1,v2)
+            return AnimationGroup(FadeIn(vector,run_time=.45),GrowArrow(arrow,run_time=3.5))
+        self.beat(actions=[first,second,collect])
+        self.restore_body(saved)
