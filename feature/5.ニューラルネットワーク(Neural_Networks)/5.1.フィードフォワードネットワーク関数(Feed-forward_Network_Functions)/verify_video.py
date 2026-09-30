@@ -68,6 +68,13 @@ def main():
                 frames.append(dict(label=f"review-{s['id']}-{label}",time=t))
             reviews.append(dict(scene=s['id'],note=b['note'],start=b['start'],end=b['end'],
                                 duration=b['end']-b['start'],sentence_sync=checks))
+        if s['id']=='scene05':
+            conversion=next(b for b in s['beats'] if b['cues'][0]['id']=='scene05-05-01')
+            for label,t in [('before',conversion['start']-.2),
+                            ('onset',conversion['start']+.2),
+                            ('during',conversion['cues'][0]['end']-.2),
+                            ('after',conversion['end']+.2)]:
+                frames.append(dict(label='output-normalization-'+label,time=t))
         # Compare early/late animation states against the first sentence's PCM onset.
         selected={1:3,5:4,8:2}
         if si in selected:
