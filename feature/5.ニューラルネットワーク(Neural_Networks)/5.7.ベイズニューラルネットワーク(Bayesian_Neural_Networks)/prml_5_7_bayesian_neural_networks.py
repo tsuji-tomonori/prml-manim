@@ -437,7 +437,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
                  jp('今回の更新式は、固有値の変化を無視した近似',20).move_to([0,-2.07,0]))
         self.card_phases(
             ('事前の強さを増やして寄与を縮める',lambda:a.animate.set_value(10)),
-            ('四方向の寄与を合計する',lambda:AnimationGroup(a.animate.set_value(1),Indicate(count,scale_factor=1))),
+            ('四方向の寄与を合計する',lambda:a.animate.set_value(1)),
             ('今回の近似へつなぐ',lambda:FadeIn(mapping)))
         self.restore_body(saved)
 

@@ -97,5 +97,31 @@ result=dict(scene_timing_max_error=max(scene_timing_errors),ffprobe=probe,stream
             frames=shots,sync=sync,
             manual_review='Frame extraction only; see the work report for actual review.',
             full_audio_listening=False)
+# Locate each new sentence in the actual AAC stream, independently of the timeline.
+from scipy.signal import correlate
+rate=24000
+raw=subprocess.check_output(['ffmpeg','-v','error','-i',str(video),'-map','0:a:0',
+                             '-f','s16le','-ac','1','-ar',str(rate),'-'])
+decoded=np.frombuffer(raw,dtype=np.int16).astype(float)
+correlations=[]
+for scene,entry in zip(timeline,manifest['scenes']):
+ with wave.open(str(d/entry['path'])) as wav:
+  assert wav.getframerate()==rate and wav.getnchannels()==1
+  source=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16).astype(float)
+ for cue in entry['subtitle_cues']:
+  if '-recap-' not in cue['id'] and '-aid-' not in cue['id']:continue
+  a,b=[round(cue[k]*rate) for k in ('start','end')]
+  template=source[a:b];expected=scene['start']+cue['start']
+  start=max(0,round((expected-.12)*rate));end=round((expected+.12)*rate)+len(template)
+  window=decoded[start:end]
+  scores=correlate(window,template,mode='valid',method='fft')
+  k=int(np.argmax(scores));match=window[k:k+len(template)]
+  coefficient=float(np.dot(match,template)/(np.linalg.norm(match)*np.linalg.norm(template)))
+  error=(start+k)/rate-expected
+  assert abs(error)<.1 and coefficient>.98
+  correlations.append(dict(id=cue['id'],offset_seconds=error,correlation=coefficient))
+result['added_sentence_audio_correlation']=correlations
+print('AAC sync',len(correlations),'max offset',max(abs(c['offset_seconds']) for c in correlations),
+      'min correlation',min(c['correlation'] for c in correlations))
 (d/'video_validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print('media checks passed',difference,silence_count)
