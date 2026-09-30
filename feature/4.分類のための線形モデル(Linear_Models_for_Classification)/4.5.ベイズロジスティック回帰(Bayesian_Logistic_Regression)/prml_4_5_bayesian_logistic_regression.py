@@ -424,7 +424,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         colors = ['#FF6B77', '#FFE079', '#C29AFF', '#FFB45B', '#58B5ED', '#77D49A']
         left = self.axes((-1, 1, 1), (-3, 3, 1), (-2.8, .0, 0), 3.5, 2.35, ('x', 'y'))
         right = self.axes((-1, 1, 1), (0, 1, .5), (2.6, .0, 0), 3.5, 2.35, ('x', 'p'))
-        right.labels[-1].next_to(right.c2p(-1, 1), LEFT, buff=.15)
+        right.labels[-1].next_to(right.c2p(-1, 1), RIGHT, buff=.15)
         self.add(jp('説明用の候補：同じ重みの組を使う', 19, MUTED).move_to([0, 1.45, 0]))
         xx = np.linspace(-1, 1, 101)
         values = np.array([b+w*xx for b, w in [(-.8,1.4),(-.3,1.1),(.4,1.8),(.6,.9),(-.5,1.9),(.1,1.3)]])
@@ -451,7 +451,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         red, gold = '#FF6B77', '#FFE079'
         left = self.axes((-1.4,1.4,1),(0,4,1),(-2.8,0,0),3.5,2.25,('z','h(z)'))
         right = self.axes((-1.4,1.4,1),(0,.9,.3),(2.65,0,0),3.5,2.25,('z','q(z)'))
-        right.labels[-1].next_to(right.c2p(-1.4, .9), LEFT, buff=.15)
+        right.labels[-1].next_to(right.c2p(-1.4, .9), RIGHT, buff=.15)
         xx = np.linspace(-1.4,1.4,121); a = ValueTracker(1)
         bowl = always_redraw(lambda:curve(left,xx,.5*a.get_value()*xx**2,red))
         bell = always_redraw(lambda:curve(right,xx,normal(xx,0,1/a.get_value()),red))
