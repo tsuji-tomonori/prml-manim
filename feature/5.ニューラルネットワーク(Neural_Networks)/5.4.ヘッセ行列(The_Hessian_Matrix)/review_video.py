@@ -17,11 +17,15 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:
                     frames.append(dict(id=c['id'],time=(c['start']+c['end'])/2,kind='math',display=c['display']))
-        if s['id'] in ('scene01','scene03','scene05','scene08'):
-            b=s['beats'][{'scene01':1,'scene03':0,'scene05':1,'scene08':5}[s['id']]]
-            action=b['actions'][0]
-            for phase,alpha in [('early',.1),('late',.9)]:
-                frames.append(dict(id=s['id']+'-'+phase,time=action['start']+alpha*(action['end']-action['start']),kind='sync'))
+        for b in s['beats']:
+            if not any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+                continue
+            for phase,t in [('before',b['start']-.3),('after',b['end']+.3)]:
+                frames.append(dict(id=s['id']+'-'+phase,time=max(.1,t),kind='transition'))
+            for action in b['actions']:
+                for phase,alpha in [('early',.15),('late',.85)]:
+                    frames.append(dict(id=action['sentence']+'-'+phase,
+                        time=action['start']+alpha*(action['end']-action['start']),kind='sync'))
     frames.append(dict(id='scene06-smallest-epsilon',time=timeline[5]['beats'][1]['end']-.2,kind='detail'))
     for f in frames:
         subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(OUT/(f['id']+'.png'))],check=True)
