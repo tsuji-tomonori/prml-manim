@@ -1,6 +1,6 @@
 {
-  "count": 109,
-  "math_count": 15,
+  "count": 120,
+  "math_count": 18,
   "max_width": 9.390625,
   "max_height": 0.7010937500000001,
   "sentences": [
@@ -62,6 +62,18 @@
       "id": "scene01-05-02",
       "width": 7.503125000000001,
       "height": 0.2859375000000002,
+      "math": false
+    },
+    {
+      "id": "scene01-recap-01",
+      "width": 8.89765625,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene01-recap-02",
+      "width": 7.53203125,
+      "height": 0.2843749999999998,
       "math": false
     },
     {
@@ -158,6 +170,18 @@
       "id": "scene03-01-02",
       "width": 7.203125,
       "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene03-recap-01",
+      "width": 7.4,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene03-recap-02",
+      "width": 9.3453125,
+      "height": 0.2843749999999998,
       "math": false
     },
     {
@@ -279,6 +303,18 @@
       "width": 8.440625,
       "height": 0.2843749999999998,
       "math": false
+    },
+    {
+      "id": "scene04-aid-01",
+      "width": 5.802924755875343,
+      "height": 0.6964062499999999,
+      "math": true
+    },
+    {
+      "id": "scene04-aid-02",
+      "width": 5.297827481242146,
+      "height": 0.2820312500000002,
+      "math": true
     },
     {
       "id": "scene04-06-01",
@@ -434,6 +470,24 @@
       "id": "scene06-06-02",
       "width": 4.893750000000001,
       "height": 0.6979687500000002,
+      "math": false
+    },
+    {
+      "id": "scene07-recap-01",
+      "width": 6.49765625,
+      "height": 0.28749999999999964,
+      "math": false
+    },
+    {
+      "id": "scene07-recap-02",
+      "width": 6.093157591650074,
+      "height": 0.2859375000000002,
+      "math": true
+    },
+    {
+      "id": "scene07-recap-03",
+      "width": 8.1453125,
+      "height": 0.28515625,
       "math": false
     },
     {
@@ -597,6 +651,18 @@
       "width": 6.944172177741828,
       "height": 0.2843749999999998,
       "math": true
+    },
+    {
+      "id": "scene09-recap-01",
+      "width": 8.9,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene09-recap-02",
+      "width": 8.1453125,
+      "height": 0.2843749999999998,
+      "math": false
     },
     {
       "id": "scene09-02-01",
