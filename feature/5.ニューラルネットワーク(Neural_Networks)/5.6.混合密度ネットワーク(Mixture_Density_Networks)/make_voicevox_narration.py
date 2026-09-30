@@ -127,6 +127,9 @@ def generate_scene(base, scene):
             # Only a short breath after actual speech; never pad to the old
             # silent-storyboard duration. Align to the 15fps preview boundaries.
             target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            # Recaps have a ten-second reading budget, including the short breath.
+            if beat['visual_note'].startswith('復習:'):
+                target_seconds = max(10.0, target_seconds)
             target_frames = round(target_seconds * params[2])
             padding = target_frames - (total_frames - beat_start)
             output.writeframes(b"\0" * (padding * params[0] * params[1]))
