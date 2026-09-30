@@ -71,8 +71,8 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.entry=self.entries[self.story['id']]
         if not valid_entry(self.story,self.entry):raise ValueError('Audio and script mismatch')
         self.scene_start=float(self.time)
-        self.add(jp(self.story['title'],32).move_to([0,3.45,0]))
-        self.add(Line([-6.7,-2.91,0],[6.7,-2.91,0],color=MUTED,stroke_opacity=.22))
+        self.title=jp(self.story['title'],32).move_to([0,3.45,0]);self.add(self.title)
+        self.separator=Line([-6.7,-2.91,0],[6.7,-2.91,0],color=MUTED,stroke_opacity=.22);self.add(self.separator)
         self.add_sound(str(OUTPUT_DIR/f"{self.story['id']}.wav"))
         self.timeline.append(dict(id=self.story['id'],title=self.story['title'],reference=self.story['reference'],start=self.scene_start,beats=[]))
 
@@ -129,6 +129,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.label('M = 10 を固定。初期値だけを変更')
         variants=[curve(ax,model.GRID,model.predict(model.fit(10,s),model.GRID)) for s in [551,553,554,550]]
         self.beat(lambda:Succession(Transform(pred,variants[0]),Transform(pred,variants[1])),lambda:Succession(Transform(pred,variants[2]),Transform(pred,variants[3])))
+        self.roles_recap()
         residual=VGroup(*[Line(ax.c2p(x,t),ax.c2p(x,float(model.predict(model.fit(10),x))),color=ORANGE_VAL,stroke_width=2) for x,t in zip(model.XV[::4],model.TV[::4])])
         self.beat(lambda:Create(residual),lambda:Indicate(validation,color=ORANGE_VAL,scale_factor=1))
         self.label('正則化：予測に必要な自由度を選ぶ',PURPLE_REG)
@@ -167,6 +168,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:scale.animate.set_value(1),lambda:scale.animate.set_value(2))
         self.equation(r'\widetilde x=ax+b,\quad \widetilde w=w/a,\quad \widetilde b_0=b_0-wb/a',29)
         self.beat(lambda:Indicate(self.formula,color=BLUE_DATA),lambda:Indicate(self.equation(r'\frac{\lambda_1}{2}\sum_{w\in W_1}w^2+\frac{\lambda_2}{2}\sum_{w\in W_2}w^2\quad\text{(bias excluded)}',30),color=PURPLE_REG))
+        self.prior_recap()
         self.remove(*[m for m in self.mobjects if m not in [self.caption,self.formula,self.note] and m.get_center()[1]<2.9])
         alpha=ValueTracker(1);ax,g=axes((-3,3,1),(0,1.3,.5),center=(-3,.1,0),width=5,height=3)
         gaussian=always_redraw(lambda:curve(ax,np.linspace(-3,3,161),np.sqrt(alpha.get_value()/(2*np.pi))*np.exp(-.5*alpha.get_value()*np.linspace(-3,3,161)**2),PURPLE_REG))
@@ -257,11 +259,13 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.equation(r'\tau=\left.\frac{\partial s}{\partial\xi}\right|_0,\qquad \tau=(-x_2,x_1)^T')
         self.beat(lambda:Create(tau.update()),lambda:angle.animate.set_value(.8))
         self.equation(r'\frac{\partial y}{\partial\xi}=J\tau,\qquad y=x_1^2+x_2^2+c x_1')
+        ref=self.reference_tag('復習: 5.3 ヤコビ行列')
         sens=readout(r'J\tau=',lambda:model.sensitivity(x(),c.get_value()),[3.5,.8,0],YELLOW_TERM)
         value=readout('y=',lambda:model.radial(x(),c.get_value()),[3.5,.0,0],RED_MODEL)
         coef=readout('c=',c.get_value,[3.5,-.8,0],PURPLE_REG)
         self.add(sens,value,coef)
         self.beat(lambda:angle.animate.set_value(2.2),lambda:angle.animate.set_value(.8))
+        self.remove(ref)
         self.beat(lambda:angle.animate.set_value(2.2),lambda:AnimationGroup(c.animate.set_value(0),angle.animate.set_value(4)))
         self.equation(r'\widetilde E=E+\lambda\Omega,\qquad \Omega=\frac12\sum_{n,k}(J_{nk}\tau_n)^2')
         self.label('c = 0：円周上で y = 1、回転方向の微分は0',GREEN_TRUE)
@@ -287,7 +291,9 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.add(exact,approx)
         self.beat(lambda:slope.animate.set_value(1.8),lambda:slope.animate.set_value(.3))
         self.equation(r'\mathbb E[E_\xi]\approx\frac{r^2}{2}+\frac{\epsilon^2}{2}\left[(y\prime)^2+r\,y\prime\prime\right],\quad r=y-t',28)
+        ref=self.reference_tag('復習: 4.4 二次近似')
         self.beat(lambda:slope.animate.set_value(1.2),lambda:eps.animate.set_value(.5))
+        self.remove(ref)
         self.equation(r'\Omega\simeq\frac12\int(\tau^T\nabla y)^2p(x)\,dx\quad\left[y\approx\mathbb E[t|x]\right]',29)
         self.label('無限データ極限・小さい平均0の変換・条件付き平均に近い解')
         self.beat(lambda:eps.animate.set_value(.2),lambda:eps.animate.set_value(.08))
@@ -316,7 +322,8 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         pointer=always_redraw(lambda:Square(.31,color=YELLOW_TERM,stroke_width=3).move_to(feature[min(63,int(scan.get_value()))]))
         value=readout(r'\sum Kx=',lambda:feat.ravel()[min(63,int(scan.get_value()))],[4.25,.8,0],YELLOW_TERM,1)
         self.add(pointer,value)
-        self.beat(lambda:scan.animate.set_value(32),lambda:scan.animate.set_value(63))
+        self.beat(lambda:scan.animate.set_value(32),lambda:scan.animate.set_value(44))
+        self.convolution_aid()
         self.label('8×8 箇所で同じ9個の重みと1個のバイアスを使用')
         self.beat(lambda:scan.animate.set_value(40),lambda:scan.animate.set_value(5))
         self.remove(patch,pointer,value)
@@ -335,6 +342,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.beat(lambda:AnimationGroup(Transform(image,pixels(np.roll(img,2,axis=1),.31,(-4.5,.25,0))),Transform(feature,pixels(sf2,.31,(.7,.25,0))),Transform(pool,pixels(model.subsample(sf2),.45,(4.7,.25,0)))),lambda:LaggedStart(*[Indicate(kernel[i],color=YELLOW_TERM) for i in range(9)],lag_ratio=.12))
 
     def soft_sharing(self):
+        self.mixture_recap()
         ax,g=axes((-3,3,1),(0,.55,.2),center=(0,.15,0),width=10.5,height=3.1,xlabel='w',ylabel='p(w)');g[1][1].move_to([-5.9,1.65,0]);self.add(g)
         u=np.linspace(-3,3,241);mu=np.array([-1.2,1.2]);sigma=np.array([.6,.6]);pi=np.array([.5,.5])
         comps=model.mixture_components(u);graphs=VGroup(curve(ax,u,comps[:,0],BLUE_DATA),curve(ax,u,comps[:,1],ORANGE_VAL),curve(ax,u,comps.sum(1),PURPLE_REG))
@@ -367,3 +375,116 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.label('重みの大きさ → 学習時刻 → 変換への感度 → 重みのまとまり',GREEN_TRUE)
         self.equation(r'\widetilde E=E+\lambda\Omega',30)
         self.beat(lambda:Indicate(dots,color=YELLOW_TERM,scale_factor=1),lambda:Indicate(graphs,color=GREEN_TRUE,scale_factor=1))
+
+    def reference_tag(self, text):
+        tag=jp(text,19).move_to([-6.2,2.99,0],aligned_edge=LEFT)
+        self.add(tag)
+        return tag
+
+    def body_card(self, label):
+        """Keep title/caption band; restore the frozen body after the spoken beat."""
+        state=([m for m in self.mobjects if m is not self.caption],self.formula,self.note)
+        self.clear();self.caption=None
+        self.add(self.title,self.separator,
+                 RoundedRectangle(width=10.4,height=4.6,corner_radius=.12,
+                                  color='#FFFF00',stroke_width=1.2).move_to([0,.1,0]),
+                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+        return state
+
+    def restore_body(self,state):
+        self.clear();self.add(*state[0]);self.formula,self.note=state[1:];self.caption=None
+
+    def roles_recap(self):
+        state=self.body_card('復習: 1.3 訓練・検証・テスト')
+        # Reproduce roles()'s square data rows and the closed final-test box.
+        rows=VGroup()
+        for y,label,color in [(1.15,'訓練：重みを決める',BLUE_DATA),
+                               (0,'検証：設定を選ぶ',ORANGE_VAL),
+                               (-1.15,'テスト：最後に測る',GREEN_TRUE)]:
+            blocks=VGroup(*[Square(.25,color=color,fill_opacity=.65) for _ in range(10)])
+            blocks.arrange(RIGHT,buff=.055).move_to([-2.6,y,0])
+            arrow=Arrow([-.75,y,0],[.2,y,0],buff=.05,color=color)
+            label=jp(label,25,color).move_to([2.45,y,0])
+            rows.add(VGroup(blocks,arrow,label))
+        lock=VGroup(RoundedRectangle(width=3.35,height=.62,color=GREEN_TRUE,
+                                     fill_color=BG,fill_opacity=1),
+                    jp('選択が終わるまで未使用',18,GREEN_TRUE)).move_to([-2.6,-1.15,0])
+        setting=VGroup(tex(r'\lambda',27,PURPLE_REG),jp('正則化の強さ',21,ORANGE_VAL)).arrange(RIGHT,buff=.18).move_to([2.45,-.48,0])
+        self.add(rows[0],rows[1],rows[2],lock)
+        self.beat(lambda:Succession(Indicate(rows[0],color=BLUE_DATA,scale_factor=1.03),
+                                    Indicate(rows[1],color=ORANGE_VAL,scale_factor=1.03)),
+                  lambda:Succession(FadeIn(setting),Indicate(lock,color=GREEN_TRUE,scale_factor=1.03)))
+        self.restore_body(state)
+
+    def prior_recap(self):
+        state=self.body_card('復習: 3.3 ガウス事前と二乗正則化')
+        # 3.3 regularization(): purple denotes the prior and weight-square term.
+        alpha=ValueTracker(1);u=np.linspace(-2,2,161)
+        left,lg=axes((-2,2,1),(0,.9,.4),center=(-2.65,.0,0),width=3.6,height=2.35,xlabel='w',ylabel='p(w)')
+        right,rg=axes((-2,2,1),(0,8,4),center=(2.45,.0,0),width=3.6,height=2.35,xlabel='w',ylabel='')
+        lg[1][1].move_to([-4.15,1.4,0]);rg[1][1].set_opacity(0)
+        density=always_redraw(lambda:curve(left,u,np.sqrt(alpha.get_value()/(2*np.pi))*np.exp(-alpha.get_value()*u*u/2),PURPLE_REG))
+        cost=always_redraw(lambda:curve(right,u,alpha.get_value()*u*u/2,PURPLE_REG))
+        equation=tex(r'-\ln p(w)=\frac{\alpha}{2}w^2+C(\alpha)',28,PURPLE_REG).move_to([0,-1.78,0])
+        arrow=Arrow([-.55,.2,0],[.35,.2,0],buff=.03,color=YELLOW_TERM)
+        probe=always_redraw(lambda:VGroup(Dot(right.c2p(1,alpha.get_value()/2),color=YELLOW_TERM),
+                    Line(right.c2p(1,0),right.c2p(1,alpha.get_value()/2),color=YELLOW_TERM)))
+        self.add(lg,rg,density,jp('重みによるコスト',21,PURPLE_REG).move_to([2.45,1.45,0]),
+                 jp('C は重みに依存しない定数',18,MUTED).move_to([0,-2.13,0]))
+        self.beat(lambda:AnimationGroup(Create(cost),Create(arrow),Write(equation)),
+                  lambda:AnimationGroup(alpha.animate.set_value(4),FadeIn(probe)))
+        self.restore_body(state)
+
+    def convolution_aid(self):
+        state=self.body_card('補足: 一つの窓から、一つの応答へ')
+        blue,yellow,green,purple='#58C4DD','#FFFF00','#83C167','#9A72AC'
+        # This is the actual window under the main scene's scan=44 (r=5,c=4).
+        patch=model.IMAGE[5:8,4:7];products=(patch*model.KERNEL).ravel();total=float(products.sum())
+        assert total==-1
+        def matrix(values,center,color):
+            return VGroup(*[VGroup(Square(.52,color=color,stroke_width=1.2,fill_opacity=.10),
+                                   tex(str(int(v)),25,color)).move_to([center+(j%3-1)*.52,.35+(1-j//3)*.52,0])
+                            for j,v in enumerate(values.ravel())])
+        inputs=matrix(patch,-3.65,blue);weights=matrix(model.KERNEL,-1.15,purple)
+        self.add(inputs,weights,jp('画素',22,blue).move_to([-3.65,1.52,0]),
+                 jp('重み',22,purple).move_to([-1.15,1.52,0]),
+                 jp('九個の積',22,yellow).move_to([2.5,1.52,0]),
+                 tex(r'\times',32,yellow).move_to([-2.4,.35,0]))
+        bars=VGroup()
+        for j,v in enumerate(products):
+            x=.6+j*.48;base=np.array([x,.2,0])
+            shape=(Rectangle(width=.25,height=.7*abs(v),color=yellow,fill_opacity=.65).move_to(base+[0,.35*v,0])
+                   if v else Line(base+LEFT*.125,base+RIGHT*.125,color=yellow,stroke_width=3))
+            bars.add(VGroup(shape,tex(str(int(v)),21,yellow).move_to([x,-.85,0])))
+        self.add(Line([.35,.2,0],[4.75,.2,0],color=MUTED,stroke_width=1),
+                 jp('6行5列を左上とする窓',18,blue).move_to([-3.6,-.85,0]))
+        sum_label=tex(r'\sum Kx=-1',29,green).move_to([2.45,-1.4,0])
+        processing=tex(r'-1+\underbrace{0}_{b}\ \xrightarrow{\ \sigma\ }\ %.3f'%model.sigmoid(total),29,green).move_to([-.75,-1.68,0])
+        cell=VGroup(Square(.54,color=green,fill_opacity=float(model.sigmoid(total))),
+                    tex('0.27',18,green)).move_to([4.2,-1.68,0])
+        destination=jp('応答の1セル',18,green).move_to([3.95,-1.1,0])
+        self.beat(lambda:LaggedStart(*[AnimationGroup(Indicate(inputs[j],color=yellow,scale_factor=1.04),
+                           Indicate(weights[j],color=yellow,scale_factor=1.04),FadeIn(bars[j])) for j in range(9)],lag_ratio=.45),
+                  lambda:Succession(Indicate(bars,color=yellow,scale_factor=1.02),Write(sum_label)),
+                  lambda:Succession(FadeOut(sum_label),Write(processing),AnimationGroup(FadeIn(cell),FadeIn(destination),
+                            GrowArrow(Arrow([2,-1.68,0],[3.8,-1.68,0],buff=.05,color=green)))))
+        self.restore_body(state)
+
+    def mixture_recap(self):
+        state=self.body_card('復習: 2.3 ガウス混合')
+        ax,g=axes((-4,4,2),(0,.55,.25),center=(0,.15,0),width=8.25,height=2.45,xlabel='x',ylabel='p(x)')
+        g[1][1].move_to([-4.5,1.4,0]);u=np.linspace(-4,4,241)
+        # Reuse mixtures()'s means, widths, blue/yellow components, purple sum.
+        components=model.mixture_components(u,np.array([-1.7,1.5]),np.array([.55,.7]),np.array([.45,.55]))
+        parts=VGroup(curve(ax,u,components[:,0],BLUE_DATA),curve(ax,u,components[:,1],YELLOW_TERM))
+        total=curve(ax,u,components.sum(1),PURPLE_REG)
+        formula=tex(r'p(x)=0.45\,\mathcal N(x|-1.7,0.55^2)+0.55\,\mathcal N(x|1.5,0.7^2)',25,PURPLE_REG).move_to([0,-1.5,0])
+        mapping=VGroup(tex(r'x\ \longrightarrow\ w',28),jp('今回は重みの事前分布',22)).arrange(RIGHT,buff=.4).move_to([0,-1.93,0])
+        color_mapping=VGroup(jp('成分2',18),Dot(color=YELLOW_TERM),tex(r'\longrightarrow',22),
+                             Dot(color=ORANGE_VAL),jp('本編',18)).arrange(RIGHT,buff=.18).move_to([0,-2.55,0])
+        self.add(g,parts,formula)
+        self.beat(lambda:Create(total),lambda:AnimationGroup(FadeIn(mapping),FadeIn(color_mapping),
+                  Transform(g[1][0],tex('w',24,MUTED).move_to(g[1][0])),
+                  Transform(g[1][1],tex('p(w)',24,MUTED).move_to(g[1][1])),
+                  Transform(formula,tex(r'p(w)=0.45\,\mathcal N(w|-1.7,0.55^2)+0.55\,\mathcal N(w|1.5,0.7^2)',25,PURPLE_REG).move_to(formula))))
+        self.restore_body(state)
