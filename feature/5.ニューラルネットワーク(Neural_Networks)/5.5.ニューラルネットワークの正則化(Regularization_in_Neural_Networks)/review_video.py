@@ -13,14 +13,18 @@ def main():
     frames={}
     for scene in timeline:
         for i,b in enumerate(scene['beats']):
-            # All 54 beats, plus EVERY mathematical cue.
+            # Every beat, plus every mathematical cue.
             c=b['cues'][-1];frames[c['id']]=(c['start']+c['end'])/2
             for c in b['cues']:
                 if '$' in c['display']:frames[c['id']]=(c['start']+c['end'])/2
-        if scene['id'] in ('scene02','scene06','scene08'):
-            b=scene['beats'][1 if scene['id']=='scene08' else 3]
-            for i,a in enumerate(b['actions']):
-                for fraction in (.1,.9):frames[f"{scene['id']}-sync-{i}-{fraction}"]=a['start']+(a['end']-a['start'])*fraction
+        for b in scene['beats']:
+            first=b['cues'][0]['id']
+            if 'recap-' in first or 'aid-' in first or first in ('scene06-03-01','scene07-03-01'):
+                frames[first+'-before']=max(0,b['start']-.2)
+                frames[first+'-after']=b['end']+.2
+                for cue,action in zip(b['cues'],b['actions']):
+                    for fraction in (.1,.5,.9):
+                        frames[f"{cue['id']}-sync-{fraction}"]=action['start']+(action['end']-action['start'])*fraction
     rows=[]
     for name,t in sorted(frames.items(),key=lambda item:item[1]):
         output=OUT/f'{name}.png'
