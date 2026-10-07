@@ -9,13 +9,11 @@ from __future__ import annotations
 import numpy as np
 from manim import (
     BLACK, WHITE, DOWN, RIGHT, UP, Circle, Line, ManimColor, Polygon,
-    RoundedRectangle, ValueTracker, VGroup, VMobject, interpolate_color,
+    ValueTracker, VGroup, VMobject, interpolate_color,
 )
 
 from polynomial_model import WEIGHTS, linear_fit_error, linear_loss_ring
 
-PANEL = ManimColor("#182231")
-EDGE = ManimColor("#3C5069")
 PURPLE = ManimColor("#C29AFF")
 GREEN = ManimColor("#77D49A")
 YELLOW = ManimColor("#FFE079")
@@ -37,22 +35,6 @@ class DepthDot(VGroup):
                             fill_color=tone, fill_opacity=1)
                      .shift(radius * offset * (UP + .65 * -RIGHT)))
         self.move_to(point)
-
-
-def raised_panel(center, width, height):
-    """A shallow board with a cast shadow; its face is behind chart geometry."""
-    shadow = RoundedRectangle(width=width + .10, height=height + .10,
-                              corner_radius=.13, stroke_width=0,
-                              fill_color=BLACK, fill_opacity=.35)
-    shadow.move_to(center).shift(.10 * DOWN + .08 * RIGHT).set_z_index(-7)
-    edge = RoundedRectangle(width=width, height=height, corner_radius=.11,
-                            stroke_width=0, fill_color=EDGE, fill_opacity=1)
-    edge.move_to(center).shift(.055 * DOWN).set_z_index(-6)
-    face = RoundedRectangle(width=width, height=height, corner_radius=.11,
-                            stroke_color=EDGE, stroke_width=.65,
-                            fill_color=PANEL, fill_opacity=1)
-    face.move_to(center).set_z_index(-5)
-    return VGroup(shadow, edge, face)
 
 
 def relief_faces(front, color, thickness=.045):
@@ -107,9 +89,6 @@ class LossLandscape(VGroup):
 
         rim = np.c_[ring, np.zeros(len(ring))]
         self.floor_vertices = np.vstack((rim, rim[0]))
-        self.floor = Polygon(*np.zeros((len(rim), 3)), fill_color=PANEL,
-                             fill_opacity=1, stroke_color=EDGE, stroke_width=1)
-        self.shadow = self.floor.copy().set_fill(BLACK, .4).set_stroke(width=0)
         self.contours = VGroup()
         self.contour_vertices = []
         for excess in [.10, .40, 1., 2., 4.]:
@@ -123,7 +102,7 @@ class LossLandscape(VGroup):
             np.array([[low[0], 0, 0], [high[0], 0, 0]]),
             np.array([[0, low[1], 0], [0, high[1], 0]]),
         ]
-        self.floor_axes = VGroup(*[Line(UP, DOWN, color=EDGE, stroke_width=1.6) for _ in range(2)])
+        self.floor_axes = VGroup(*[Line(UP, DOWN, color=ManimColor('#64768E'), stroke_width=1.6) for _ in range(2)])
         self.axis_ends = [high[0], high[1]]
 
         # Fix one scale for the entire reveal; the height axis is never rescaled.
@@ -136,7 +115,7 @@ class LossLandscape(VGroup):
         extent = np.ptp(bounds[:, :2], axis=0)
         self.scale_factor = min(width / extent[0], height / extent[1])
         self.screen_offset = .5 * (bounds.min(axis=0) + bounds.max(axis=0))
-        self.add(self.shadow, self.floor, self.floor_axes, self.surface, self.contours)
+        self.add(self.floor_axes, self.surface, self.contours)
         self.refresh()
         self.add_updater(lambda m: m.refresh())
 
@@ -173,9 +152,6 @@ class LossLandscape(VGroup):
             return
         self._last_state = state
         lift, _, _, opacity = state
-        floor, _ = self.project(self.floor_vertices)
-        self.floor.set_points_as_corners(floor)
-        self.shadow.set_points_as_corners(floor + .09 * DOWN + .06 * RIGHT)
         for axis, vertices in zip(self.floor_axes, self.axis_vertices):
             axis.put_start_and_end_on(*self.project(vertices)[0])
         for contour, vertices in zip(self.contours, self.contour_vertices):
