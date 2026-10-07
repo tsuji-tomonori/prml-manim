@@ -15,6 +15,7 @@ from polynomial_model import (
     NOISE_STD, T, TT, T_ALL, WEIGHTS, X, XT, X_ALL, TRAIN_RMS, TEST_RMS,
     degree_weights, design_matrix, eval_poly, fit_polynomial, growing_weights,
     ridge_weights, rms_error, sample_weights,
+    linear_fit_error, linear_loss_ring,
 )
 
 
@@ -68,6 +69,21 @@ class NumericalChecks(unittest.TestCase):
             y = eval_poly(ridge_weights(float(l)), grid)
             self.assertGreaterEqual(y.min(), -3)
             self.assertLessEqual(y.max(), 2)
+
+    def test_loss_surface_matches_residuals(self):
+        # Independently recompute Eq. (1.2) at every ring vertex, not just the
+        # minimum. This catches accidentally displaying E-E_min as height.
+        best = WEIGHTS[1][:2]
+        minimum = .5 * np.sum((design_matrix(X, 1) @ best - T) ** 2)
+        self.assertGreater(minimum, 1)
+        for excess in [.1, .4, 1, 2, 4]:
+            ring = linear_loss_ring(excess)
+            energy = .5 * np.sum((design_matrix(X, 1) @ ring.T - T[:, None]) ** 2, axis=0)
+            np.testing.assert_allclose(energy, minimum + excess, atol=1e-12)
+            np.testing.assert_allclose(linear_fit_error(ring[:, 0], ring[:, 1]), energy)
+        initial = np.array([-.8, .5])
+        path = initial + np.linspace(0, 1, 101)[:, None] * (best - initial)
+        self.assertTrue(np.all(np.diff(linear_fit_error(path[:, 0], path[:, 1])) < 0))
 
 
 class AudioChecks(unittest.TestCase):

@@ -53,6 +53,23 @@ TRAIN_RMS = np.array([rms_error(w, X, T) for w in WEIGHTS])
 TEST_RMS = np.array([rms_error(w, XT, TT) for w in WEIGHTS])
 
 
+def linear_fit_error(w0, w1):
+    """Eq. (1.2), vectorized over coefficient pairs; the minimum stays above zero."""
+    w0, w1 = np.broadcast_arrays(w0, w1)
+    residual = w0[..., None] + w1[..., None] * X - T
+    return .5 * np.sum(residual ** 2, axis=-1)
+
+
+def linear_loss_ring(excess, samples=97):
+    """Coefficient pairs at E = E_min + excess, in the original w0/w1 units."""
+    phi = design_matrix(X, 1)
+    values, vectors = np.linalg.eigh(phi.T @ phi)
+    theta = np.linspace(0, 2 * np.pi, samples)
+    delta = vectors @ (np.sqrt(2 * excess / values)[:, None]
+                       * np.array([np.cos(theta), np.sin(theta)]))
+    return WEIGHTS[1][:2] + delta.T
+
+
 def degree_weights(value):
     """Visual morph only: M remains integer at each fitted endpoint."""
     low = int(np.clip(np.floor(value), 0, 9))
