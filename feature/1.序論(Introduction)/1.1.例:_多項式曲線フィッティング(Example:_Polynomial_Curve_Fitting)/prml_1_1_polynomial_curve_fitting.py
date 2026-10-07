@@ -11,7 +11,7 @@ from manim import *
 
 from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
 from narration_content import SCENES, estimated_duration
-from depth_visuals import DepthDot, LossLandscape, raised_panel, relief_faces
+from depth_visuals import DepthDot, LossLandscape, relief_faces
 from polynomial_model import (
     NOISE_STD, T, TT, T_ALL, WEIGHTS, X, XT, X_ALL, TRAIN_RMS, TEST_RMS,
     degree_weights, eval_poly, growing_weights, ridge_weights,
@@ -285,7 +285,7 @@ class PRML11PolynomialCurveFitting(Scene):
             labels.add(label)
         labels.add(tex('x', 22).next_to(ax.c2p(1, -span_fn()), RIGHT, buff=.18))
         labels.add(tex(r't,\ y', 22).next_to(ax.c2p(0, span_fn()), UP, buff=.17))
-        self.add(raised_panel(center, width + .85, height + .60), grid, ax, labels)
+        self.add(grid, ax, labels)
         return ax
 
     def curve_span(self, weights, minimum=1.5):
@@ -319,26 +319,46 @@ class PRML11PolynomialCurveFitting(Scene):
         return labels
 
     def question(self):
-        ax = self.axes(center=(0, .1, 0), width=9, height=3.7)
+        degree = ValueTracker(9)
+        weights = lambda: degree_weights(degree.get_value())
+        ax = self.axes(center=(0, .1, 0), width=9, height=3.7,
+                       span=lambda: self.curve_span(weights()))
         dots = data_dots(ax)
         self.beat(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=.15), moving=False, end_sentence=1)
-        cursor = ValueTracker(.45)
-        guide = always_redraw(lambda: DashedLine(ax.c2p(cursor.get_value(), -1.4), ax.c2p(cursor.get_value(), 1.4), color=MUTED))
-        self.add(guide)
-        self.beat(cursor.animate.set_value(.72))
-        truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4)
-        equation = tex(r't_n=\sin(2\pi x_n)+\epsilon_n', 32).move_to([0, -2.45, 0])
-        self.add(equation)
-        self.beat(Create(truth), Indicate(equation, scale_factor=1.015), moving=False)
+        # The same held-out observation returns at the end of the story.
+        sample_x, sample_t = XT[5], TT[5]
+        model = always_redraw(lambda: graph_curve(ax, weights()))
+        guide = DashedLine(ax.c2p(sample_x, -self.curve_span(weights())),
+                           ax.c2p(sample_x, self.curve_span(weights())),
+                           color=MUTED, stroke_width=1.3)
+        badge = jp('10点すべてを通過', 26, BLUE_DATA).move_to([0, -2.45, 0])
+        cues = self.beat_cues()
+        self.beat(phases=[
+            ('perfect interpolating curve', cues[0]['end'], lambda: Create(model)),
+            ('zero training error', self.sentence_duration(1), lambda: FadeIn(badge)),
+            ('predict the unseen point', self.sentence_duration(2), lambda: FadeIn(guide)),
+        ])
+        new_point = data_dots(ax, [sample_x], [sample_t], TEST_ORANGE, .075)
+        gap = always_redraw(lambda: Line(ax.c2p(sample_x, sample_t),
+                                         ax.c2p(sample_x, float(eval_poly(weights(), sample_x))),
+                                         color=RESIDUAL_YELLOW, stroke_width=3))
+        prediction = DepthDot(ax.c2p(sample_x, float(eval_poly(weights(), sample_x))),
+                              radius=.07, color=MODEL_RED)
+        prediction.add_updater(lambda m: m.move_to(ax.c2p(sample_x, float(eval_poly(weights(), sample_x)))))
+        self.beat(phases=[
+            ('unseen observation appears', self.sentence_duration(0), lambda: FadeIn(new_point)),
+            ('perfect fit misses', self.sentence_duration(1),
+             lambda: AnimationGroup(Create(gap), FadeIn(prediction), FadeOut(badge))),
+        ])
+        truth = always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.4))
+        equation = tex(r't_n=\sin(2\pi x_n)+\epsilon_n', 30).move_to([0, -2.45, 0])
+        self.beat(Create(truth), FadeIn(equation), FadeOut(guide))
         self.beat(Indicate(dots, color=BLUE_DATA, scale_factor=1.04))
-        model = graph_curve(ax, WEIGHTS[3])
-        self.beat(Create(model), FadeOut(guide))
-        test = data_dots(ax, XT[::10], TT[::10], TEST_ORANGE, .05)
-        self.beat(LaggedStart(*[FadeIn(d, shift=DOWN * .3) for d in test], lag_ratio=.1), moving=False)
+        self.beat(degree.animate.set_value(3), FadeOut(equation),
+                  start_sentence=0, end_sentence=1)
 
     def knobs(self):
         ax = self.axes()
-        self.add(raised_panel((3.4, .15, 0), 5.2, 4.10))
         self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
         trackers = [ValueTracker(0) for _ in range(4)]
         weights = lambda: np.array([v.get_value() for v in trackers])
@@ -389,7 +409,7 @@ class PRML11PolynomialCurveFitting(Scene):
         self.add(formula)
         self.beat(Create(lines), Indicate(formula, scale_factor=1.015), moving=False)
         signed = VGroup(jp('符号付きの和（例）', 25), tex(r'(+1)+(-1)=0', 34, BLUE_DATA),
-                        jp('ずれていても、ゼロになる', 21, MUTED)).arrange(DOWN, buff=.25).move_to([3.1, 1.1, 0])
+                        jp('ずれているのに、合計0', 21, MUTED)).arrange(DOWN, buff=.25).move_to([3.1, 1.1, 0])
         signed_vectors = VGroup(Arrow([1.6, .15, 0], [3.1, .15, 0], buff=0, color=BLUE_DATA),
                                 Arrow([3.1, -.05, 0], [1.6, -.05, 0], buff=0, color=TEST_ORANGE))
         self.beat(FadeIn(signed), Succession(GrowArrow(signed_vectors[0]), GrowArrow(signed_vectors[1])), moving=False)
@@ -500,11 +520,8 @@ class PRML11PolynomialCurveFitting(Scene):
         retained = [*self.mobjects[:2], self.subtitle]
         body = [m for m in self.mobjects if m not in retained]
         self.remove(*body)
-        frame = RoundedRectangle(width=10.5, height=4.55, corner_radius=.12,
-                                 stroke_color=MUTED, stroke_width=1.2,
-                                 fill_color=BG, fill_opacity=1).move_to([0, .05, 0])
         heading = jp(heading, 25).move_to([0, 1.92, 0])
-        return body, VGroup(frame, heading)
+        return body, VGroup(heading)
 
     def restore_aid_body(self, body):
         retained = [*self.mobjects[:2], self.subtitle]
@@ -512,7 +529,7 @@ class PRML11PolynomialCurveFitting(Scene):
         self.add(*body)
 
     def rms_aid(self):
-        body, card = self.aid_card('補足：RMSを作る3段階（2点の例）')
+        body, card = self.aid_card('ずれの長さへ戻すには？（2点の例）')
         stages = VGroup(*[jp(label, 25, AID_OPERATION).move_to([x, 1.25, 0])
                           for label, x in [('二乗', -3.2), ('平均', 0), ('平方根', 3.2)]])
         arrows = VGroup(Arrow([-3.85, -.3, 0], [-3.85, .6, 0], buff=0, color=AID_INPUT),
@@ -551,7 +568,7 @@ class PRML11PolynomialCurveFitting(Scene):
         self.restore_aid_body(body)
 
     def log_scale_aid(self):
-        body, card = self.aid_card('補足：大きさを圧縮し、符号を残す（説明用の例）')
+        body, card = self.aid_card('桁の違いを、同じ目盛りで見る（例）')
         definition = tex(r'\operatorname{sgn}(w)\,\log_{10}(1+|w|)', 30,
                          AID_OPERATION).move_to([0, 1.2, 0])
         axis = NumberLine(x_range=[-3, 3, 1], length=7.2,
@@ -608,8 +625,7 @@ class PRML11PolynomialCurveFitting(Scene):
         test_lines = live_residuals(XT[::10], TT[::10], TEST_ORANGE).set_opacity(.6)
         errax = Axes(x_range=[0, 9, 1], y_range=[0, 1.1, .25], x_length=4.65, y_length=3.0,
                      tips=False, axis_config={'color': MUTED, 'stroke_width': 1.5}).move_to([3.45, .1, 0])
-        self.add(raised_panel((3.45, .1, 0), 5.40, 4.35),
-                 errax, tex('M', 23).next_to(errax.c2p(9, 0), RIGHT, buff=.13),
+        self.add(errax, tex('M', 23).next_to(errax.c2p(9, 0), RIGHT, buff=.13),
                  jp('RMS', 23).move_to([1.25, 2.02, 0]))
         for v in [0, .5, 1.0]:
             self.add(tex(str(v), 18, MUTED).next_to(errax.c2p(0, v), LEFT, buff=.12))
@@ -670,7 +686,7 @@ class PRML11PolynomialCurveFitting(Scene):
     def coefficient_axes(self, center=(3.3, .1, 0), width=4.8, height=3.25):
         ax = Axes(x_range=[-.5, 9.5, 1], y_range=[-6.5, 6.5, 2], x_length=width, y_length=height,
                   tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to(center)
-        self.add(raised_panel(np.array(center) + DOWN * .16, width + .85, height + .55), ax)
+        self.add(ax)
         for i in range(10):
             self.add(tex(str(i), 18, MUTED).move_to(ax.c2p(i, -6.5) + DOWN * .17))
         for y in [-6, -3, 3, 6]:
@@ -803,11 +819,24 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(loglam.animate.set_value(-18))
 
     def uncertainty(self):
-        ax = self.axes(center=(0, .1, 0), width=9, height=3.6)
+        rescue = ValueTracker(0)
+        weights = lambda: (1 - rescue.get_value()) * WEIGHTS[9] + rescue.get_value() * ridge_weights(-18)
+        ax = self.axes(center=(0, .1, 0), width=9, height=3.6,
+                       span=lambda: self.curve_span(weights()))
         observations = data_dots(ax)
-        self.add(observations, graph_curve(ax, ridge_weights(-18)))
-        truth = graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.65)
-        self.beat(Create(truth), moving=False)
+        curve = always_redraw(lambda: graph_curve(ax, weights()))
+        sample_x, sample_t = XT[5], TT[5]
+        returned_point = data_dots(ax, [sample_x], [sample_t], TEST_ORANGE, .075)
+        returned_gap = always_redraw(lambda: Line(ax.c2p(sample_x, sample_t),
+                                                  ax.c2p(sample_x, float(eval_poly(weights(), sample_x))),
+                                                  color=RESIDUAL_YELLOW, stroke_width=3))
+        truth = always_redraw(lambda: graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.5))
+        self.add(observations, curve, returned_point, returned_gap)
+        self.beat(phases=[
+            ('return to opening failure', self.sentence_duration(0), lambda: Indicate(returned_gap)),
+            ('apply what we learned', self.sentence_duration(1), lambda: rescue.animate.set_value(1)),
+            ('prediction still has uncertainty', self.sentence_duration(2), lambda: Create(truth)),
+        ])
         repeated = np.random.default_rng(44).normal(float(sine(.65)), NOISE_STD, 18)
         newdots = data_dots(ax, np.full(18, .65), repeated, TEST_ORANGE, .04)
         self.beat(LaggedStart(*[FadeIn(d, shift=DOWN * .15) for d in newdots], lag_ratio=.2))
@@ -826,3 +855,9 @@ class PRML11DepthPreview(PRML11PolynomialCurveFitting):
     """Render just the narrated map-to-surface experiment for quick iteration."""
     scene_indices = [3]
     timeline_name = 'prml11_depth_timeline.json'
+
+
+class PRML11StoryPreview(PRML11PolynomialCurveFitting):
+    """The opening mystery and its payoff, with the same speech as the full film."""
+    scene_indices = [0, 8]
+    timeline_name = 'prml11_story_timeline.json'
