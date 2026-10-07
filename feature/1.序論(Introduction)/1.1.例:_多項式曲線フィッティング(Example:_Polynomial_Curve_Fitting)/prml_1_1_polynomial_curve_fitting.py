@@ -11,10 +11,11 @@ from manim import *
 
 from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
 from narration_content import SCENES, estimated_duration
+from depth_visuals import DepthDot, LossLandscape, raised_panel, relief_faces
 from polynomial_model import (
     NOISE_STD, T, TT, T_ALL, WEIGHTS, X, XT, X_ALL, TRAIN_RMS, TEST_RMS,
-    degree_weights, design_matrix, eval_poly, growing_weights, ridge_weights,
-    rms_error, sine,
+    degree_weights, eval_poly, growing_weights, ridge_weights,
+    rms_error, sine, linear_fit_error,
 )
 
 BLUE_DATA = ManimColor("#58B5ED")
@@ -108,7 +109,7 @@ def graph_curve(ax, weights=None, values=None, color=MODEL_RED, opacity=1):
 
 
 def data_dots(ax, x=X, t=T, color=BLUE_DATA, radius=.052):
-    dots = VGroup(*[Dot(ax.c2p(a, b), radius=radius, color=color) for a, b in zip(x, t)])
+    dots = VGroup(*[DepthDot(ax.c2p(a, b), radius=radius, color=color) for a, b in zip(x, t)])
     if getattr(ax, 'dynamic_span', False):
         for dot, a, b in zip(dots, x, t):
             dot.add_updater(lambda m, a=a, b=b: m.move_to(ax.c2p(a, b)))
@@ -130,19 +131,22 @@ def readout(label, getter, position, color=WHITE, places=3, size=25):
 
 
 class PRML11PolynomialCurveFitting(Scene):
+    scene_indices = range(9)
+    timeline_name = 'prml11_timeline.json'
+
     def construct(self):
         self.camera.background_color = BG
         self.timeline = []
         self.manifest = {e['id']: e for e in json.loads(MANIFEST.read_text()).get('scenes', [])} if MANIFEST.exists() else {}
         methods = [self.question, self.knobs, self.squares, self.valley, self.degrees,
                    self.coefficients, self.more_data, self.regularization, self.uncertainty]
-        for i, method in enumerate(methods):
+        for i in self.scene_indices:
             self.begin(i)
-            method()
+            methods[i]()
             if self.beat_index != len(self.story['beats']):
                 raise RuntimeError(f"Unconsumed narration in {self.story['id']}")
             self.timeline[-1]['end'] = float(self.time)
-        out = Path(config.media_dir) / 'prml11_timeline.json'
+        out = Path(config.media_dir) / self.timeline_name
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(self.timeline, ensure_ascii=False, indent=2) + '\n')
 
@@ -281,7 +285,7 @@ class PRML11PolynomialCurveFitting(Scene):
             labels.add(label)
         labels.add(tex('x', 22).next_to(ax.c2p(1, -span_fn()), RIGHT, buff=.18))
         labels.add(tex(r't,\ y', 22).next_to(ax.c2p(0, span_fn()), UP, buff=.17))
-        self.add(grid, ax, labels)
+        self.add(raised_panel(center, width + .85, height + .60), grid, ax, labels)
         return ax
 
     def curve_span(self, weights, minimum=1.5):
@@ -290,13 +294,14 @@ class PRML11PolynomialCurveFitting(Scene):
     def slider(self, tracker, low, high, position, width=4.8, label='M', ticks=None, color=MODEL_RED):
         base = NumberLine(x_range=[low, high, 1], length=width, include_ticks=False,
                           color=MUTED, stroke_width=2).move_to(position)
-        group = VGroup(base)
+        groove = base.copy().set_stroke(BLACK, 7)
+        group = VGroup(groove, base)
         for v in (ticks if ticks is not None else range(int(low), int(high) + 1)):
             pos = base.n2p(v)
             group.add(Line(pos + DOWN * .07, pos + UP * .07, color=MUTED))
             group.add(tex(str(v), 17, MUTED).next_to(pos, DOWN, buff=.13))
         group.add(tex(label, 26, color).next_to(base, LEFT, buff=.25))
-        knob = Dot(base.n2p(tracker.get_value()), color=color, radius=.075)
+        knob = DepthDot(base.n2p(tracker.get_value()), color=color, radius=.105)
         knob.add_updater(lambda m: m.move_to(base.n2p(tracker.get_value())))
         group.add(knob)
         return group
@@ -333,6 +338,7 @@ class PRML11PolynomialCurveFitting(Scene):
 
     def knobs(self):
         ax = self.axes()
+        self.add(raised_panel((3.4, .15, 0), 5.2, 4.10))
         self.add(data_dots(ax), graph_curve(ax, values=sine, color=TRUE_GREEN, opacity=.3))
         trackers = [ValueTracker(0) for _ in range(4)]
         weights = lambda: np.array([v.get_value() for v in trackers])
@@ -345,8 +351,9 @@ class PRML11PolynomialCurveFitting(Scene):
         knobs = []
         for j, tracker in enumerate(trackers):
             x = 1.2 + j * 1.45
-            rail = Line([x, -1.25, 0], [x, 1.55, 0], color=MUTED)
-            dot = Dot(color=TERM_COLORS[j], radius=.08)
+            rail = VGroup(Line([x, -1.25, 0], [x, 1.55, 0], color=BLACK, stroke_width=7),
+                          Line([x, -1.25, 0], [x, 1.55, 0], color=MUTED, stroke_width=2))
+            dot = DepthDot(color=TERM_COLORS[j], radius=.11)
             dot.add_updater(lambda m, tr=tracker, xx=x: m.move_to([xx, .15 + tr.get_value() * .4, 0]))
             number = readout('', tracker.get_value, [x, -1.68, 0], TERM_COLORS[j], 1, 22)
             group = VGroup(rail, dot, tex(f'w_{j}', 28, TERM_COLORS[j]).move_to([x, 2.02, 0]), number)
@@ -398,7 +405,7 @@ class PRML11PolynomialCurveFitting(Scene):
                 square = Square(side_length=max(.008, scale * abs(r)), color=RESIDUAL_YELLOW,
                                 fill_color=RESIDUAL_YELLOW, fill_opacity=.3, stroke_width=1.5)
                 square.move_to([.9 + 1.05 * (i % 5), 1.12 - 1.45 * (i // 5), 0])
-                result.add(square)
+                result.add(relief_faces(square, RESIDUAL_YELLOW, thickness=.035))
             return result
         tile_static = tiles()
         self.beat(LaggedStart(*[TransformFromCopy(lines[i], tile_static[i]) for i in range(10)], lag_ratio=.1))
@@ -433,25 +440,52 @@ class PRML11PolynomialCurveFitting(Scene):
         line = always_redraw(lambda: graph_curve(ax, weights()))
         errors = always_redraw(lambda: residuals(ax, weights()))
         self.add(line, errors)
-        plane = Axes(x_range=[-1.5, 1.5, .5], y_range=[-3, 1.5, .5], x_length=4.7, y_length=3.6,
-                     tips=False, axis_config={'color': MUTED, 'stroke_width': 1.3}).move_to([3.35, .1, 0])
-        self.add(plane, tex('w_0', 26).next_to(plane.c2p(1.5, 0), RIGHT, buff=.1),
-                 tex('w_1', 26).next_to(plane.c2p(0, 1.5), UP, buff=.1))
-        hessian = design_matrix(X, 1).T @ design_matrix(X, 1)
-        vals, vecs = np.linalg.eigh(hessian)
-        contours = VGroup()
-        for level in [.04, .14, .32, .7, 1.3]:
-            theta = np.linspace(0, 2 * PI, 181)
-            xy = best[:, None] + vecs @ (np.sqrt(2 * level / vals)[:, None] * np.array([np.cos(theta), np.sin(theta)]))
-            contours.add(polyline([plane.c2p(a, b) for a, b in xy.T], REG_PURPLE, 1.7, .65))
-        dot = always_redraw(lambda: Dot(plane.c2p(*weights()), color=RESIDUAL_YELLOW, radius=.085))
-        bottom = Dot(plane.c2p(*best), color=TRUE_GREEN, radius=.055)
-        self.add(dot)
+        landscape = LossLandscape()
+        landscape.remove(landscape.contours)
+        self.add(landscape)
+        w0_label = tex('w_0', 25, BLUE_DATA)
+        w1_label = tex('w_1', 25, REG_PURPLE)
+        w0_label.add_updater(lambda m: m.next_to(landscape.axis_end(0), RIGHT, buff=.1))
+        w1_label.add_updater(lambda m: m.next_to(landscape.axis_end(1), UP, buff=.1))
+        dot = DepthDot(landscape.point(*weights()), radius=.105, color=RESIDUAL_YELLOW)
+        dot.add_updater(lambda m: m.move_to(landscape.point(*weights())))
+        bottom = DepthDot(landscape.point(*best), radius=.06, color=TRUE_GREEN)
+        bottom.add_updater(lambda m: m.move_to(landscape.point(*best)))
+        self.add(dot, w0_label, w1_label)
         self.beat(Indicate(dot), Indicate(line), moving=False)
-        self.beat(Create(contours), FadeIn(bottom), moving=False)
-        energy = readout('E=', lambda: .5 * np.sum((eval_poly(weights(), X) - T)**2), [3.2, -2.35, 0], RESIDUAL_YELLOW)
+        height_note = VGroup(jp('高さが誤差', 23, RESIDUAL_YELLOW), tex('E', 28, RESIDUAL_YELLOW))
+        height_note.arrange(RIGHT, buff=.15).move_to([3.35, 2.35, 0])
+        cues = self.beat_cues()
+        reveal_start = cues[2]['start']
+        reveal_duration = cues[-1]['end'] - reveal_start
+        self.beat(phases=[
+            ('same-error contours', reveal_start,
+             lambda: AnimationGroup(Create(landscape.contours), FadeIn(bottom))),
+            ('contour map rises into error surface', reveal_duration,
+             lambda: AnimationGroup(landscape.lift.animate.set_value(1),
+                                    landscape.elevation.animate.set_value(landscape.FINAL_ELEVATION),
+                                    landscape.azimuth.animate.set_value(landscape.FINAL_AZIMUTH),
+                                    landscape.surface_opacity.animate.set_value(1), FadeIn(height_note))),
+        ])
+        # Keep foreground markers above the inset, whose faces sort internally.
+        self.bring_to_front(dot, bottom, w0_label, w1_label)
+        projection = always_redraw(lambda: DashedLine(
+            landscape.point(*weights(), energy=0), landscape.point(*weights()),
+            color=RESIDUAL_YELLOW, stroke_width=1.7, dash_length=.07))
+        footprint = DepthDot(radius=.05, color=RESIDUAL_YELLOW)
+        footprint.add_updater(lambda m: m.move_to(landscape.point(*weights(), energy=0)))
+        path = always_redraw(lambda: polyline([
+            landscape.point(*((1-a)*initial + a*best))
+            for a in np.linspace(0, max(alpha.get_value(), 1e-6), 49)],
+            RESIDUAL_YELLOW, 2.6))
+        self.add(projection, footprint, path)
+        self.bring_to_front(dot, bottom)
+        energy = readout('E=', lambda: float(linear_fit_error(*weights())), [3.3, -2.35, 0], RESIDUAL_YELLOW)
         formula = tex(r'y=w_0+w_1x', 32).move_to([-3, -2.35, 0])
-        self.add(energy, formula)
+        # Values and the fitted line share exactly the same coefficient tracker.
+        w0 = readout('w_0=', lambda: weights()[0], [1.75, -1.90, 0], BLUE_DATA, 2, 21)
+        w1 = readout('w_1=', lambda: weights()[1], [4.70, -1.90, 0], REG_PURPLE, 2, 21)
+        self.add(energy, formula, w0, w1)
         self.beat(alpha.animate.set_value(.45))
         self.beat(alpha.animate.set_value(.85))
         arrival = self.sentence_duration(0)
@@ -574,7 +608,8 @@ class PRML11PolynomialCurveFitting(Scene):
         test_lines = live_residuals(XT[::10], TT[::10], TEST_ORANGE).set_opacity(.6)
         errax = Axes(x_range=[0, 9, 1], y_range=[0, 1.1, .25], x_length=4.65, y_length=3.0,
                      tips=False, axis_config={'color': MUTED, 'stroke_width': 1.5}).move_to([3.45, .1, 0])
-        self.add(errax, tex('M', 23).next_to(errax.c2p(9, 0), RIGHT, buff=.13),
+        self.add(raised_panel((3.45, .1, 0), 5.40, 4.35),
+                 errax, tex('M', 23).next_to(errax.c2p(9, 0), RIGHT, buff=.13),
                  jp('RMS', 23).move_to([1.25, 2.02, 0]))
         for v in [0, .5, 1.0]:
             self.add(tex(str(v), 18, MUTED).next_to(errax.c2p(0, v), LEFT, buff=.12))
@@ -635,7 +670,7 @@ class PRML11PolynomialCurveFitting(Scene):
     def coefficient_axes(self, center=(3.3, .1, 0), width=4.8, height=3.25):
         ax = Axes(x_range=[-.5, 9.5, 1], y_range=[-6.5, 6.5, 2], x_length=width, y_length=height,
                   tips=False, axis_config={'color': MUTED, 'stroke_width': 1.2}).move_to(center)
-        self.add(ax)
+        self.add(raised_panel(np.array(center) + DOWN * .16, width + .85, height + .55), ax)
         for i in range(10):
             self.add(tex(str(i), 18, MUTED).move_to(ax.c2p(i, -6.5) + DOWN * .17))
         for y in [-6, -3, 3, 6]:
@@ -647,9 +682,9 @@ class PRML11PolynomialCurveFitting(Scene):
         for j, value in enumerate(weights):
             height = np.sign(value) * np.log10(1 + abs(value))
             a, b = ax.c2p(j, 0), ax.c2p(j, height)
-            bars.add(Rectangle(width=.22, height=max(.006, abs(b[1] - a[1])),
-                               stroke_width=0, fill_color=color, fill_opacity=.95)
-                     .move_to((a + b) / 2))
+            front = Rectangle(width=.22, height=max(.006, abs(b[1] - a[1])),
+                              stroke_width=0, fill_color=color, fill_opacity=.95)
+            bars.add(relief_faces(front.move_to((a + b) / 2), color, thickness=.03))
         return bars
 
     def coefficient_scale_label(self, position):
@@ -785,3 +820,9 @@ class PRML11PolynomialCurveFitting(Scene):
         self.beat(Indicate(newdots, scale_factor=1.12), Indicate(observations, scale_factor=1.03))
         question = jp('どんな値が、どれくらいありそうか？', 34).move_to([0, -2.45, 0])
         self.beat(ReplacementTransform(label, question), moving=False)
+
+
+class PRML11DepthPreview(PRML11PolynomialCurveFitting):
+    """Render just the narrated map-to-surface experiment for quick iteration."""
+    scene_indices = [3]
+    timeline_name = 'prml11_depth_timeline.json'
