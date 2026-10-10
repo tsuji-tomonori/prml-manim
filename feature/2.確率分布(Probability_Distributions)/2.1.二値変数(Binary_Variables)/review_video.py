@@ -39,6 +39,17 @@ def main():
             frames[key]=(a['start']+a['end'])/2
             additions.append(dict(key=key,**a))
         frames[f"added-{sc['id']}-last"]=b['end']-.15
+    # Opening reveal, return to the same observation, and final posterior.
+    for si,bi in [(0,0),(4,0),(7,4),(8,0),(8,5)]:
+        sc=timeline[si];b=sc['beats'][bi]
+        key=f"story-{sc['id']}-beat{bi+1:02}"
+        frames[f'{key}-before']=b['start']-.1 if b['start']>.1 else b['start']+.1
+        frames[f'{key}-during']=b['start']+.45*(b['end']-b['start'])
+        frames[f'{key}-after']=b['end']-.1
+        for j,a in enumerate(b.get('actions',[])):
+            if a['name']=='breath': continue
+            frames[f'{key}-action{j+1}-middle']=(a['start']+a['end'])/2
+            frames[f'{key}-action{j+1}-after']=max(a['start'],a['end']-.08)
     sync=[]
     for si,bi in [(0,2),(2,2),(5,2),(7,1),(2,5),(4,1)]:
         sc=timeline[si];b=sc['beats'][bi];entry=manifest[si]

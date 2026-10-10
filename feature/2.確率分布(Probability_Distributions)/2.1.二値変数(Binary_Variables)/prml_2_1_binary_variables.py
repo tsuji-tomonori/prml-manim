@@ -101,11 +101,11 @@ class PRML21BinaryVariables(NarratedScene):
     def question(self):
         cs=VGroup(*[VGroup(Circle(radius=.53,color=HEAD),jp('表',34,HEAD)) for _ in range(3)]).arrange(RIGHT,buff=.5).move_to([-.8,.8,0])
         q=jp('？',55,YELLOW).move_to([3,.8,0])
+        fourth=VGroup(coin(0,.5),jp('裏',26,TAIL)).arrange(DOWN,buff=.15).move_to([3,.7,0])
         self.beat(phases=[('three-heads',self.sentence_duration(0),lambda:LaggedStart(*[FadeIn(c,shift=UP*.3) for c in cs],lag_ratio=.3)),
             ('next-question',self.sentence_duration(1),lambda:FadeIn(q)),
-            ('question-emphasis',self.sentence_duration(2),lambda:pulse(q))])
-        zeros=VGroup(coin(0,.5),jp('裏',26,TAIL)).arrange(DOWN,buff=.15).move_to([3,.7,0])
-        self.beat(*[Transform(c,coin(1,.53).move_to(c),rate_func=lambda t:smooth(min(1,5*t))) for c in cs],Transform(q,zeros,rate_func=lambda t:smooth(min(1,5*t))))
+            ('fourth-tail-reveal',self.sentence_duration(2),lambda:Transform(q,fourth))])
+        self.beat(*[Transform(c,coin(1,.53).move_to(c),rate_func=lambda t:smooth(min(1,5*t))) for c in cs],pulse(q,TAIL))
         self.discard(cs,q)
         mu=ValueTracker(.5)
         ax=self.ax(xr=(-.5,1.5,.5),yr=(0,1,.25),width=6.5,xlabel='x',ylabel='確率')
@@ -191,10 +191,8 @@ class PRML21BinaryVariables(NarratedScene):
                 and not (isinstance(m,Text) and m.get_y()>2.7)]
 
     def review_card(self,title):
-        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
-            color=AID_OPERATION,stroke_width=1.2).move_to([0,.1,0])
         label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
-        self.add(frame,label)
+        self.add(label)
 
     def slope_aid(self):
         """V04a: actual log likelihood and its derivative, not a generic hill."""
@@ -308,7 +306,7 @@ class PRML21BinaryVariables(NarratedScene):
     def prior(self):
         ax=self.ax(yr=(0,4,1),ylabel='尤度')
         g=curve(ax,lambda u:u**3,YELLOW)
-        note=jp('３回とも表：最尤推定は１',25,YELLOW).move_to([0,2.15,0])
+        note=jp('3回とも表：最尤推定は1、裏は0',25,YELLOW).move_to([0,2.15,0])
         tip=Dot(ax.c2p(1,1),color=YELLOW)
         self.add(note,g,tip)
         self.beat(pulse(g),pulse(tip))
@@ -358,7 +356,7 @@ class PRML21BinaryVariables(NarratedScene):
         base=curve(ax,lambda u:beta_pdf(u,3,2),PRIOR_COLOR).set_stroke(opacity=.35)
         xs=[.2,.4,.6,.8]
         stems=always_redraw(lambda:VGroup(*[Line(ax.c2p(u,0),ax.c2p(u,fn(u)),color=POST) for u in xs]))
-        note=jp('事前分布 → 表を１回観測',24).move_to([0,2.15,0])
+        note=jp('事前分布 → 表を1回観測',24).move_to([0,2.15,0])
         self.add(g,base,stems,note)
         self.beat(LaggedStart(*[pulse(stem) for stem in stems],lag_ratio=.2))
         weights=VGroup(*[tex(str(u),23,HEAD).move_to(ax.c2p(u,beta_pdf(u,3,2)) + UP*.35) for u in xs])
@@ -367,7 +365,7 @@ class PRML21BinaryVariables(NarratedScene):
         self.beat(mult.animate.set_value(1))
         self.discard(weights)
         integral=readout(r'\int q(\mu)\,d\mu=',lambda:.6*norm.get_value(),[2.8,2.15,0],YELLOW,2)
-        self.discard(note);self.add(integral,jp('面積を１へ戻す',24).move_to([-2.5,2.15,0]))
+        self.discard(note);self.add(integral,jp('面積を1へ戻す',24).move_to([-2.5,2.15,0]))
         self.beat(norm.animate.set_value(1/.6),start_sentence=1)
         self.discard(f)
         f=self.f(r'\mu^{a-1}(1-\mu)^{b-1}\times',r'\mu',r'=\mu^{(a+1)-1}(1-\mu)^{b-1}',size=29,colors=[PRIOR_COLOR,HEAD,POST])
@@ -443,9 +441,15 @@ class PRML21BinaryVariables(NarratedScene):
         self.discard(line,marker,labels,f)
         cs=coins([1,1,1],.8,.45)
         f=self.f(r'a=b=1:\quad p(x=1\mid1,1,1)=\frac{1+3}{1+1+3}=\frac45',size=33)
+        fourth=VGroup(coin(0,.45),jp('4回目：裏',24,TAIL)).arrange(DOWN,buff=.12).move_to([3,.7,0])
+        tail_chance=tex(r'p(x=0\mid1,1,1)=\frac15',32,TAIL).move_to([0,-1.55,0])
         self.add(cs,f)
-        self.beat(FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))),LaggedStart(*[pulse(c,HEAD) for c in cs],lag_ratio=.2))
-        self.discard(cs,f)
+        self.beat(phases=[
+            ('return to three heads',self.sentence_duration(0),lambda:LaggedStart(*[pulse(c,HEAD) for c in cs],lag_ratio=.2)),
+            ('allow the actual tail',self.sentence_duration(1),lambda:AnimationGroup(FadeIn(fourth),FadeIn(tail_chance))),
+            ('prior matters for short runs',self.sentence_duration(2),lambda:pulse(tail_chance,TAIL)),
+        ])
+        self.discard(cs,f,fourth,tail_chance)
         n=ValueTracker(8)
         line=NumberLine(x_range=[.60,.626,.005],length=8,include_numbers=True,font_size=18,decimal_number_config={'num_decimal_places':3}).move_to([0,.4,0])
         pred=lambda:(3+5*n.get_value()/8)/(5+n.get_value())
@@ -455,27 +459,33 @@ class PRML21BinaryVariables(NarratedScene):
         self.beat(n.animate.set_value(80))
 
     def uncertainty(self):
-        ax=self.ax(yr=(0,10,2),height=3)
+        # Return to the same 3 heads and the same fourth tail as the opening.
+        ax=self.ax(yr=(0,4.5,1),height=3)
         b=ValueTracker(1)
-        g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,9,b.get_value()),POST))
-        old=curve(ax,lambda u:beta_pdf(u,9,1),PRIOR_COLOR).set_stroke(opacity=.35)
-        v=readout(r'\operatorname{var}[\mu]=',lambda:beta_var(9,b.get_value()),[1.8,2.15,0],POST,5)
-        self.add(g,old,v)
-        self.beat(b.animate.set_value(2),start_sentence=1)
-        h=curve(ax,lambda u:beta_pdf(u,10,1),HEAD)
+        g=always_redraw(lambda:curve(ax,lambda u:beta_pdf(u,4,b.get_value()),POST))
+        old=curve(ax,lambda u:beta_pdf(u,4,1),PRIOR_COLOR).set_stroke(opacity=.35)
+        v=readout(r'\operatorname{var}[\mu]=',lambda:beta_var(4,b.get_value()),[-2.4,2.15,0],POST,5)
+        original=coins([1,1,1],2.15,.18).shift(RIGHT*2.1)
+        surprise=coin(0,.18).move_to([4.1,2.15,0])
+        self.add(g,old,v,original)
+        self.beat(phases=[
+            ('recall fourth tail',self.sentence_duration(0),lambda:FadeIn(surprise)),
+            ('posterior variance grows',self.sentence_duration(1),lambda:b.animate.set_value(2)),
+        ])
+        h=curve(ax,lambda u:beta_pdf(u,5,1),HEAD)
         label=jp('緑：表の後　オレンジ：裏の後　紫：観測前',22).move_to([0,-2.05,0])
         self.add(label)
         self.beat(Create(h))
-        self.discard(ax,ax.labels,g,old,h,v,label)
-        r=variance_decomposition(9,1)
+        self.discard(ax,ax.labels,g,old,h,v,label,original,surprise)
+        r=variance_decomposition(4,1)
         # Heights share the same linear variance scale.
         def bar(x,val,color):
-            return Rectangle(width=1.3,height=val*240,fill_color=color,fill_opacity=.8,stroke_width=0).move_to([x,-1+val*120,0])
+            return Rectangle(width=1.3,height=val*70,fill_color=color,fill_opacity=.8,stroke_width=0).move_to([x,-1+val*35,0])
         bars=VGroup(bar(-3,r['variances'][1],HEAD),bar(0,r['variances'][0],TAIL),bar(3,r['prior'],PRIOR_COLOR))
-        labels=VGroup(jp('表の後（確率0.9）',20,HEAD).move_to([-3,-1.4,0]),jp('裏の後（確率0.1）',20,TAIL).move_to([0,-1.4,0]),jp('観測前',22,PRIOR_COLOR).move_to([3,-1.4,0]))
+        labels=VGroup(jp('表の後（確率0.8）',20,HEAD).move_to([-3,-1.4,0]),jp('裏の後（確率0.2）',20,TAIL).move_to([0,-1.4,0]),jp('観測前',22,PRIOR_COLOR).move_to([3,-1.4,0]))
         nums=VGroup(*[tex(f'{val:.5f}',25,c).next_to(m,UP,buff=.15) for m,val,c in zip(bars,[r['variances'][1],r['variances'][0],r['prior']],[HEAD,TAIL,PRIOR_COLOR])])
         self.add(bars,labels,nums)
-        f=self.f(r'0.9\times0.00689+0.1\times0.01240\approx0.00744<0.00818',size=27)
+        f=self.f(r'0.8\times0.01984+0.2\times0.03175\approx0.02222<0.02667',size=27)
         self.beat(FadeIn(f,rate_func=lambda t:smooth(min(1,5*t))),LaggedStart(pulse(bars[0]),pulse(bars[1]),lag_ratio=.5))
         self.discard(nums,f,labels,bars)
         whole=bar(-2,r['prior'],PRIOR_COLOR)
@@ -486,13 +496,20 @@ class PRML21BinaryVariables(NarratedScene):
         self.add(whole,labels,f)
         self.beat(TransformFromCopy(whole,remaining),FadeIn(moved))
         self.discard(whole,remaining,moved,labels,f)
-        line=NumberLine(x_range=[.8,.92,.02],length=8,include_numbers=True,font_size=20,decimal_number_config={'num_decimal_places':2}).move_to([0,0,0])
-        dots=VGroup(Dot(line.n2p(9/11),radius=.08,color=TAIL),Dot(line.n2p(10/11),radius=.18,color=HEAD))
-        f=self.f(r'\mathbb E_{\mathcal D}[\mathbb E[\mu\mid\mathcal D]]=\mathbb E[\mu]=0.9',size=32)
+        line=NumberLine(x_range=[.6,.9,.05],length=8,include_numbers=True,font_size=20,decimal_number_config={'num_decimal_places':2}).move_to([0,0,0])
+        dots=VGroup(Dot(line.n2p(4/6),radius=.08,color=TAIL),Dot(line.n2p(5/6),radius=.18,color=HEAD))
+        f=self.f(r'\mathbb E_{\mathcal D}[\mathbb E[\mu\mid\mathcal D]]=\mathbb E[\mu]=0.8',size=32)
         self.add(line,dots,f)
-        self.beat(*[d.animate.move_to(line.n2p(.9)) for d in dots])
+        self.beat(*[d.animate.move_to(line.n2p(.8)) for d in dots])
         self.discard(line,dots,f)
-        chain=VGroup(*[VGroup(jp(title,25,col),tex(formula,32,col)).arrange(DOWN,buff=.4) for title,formula,col in [
-            ('観測',r'0,1,1,\ldots',HEAD),('尤度',r'\mu^m(1-\mu)^l',YELLOW),('事後',r'\operatorname{Beta}(a+m,b+l)',POST),('予測',r'\frac{a+m}{a+b+N}',TAIL)]]).arrange(RIGHT,buff=.6).move_to([0,.2,0])
-        if chain.width>12.4: chain.scale_to_fit_width(12.4)
-        self.beat(LaggedStart(*[FadeIn(c,shift=RIGHT*.15) for c in chain],lag_ratio=.3))
+        history=coins([1,1,1],1.2,.43)
+        fourth=coin(0,.43).move_to([3,1.2,0])
+        probabilities=VGroup(tex(r'p(x=1)=\frac45',34,HEAD),tex(r'p(x=0)=\frac15',34,TAIL)).arrange(RIGHT,buff=1.1).move_to([0,.05,0])
+        update=tex(r'\operatorname{Beta}(4,1)\xrightarrow{x=0}\operatorname{Beta}(4,2)',32,POST).move_to([0,-1.35,0])
+        next_prediction=tex(r'p(x_{\rm next}=1)=\frac23',30,YELLOW).move_to([0,-2,0])
+        self.add(history,probabilities)
+        self.beat(phases=[
+            ('same fourth tail',self.sentence_duration(0),lambda:FadeIn(fourth)),
+            ('update after tail',self.sentence_duration(1),lambda:AnimationGroup(FadeIn(update),FadeIn(next_prediction))),
+            ('next question',self.sentence_duration(2),lambda:pulse(next_prediction,YELLOW)),
+        ])
