@@ -40,6 +40,20 @@ def main():
             for cue in beat['cues']:
                 if '$' in cue['display']:
                     frames.append(dict(id=cue['id']+'-math',time=(cue['start']+cue['end'])/2,reason='math',display=cue['display']))
+    # Inspect the hook, reversal, return and payoff while each action is moving.
+    for scene_index,beat_indices in {0:[0,1,3,4],5:[1,2,3,5],8:[5]}.items():
+        scene=timeline[scene_index]
+        for beat_index in beat_indices:
+            beat=scene['beats'][beat_index]
+            for phase in beat.get('actions',[]):
+                if phase['name']=='breath':continue
+                for fraction,label in [(.30,'moving'),(.82,'late')]:
+                    frames.append(dict(
+                        id=f"{scene['id']}-beat{beat_index+1:02d}-{phase['name'].replace(' ','-')}-{label}",
+                        time=phase['start']+fraction*(phase['end']-phase['start']),
+                        reason='story-action'))
+            frames.append(dict(id=f"{scene['id']}-beat{beat_index+1:02d}-after",
+                               time=min(beat['end']+.15,scene['end']-.1),reason='story-after'))
     for si,bi in [(3,1),(4,2),(6,4)]:
         scene=timeline[si];beat=scene['beats'][bi];entry=manifest[si]
         start,end=beat['action_start'],beat['action_end']

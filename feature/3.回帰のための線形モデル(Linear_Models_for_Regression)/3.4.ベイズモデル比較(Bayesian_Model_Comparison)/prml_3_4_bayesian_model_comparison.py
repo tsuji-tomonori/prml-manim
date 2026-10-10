@@ -83,10 +83,8 @@ class PRML34BayesianModelComparison(Scene):
         saved=[m for m in self.mobjects if m is not self.subtitle]
         header=[m for m in saved if m.get_center()[1]>2.65]
         self.clear()
-        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
-                               color='#FFFF00',stroke_width=1.2).move_to([0,.1,0])
         label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
-        self.add(*header,frame,label)
+        self.add(*header,label)
         return saved
 
     def restore_recap(self, saved):
@@ -129,7 +127,7 @@ class PRML34BayesianModelComparison(Scene):
         factors=VGroup(tex(r'0.3\times0.75=0.225',26,RED),tex(r'0.7\times0.2=0.140',26,BLUE)).arrange(RIGHT,buff=.7).move_to([0,-.92,0])
         meaning=jp('事前確率 × モデル証拠',23,GOLD).move_to([0,-1.65,0])
         total=jp('合計 1',23,GREEN).move_to([3.8,1.2,0])
-        self.add(jp('説明用の例：観測は二種類',18,MUTED).move_to([2.65,2.02,0]))
+        self.add(jp('説明用の例：観測は2種類',18,MUTED).move_to([2.65,2.02,0]))
         self.add(boxes,band)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
         def model_labels():
@@ -183,7 +181,7 @@ class PRML34BayesianModelComparison(Scene):
     def question(self):
         ax=self.ax([-1,1,.5],[0,1.8,.5])
         dots=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=BLUE) for x,t in zip(bm.X,bm.T)])
-        labels=self.legend([('観測',BLUE),('最小二乗の曲線',GREEN)])
+        labels=self.legend([('同じ12点',BLUE),('最良の1本',GREEN)])
         self.add(ax,labels,tex('x',25).next_to(ax.x_axis,RIGHT,buff=.2),tex('t',25).move_to(ax.c2p(0,1.8)+LEFT*.28))
         self.beat(LaggedStart(*[FadeIn(d) for d in dots],lag_ratio=.12))
         degree=ValueTracker(1)
@@ -195,10 +193,27 @@ class PRML34BayesianModelComparison(Scene):
         residual=always_redraw(lambda:VGroup(*[Line(ax.c2p(x,t),ax.c2p(x,float(np.interp(x,bm.GRID,bm.interpolate_rows(bm.ML_CURVES,degree.get_value())))),color=GOLD,stroke_width=2)
                                                 for x,t in zip(bm.X,bm.T)]))
         self.add(residual)
-        self.beat(degree.animate.set_value(7))
-        alternatives=VGroup(*[curve(ax,bm.GRID,.4+.2*bm.GRID+a*bm.GRID**2,PURPLE,2).set_stroke(opacity=.5) for a in [.2,.45,.7,1.]])
-        self.beat(FadeOut(residual),LaggedStart(*[Create(c) for c in alternatives],lag_ratio=.15),start_sentence=1)
+        def score_row(name, numbers, color, y):
+            return VGroup(jp(name,21,color),tex(numbers,26,color)).arrange(RIGHT,buff=.25).move_to([0,y,0])
+        ml_score=score_row('最良の1本  対数尤度',
+            rf'd=2:{bm.LOG_ML[2]:.2f}\quad d=7:{bm.LOG_ML[7]:.2f}',GOLD,-2.02)
+        evidence_score=score_row('モデル全体  対数エビデンス',
+            rf'd=2:{bm.LOG_EVIDENCE[2]:.2f}\quad d=7:{bm.LOG_EVIDENCE[7]:.2f}',GREEN,-2.48)
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[('increase degree',a,lambda:degree.animate.set_value(7)),
+                          ('best curve wins',b,lambda:FadeIn(ml_score))])
+        rng=np.random.default_rng(34)
+        fit7=bm.FITS[7]
+        alternatives=VGroup(*[
+            curve(ax,bm.GRID,bm.design(bm.GRID,7)@(
+                fit7['mean']+.42*np.linalg.cholesky(fit7['cov'])@rng.normal(size=8)),PURPLE,2)
+            .set_stroke(opacity=.48) for _ in range(4)])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[('ranking reverses',a,lambda:FadeIn(evidence_score)),
+                          ('other coefficient choices',b,lambda:AnimationGroup(
+                              FadeOut(residual),LaggedStart(*[Create(c) for c in alternatives],lag_ratio=.15)))])
         f=self.formula(r'M_i:\quad p(D\mid\mathbf w,M_i)',r'p(\mathbf w\mid M_i)',colors=[BLUE,PURPLE])
+        self.remove(ml_score,evidence_score)
         self.beat(Write(f))
         self.beat(pulse(alternatives),pulse(f))
 
@@ -325,7 +340,7 @@ class PRML34BayesianModelComparison(Scene):
         slider=self.slider(sd,.35,3,r'\sigma_D=',pos=(-1.2,2.25,0),width=3.5)
         self.add(slider,c,marker)
         dot=always_redraw(lambda:Dot(ax.c2p(datum.get_value(),bm.normal(datum.get_value(),std=sd.get_value())),color=GOLD,radius=.075))
-        z=readout('p(D_0)=',lambda:bm.normal(datum.get_value(),std=sd.get_value()),[3.4,1.7,0],GOLD)
+        z=readout('p(D_0)=',lambda:bm.normal(datum.get_value(),std=sd.get_value()),[3.4,1.7,0],GOLD,5)
         self.add(dot,z)
         self.beat(pulse(c))
         self.beat(sd.animate.set_value(1.3),end_sentence=1)
@@ -368,8 +383,12 @@ class PRML34BayesianModelComparison(Scene):
         c2=always_redraw(lambda:graph(ax,lambda x:b(x)*(1-scale.get_value()+scale.get_value()*(1-p.get_value())),-3.5,3.5,PURPLE))
         self.add(ax,tex('t',25).next_to(ax.x_axis,RIGHT,buff=.2))
         recap_label=jp('復習: 2.3 混合分布',23).move_to([0,2.25,0])
-        self.add(recap_label)
-        self.beat(Create(c1),Create(c2))
+        self.add(recap_label,c1,c2)
+        first_duration,second_duration=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[('show two predictions',first_duration,lambda:AnimationGroup(
+                              Indicate(c1,color=BLUE),Indicate(c2,color=PURPLE))),
+                          ('compare two peaks',second_duration,lambda:AnimationGroup(
+                              Indicate(c1,color=BLUE),Indicate(c2,color=PURPLE)))])
         self.remove(recap_label)
         slider=self.slider(p,0,1,r'p(M_1\mid D)=',pos=(-1.5,2.25,0),width=3)
         self.add(slider)
@@ -455,8 +474,28 @@ class PRML34BayesianModelComparison(Scene):
                      self.formula(r'p(t\mid x,D)=\sum_i p(t\mid x,M_i,D)p(M_i\mid D)',y=-1.25,size=30))
         chain[0].set_color(GOLD);chain[1].set_color(GREEN);chain[2].set_color(BLUE)
         self.beat(LaggedStart(*[Write(c) for c in chain],lag_ratio=.3),end_sentence=1)
-        next_title=jp('3.5  エビデンス近似へ',29,GOLD).move_to([0,-2.5,0])
-        self.beat(FadeIn(next_title),pulse(chain[0]))
+        # Return to precisely the opening dataset and its two computed rankings.
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]),
+                 jp(self.story['reference'],16,MUTED).move_to([0,2.83,0]))
+        ax=self.ax([-1,1,.5],[0,1.8,.5],center=(0,.2,0),width=8.4,height=3.1)
+        degree=ValueTracker(7)
+        dots=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=BLUE) for x,t in zip(bm.X,bm.T)])
+        fitted=always_redraw(lambda:curve(ax,bm.GRID,bm.interpolate_rows(
+            bm.ML_CURVES,degree.get_value()),GREEN))
+        degree_label=readout('d=',degree.get_value,[4.85,1.55,0],GREEN,0)
+        best=VGroup(jp('最良の1本',22,GOLD),tex(
+            rf'd=2:{bm.LOG_ML[2]:.2f}\quad d=7:{bm.LOG_ML[7]:.2f}',27,GOLD)
+            ).arrange(RIGHT,buff=.3).move_to([0,-2.02,0])
+        averaged=VGroup(jp('モデル全体',22,GREEN),tex(
+            rf'd=2:{bm.LOG_EVIDENCE[2]:.2f}\quad d=7:{bm.LOG_EVIDENCE[7]:.2f}',27,GREEN)
+            ).arrange(RIGHT,buff=.3).move_to([0,-2.48,0])
+        returned=VGroup(ax,dots,fitted,degree_label,best,averaged)
+        next_title=jp('次の問い：事前とノイズの強さは？  3.5',25,GOLD).move_to([0,2.25,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[('return to the same twelve points',a*.48,lambda:FadeIn(returned)),
+                          ('compare the same degrees',a*.52,lambda:degree.animate.set_value(2)),
+                          ('question for section 3.5',b,lambda:FadeIn(next_title))])
 
     def begin(self, index):
         self.clear()
