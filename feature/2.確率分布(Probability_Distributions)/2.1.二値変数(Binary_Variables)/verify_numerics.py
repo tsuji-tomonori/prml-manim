@@ -29,7 +29,7 @@ class Numerics(unittest.TestCase):
         self.assertEqual(np.argmax(likelihood(xs,3,3)),len(xs)-1)
     def test_beta_and_prediction(self):
         xs=np.linspace(0,1,100001)
-        for a,b in [(1,1),(3,2),(9,6),(8,5),(9,1),(9,2),(10,1)]:
+        for a,b in [(1,1),(3,2),(9,6),(8,5),(4,1),(4,2),(5,1)]:
             p=beta_pdf(xs,a,b)
             self.assertAlmostEqual(np.trapezoid(p,xs),1,places=8)
             self.assertAlmostEqual(np.trapezoid(xs*p,xs),beta_mean(a,b),places=8)
@@ -52,11 +52,18 @@ class Numerics(unittest.TestCase):
         np.testing.assert_allclose(ratio,ratio[0],rtol=1e-12)
         np.testing.assert_allclose(posterior(OBS[::-1]),(a,b))
     def test_total_variance(self):
-        r=variance_decomposition(9,1)
+        # Same 3-head history and fourth tail as the opening and closing shots.
+        r=variance_decomposition(4,1)
+        self.assertAlmostEqual(r['weights'][0],1/5)
+        self.assertAlmostEqual(r['weights'][1],4/5)
         self.assertGreater(r['variances'][0],r['prior'])
-        self.assertAlmostEqual(r['mean'],.9)
+        self.assertAlmostEqual(r['mean'],4/5)
+        self.assertAlmostEqual(r['variances'][0],beta_var(4,2))
+        self.assertAlmostEqual(r['remaining'],1/45)
+        self.assertAlmostEqual(r['moved'],1/225)
         self.assertAlmostEqual(r['remaining']+r['moved'],r['prior'])
         self.assertLess(r['remaining'],r['prior'])
+        self.assertAlmostEqual(beta_mean(4,2),2/3)
     def test_audio(self):
         entries=json.loads(MANIFEST.read_text())['scenes']
         self.assertEqual(len(entries),len(SCENES))
