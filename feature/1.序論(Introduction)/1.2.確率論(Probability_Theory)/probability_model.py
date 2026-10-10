@@ -16,6 +16,12 @@ def box_posterior(prior=.3, orange_red=.75, orange_blue=.2):
     return j[:,0]/j[:,0].sum()
 
 
+def box_next_orange(prior=.3, orange_red=.75, orange_blue=.2):
+    """Predict a second orange after replacement, keeping the initially chosen box."""
+    return float(box_posterior(prior,orange_red,orange_blue) @
+                 np.array([orange_red,orange_blue]))
+
+
 OBS=np.array([-1.15,-.55,-.2,.15,.55,.9,1.15])
 PAIRS=np.random.default_rng(124).normal(size=(4000,2))
 PAIR_VARIANCES=PAIRS.var(axis=1)

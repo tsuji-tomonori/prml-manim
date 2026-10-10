@@ -118,15 +118,12 @@ class PRML12ProbabilityTheory(NarratedScene):
         return g
 
     def aid_card(self, heading):
-        """Use the section 1.1 card convention without overlapping the live plot."""
+        """Temporarily clear the plot and use open space for the visual aid."""
         retained = [self.title, self.subtitle]
         body = [m for m in self.mobjects if m not in retained]
         self.remove(*body)
-        frame = RoundedRectangle(width=10.5, height=4.55, corner_radius=.12,
-                                 stroke_color=MUTED, stroke_width=1.2,
-                                 fill_color=BG, fill_opacity=1).move_to([0, .05, 0])
         label = jp(heading, 25).move_to([0, 1.92, 0])
-        return body, VGroup(frame, label)
+        return body, VGroup(label)
 
     def restore_aid_body(self, body):
         self.remove(*[m for m in self.mobjects if m not in [self.title, self.subtitle]])
@@ -210,8 +207,6 @@ class PRML12ProbabilityTheory(NarratedScene):
         diag = VGroup(entries[0], entries[3]).set_color(AID_RESULT)
         offdiag = VGroup(entries[1], entries[2]).set_color(AID_COMPARE)
         name = tex('S=', 32).next_to(matrix, LEFT, buff=.15)
-        diag_frames = VGroup(*[SurroundingRectangle(m, color=AID_RESULT, buff=.09) for m in diag])
-        off_frames = VGroup(*[SurroundingRectangle(m, color=AID_COMPARE, buff=.09) for m in offdiag])
         diag_label = jp('対角：それぞれの分散', 24, AID_RESULT).move_to([2, -1, 0])
         off_label = jp('残り：一緒に変わる度合い', 24, AID_COMPARE).move_to([2, -1.65, 0])
         ax = Axes(x_range=[-1.3, 1.3, 1], y_range=[-1.1, 1.1, 1], x_length=2.5, y_length=1.6,
@@ -233,10 +228,10 @@ class PRML12ProbabilityTheory(NarratedScene):
             ('coefficient cloud and covariance table', b*.52,
              lambda: AnimationGroup(Create(ax), FadeIn(labels), Create(ellipse), FadeIn(matrix), FadeIn(name))),
             ('diagonal variances', b*.48,
-             lambda: AnimationGroup(Create(diag_frames), Create(horizontal), Create(vertical), FadeIn(diag_label))),
+             lambda: AnimationGroup(Indicate(diag, color=AID_RESULT), Create(horizontal), Create(vertical), FadeIn(diag_label))),
             ('off diagonal joint variation', c,
-             lambda: AnimationGroup(FadeOut(diag_frames), FadeOut(horizontal), FadeOut(vertical),
-                                    Create(off_frames), Indicate(ellipse, scale_factor=1.04), FadeIn(off_label))),
+             lambda: AnimationGroup(FadeOut(horizontal), FadeOut(vertical),
+                                    Indicate(offdiag, color=AID_COMPARE), Indicate(ellipse, scale_factor=1.04), FadeIn(off_label))),
         ])
         self.restore_aid_body(body)
 
@@ -249,7 +244,11 @@ class PRML12ProbabilityTheory(NarratedScene):
             box=RoundedRectangle(width=3.1,height=1.8,corner_radius=.13,color=c).move_to([x,.5,0]); boxes.add(box)
             dots=VGroup(*[Circle(.14,color=GREEN if k<n else ORANGE,fill_opacity=1).move_to([x-.9+k*.45,.5,0]) for k in range(4 if n==1 else 5)])
             fruits.add(dots)
-        self.beat(FadeOut(fruit),Create(boxes),LaggedStart(*[FadeIn(g) for g in fruits],lag_ratio=.2))
+        a,b = [self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('red box and fruit count',a,lambda:AnimationGroup(FadeOut(fruit),FadeIn(boxes[0]),FadeIn(fruits[0]))),
+            ('blue box and fruit count',b,lambda:AnimationGroup(FadeIn(boxes[1]),FadeIn(fruits[1]))),
+        ])
         q=ValueTracker(.5)
         s=self.slider(q,.1,.9,[0,-1.3,0],'p(B=r)',RED,4)
         self.beat(Indicate(fruits,scale_factor=1.08),self.formula(r'p(B=r)+p(B=b)=1'))
@@ -257,7 +256,7 @@ class PRML12ProbabilityTheory(NarratedScene):
         labels=VGroup(tex('B=r',28,RED).move_to([-2.6,1.9,0]),tex('B=b',28,BLUE).move_to([2.6,1.9,0]))
         self.beat(FadeIn(labels),self.formula(r'B\in\{r,b\},\qquad F\in\{a,o\}'))
         oranges=VGroup(*[d for g in fruits for d in g if d.get_color()==ORANGE])
-        self.beat(Indicate(oranges,scale_factor=1.15),self.formula(r'p(B=r\mid F=o)=\ ?'))
+        self.beat(Indicate(oranges,scale_factor=1.15),self.formula(r'p(B=r)=0.30\quad\longrightarrow\quad p(B=r\mid F=o)\simeq0.616',size=30))
 
     def mosaic(self,q=.3,ar=.75,ab=.2):
         w,h=7,2.65; left=-3.5; bottom=-1
@@ -496,3 +495,20 @@ class PRML12ProbabilityTheory(NarratedScene):
         self.beat(cursor.animate.set_value(1),self.formula(r'\phi(x)=(1,x,x^2,x^3)^T,\quad S^{-1}=\alpha I+\beta\sum_n\phi(x_n)\phi(x_n)^T',size=25))
         self.covariance_aid()
         self.beat(cursor.animate.set_value(.1),self.formula(r'm(x)=\beta\phi(x)^TS\sum_n\phi(x_n)t_n,\quad s^2(x)=\beta^{-1}+\phi(x)^TS\phi(x)',size=26))
+        self.remove(*[m for m in self.mobjects if m not in (self.title, self.subtitle)])
+        self.equation = None
+        post = box_posterior()
+        red = rect(7*post[0],2.25,[-3.5+3.5*post[0],.25,0],RED,.25)
+        blue = rect(7*post[1],2.25,[-3.5+7*post[0]+3.5*post[1],.25,0],BLUE,.25)
+        orange_red = rect(7*post[0],2.25*.75,[red.get_center()[0],-.875+2.25*.75/2,0],ORANGE,.72)
+        orange_blue = rect(7*post[1],2.25*.2,[blue.get_center()[0],-.875+2.25*.2/2,0],ORANGE,.72)
+        label = jp('同じ箱から、次の1個は？',25).move_to([0,2.05,0])
+        names = VGroup(jp('赤: 45/73',22,RED).move_to([red.get_center()[0],-1.15,0]),
+                       jp('青: 28/73',22,BLUE).move_to([blue.get_center()[0],-1.15,0]))
+        bridge = jp('箱の和  →  係数の積分',23,GREEN).move_to([0,-1.65,0])
+        a,b,c = [self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('return to same box and posterior',a,lambda:AnimationGroup(FadeIn(label),FadeIn(red),FadeIn(blue),FadeIn(names))),
+            ('predict next orange from posterior',b,lambda:AnimationGroup(FadeIn(orange_red),FadeIn(orange_blue),self.formula(r'p(o_{\rm next}\mid o)=\frac{45}{73}\cdot\frac34+\frac{28}{73}\cdot\frac15\simeq0.5390',size=28))),
+            ('sum over boxes becomes integration',c,lambda:AnimationGroup(FadeIn(bridge),Indicate(VGroup(orange_red,orange_blue),scale_factor=1.02))),
+        ])

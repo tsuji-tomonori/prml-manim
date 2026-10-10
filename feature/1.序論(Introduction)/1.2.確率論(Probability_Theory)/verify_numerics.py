@@ -17,6 +17,8 @@ class Verification(unittest.TestCase):
             np.testing.assert_allclose(box_posterior(p)*j[:,0].sum(),j[:,0])
             np.testing.assert_allclose(box_posterior(p,.75,.75),[p,1-p])
         self.assertAlmostEqual(box_posterior()[0],45/73)
+        self.assertAlmostEqual(box_next_orange(), (45/73)*(.75)+(28/73)*(.2))
+        self.assertAlmostEqual(box_next_orange(), 787/1460)
 
     def test_density_and_moments(self):
         x=np.linspace(-12,12,20001)
@@ -70,5 +72,10 @@ class Verification(unittest.TestCase):
 
 
 if __name__=='__main__':
-    print(json.dumps(dict(box_posterior=box_posterior().tolist(),gaussian_mean=float(OBS.mean()),gaussian_variance=float(OBS.var()),mean_variance_4000=float(VAR_RUNNING[-1]),coin_prediction=5/7),indent=2))
+    print(json.dumps(dict(box_posterior=box_posterior().tolist(),
+                          box_next_orange=box_next_orange(),
+                          gaussian_mean=float(OBS.mean()),
+                          gaussian_variance=float(OBS.var()),
+                          mean_variance_4000=float(VAR_RUNNING[-1]),
+                          coin_prediction=5/7),indent=2))
     unittest.main()
