@@ -4,7 +4,9 @@ import math
 import numpy as np
 from scipy.special import gammaln, xlogy
 
-SEQUENCE = np.array([0,1,0,2,0,1,0,0,1,0])
+SEQUENCE = np.array([0,0,0,1,0,2,0,1,0,1])
+OPENING_SEQUENCE = SEQUENCE[:4]
+OPENING_COUNTS = np.bincount(OPENING_SEQUENCE, minlength=3)
 COUNTS = np.bincount(SEQUENCE, minlength=3)
 PERMUTATIONS = sorted(set(itertools.permutations([0,0,1,2])))
 

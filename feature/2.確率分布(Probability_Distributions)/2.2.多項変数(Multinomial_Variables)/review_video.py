@@ -1,4 +1,4 @@
-"""Extract every beat, math caption, review-card transition and PCM synchronization."""
+"""Extract every beat, math caption, visual aid, and PCM synchronization."""
 import argparse
 import json
 import subprocess
@@ -23,6 +23,13 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:
                     frames.append(dict(id=c['id']+'-math',time=(c['start']+c['end'])/2))
+            # Inspect moving states as well as the end of the action.
+            story_beats={1:{1,2,7},4:{2,3,4},6:{2,3,4},
+                         7:{2,3,4,6},8:{2,4,5},9:{1,2,5,7,8}}
+            if bi+1 in story_beats.get(si+1,set()):
+                for fraction in (.15,.50,.85):
+                    frames.append(dict(id=f"{s['id']}-beat{bi+1:02}-move-{fraction:.2f}",
+                                       time=b['action_start']+fraction*(b['action_end']-b['action_start'])))
         if si in (1,3,7):
             anchor=f"{s['id']}-02-01"
             b=next(b for b in s['beats'] if any(c['id']==anchor for c in b['cues']))
@@ -37,7 +44,7 @@ def main():
                 hit=np.flatnonzero(np.abs(samples)>10**(-45/20))
                 starts.append(c['start']+float(hit[0]/rate) if len(hit) else None)
             sync.append(dict(scene=s['id'],beat=2,action_start=b['action_start'],action_end=b['action_end'],pcm_voice_starts=starts))
-    # Every new card: before/after, each sentence, and both ends of every action.
+    # Both visual aids: before/after, each sentence, and both ends of every action.
     for si,s in enumerate(timeline):
         for b in s['beats']:
             if not any('-aid-' in c['id'] or '-recap-' in c['id'] for c in b['cues']):

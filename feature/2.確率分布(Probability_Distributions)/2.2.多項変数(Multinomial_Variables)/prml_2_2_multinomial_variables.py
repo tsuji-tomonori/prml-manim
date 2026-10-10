@@ -8,7 +8,7 @@ from caption_layout import jp, tex
 from narrated_scene import NarratedScene
 from make_voicevox_narration import MANIFEST
 from narration_content import SCENES
-from multinomial_model import (SEQUENCE, COUNTS, PERMUTATIONS, coefficient,
+from multinomial_model import (SEQUENCE, COUNTS, OPENING_SEQUENCE, OPENING_COUNTS, PERMUTATIONS, coefficient,
                                 relative_likelihood, mle_slice, density_raster, predictive)
 
 COLORS=[ManimColor('#FF727C'),ManimColor('#64B5F6'),ManimColor('#FFE079')]
@@ -56,7 +56,7 @@ def readout(label, getter, pos, color=WHITE, places=2):
     return group
 
 
-def bars(getter, xs=(-3,0,3), bottom=-1.1, height=2.8, width=.8, labels=True):
+def bars(getter, xs=(-3,0,3), bottom=-1.1, height=2.8, width=.8, labels=True, label_prefix=r'\mu_'):
     result=VGroup()
     for k,x in enumerate(xs):
         rect=Rectangle(width=width,height=.01,fill_color=COLORS[k],fill_opacity=.85,stroke_width=0)
@@ -66,7 +66,7 @@ def bars(getter, xs=(-3,0,3), bottom=-1.1, height=2.8, width=.8, labels=True):
         num.add_updater(lambda m,k=k,x=x:m.set_value(getter()[k]).move_to([x,bottom+height*getter()[k]+.25,0]))
         result.add(num)
         if labels:
-            result.add(tex(r'\mu_'+str(k+1),27,COLORS[k]).move_to([x,bottom-.30,0]))
+            result.add(tex(label_prefix+str(k+1),27,COLORS[k]).move_to([x,bottom-.30,0]))
     result.update(0)
     return result
 
@@ -118,25 +118,32 @@ class PRML22MultinomialVariables(NarratedScene):
         new=equation(s,pos,size)
         old=self.formula
         self.formula=new
-        return FadeIn(new) if old is None else ReplacementTransform(old,new)
+        return FadeIn(new) if old is None else Succession(
+            FadeOut(old,run_time=.35),FadeIn(new,run_time=.65))
 
     def observation(self):
-        seq=tokens(SEQUENCE)
+        seq=tokens(OPENING_SEQUENCE)
         note=jp('自作の観測例：毎回、玉を戻す',23,MUTED).move_to([0,2.25,0])
         self.add(note)
         self.beat(LaggedStart(*[FadeIn(d,shift=DOWN*.4) for d in seq],lag_ratio=.15))
         targets=[]; used=[0,0,0]
-        for k in SEQUENCE:
+        for k in OPENING_SEQUENCE:
             targets.append(np.array([(-3+3*k),-.8+used[k]*.45,0]));used[k]+=1
-        counts=VGroup(*[tex(str(c),31,COLORS[k]).move_to([-3+3*k,-1.3,0]) for k,c in enumerate(COUNTS)])
-        self.beat(*[d.animate.move_to(p) for d,p in zip(seq,targets)],FadeIn(counts))
+        counts=VGroup(*[tex(str(c),31,COLORS[k]).move_to([-3+3*k,-1.3,0]) for k,c in enumerate(OPENING_COUNTS)])
+        puzzle=jp('黄色 0回  →  次も 0？',30,COLORS[2]).move_to([0,1.65,0])
+        self.beat(*[d.animate.move_to(p) for d,p in zip(seq,targets)],FadeIn(counts),FadeIn(puzzle))
         cards=VGroup(*[VGroup(RoundedRectangle(width=1.6,height=.8,corner_radius=.12,color=c),jp(name,29,c)).move_to([-3+3*k,.6,0]) for k,(name,c) in enumerate(zip(['赤','青','黄色'],COLORS))])
-        self.beat(FadeOut(seq),FadeOut(counts),FadeIn(cards),self.formula_to(r'x_k\in\{0,1\},\quad\sum_{k=1}^{K}x_k=1'))
+        self.beat(FadeOut(seq),FadeOut(counts),FadeOut(puzzle),FadeIn(cards),self.formula_to(r'x_k\in\{0,1\},\quad\sum_{k=1}^{K}x_k=1'))
         highlight=SurroundingRectangle(cards[1],color=COLORS[1],buff=.12)
         vec=equation(r'x=(0,1,0)^{\mathsf T}',(0,-.7,0),40)
         self.beat(Create(highlight),FadeIn(vec))
         self.beat(highlight.animate.become(SurroundingRectangle(cards[0],color=COLORS[0],buff=.12)),Transform(vec,equation(r'x=(1,0,0)^{\mathsf T}',(0,-.7,0),40)))
         self.beat(FadeOut(cards),FadeOut(highlight),Transform(vec,equation(r'x=(0,0,1,0,0,0)^{\mathsf T}',(0,.35,0),43)),self.formula_to(r'K=6\quad\text{(2.25)}'))
+        first=tokens(OPENING_SEQUENCE,y=1.25,spacing=.8)
+        extra=tokens(SEQUENCE[4:],y=.35,spacing=.8)
+        self.add(first)
+        self.beat(Succession(FadeOut(vec,run_time=.2),FadeIn(extra,run_time=.8)),
+                  self.formula_to(r'm=(6,3,1),\quad N=10'))
 
     def selector(self):
         red=ValueTracker(.5)
@@ -191,10 +198,8 @@ class PRML22MultinomialVariables(NarratedScene):
         self.beat(Transform(deriv,equation(r'1=\sum_k\mu_k=-\frac{N}{\lambda}\quad\Longrightarrow\quad\lambda=-N',(0,.8,0),40)),self.formula_to(r'\mu_k^{\rm ML}=m_k/N\qquad(m_k=0\Rightarrow\mu_k^{\rm ML}=0)'))
 
     def review_card(self, label):
-        frame=RoundedRectangle(width=11.2,height=5.0,corner_radius=.12,
-                               color='#FFFF00',stroke_width=1.3).move_to([0,.05,0])
         title=jp(label,24).move_to([-5.25,2.18,0],aligned_edge=LEFT)
-        self.add(frame,title)
+        self.add(title)
 
     def lagrange_aid(self):
         # Replace the body, preserving the original derivation and title.
@@ -348,17 +353,40 @@ class PRML22MultinomialVariables(NarratedScene):
 
     def predict(self):
         amount=ValueTracker(1); mix=ValueTracker(0)
-        counts=lambda:np.array([3,1,0])*amount.get_value()
+        # Repeat the original 3-red/1-blue block in whole groups, so every
+        # displayed intermediate count still sums to the displayed N.
+        counts=lambda:OPENING_COUNTS*int(np.floor(amount.get_value()+.5))
         get=lambda:(1-mix.get_value())*np.array([.75,.25,0])+mix.get_value()*predictive([1,1,1],counts())
-        chart=bars(get,xs=(-3,0,3),bottom=-.8,height=2.6)
+        chart=bars(get,xs=(-3,0,3),bottom=-.8,height=2.6,label_prefix=r'p_')
         counter=readout('N=',lambda:counts().sum(),(4.7,2.2,0),WHITE,0)
+        opening=tokens(OPENING_SEQUENCE,y=2.0,spacing=.55,radius=.14)
         self.add(chart,counter)
-        self.beat(self.formula_to(r'm=(3,1,0)\qquad\mu^{\rm ML}=(0.75,0.25,0)'))
+        self.beat(FadeIn(opening),self.formula_to(r'm=(3,1,0)\qquad\mu^{\rm ML}=(0.75,0.25,0)'))
         self.beat(mix.animate.set_value(1),self.formula_to(r'\alpha=(1,1,1)\qquad p(x_{\rm next})=(4/7,2/7,1/7)'))
         self.beat(self.formula_to(r'p(x_{{\rm next},k}=1\mid D)=\int\mu_kp(\mu\mid D)\,d\mu=\frac{\alpha_k+m_k}{\alpha_0+N}',size=31))
         self.beat(self.formula_to(r'\frac{\alpha_0}{\alpha_0+N}\frac{\alpha_k}{\alpha_0}+\frac{N}{\alpha_0+N}\frac{m_k}{N}',size=37),Indicate(chart[0].copy(),remover=True),Indicate(chart[6].copy(),remover=True))
-        self.beat(amount.animate.set_value(10),self.formula_to(r'p(x_{{\rm next},3}=1\mid D)=\frac{1}{N+3}'))
+        expanded=VGroup(*[readout(r'm_'+str(k+1)+'=',lambda k=k:counts()[k],
+                                  (x,2.05,0),COLORS[k],0)
+                          for k,x in enumerate((-2,0,2))])
+        self.remove(opening)
+        self.add(expanded)
+        self.beat(amount.animate.set_value(10),
+                  self.formula_to(r'p(x_{{\rm next},3}=1\mid D)=\frac{1}{N+3}'))
         chart.clear_updaters(recursive=True);counter.clear_updaters(recursive=True)
-        chain=VGroup(jp('一回の色',28,COLORS[0]),tex(r'\longrightarrow',36),jp('回数の組',28,COLORS[1]),tex(r'\longrightarrow',36),jp('確率の地図',28,COLORS[2])).arrange(RIGHT,buff=.35).move_to([0,1,0])
+        expanded.clear_updaters(recursive=True)
+        chain=VGroup(jp('1回の色',28,COLORS[0]),tex(r'\longrightarrow',36),jp('回数の組',28,COLORS[1]),tex(r'\longrightarrow',36),jp('確率の地図',28,COLORS[2])).arrange(RIGHT,buff=.35).move_to([0,1,0])
         line=Line([-3,-.8,0],[3,-.8,0],color=PURPLE)
-        self.beat(FadeOut(chart),FadeOut(counter),FadeIn(chain),Create(line),self.formula_to(r'K=2:\quad\mathrm{Dir}(\mu_1,1-\mu_1\mid\alpha_1,\alpha_2)=\mathrm{Beta}(\mu_1\mid\alpha_1,\alpha_2)',size=29))
+        self.beat(FadeOut(chart),FadeOut(counter),FadeOut(expanded),FadeIn(chain),Create(line),self.formula_to(r'K=2:\quad\mathrm{Dir}(\mu_1,1-\mu_1\mid\alpha_1,\alpha_2)=\mathrm{Beta}(\mu_1\mid\alpha_1,\alpha_2)',size=29))
+        return_mix=ValueTracker(0)
+        return_values=lambda:(1-return_mix.get_value())*OPENING_COUNTS/4+return_mix.get_value()*predictive([1,1,1],OPENING_COUNTS)
+        return_chart=bars(return_values,xs=(-3,0,3),bottom=-.8,height=2.6,label_prefix=r'p_')
+        return_tokens=tokens(OPENING_SEQUENCE,y=2.05,spacing=.55,radius=.14)
+        question=jp('黄色 0回  →  次も 0？',28,COLORS[2]).move_to([0,1.35,0])
+        self.add(return_tokens)
+        self.beat(Succession(AnimationGroup(FadeOut(chain),FadeOut(line),run_time=.2),
+                             AnimationGroup(FadeIn(return_chart),FadeIn(question),run_time=.8)),
+                  self.formula_to(r'm=(3,1,0),\quad\mu^{\rm ML}_3=0'))
+        answer=jp('黄色 0回でも、次の予測は 1/7',28,GREEN).move_to([0,1.35,0])
+        self.beat(return_mix.animate.set_value(1),
+                  Succession(FadeOut(question,run_time=.35),FadeIn(answer,run_time=.65)),
+                  self.formula_to(r'p(x_{{\rm next},3}=1\mid D,\alpha=(1,1,1))=\frac{1}{7}',size=34))
