@@ -350,13 +350,13 @@ class PRML13ModelSelection(NarratedScene):
         self.legend([('1マス＝1候補',BLUE_DATA),('交差検証＝候補ごとに4回',ORANGE_DATA)])
         def grid(layers, rows):
             group=VGroup()
-            side=.61 if layers==1 else .34
-            step=.74 if layers==1 else .43
+            side=.61 if layers==1 else .32
+            step=.74 if layers==1 else .39
             for layer in range(layers):
                 for r in range(rows):
                     for c in range(5):
                         box=Square(side_length=side,color=BLUE_DATA,fill_color=BG,fill_opacity=.25)
-                        box.move_to([-4.4+c*step+layer*(2.12 if layers>1 else 0),
+                        box.move_to([-4.4+c*step+layer*(2.15 if layers>1 else 0),
                                      1.25-r*step,0]); group.add(box)
             return group
         g=grid(1,1)
@@ -378,11 +378,14 @@ class PRML13ModelSelection(NarratedScene):
         formula60=tex(r'5\times4\times3=60',34).move_to(formula)
         f240=tex(r'60\times4=240',32,ORANGE_DATA).move_to(f80)
         extra=jp('別の設定：3通り',20,PURPLE_TERM).move_to([-2.55,-1.3,0])
+        layer_labels=VGroup(*[jp(f'設定{i+1}',18,PURPLE_TERM)
+                              .move_to([-3.62+2.15*i,1.74,0]) for i in range(3)])
         first,second=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('show three separate candidate grids',first,
              lambda: AnimationGroup(ReplacementTransform(g20,g60),FadeOut(formula),
-                                    FadeOut(f80),FadeIn(formula60),FadeIn(extra))),
+                                    FadeOut(f80),FadeIn(formula60),FadeIn(extra),
+                                    FadeIn(layer_labels))),
             ('count four fits per candidate',second,
              lambda: AnimationGroup(counter.animate.set_value(240),FadeIn(f240))),
         ])
