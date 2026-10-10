@@ -1,287 +1,128 @@
 {
-  "video_sha256": "0bc04954096a9ba1993abb6379e8f713302e6b0dc4efd23db436b5a631934f6f",
-  "ffprobe": {
-    "programs": [],
-    "streams": [
-      {
-        "index": 0,
-        "codec_name": "h264",
-        "codec_type": "video",
-        "width": 854,
-        "height": 480,
-        "r_frame_rate": "15/1",
-        "duration": "605.930733"
-      },
-      {
-        "index": 1,
-        "codec_name": "aac",
-        "codec_type": "audio",
-        "r_frame_rate": "0/0",
-        "duration": "605.973333"
-      }
-    ],
-    "format": {
-      "duration": "605.974000"
-    }
+  "video_sha256": "83bbb8f9afce521ad12a347aef93ecc9a04f0610e46ea55236a08e4ec0dd26f8",
+  "source_checked": "Bishop PRML (2006), §1.4, printed pp.33–38 / PDF pp.53–58",
+  "narration": {
+    "speaker": "VOICEVOX:WhiteCUL",
+    "speaker_id": 23,
+    "speed": 1.08,
+    "intonation": 1.08,
+    "scenes": 9,
+    "beats": 64,
+    "sentences": 129,
+    "reading_checked_sentences": 129,
+    "wav_duration_total_seconds": 642.0,
+    "manifest_hashes_validated": true
   },
-  "baseline_ffprobe": {
-    "programs": [],
-    "streams": [
-      {
-        "index": 0,
-        "codec_type": "video",
-        "duration": "591.864067"
-      },
-      {
-        "index": 1,
-        "codec_type": "audio",
-        "duration": "591.893333"
+  "render": {
+    "command": "manim --progress_bar none --disable_caching --flush_cache -ql prml_1_4_curse_of_dimensionality.py PRML14CurseOfDimensionality",
+    "animations": 108,
+    "ffprobe": {
+      "programs": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 854,
+          "height": 480,
+          "r_frame_rate": "15/1",
+          "duration": "641.995767"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0",
+          "duration": "642.026667"
+        }
+      ],
+      "format": {
+        "duration": "642.027000",
+        "size": "15541438"
       }
-    ],
-    "format": {
-      "duration": "591.894000"
-    }
+    },
+    "stream_duration_difference_seconds": 0.03089999999997417,
+    "video_decode": "passed",
+    "audio_decode": "passed",
+    "silence_filter": "silencedetect=noise=-45dB:d=3",
+    "silences_at_least_3_seconds": 0,
+    "mean_volume_db": -26.6,
+    "max_volume_db": -5.9
   },
-  "stream_duration_difference": 0.04259999999999309,
-  "video_duration_increase": 14.066666000000055,
-  "video_duration_increase_percent": 2.37667173668783,
-  "mean_volume_db": -26.8,
-  "max_volume_db": -5.7,
-  "silence_filter": "silencedetect=noise=-45dB:d=3",
-  "long_silence_count": 0,
-  "unchanged_sentence_pcm_count": 114,
-  "caption_count": 119,
-  "caption_max_width": 9.38984375,
-  "caption_max_height": 0.6995312499999997,
-  "frames": [
-    {
-      "time": 21.16666666666663,
-      "label": "scene01 existing"
-    },
-    {
-      "time": 80.53333333333413,
-      "label": "scene02 existing"
-    },
-    {
-      "time": 151.1999999999969,
-      "label": "scene03 existing"
-    },
-    {
-      "time": 224.3999999999926,
-      "label": "scene04 existing"
-    },
-    {
-      "time": 304.0333333333215,
-      "label": "scene05 existing"
-    },
-    {
-      "time": 375.4666666666508,
-      "label": "scene06 existing"
-    },
-    {
-      "time": 473.23333333331186,
-      "label": "scene07 existing"
-    },
-    {
-      "time": 544.7333333333311,
-      "label": "scene08 existing"
-    },
-    {
-      "time": 348.5,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 349.0,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 351.3,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 352.3,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 353.5,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 355.3,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 359.5,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 360.6,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 412.9,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 413.6,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 416.5,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 417.6,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 419.8,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 422.5,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 423.1,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 425.4,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 426.3,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 427.4,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 428.2,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 432.8,
-      "label": "changed before/inside/after"
-    },
-    {
-      "time": 438.3,
-      "label": "changed before/inside/after"
-    }
-  ],
-  "scene_timing": [
-    {
-      "id": "scene01",
-      "start": 0.0,
-      "duration": 62.53333333333476
-    },
-    {
-      "id": "scene02",
-      "start": 62.53333333333476,
-      "duration": 64.93333333332978
-    },
-    {
-      "id": "scene03",
-      "start": 127.46666666666455,
-      "duration": 74.99999999999575
-    },
-    {
-      "id": "scene04",
-      "start": 202.4666666666603,
-      "duration": 76.733333333329
-    },
-    {
-      "id": "scene05",
-      "start": 279.1999999999893,
-      "duration": 69.59999999999604
-    },
-    {
-      "id": "scene06",
-      "start": 348.79999999998535,
-      "duration": 99.06666666666104
-    },
-    {
-      "id": "scene07",
-      "start": 447.8666666666464,
-      "duration": 74.53333333333791
-    },
-    {
-      "id": "scene08",
-      "start": 522.3999999999843,
-      "duration": 83.53333333339981
-    }
-  ],
-  "synchronization": [
-    {
-      "sentence": "scene06-01-01",
-      "phrase": "ヘエキンガ",
-      "query_phrase_time": 351.16689066333544,
-      "animation": {
-        "name": "recap 1.2 mean to zero",
-        "start": 351.1999999999852,
-        "end": 352.59999999998513
-      },
-      "action_minus_phrase_seconds": 0.03310933664977256,
-      "pcm_sentence_onset": 348.8489999999853
-    },
-    {
-      "sentence": "scene06-01-01",
-      "phrase": "ヒョオジュンヘンサガ",
-      "query_phrase_time": 352.5723300201603,
-      "animation": {
-        "name": "recap 1.2 standard deviation to one",
-        "start": 352.59999999998513,
-        "end": 354.799999999985
-      },
-      "action_minus_phrase_seconds": 0.02766997982485009,
-      "pcm_sentence_onset": 348.8489999999853
-    },
-    {
-      "sentence": "scene06-aid-03",
-      "phrase": "サラニ",
-      "query_phrase_time": 425.63272656880235,
-      "animation": {
-        "name": "V02 product falls from radius 1 to 2",
-        "start": 425.599999999981,
-        "end": 427.3333333333142
-      },
-      "action_minus_phrase_seconds": -0.03272656882137426,
-      "pcm_sentence_onset": 422.79516666665205
-    }
-  ],
-  "max_subtitle_pcm_timing_difference": 5.702815997210564e-11,
-  "max_scene_wav_timing_difference": 6.647837835771497e-11,
+  "synchronization": {
+    "timeline_end_seconds": 642.0000000000795,
+    "max_subtitle_wav_cue_difference_seconds": 5.707079253625125e-11,
+    "caption_max_width": 9.3453125,
+    "caption_max_height": 0.6995312499999997,
+    "title_max_width": 9.63984375
+  },
+  "numerical_verification": "verify_numerics.py: 5 groups passed, including 2D [22,12,0] and 10D [0,0,0] on the same 90 points",
   "py_compile": "passed",
-  "numerical_verification": "5 groups passed",
-  "numerical_results": {
-    "D2_product_integral": 0.999999999166654,
-    "D2_product_mode": 1.0,
-    "D2_factors": [
-      [
-        0.3,
-        0.9559974818331,
-        0.28679924454993
-      ],
-      [
-        1,
-        0.6065306597126334,
-        0.6065306597126334
-      ],
-      [
-        2,
-        0.1353352832366127,
-        0.2706705664732254
-      ]
-    ]
-  },
-  "narration_symbol_readings_in_display": 0,
-  "reviewed_frame_count": 29,
-  "rendered_animations": 95,
+  "reviewed_final_frame_times_seconds": [
+    2,
+    8,
+    25,
+    35,
+    45,
+    50,
+    54,
+    57,
+    60,
+    61,
+    66,
+    74,
+    85,
+    103,
+    116,
+    127.5,
+    143,
+    160,
+    180,
+    201.5,
+    205,
+    225,
+    247,
+    278.5,
+    281,
+    300,
+    327,
+    348.7,
+    351,
+    358,
+    360,
+    375,
+    405,
+    413.2,
+    417,
+    422,
+    426,
+    427.8,
+    443,
+    447.8,
+    463,
+    480,
+    503,
+    521.9,
+    538,
+    557,
+    580,
+    602.5,
+    602.9,
+    612,
+    616,
+    619,
+    620,
+    622,
+    626,
+    630,
+    634,
+    638,
+    641.5
+  ],
   "limitations": [
     "全編の通し聴取は未実施",
     "全フレームの目視は未実施",
-    "高品質レンダリングは未実施"
+    "高品質レンダリングは未実施",
+    "視聴者による理解度確認は未実施"
   ]
 }
