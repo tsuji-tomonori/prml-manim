@@ -22,6 +22,7 @@ def main():
     probe=json.loads(run(['ffprobe','-v','error','-show_entries','format=duration:stream=codec_type,codec_name,duration,width,height,r_frame_rate','-of','json',str(VIDEO)]).stdout)
     v=next(s for s in probe['streams'] if s['codec_type']=='video');a=next(s for s in probe['streams'] if s['codec_type']=='audio')
     delta=abs(float(v['duration'])-float(a['duration']));assert delta<1/15
+    run(['ffmpeg','-v','error','-i',str(VIDEO),'-f','null','-'])
     sil=run(['ffmpeg','-hide_banner','-i',str(VIDEO),'-af','silencedetect=noise=-45dB:d=3','-f','null','-']).stderr
     vol=run(['ffmpeg','-hide_banner','-i',str(VIDEO),'-map','0:a:0','-af','volumedetect','-f','null','-']).stderr
     (out/'silence.log').write_text(sil);(out/'volume.log').write_text(vol)
@@ -43,14 +44,27 @@ def main():
             assert c['id']==expected['id'] and c['display']==expected['display']
             assert abs(c['start']-s['start']-expected['start'])<1e-6
     assert max(timing_errors)<1e-6
+    # Inspect the opening prediction, both centre switches, and the closing return.
+    for si,indices in [(0,[0,1,2]),(6,[7,8,9])]:
+        s=timeline[si]
+        for bi in indices:
+            b=s['beats'][bi]
+            for fraction in [.10,.45,.82]:
+                frames.append(dict(label=f"{s['id']}-story-{bi+1}-{fraction}",
+                                   time=b['start']+fraction*(b['action_end']-b['start'])))
+            if bi+1<len(s['beats']):
+                frames.append(dict(label=f"{s['id']}-story-{bi+1}-after",time=b['end']+.10))
     # Review every new card through its phases and both neighbouring shots.
-    for si,bi in [(1,0),(4,4),(2,0)]:
+    for si,bi in [(0,0),(1,0),(4,4),(2,0)]:
         b=timeline[si]['beats'][bi]
         times=[b['start']-.15,b['start']+.6,b['end']-.2,b['end']+.2]
         times += [(p['start']+p['end'])/2 for p in b.get('actions',[]) if p['name']!='breath']
         for j,t in enumerate(times):
             frames.append(dict(label=f"{timeline[si]['id']}-review-{j}",time=t))
-    for si,bi,name in [(0,1,'weight raises local bump'),(2,4,'straighten manifold'),(4,2,'rotate relevant direction'),(5,2,'shift then sharpen sigmoid'),(1,0,'R1.4 boxes to basis centers'),(4,4,'V08a projection to scalar')]:
+    for si,bi,name in [(0,0,'72 points then 81 grid centers'),(0,1,'81 to 12 centers'),
+                       (0,3,'weight raises local bump'),(2,4,'straighten manifold'),
+                       (4,2,'rotate relevant direction'),(5,2,'shift then sharpen sigmoid'),
+                       (1,0,'R1.4 boxes to basis centers'),(4,4,'V08a projection to scalar')]:
         s=timeline[si];b=s['beats'][bi];e=manifest[si]
         with wave.open(str(ROOT/'assets/voicevox'/f"{s['id']}.wav"),'rb') as w:
             rate=w.getframerate();assert w.getsampwidth()==2
@@ -60,7 +74,7 @@ def main():
         active=np.flatnonzero(abs(window)>10**(-45/20))
         onset=s['start']+cue['start']+active[0]/rate
         sync.append(dict(scene=s['id'],beat=bi+1,action=name,start=b['action_start'],end=b['action_end'],first_voice=onset,phases=b.get('actions',[])))
-        if (si,bi) in [(1,0),(4,4)]:
+        if (si,bi) in [(0,0),(1,0),(4,4)]:
             for phase in b['actions']:
                 if phase['name']=='breath':continue
                 begin=round((phase['start']-s['start'])*rate)
