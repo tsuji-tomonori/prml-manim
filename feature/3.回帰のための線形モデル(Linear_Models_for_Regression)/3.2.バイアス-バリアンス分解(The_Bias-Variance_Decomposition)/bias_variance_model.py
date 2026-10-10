@@ -47,3 +47,10 @@ def experiment(log_lambda):
 
 METRICS = np.array([[experiment(float(l))[k] for k in ['bias2','variance','expected','test']] for l in LOG_LAMBDAS])
 BEST = float(LOG_LAMBDAS[np.argmin(METRICS[:,0]+METRICS[:,1])])
+
+# The opening and return use the same input and the same independent training sets.
+STORY_X = .25
+STORY_SETS = (0, 2)
+
+def story_prediction(dataset_index, log_lambda):
+    return float(experiment(float(log_lambda))['weights'][dataset_index] @ design(np.array([STORY_X])).ravel())
