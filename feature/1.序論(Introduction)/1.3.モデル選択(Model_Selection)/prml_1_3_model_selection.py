@@ -145,11 +145,9 @@ class PRML13ModelSelection(NarratedScene):
         gap9=jp(f'ずれ {model.STORY_RESIDUALS[9]:.3f}',21,YELLOW_ERROR)
         figures=VGroup(observed,pred9,gap9).arrange(DOWN,buff=.16).move_to([4.65,.65,0])
         self.beat(Create(errs),FadeIn(figures))
-        figures3=VGroup(jp(f'観測 {model.STORY_T:.3f}',21,ORANGE_DATA),
-                        jp(f'd=3 予測 {model.STORY_PREDICTIONS[3]:.3f}',21,MODEL_RED),
-                        jp(f'ずれ {model.STORY_RESIDUALS[3]:.3f}',21,YELLOW_ERROR))
-        figures3.arrange(DOWN,buff=.16).move_to(figures)
-        self.beat(d.animate.set_value(3),Transform(figures,figures3),Indicate(halo,color=YELLOW_ERROR))
+        pred3=jp(f'd=3 予測 {model.STORY_PREDICTIONS[3]:.3f}',21,MODEL_RED).move_to([4.65,-.58,0])
+        gap3=jp(f'ずれ {model.STORY_RESIDUALS[3]:.3f}',21,YELLOW_ERROR).move_to([4.65,-1.12,0])
+        self.beat(d.animate.set_value(3),FadeIn(pred3),FadeIn(gap3),Indicate(halo,color=YELLOW_ERROR))
         formula=MathTex(r'E_{\rm val}', '=',r'\frac1{N_{\rm val}}\sum_n',r'(y(x_n)-t_n)^2',font_size=29)
         formula[0].set_color(ORANGE_DATA); formula[3].set_color(ORANGE_DATA)
         formula.move_to([0,-2.03,0])
@@ -352,11 +350,14 @@ class PRML13ModelSelection(NarratedScene):
         self.legend([('1マス＝1候補',BLUE_DATA),('交差検証＝候補ごとに4回',ORANGE_DATA)])
         def grid(layers, rows):
             group=VGroup()
+            side=.61 if layers==1 else .34
+            step=.74 if layers==1 else .43
             for layer in range(layers):
                 for r in range(rows):
                     for c in range(5):
-                        box=Square(side_length=.61,color=BLUE_DATA,fill_color=BG,fill_opacity=1 if layers>1 else .25)
-                        box.move_to([-4.4+c*.74+layer*.3,1.25-r*.74+layer*.25,0]); group.add(box)
+                        box=Square(side_length=side,color=BLUE_DATA,fill_color=BG,fill_opacity=.25)
+                        box.move_to([-4.4+c*step+layer*(2.12 if layers>1 else 0),
+                                     1.25-r*step,0]); group.add(box)
             return group
         g=grid(1,1)
         self.beat(LaggedStart(*[FadeIn(b) for b in g],lag_ratio=.15))
@@ -374,12 +375,22 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(counter.animate.set_value(80),Write(f80))
         scan.clear_updaters(); self.remove(scan)
         g60=grid(3,4)
-        self.beat(ReplacementTransform(g20,g60),counter.animate.set_value(240),
-                  Transform(formula,tex(r'5\times4\times3=60',34).move_to(formula)),
-                  Transform(f80,tex(r'60\times4=240',32,ORANGE_DATA).move_to(f80)))
+        formula60=tex(r'5\times4\times3=60',34).move_to(formula)
+        f240=tex(r'60\times4=240',32,ORANGE_DATA).move_to(f80)
+        extra=jp('別の設定：3通り',20,PURPLE_TERM).move_to([-2.55,-1.3,0])
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('show three separate candidate grids',first,
+             lambda: AnimationGroup(ReplacementTransform(g20,g60),FadeOut(formula),
+                                    FadeOut(f80),FadeIn(formula60),FadeIn(extra))),
+            ('count four fits per candidate',second,
+             lambda: AnimationGroup(counter.animate.set_value(240),FadeIn(f240))),
+        ])
         general=tex(r'k^h\ \mathrm{candidates}\quad\Longrightarrow\quad S k^h\ \mathrm{runs}',34,YELLOW_ERROR).move_to([0,-2.55,0])
         self.beat(Write(general))
-        self.beat(Indicate(runs,color=YELLOW_ERROR),Indicate(g60,color=YELLOW_ERROR))
+        self.beat(Indicate(runs,color=YELLOW_ERROR),
+                  *[Flash(g60[i].get_center(),color=YELLOW_ERROR,flash_radius=.45)
+                    for i in (0,20,40)])
 
     def aic(self):
         formula=MathTex(r'\ln p(\mathcal D\mid\mathbf w_{\rm ML})','-', 'M',font_size=34)
@@ -475,12 +486,13 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(Transform(line,curve(ax,model.WEIGHTS[8])),FadeIn(target),Create(gap),
                   FadeIn(point_label),FadeIn(observation),FadeIn(prediction9),
                   FadeIn(residual9),Write(conclusion))
-        prediction3=jp(f'd=3 予測 {model.STORY_PREDICTIONS[3]:.3f}',21,MODEL_RED).move_to(prediction9)
-        residual3=jp(f'ずれ {model.STORY_RESIDUALS[3]:.3f}',21,YELLOW_ERROR).move_to(residual9)
+        prediction3=jp(f'd=3 予測 {model.STORY_PREDICTIONS[3]:.3f}',21,MODEL_RED).move_to([4.6,-.65,0])
+        residual3=jp(f'ずれ {model.STORY_RESIDUALS[3]:.3f}',21,YELLOW_ERROR).move_to([4.6,-1.2,0])
         new_gap=Line(ax.c2p(model.STORY_X,model.STORY_T),
                      ax.c2p(model.STORY_X,model.STORY_PREDICTIONS[3]),
                      color=YELLOW_ERROR,stroke_width=4)
         answer=jp('検証24点で選んだ三次式',25,ORANGE_DATA).move_to(conclusion)
+        self.remove(conclusion)
         self.beat(Transform(line,curve(ax,model.WEIGHTS[2])),Transform(gap,new_gap),
-                  Transform(prediction9,prediction3),Transform(residual9,residual3),
-                  Transform(conclusion,answer),Indicate(target,color=ORANGE_DATA))
+                  FadeIn(prediction3),FadeIn(residual3),FadeIn(answer),
+                  Indicate(target,color=ORANGE_DATA))
