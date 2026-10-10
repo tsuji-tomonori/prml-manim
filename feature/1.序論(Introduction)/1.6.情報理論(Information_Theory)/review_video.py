@@ -27,6 +27,19 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:
                     key=c['id'];frames[key]=(c['start']+c['end'])/2;symbolic.append(key)
+    # Include motion before, during, and just after the main reveals in every act.
+    transitions={'scene01':[1,2,4], 'scene02':[2,3,4], 'scene03':[2,5],
+                 'scene04':[1,3], 'scene05':[2,4,5], 'scene06':[2,6],
+                 'scene07':[1,2,5], 'scene08':[2,5,6],
+                 'scene09':[3,5], 'scene10':[2,5,6]}
+    by_id={sc['id']:sc for sc in timeline}
+    for sid,beats in transitions.items():
+        for bi in beats:
+            b=by_id[sid]['beats'][bi-1]
+            span=b['action_end']-b['action_start']
+            for label,fraction in [('early',.15),('late',.85)]:
+                frames[f'{sid}-beat{bi:02}-{label}']=b['action_start']+span*fraction
+            frames[f'{sid}-beat{bi:02}-after']=min(b['end']-.067,b['action_end']+.15)
     sync=[]
     for si,bi in [(0,3),(4,4),(8,4)]:
         sc=timeline[si];b=sc['beats'][bi];entry=manifest[si]

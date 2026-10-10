@@ -4,7 +4,12 @@ import numpy as np
 
 P = np.array([.5, .25, .125, .125])
 Q = np.array([.1, .2, .3, .4])
+P_CODES = ('0', '10', '110', '111')
+Q_CODES = ('000', '001', '01', '1')
 DATA = np.array([1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1])
+
+def mean_code_length(p, codes):
+    return float(np.asarray(p) @ np.array([len(code) for code in codes]))
 
 def entropy(p, base=np.e):
     p = np.asarray(p, dtype=float)

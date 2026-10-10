@@ -9,11 +9,18 @@ from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
 
 def main():
     results={}
-    codes=['0','10','110','111']
+    codes=P_CODES
     assert not any(b.startswith(a) for a,b in itertools.permutations(codes,2))
-    mean=float(P@np.array([len(s) for s in codes]))
+    assert not any(b.startswith(a) for a,b in itertools.permutations(Q_CODES,2))
+    mistaken=mean_code_length(P,Q_CODES)
+    assert np.isclose(mistaken,2.625) and mistaken>2
+    assert np.isclose(mean_code_length(Q,Q_CODES),1.9)
+    mean=mean_code_length(P,codes)
     assert np.isclose(mean,entropy(P,2)) and np.isclose(mean,1.75)
     results['coding_bits']=mean
+    results['opening_code_bits']=mistaken
+    results['ideal_cross_entropy_bits']=float(-P@np.log2(Q))
+    assert np.isclose(results['ideal_cross_entropy_bits']-mean,kl(P,Q)/np.log(2))
     assert multiplicity(6,3)==len(list(itertools.combinations(range(6),3)))==20
     assert np.isclose(entropy(np.ones(30)/30),np.log(30))
     assert entropy(np.eye(30)[14])==0
