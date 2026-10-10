@@ -53,11 +53,13 @@ for scene,entry in zip(timeline,manifest):
             frames.append(dict(name=f"sync-{scene['id']}-{suffix}",time=b['action_start']+alpha*(b['action_end']-b['action_start']),display=b['display']))
 
 # Sample every revised demonstration, including context on both sides.
-revised={'scene01':[1,2], 'scene03':[6], 'scene06':[3]}
+revised={'scene01':[0,1,3,4], 'scene03':[6], 'scene06':[3],
+         'scene09':[0], 'scene10':[0], 'scene11':[0,1,5,6]}
 for scene,entry in zip(timeline,manifest):
     for j in revised.get(scene['id'],[]):
         beat=scene['beats'][j]
-        for suffix,t in [('before',beat['start']-.2),('after',beat['end']+.2)]:
+        for suffix,t in [('before',beat['start']-.2),
+                         ('after',min(beat['end']+.2,timeline[-1]['end']-.2))]:
             frames.append(dict(name=f"changed-{scene['id']}-{j+1}-{suffix}",time=t,display=beat['display']))
         for i,cue in enumerate(beat['cues']):
             for suffix,alpha in [('early',.2),('late',.8)]:

@@ -53,6 +53,22 @@ for w in [.2,.45,.8]:
     r=responsibility(np.linspace(-4,4,51),w)
     assert np.all((r>=0)&(r<=1))
 checks['responsibility_x0']=float(responsibility(0))
+# The opening and ending reuse these 100 observations and the same two fits.
+middle_count=int(np.count_nonzero((MIX_DATA>=-.55)&(MIX_DATA<.55)))
+single_mid=float(normal(0,MIX_DATA.mean(),MIX_DATA.std()))
+two_mid=float(mixture(0))
+single_ll=float(np.log(normal(MIX_DATA,MIX_DATA.mean(),MIX_DATA.std())).sum())
+two_ll=float(np.log(mixture(MIX_DATA)).sum())
+assert len(MIX_DATA)==100 and middle_count==2
+assert np.isclose(single_mid,.22372912131409675)
+assert np.isclose(two_mid,.028870790587310416)
+assert two_ll>single_ll
+assert np.isclose(MIX_WEIGHT,.4493772872323348,atol=1e-8)
+checks['opening_return']={'observations':len(MIX_DATA),'middle_count':middle_count,
+    'single_mid_density':single_mid,'two_mid_density':two_mid,
+    'single_log_likelihood':single_ll,'two_log_likelihood':two_ll,
+    'fitted_weight':MIX_WEIGHT,'fitted_means':MIX_MEANS.tolist(),
+    'fitted_scales':MIX_SCALES.tolist()}
 # V10: use polygon area and Gaussian quadrature independently of the drawing.
 b=np.diag([2.,1.]);cov=b@b.T
 square=np.array([[0.,0.],[1.,0.],[1.,1.],[0.,1.]])@b.T
@@ -66,4 +82,4 @@ assert np.isclose(quad(lambda u:30*u**4*(1-u),0,1)[0],1)
 checks['visual_aid']={'area_multiplier':area,'covariance_determinant':float(np.linalg.det(cov)),
                       'density_ratio':.5,'bayes_product_area':product_area,'bayes_normalized_area':1.}
 print(json.dumps(checks,indent=2,ensure_ascii=False))
-print('PASS: normalization, covariance geometry, conditional/linear Bayes, CLT, MLE, bias, sequential update, posterior, t mixture, robustness, circular mean, mixture responsibilities')
+print('PASS: normalization, covariance geometry, conditional/linear Bayes, CLT, MLE, bias, sequential update, posterior, t mixture, robustness, circular mean, mixture responsibilities, opening/ending fit')
