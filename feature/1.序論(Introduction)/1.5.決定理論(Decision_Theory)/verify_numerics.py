@@ -19,7 +19,10 @@ for c in (1,2,20,1000):
  candidates=z+np.linspace(-.5,.5,101)
  risk=[mistake_parts(t)[0]+c*mistake_parts(t)[1] for t in candidates]
  assert np.argmin(risk)==50
+# The opening prediction and the ending use the same posterior and costs.
+assert np.allclose(risks(.08,1),[.92,.08])
 assert np.allclose(risks(.08,1000),[.92,80])
+assert np.isclose(posterior(.5*np.log(.92/.08)),.08)
 assert reject_fraction(.4)==0 and reject_fraction(1)==1
 assert reject_fraction(.9)>reject_fraction(.6)
 for th in (.6,.9):
@@ -42,7 +45,8 @@ for scene in SCENES:
  assert valid_entry(scene,entries[scene['id']]),scene['id']
 assert {p.stem for p in (MANIFEST.parent).glob('scene*.wav')}==set(entries)
 print(json.dumps(dict(mistake_min=min(errors),boundary_cost20=optimal_boundary(20),
-    boundary_cost1000=optimal_boundary(1000),risk_008_cost1000=risks(.08,1000).tolist(),
+    boundary_cost1000=optimal_boundary(1000),risk_008_cost1=risks(.08,1).tolist(),
+    risk_008_cost1000=risks(.08,1000).tolist(),
     reject_06=reject_fraction(.6),reject_09=reject_fraction(.9),
     corrected=corrected_posterior(.8,.5,.01).tolist(),combined=combine_posteriors(.5,.6,.2).tolist(),
     mean=MEAN,median=MEDIAN,mode=MODE,variance=VARIANCE,

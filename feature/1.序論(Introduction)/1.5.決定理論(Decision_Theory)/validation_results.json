@@ -9,406 +9,151 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "567.800000"
+        "duration": "586.733333"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "567.829333"
+        "duration": "586.773333"
       }
     ],
     "format": {
-      "duration": "567.830000",
-      "size": "13683026"
+      "duration": "586.774000",
+      "size": "14287917"
     }
   },
-  "sha256": "c16451c13a24ea21461bed43ea0b8d8e18dbe7335d6ed1b9073b958e553d4840",
-  "baseline_video_duration": 554.2,
-  "duration_increase": 13.599999999999909,
-  "increase_percent": 2.4539877300613333,
+  "sha256": "efae662c717c801c4d6e6659f3ef5706557b950339cf1aa10c327360cfd6c9fc",
+  "baseline_video_duration": 567.8,
+  "duration_increase": 18.93333300000006,
+  "increase_percent": 3.3345073969707753,
   "long_silences": 0,
   "mean_volume": "-26.7 dB",
-  "max_volume": "-6.2 dB",
-  "unchanged_pcm_sentences": 110,
-  "unchanged_wav_scenes": 7,
+  "max_volume": "-6.4 dB",
+  "full_decode_errors": 0,
   "sentence_count": 115,
-  "caption_max_width": 9.392968750000001,
-  "caption_max_height": 0.7018750000000002,
-  "max_caption_pcm_start_error": 2.3703705664956942e-11,
-  "sync_checks": [
-    {
-      "cue": "scene01-05-02",
-      "phrase": "ゴオケエオ",
-      "action": "R1.2 normalize by observed total",
-      "voice_start": 40.58306133237473,
-      "visual_start": 40.600000000000335,
-      "visual_minus_voice": 0.016938667625602477
-    },
-    {
-      "cue": "scene06-aid-01",
-      "phrase": "ジゼンカクリツガ",
-      "action": "V06b one prior in each posterior",
-      "voice_start": 379.7359096556187,
-      "visual_start": 379.7333333333169,
-      "visual_minus_voice": -0.002576322301763412
-    },
-    {
-      "cue": "scene06-aid-02",
-      "phrase": "ノゾイテカラ",
-      "action": "V06b cancel one prior",
-      "voice_start": 382.9802995394426,
-      "visual_start": 382.9999999999834,
-      "visual_minus_voice": 0.019700460540775566
-    },
-    {
-      "cue": "scene06-aid-02",
-      "phrase": "ゴオケエオ",
-      "action": "V06b normalize over all classes",
-      "voice_start": 384.7581415732351,
-      "visual_start": 384.73333333331664,
-      "visual_minus_voice": -0.02480823991845682
-    }
+  "caption_max_width": 9.34921875,
+  "caption_max_height": 0.7471018105829454,
+  "max_caption_pcm_start_error": 2.7853275241795927e-11,
+  "representative_frames": [
+    3.9,
+    12.18,
+    16.755,
+    34.367,
+    49.16,
+    59.333,
+    69.567,
+    89.6,
+    99.567,
+    109.967,
+    120.067,
+    130.7,
+    140.867,
+    161.867,
+    172.587,
+    177.725,
+    185.88,
+    208.967,
+    218.333,
+    227.5,
+    235.133,
+    242.6,
+    250.5,
+    259.9,
+    270.333,
+    281.367,
+    292.2,
+    302.767,
+    314.1,
+    326.233,
+    338.0,
+    349.5,
+    373.367,
+    393.367,
+    402.833,
+    413.6,
+    424.767,
+    433.733,
+    442.8,
+    452.533,
+    472.233,
+    482.633,
+    490.967,
+    498.3,
+    505.3,
+    514.167,
+    524.633,
+    535.833,
+    547.233,
+    555.097,
+    559.957,
+    564.553,
+    571.3,
+    581.733,
+    12.54,
+    14.067,
+    413.367,
+    415.067,
+    553.433,
+    555.133,
+    39.3,
+    307.8,
+    406.6,
+    518.8
   ],
+  "representative_frame_count": 64,
   "scenes": [
     {
       "id": "scene01",
       "start": 0.0,
-      "end": 54.73333333333437
+      "end": 64.46666666666813
     },
     {
       "id": "scene02",
-      "start": 54.73333333333437,
-      "end": 118.9333333333317
+      "start": 64.46666666666813,
+      "end": 136.33333333333073
     },
     {
       "id": "scene03",
-      "start": 118.9333333333317,
-      "end": 193.73333333332747
+      "start": 136.33333333333073,
+      "end": 212.93333333332637
     },
     {
       "id": "scene04",
-      "start": 193.73333333332747,
-      "end": 245.86666666665784
+      "start": 212.93333333332637,
+      "end": 264.9999999999901
     },
     {
       "id": "scene05",
-      "start": 245.86666666665784,
-      "end": 313.866666666654
+      "start": 264.9999999999901,
+      "end": 332.46666666665294
     },
     {
       "id": "scene06",
-      "start": 313.866666666654,
-      "end": 400.2666666666491
+      "start": 332.46666666665294,
+      "end": 419.93333333331464
     },
     {
       "id": "scene07",
-      "start": 400.2666666666491,
-      "end": 473.3333333333116
+      "start": 419.93333333331464,
+      "end": 486.9333333333108
     },
     {
       "id": "scene08",
-      "start": 473.3333333333116,
-      "end": 529.6666666666567
+      "start": 486.9333333333108,
+      "end": 541.733333333333
     },
     {
       "id": "scene09",
-      "start": 529.6666666666567,
-      "end": 567.8000000000204
+      "start": 541.733333333333,
+      "end": 586.7333333333688
     }
   ],
-  "changed_beats": [
-    {
-      "scene": "scene01",
-      "start": 32.26666666666659,
-      "end": 46.666666666666586,
-      "display": "1.2では、観測前の事前確率を、観測後の事後確率へ更新しました。観測に合う部分を集め、合計を $1$ にそろえます。今回は、画像を見た後のクラスの確率を求めます。",
-      "action_start": 32.26666666666659,
-      "action_end": 46.261333333333255,
-      "cues": [
-        {
-          "id": "scene01-05-01",
-          "display": "1.2では、観測前の事前確率を、観測後の事後確率へ更新しました。",
-          "start": 32.26666666666659,
-          "end": 38.538666666666586
-        },
-        {
-          "id": "scene01-05-02",
-          "display": "観測に合う部分を集め、合計を $1$ にそろえます。",
-          "start": 38.538666666666586,
-          "end": 42.31466666666659
-        },
-        {
-          "id": "scene01-recap-01",
-          "display": "今回は、画像を見た後のクラスの確率を求めます。",
-          "start": 42.31466666666659,
-          "end": 46.261333333333255
-        }
-      ],
-      "actions": [
-        {
-          "name": "R1.2 identify prior and posterior",
-          "start": 32.26666666666659,
-          "end": 38.533333333333566
-        },
-        {
-          "name": "R1.2 select observed fruit",
-          "start": 38.533333333333566,
-          "end": 39.333333333333606
-        },
-        {
-          "name": "R1.2 collect equal-height areas",
-          "start": 39.333333333333606,
-          "end": 40.600000000000335
-        },
-        {
-          "name": "R1.2 normalize by observed total",
-          "start": 40.600000000000335,
-          "end": 42.333333333333755
-        },
-        {
-          "name": "R1.2 map boxes and fruit to classes and image",
-          "start": 42.333333333333755,
-          "end": 46.266666666667284
-        },
-        {
-          "name": "breath",
-          "start": 46.266666666667284,
-          "end": 46.666666666667304
-        }
-      ]
-    },
-    {
-      "scene": "scene06",
-      "start": 377.7999999999837,
-      "end": 386.86666666665036,
-      "display": "二つの事後確率には、事前確率が一回ずつ入っています。一回分を除いてから、全クラスの合計を $1$ にそろえます。",
-      "action_start": 377.7999999999837,
-      "action_end": 386.493333333317,
-      "cues": [
-        {
-          "id": "scene06-aid-01",
-          "display": "二つの事後確率には、事前確率が一回ずつ入っています。",
-          "start": 377.7999999999837,
-          "end": 382.205333333317
-        },
-        {
-          "id": "scene06-aid-02",
-          "display": "一回分を除いてから、全クラスの合計を $1$ にそろえます。",
-          "start": 382.205333333317,
-          "end": 386.493333333317
-        }
-      ],
-      "actions": [
-        {
-          "name": "V06b two posterior factors",
-          "start": 377.7999999999837,
-          "end": 379.7333333333169
-        },
-        {
-          "name": "V06b one prior in each posterior",
-          "start": 379.7333333333169,
-          "end": 382.19999999998345
-        },
-        {
-          "name": "V06b identify duplicate prior",
-          "start": 382.19999999998345,
-          "end": 382.9999999999834
-        },
-        {
-          "name": "V06b cancel one prior",
-          "start": 382.9999999999834,
-          "end": 384.06666666665
-        },
-        {
-          "name": "V06b collect remaining factors",
-          "start": 384.06666666665,
-          "end": 384.73333333331664
-        },
-        {
-          "name": "V06b normalize over all classes",
-          "start": 384.73333333331664,
-          "end": 386.46666666664987
-        },
-        {
-          "name": "breath",
-          "start": 386.46666666664987,
-          "end": 386.86666666664985
-        }
-      ]
-    }
-  ],
-  "extracted_frames": [
-    {
-      "name": "scene01-existing",
-      "time": 4.266666666666667
-    },
-    {
-      "name": "scene02-existing",
-      "time": 58.70000000000104
-    },
-    {
-      "name": "scene03-existing",
-      "time": 122.89999999999837
-    },
-    {
-      "name": "scene04-existing",
-      "time": 199.29999999999413
-    },
-    {
-      "name": "scene05-existing",
-      "time": 250.86666666665784
-    },
-    {
-      "name": "scene06-existing",
-      "time": 318.4999999999873
-    },
-    {
-      "name": "scene07-existing",
-      "time": 404.2666666666491
-    },
-    {
-      "name": "scene08-existing",
-      "time": 478.39999999997826
-    },
-    {
-      "name": "scene09-existing",
-      "time": 533.1333333333234
-    },
-    {
-      "name": "scene01-bar-start",
-      "time": 0.1
-    },
-    {
-      "name": "scene01-bar-end",
-      "time": 8.433333333333334
-    },
-    {
-      "name": "scene01-bar-after",
-      "time": 8.833333333333334
-    },
-    {
-      "name": "scene06-bar-start",
-      "time": 313.966666666654
-    },
-    {
-      "name": "scene06-bar-end",
-      "time": 323.0333333333206
-    },
-    {
-      "name": "scene06-bar-after",
-      "time": 323.43333333332066
-    },
-    {
-      "name": "scene01-before",
-      "time": 31.966666666666587
-    },
-    {
-      "name": "scene01-phase0-mid",
-      "time": 35.40000000000008
-    },
-    {
-      "name": "scene01-phase0-end",
-      "time": 38.463333333333566
-    },
-    {
-      "name": "scene01-phase1-mid",
-      "time": 38.933333333333586
-    },
-    {
-      "name": "scene01-phase1-end",
-      "time": 39.263333333333605
-    },
-    {
-      "name": "scene01-phase2-mid",
-      "time": 39.96666666666697
-    },
-    {
-      "name": "scene01-phase2-end",
-      "time": 40.530000000000335
-    },
-    {
-      "name": "scene01-phase3-mid",
-      "time": 41.466666666667045
-    },
-    {
-      "name": "scene01-phase3-end",
-      "time": 42.263333333333755
-    },
-    {
-      "name": "scene01-phase4-mid",
-      "time": 44.30000000000052
-    },
-    {
-      "name": "scene01-phase4-end",
-      "time": 46.196666666667284
-    },
-    {
-      "name": "scene01-after",
-      "time": 47.066666666666585
-    },
-    {
-      "name": "scene06-before",
-      "time": 377.4999999999837
-    },
-    {
-      "name": "scene06-phase0-mid",
-      "time": 378.7666666666503
-    },
-    {
-      "name": "scene06-phase0-end",
-      "time": 379.6633333333169
-    },
-    {
-      "name": "scene06-phase1-mid",
-      "time": 380.9666666666502
-    },
-    {
-      "name": "scene06-phase1-end",
-      "time": 382.12999999998345
-    },
-    {
-      "name": "scene06-phase2-mid",
-      "time": 382.5999999999834
-    },
-    {
-      "name": "scene06-phase2-end",
-      "time": 382.9299999999834
-    },
-    {
-      "name": "scene06-phase3-mid",
-      "time": 383.5333333333167
-    },
-    {
-      "name": "scene06-phase3-end",
-      "time": 383.99666666665
-    },
-    {
-      "name": "scene06-phase4-mid",
-      "time": 384.3999999999833
-    },
-    {
-      "name": "scene06-phase4-end",
-      "time": 384.66333333331664
-    },
-    {
-      "name": "scene06-phase5-mid",
-      "time": 385.59999999998325
-    },
-    {
-      "name": "scene06-phase5-end",
-      "time": 386.3966666666499
-    },
-    {
-      "name": "scene06-after",
-      "time": 387.26666666665034
-    }
-  ],
-  "visual_review": "最終41フレームを11枚のコンタクトシートで目視。全9シーン、復習・補足の各操作の途中と終了・前後、確率バー2か所の強調前後を確認。文字・式・字幕の重なり、はみ出し、カード復帰後の残留なし。",
-  "limitations": [
-    "全編の通し聴取・全フレームの人手確認・高解像度版は未実施"
-  ],
-  "baseline_commit": "547cd17a1e15445a56fc846725418488a199a801",
-  "three_class_fusion_error": 5.551115123125783e-17
+  "unverified": [
+    "全フレームの人手確認",
+    "高解像度版の全編レンダリング",
+    "音声全編の通し聴取",
+    "視聴者による楽しさの評価"
+  ]
 }
