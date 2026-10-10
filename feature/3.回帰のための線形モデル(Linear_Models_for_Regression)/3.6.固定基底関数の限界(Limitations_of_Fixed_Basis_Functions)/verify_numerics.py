@@ -23,8 +23,14 @@ def main():
     assert 5**10==9765625
     assert GRID.shape==(81,2) and LOCAL.shape==(12,2)
     assert np.all(np.linalg.norm(LOCAL[:,None]-DATA[None,:],axis=-1).min(axis=1)==0)
+    assert DATA.shape==(72,2) and int(NEAR.sum())==17
+    grid_dist=np.linalg.norm(DATA[:,None,:]-GRID[None,:,:],axis=2).min(axis=1)
+    local_dist=np.linalg.norm(DATA[:,None,:]-LOCAL[None,:,:],axis=2).min(axis=1)
+    assert np.all(grid_dist<.18) and np.all(local_dist<.18)
+    assert np.all(np.linalg.norm(GRID[:,None,:]-DATA[None,:,:],axis=2).min(axis=1)[~NEAR]>=.18)
     assert np.max(radial(LOCAL[4]))==1
-    print('PASS grid / data-selected centers; near=',int(NEAR.sum()))
+    print('PASS same 72 points covered by 81 and 12 centers at radius .18; max distances=',
+          grid_dist.max(),local_dist.max(),'; near grid centers=',int(NEAR.sum()))
     direction_invariant=np.array([[u,-u] for u in np.linspace(-.8,.8,101)])
     np.testing.assert_allclose(response(direction_invariant),.5,atol=1e-15)
     assert rmse(np.pi/4)<1e-14 and rmse(0)>.1
@@ -48,7 +54,8 @@ def main():
     display='\n'.join(seg['display'] for s in SCENES for b in s['beats'] for seg in b['segments'])
     assert not re.search('エックス|ラムダ|ミュー|シグマ|ファイ|ダブリュー|ディー|エイチ|ジェイ|エージェイ|ビージェイ',display)
     rows=json.loads((Path(__file__).parent/'reading_check.json').read_text())['sentences']
-    assert [(r['id'],r['speech']) for r in rows]==[(c['id'],c['speech']) for s in SCENES for b in s['beats'] for c in b['segments']]
+    assert [(r['id'],r['display'],r['speech']) for r in rows]==[
+        (c['id'],c['display'],c['speech']) for s in SCENES for b in s['beats'] for c in b['segments']]
     print('PASS audio / script / reading audit;',len(rows),'sentences;',sum(e['duration'] for e in entries),'seconds')
     if args.captions:
         from manim import config

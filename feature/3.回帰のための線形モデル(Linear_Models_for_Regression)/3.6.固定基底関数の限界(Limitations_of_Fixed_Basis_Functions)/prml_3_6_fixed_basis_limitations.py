@@ -67,6 +67,23 @@ class PRML36FixedBasisLimitations(NarratedScene):
         return ax
 
     def fixed(self):
+        self.hint('予想：青い72点の近くへ山を置くには？')
+        opening=self.plane(center=(-2.1,.05,0),size=4.15)
+        opening_data=VGroup(*[Dot(opening.c2p(*v),radius=.037,color=BLUE_DATA) for v in DATA]).set_z_index(3)
+        opening_grid=VGroup(*[Dot(opening.c2p(*v),radius=.043,color=ORANGE) for v in GRID])
+        opening_local=VGroup(*[Dot(opening.c2p(*v),radius=.07,color=GREEN_BASIS) for v in LOCAL]).set_z_index(4)
+        opening_rings=VGroup(*[Circle(radius=.18*4.15/2,color=GREEN_BASIS,stroke_width=1.2,stroke_opacity=.48)
+                               .move_to(opening.c2p(*v)) for v in LOCAL])
+        count=jp('格子：81個',30,ORANGE).move_to([3,.9,0])
+        result=VGroup(jp('データ付近：12個',28,GREEN_BASIS),
+                      jp('72点すべて  距離 < 0.18',23,GREEN_BASIS)).arrange(DOWN,buff=.38).move_to([3,.6,0])
+        self.beat(phases=[
+            ('72 points and prediction',self.sentence_duration(0),lambda:FadeIn(opening_data)),
+            ('81 grid centers',self.sentence_duration(1),lambda:AnimationGroup(
+                LaggedStart(*[FadeIn(d) for d in opening_grid],lag_ratio=.008),FadeIn(count)))])
+        self.beat(FadeOut(opening_grid),FadeIn(opening_local),Create(opening_rings),ReplacementTransform(count,result))
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
         self.hint('青：観測　赤：予測　黄・紫・緑：基底の寄与')
         ax=self.axes(width=9,height=3.25,center=(0,.35,0))
         u=np.linspace(-1,1,201)
@@ -233,10 +250,8 @@ class PRML36FixedBasisLimitations(NarratedScene):
         saved=[m for m in self.mobjects if m is not self.subtitle]
         header=[m for m in saved if m.get_center()[1]>3]
         self.clear()
-        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
-                               color=AID_OPERATION,stroke_width=1.2).move_to([0,.1,0])
         label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
-        self.add(*header,frame,label)
+        self.add(*header,label)
         return saved
 
     def restore_body(self,saved):
@@ -328,15 +343,14 @@ class PRML36FixedBasisLimitations(NarratedScene):
         self.beat(angle.animate.set_value(.9),bias.animate.set_value(.5),slope.animate.set_value(4))
 
     def conclusion(self):
-        hint=self.hint('三つの実験を、同じ舞台で振り返る')
+        hint=self.hint('3つの実験を、同じ舞台で振り返る')
         ax=self.plane(center=(-2.2,0,0),size=3.95)
-        u=np.linspace(-1,1,160)
-        function=curve(ax,u,(design(u)@BEST)-.5,RED_MODEL)
+        opening_points=VGroup(*[Dot(ax.c2p(*v),radius=.034,color=BLUE_DATA) for v in DATA])
         formula=MathTex('y=',r'\sum_j',r'w_j',r'\phi_j(\mathbf x)',font_size=40).move_to([3,1.3,0]);formula[2].set_color(RED_MODEL);formula[3].set_color(YELLOW_BASIS)
-        self.add(formula);self.beat(Create(function))
+        self.add(formula);self.beat(FadeIn(opening_points))
         grid=VGroup(*[Dot(ax.c2p(*v),radius=.04,color=ORANGE) for v in GRID])
         growth=tex(r'5\ \to\ 25\ \to\ 125',32,ORANGE).move_to([3,.1,0])
-        self.beat(FadeOut(function),FadeIn(grid),Write(growth))
+        self.beat(FadeOut(opening_points),FadeIn(grid),Write(growth))
         data=VGroup(*[Dot(ax.c2p(*v),radius=.032,color=BLUE_DATA) for v in DATA])
         local=VGroup(*[Circle(radius=.15,color=GREEN_BASIS).move_to(ax.c2p(*v)) for v in LOCAL])
         self.beat(FadeOut(grid),FadeIn(data),Create(local),FadeOut(growth))
@@ -350,5 +364,18 @@ class PRML36FixedBasisLimitations(NarratedScene):
         self.beat(Write(models),angle.animate.set_value(.4))
         cues=self.beat_cues()
         self.beat(phases=[('outer weights',cues[0]['end']/2,lambda:Indicate(formula[2],scale_factor=1.2)),('inner basis',cues[0]['end']/2,lambda:Indicate(formula[3],scale_factor=1.1)),('data decides',cues[1]['end']-cues[1]['start'],lambda:angle.animate.set_value(PI/4))])
-        next_text=jp('回帰から分類へ：入力を見る道具を作る',27).move_to(models)
-        self.beat(ReplacementTransform(models,next_text),Indicate(formula[3],scale_factor=1.04))
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
+        closing=self.plane(center=(-2.1,.05,0),size=4.15)
+        closing_data=VGroup(*[Dot(closing.c2p(*v),radius=.037,color=BLUE_DATA) for v in DATA]).set_z_index(3)
+        closing_grid=VGroup(*[Dot(closing.c2p(*v),radius=.043,color=ORANGE) for v in GRID])
+        closing_local=VGroup(*[Dot(closing.c2p(*v),radius=.07,color=GREEN_BASIS) for v in LOCAL]).set_z_index(4)
+        closing_rings=VGroup(*[Circle(radius=.18*4.15/2,color=GREEN_BASIS,stroke_width=1.2,stroke_opacity=.48)
+                               .move_to(closing.c2p(*v)) for v in LOCAL])
+        old_count=jp('格子：81個',30,ORANGE).move_to([3,.9,0])
+        new_count=VGroup(jp('データ付近：12個',28,GREEN_BASIS),
+                         jp('72点すべて  距離 < 0.18',23,GREEN_BASIS)).arrange(DOWN,buff=.38).move_to([3,.6,0])
+        self.beat(FadeIn(closing_data),LaggedStart(*[FadeIn(d) for d in closing_grid],lag_ratio=.008),FadeIn(old_count))
+        self.beat(FadeOut(closing_grid),FadeIn(closing_local),Create(closing_rings),ReplacementTransform(old_count,new_count))
+        next_text=jp('次は分類：見る場所をどう学ぶ？',25).move_to([3,-1.4,0])
+        self.beat(Write(next_text),Indicate(closing_local,scale_factor=1.05))
