@@ -22,12 +22,22 @@ def main():
     timeline=json.loads((ROOT/'media/prml25_timeline.json').read_text())
     manifest=json.loads(MANIFEST.read_text())['scenes']
     samples=[];sync=[];max_delta=0
+    story_beats={'scene01':{0,1,2,3,5},'scene02':{1,2},'scene09':{4,6}}
     for story,t,e in zip(SCENES,timeline,manifest):
         assert story['id']==t['id']==e['id']
         max_delta=max(max_delta,abs(t['end']-t['start']-e['duration']))
         mc={c['id']:c for c in e['subtitle_cues']}
         for bi,b in enumerate(t['beats']):
             samples.append(dict(name=f"{t['id']}-beat{bi+1:02}",time=(b['start']+b['end'])/2,kind='beat'))
+            if bi in story_beats.get(t['id'],set()):
+                for fraction in [.12,.88]:
+                    samples.append(dict(name=f"{t['id']}-beat{bi+1:02}-story-{round(fraction*100):02}",
+                                        time=b['start']+fraction*(b['end']-b['start']),kind='story'))
+                for ai,action in enumerate(b.get('actions',[])):
+                    if action['name']=='breath':continue
+                    for fraction in [.15,.85]:
+                        samples.append(dict(name=f"{t['id']}-beat{bi+1:02}-action{ai+1:02}-{round(fraction*100):02}",
+                                            time=action['start']+fraction*(action['end']-action['start']),kind='story'))
             for c in b['cues']:
                 assert c['display']==mc[c['id']]['display']
                 assert abs(c['start']-t['start']-mc[c['id']]['start'])<1/15

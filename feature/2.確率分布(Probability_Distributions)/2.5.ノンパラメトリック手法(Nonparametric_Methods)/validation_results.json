@@ -1,841 +1,22 @@
 {
-  "frames": [
-    {
-      "name": "scene01-beat01",
-      "time": 4.0,
-      "kind": "beat"
-    },
-    {
-      "name": "scene01-beat02",
-      "time": 12.033333333333324,
-      "kind": "beat"
-    },
-    {
-      "name": "scene01-beat03",
-      "time": 19.76666666666663,
-      "kind": "beat"
-    },
-    {
-      "name": "scene01-beat04",
-      "time": 28.43333333333327,
-      "kind": "beat"
-    },
-    {
-      "name": "scene01-beat05",
-      "time": 37.39999999999998,
-      "kind": "beat"
-    },
-    {
-      "name": "scene01-beat06",
-      "time": 46.03333333333371,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-beat01",
-      "time": 54.5666666666675,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-beat02",
-      "time": 62.633333333334555,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-02-01-math",
-      "time": 60.093333333334556,
-      "kind": "math",
-      "display": "全体が$N$個、そのビンの点が$n_i$個です。"
-    },
-    {
-      "name": "scene02-beat03",
-      "time": 71.20000000000132,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-03-01-math",
-      "time": 69.034666666668,
-      "kind": "math",
-      "display": "幅を$\\Delta_i$とすると、高さは割合を幅で割った値です。"
-    },
-    {
-      "name": "scene02-beat04",
-      "time": 79.40000000000083,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-beat05",
-      "time": 86.86666666666707,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-beat06",
-      "time": 94.1,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-beat07",
-      "time": 102.46666666666624,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-beat01",
-      "time": 111.33333333333238,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-01-01-math",
-      "time": 109.22399999999902,
-      "kind": "math",
-      "display": "調べたい位置$x$のまわりに、領域$R$を置きます。"
-    },
-    {
-      "name": "scene03-beat02",
-      "time": 119.06666666666524,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-02-01-math",
-      "time": 116.6373333333319,
-      "kind": "math",
-      "display": "領域の中の個数を$K$と呼びます。"
-    },
-    {
-      "name": "scene03-beat03",
-      "time": 127.09999999999815,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-03-02-math",
-      "time": 129.14399999999816,
-      "kind": "math",
-      "display": "$P\\simeq K/N$という近似です。"
-    },
-    {
-      "name": "scene03-beat04",
-      "time": 136.633333333331,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-04-01-math",
-      "time": 133.5999999999977,
-      "kind": "math",
-      "display": "領域の体積を$V$とします。一次元なら窓の幅です。"
-    },
-    {
-      "name": "scene03-beat05",
-      "time": 146.66666666666373,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-05-01-math",
-      "time": 144.15733333333043,
-      "kind": "math",
-      "display": "したがって、密度の推定値は$K/(NV)$です。"
-    },
-    {
-      "name": "scene03-beat06",
-      "time": 156.8666666666632,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-beat07",
-      "time": 168.9666666666626,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-02-01-sync-0.15",
-      "time": 116.44639999999858,
-      "kind": "sync"
-    },
-    {
-      "name": "scene03-02-01-sync-0.85",
-      "time": 121.32959999999856,
-      "kind": "sync"
-    },
-    {
-      "name": "scene04-beat01",
-      "time": 179.9333333333285,
-      "kind": "beat"
-    },
-    {
-      "name": "scene04-beat02",
-      "time": 188.09999999999468,
-      "kind": "beat"
-    },
-    {
-      "name": "scene04-beat03",
-      "time": 196.63333333332756,
-      "kind": "beat"
-    },
-    {
-      "name": "scene04-beat04",
-      "time": 205.66666666666038,
-      "kind": "beat"
-    },
-    {
-      "name": "scene04-beat05",
-      "time": 215.73333333332653,
-      "kind": "beat"
-    },
-    {
-      "name": "scene04-05-01-math",
-      "time": 212.60799999999318,
-      "kind": "math",
-      "display": "$D$次元では、一辺が$h$の箱の体積は$h^D$です。"
-    },
-    {
-      "name": "scene04-beat06",
-      "time": 225.79999999999256,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-beat01",
-      "time": 234.16666666665873,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-beat02",
-      "time": 241.93333333332492,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-beat03",
-      "time": 250.56666666665785,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-03-01-math",
-      "time": 247.5493333333245,
-      "kind": "math",
-      "display": "各山の標準偏差が、幅のつまみ$h$です。"
-    },
-    {
-      "name": "scene05-beat04",
-      "time": 259.83333333332394,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-04-01-math",
-      "time": 257.5466666666573,
-      "kind": "math",
-      "display": "$h$を小さくすると、一つ一つの点の影響が狭くなります。"
-    },
-    {
-      "name": "scene05-beat05",
-      "time": 268.73333333332346,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-beat06",
-      "time": 277.5999999999897,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-beat07",
-      "time": 287.0333333333225,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-04-01-sync-0.15",
-      "time": 256.629333333324,
-      "kind": "sync"
-    },
-    {
-      "name": "scene05-04-01-sync-0.85",
-      "time": 262.677333333324,
-      "kind": "sync"
-    },
-    {
-      "name": "scene06-beat01",
-      "time": 295.8999999999886,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-01-01-math",
-      "time": 293.6213333333219,
-      "kind": "math",
-      "display": "今度は個数$K$を、七に固定してみましょう。"
-    },
-    {
-      "name": "scene06-beat02",
-      "time": 304.1666666666548,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-beat03",
-      "time": 313.333333333321,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-beat04",
-      "time": 322.96666666665374,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-beat05",
-      "time": 330.93333333331987,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-05-01-math",
-      "time": 328.7813333333199,
-      "kind": "math",
-      "display": "今度は$K$を小さくします。"
-    },
-    {
-      "name": "scene06-beat06",
-      "time": 339.1999999999862,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-06-01-math",
-      "time": 335.8319999999862,
-      "kind": "math",
-      "display": "$K$を増やすと、広い範囲の点が必要になります。"
-    },
-    {
-      "name": "scene06-beat07",
-      "time": 349.79999999998563,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-beat01",
-      "time": 359.8333333333183,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-beat02",
-      "time": 368.66666666665117,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-02-01-math",
-      "time": 366.61333333331777,
-      "kind": "math",
-      "display": "色を区別せず、近い$K=5$個の点を集めます。"
-    },
-    {
-      "name": "scene07-beat03",
-      "time": 376.96666666665067,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-beat04",
-      "time": 385.7999999999835,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-recap-bayes-01-math",
-      "time": 383.86933333331683,
-      "kind": "math",
-      "display": "1.2では、観測に合う面積を切り出し、合計を$1$にそろえました。"
-    },
-    {
-      "name": "scene07-recap-bayes-01-before",
-      "time": 380.7999999999835,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-after",
-      "time": 390.7999999999835,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-introduce-0.15",
-      "time": 381.2199999999835,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-introduce-0.85",
-      "time": 382.2466666666501,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-select-observation-0.15",
-      "time": 382.75666666665006,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-select-observation-0.85",
-      "time": 384.10999999998336,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-collect-areas-0.15",
-      "time": 384.4699999999833,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-collect-areas-0.85",
-      "time": 384.79666666664997,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-normalize-0.15",
-      "time": 385.14666666664993,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-normalize-0.85",
-      "time": 386.45333333331655,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-map-to-classes-0.15",
-      "time": 387.2533333333165,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-map-to-classes-0.85",
-      "time": 389.679999999983,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-beat05",
-      "time": 395.7333333333163,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-recap-decision-01-before",
-      "time": 390.399999999983,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-after",
-      "time": 401.0666666666496,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-posterior-bars-0.15",
-      "time": 391.2099999999829,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-posterior-bars-0.85",
-      "time": 394.05666666664945,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-choose-largest-0.15",
-      "time": 395.0766666666494,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-choose-largest-0.85",
-      "time": 396.9899999999826,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-map-to-current-colors-0.15",
-      "time": 397.85999999998256,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-map-to-current-colors-0.85",
-      "time": 400.0066666666491,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-beat06",
-      "time": 405.16666666664906,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-04-02-math",
-      "time": 406.9039999999824,
-      "kind": "math",
-      "display": "$N_k$はクラス全体の個数、$K_k$は円の中の個数です。"
-    },
-    {
-      "name": "scene07-beat07",
-      "time": 414.69999999998186,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-beat08",
-      "time": 424.59999999998126,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-06-01-math",
-      "time": 422.6319999999813,
-      "kind": "math",
-      "display": "共通の体積と個数が消えて、$K_k/K$だけが残ります。"
-    },
-    {
-      "name": "scene07-beat09",
-      "time": 433.79999999998074,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-recap-bayes-01-sync-0.15",
-      "time": 382.38079999998354,
-      "kind": "sync"
-    },
-    {
-      "name": "scene07-recap-bayes-01-sync-0.85",
-      "time": 388.8245333333168,
-      "kind": "sync"
-    },
-    {
-      "name": "scene07-recap-decision-01-sync-0.15",
-      "time": 392.081599999983,
-      "kind": "sync"
-    },
-    {
-      "name": "scene07-recap-decision-01-sync-0.85",
-      "time": 398.9957333333163,
-      "kind": "sync"
-    },
-    {
-      "name": "scene07-07-01-sync-0.15",
-      "time": 430.5642666666474,
-      "kind": "sync"
-    },
-    {
-      "name": "scene07-07-01-sync-0.85",
-      "time": 436.6197333333141,
-      "kind": "sync"
-    },
-    {
-      "name": "scene08-beat01",
-      "time": 442.7666666666469,
-      "kind": "beat"
-    },
-    {
-      "name": "scene08-01-01-math",
-      "time": 440.1893333333136,
-      "kind": "math",
-      "display": "$K=1$なら、一番近い点の色で決まります。"
-    },
-    {
-      "name": "scene08-beat02",
-      "time": 452.89999999997974,
-      "kind": "beat"
-    },
-    {
-      "name": "scene08-beat03",
-      "time": 463.73333333331243,
-      "kind": "beat"
-    },
-    {
-      "name": "scene08-03-01-math",
-      "time": 460.7599999999791,
-      "kind": "math",
-      "display": "$K=5$へ増やすと、周りの点の多数決に変わります。"
-    },
-    {
-      "name": "scene08-beat04",
-      "time": 473.69999999997856,
-      "kind": "beat"
-    },
-    {
-      "name": "scene08-beat05",
-      "time": 483.3666666666446,
-      "kind": "beat"
-    },
-    {
-      "name": "scene08-beat06",
-      "time": 494.8999999999774,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-beat01",
-      "time": 506.36666666664337,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-beat02",
-      "time": 516.1999999999762,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-beat03",
-      "time": 526.56666666665,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-beat04",
-      "time": 537.5333333333251,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-recap-grid-01-math",
-      "time": 534.8799999999918,
-      "kind": "math",
-      "display": "1.4では、一つの軸の$5$区画が、二つの軸では$25$区画になりました。"
-    },
-    {
-      "name": "scene09-recap-grid-02-math",
-      "time": 540.3466666666584,
-      "kind": "math",
-      "display": "各軸$10$分割でも、軸が増えるたびに箱の数が掛け算で増えます。"
-    },
-    {
-      "name": "scene09-recap-grid-01-before",
-      "time": 531.6666666666584,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-after",
-      "time": 543.3999999999919,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-five-cells-0.15",
-      "time": 532.3766666666589,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-five-cells-0.85",
-      "time": 534.7566666666607,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.15",
-      "time": 535.5666666666614,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.85",
-      "time": 536.9666666666626,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-generalize-0.15",
-      "time": 537.3566666666628,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-generalize-0.85",
-      "time": 537.7766666666632,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.15",
-      "time": 538.0966666666634,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.85",
-      "time": 539.1699999999977,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-repeated-multiplication-0.15",
-      "time": 539.9099999999983,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-repeated-multiplication-0.85",
-      "time": 542.2900000000001,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-beat05",
-      "time": 548.2333333333343,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-04-01-math",
-      "time": 545.6213333333342,
-      "kind": "math",
-      "display": "各軸を$M$分割すると、$D$次元のビン数は$M^D$です。"
-    },
-    {
-      "name": "scene09-beat06",
-      "time": 558.3000000000088,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-beat07",
-      "time": 569.9000000000169,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-recap-grid-01-sync-0.15",
-      "time": 533.5066666666585,
-      "kind": "sync"
-    },
-    {
-      "name": "scene09-recap-grid-01-sync-0.85",
-      "time": 541.1599999999918,
-      "kind": "sync"
-    }
-  ],
-  "sync": [
-    {
-      "scene": "scene03",
-      "beat": 2,
-      "sentence": "scene03-02-01",
-      "speech_onset": 115.48412499999904,
-      "action_start": 115.39999999999857,
-      "action_end": 122.37599999999857,
-      "phases": []
-    },
-    {
-      "scene": "scene05",
-      "beat": 4,
-      "sentence": "scene05-04-01",
-      "speech_onset": 255.39191666665872,
-      "action_start": 255.33333333332396,
-      "action_end": 263.973333333324,
-      "phases": []
-    },
-    {
-      "scene": "scene07",
-      "beat": 4,
-      "sentence": "scene07-recap-bayes-01",
-      "speech_onset": 381.04741666665166,
-      "action_start": 380.9999999999835,
-      "action_end": 390.20533333331684,
-      "phases": [
-        {
-          "name": "R1.2 introduce",
-          "start": 380.9999999999835,
-          "end": 382.4666666666501
-        },
-        {
-          "name": "R1.2 select observation",
-          "start": 382.4666666666501,
-          "end": 384.3999999999833
-        },
-        {
-          "name": "R1.2 collect areas",
-          "start": 384.3999999999833,
-          "end": 384.86666666664996
-        },
-        {
-          "name": "R1.2 normalize",
-          "start": 384.86666666664996,
-          "end": 386.7333333333165
-        },
-        {
-          "name": "R1.2 map to classes",
-          "start": 386.7333333333165,
-          "end": 390.199999999983
-        },
-        {
-          "name": "breath",
-          "start": 390.199999999983,
-          "end": 390.59999999998297
-        }
-      ]
-    },
-    {
-      "scene": "scene07",
-      "beat": 5,
-      "sentence": "scene07-recap-decision-01",
-      "speech_onset": 390.6450833333183,
-      "action_start": 390.59999999998297,
-      "action_end": 400.4773333333163,
-      "phases": [
-        {
-          "name": "R1.5 posterior bars",
-          "start": 390.59999999998297,
-          "end": 394.6666666666494
-        },
-        {
-          "name": "R1.5 choose largest",
-          "start": 394.6666666666494,
-          "end": 397.3999999999826
-        },
-        {
-          "name": "R1.5 map to current colors",
-          "start": 397.3999999999826,
-          "end": 400.4666666666491
-        },
-        {
-          "name": "breath",
-          "start": 400.4666666666491,
-          "end": 400.86666666664905
-        }
-      ]
-    },
-    {
-      "scene": "scene07",
-      "beat": 9,
-      "sentence": "scene07-07-01",
-      "speech_onset": 429.35412499998495,
-      "action_start": 429.26666666664744,
-      "action_end": 437.9173333333141,
-      "phases": []
-    },
-    {
-      "scene": "scene09",
-      "beat": 4,
-      "sentence": "scene09-recap-grid-01",
-      "speech_onset": 531.9151666666434,
-      "action_start": 531.8666666666585,
-      "action_end": 542.7999999999918,
-      "phases": [
-        {
-          "name": "R1.4 five cells",
-          "start": 531.8666666666585,
-          "end": 535.2666666666612
-        },
-        {
-          "name": "R1.4 copy into 25 cells",
-          "start": 535.2666666666612,
-          "end": 537.2666666666628
-        },
-        {
-          "name": "R1.4 generalize",
-          "start": 537.2666666666628,
-          "end": 537.8666666666633
-        },
-        {
-          "name": "R1.4 map to ten bins",
-          "start": 537.8666666666633,
-          "end": 539.3999999999978
-        },
-        {
-          "name": "R1.4 repeated multiplication",
-          "start": 539.3999999999978,
-          "end": 542.8000000000005
-        },
-        {
-          "name": "breath",
-          "start": 542.8000000000005,
-          "end": 543.2000000000008
-        }
-      ]
-    }
-  ],
-  "scene_duration_max_delta": 5.0661697059695143e-11,
-  "probe": {
-    "programs": [],
-    "streams": [
-      {
-        "index": 0,
-        "codec_name": "h264",
-        "codec_type": "video",
-        "width": 854,
-        "height": 480,
-        "r_frame_rate": "15/1",
-        "duration": "576.466011"
-      },
-      {
-        "index": 1,
-        "codec_name": "aac",
-        "codec_type": "audio",
-        "r_frame_rate": "0/0",
-        "duration": "576.490667"
-      }
-    ],
-    "format": {
-      "duration": "576.491000",
-      "size": "13386404"
-    }
-  },
-  "audio_logs": {
-    "silence": [],
-    "volume": [
-      "[Parsed_volumedetect_0 @ 0x6260308a1bc0] mean_volume: -26.5 dB",
-      "[Parsed_volumedetect_0 @ 0x6260308a1bc0] max_volume: -6.0 dB"
-    ]
+  "video_sha256": "43d55a765ca8a389aa9aeb1dda6a80a3c92f8d61d3025db27f07598247761112",
+  "render": {
+    "command": "manim --progress_bar none --disable_caching --flush_cache -ql prml_2_5_nonparametric_methods.py PRML25NonparametricMethods",
+    "animations": 96,
+    "exit_code": 0
   },
   "numerics": {
+    "story_hook": {
+      "x": 0.5,
+      "true": 0.05524615044303804,
+      "one_gaussian": 1.9515255989741531,
+      "kernel_h006": 0.4015191163009633,
+      "samples_in_width012": 1,
+      "empty_center_bin": [
+        0.48000000000000004,
+        0.56
+      ]
+    },
     "normalization": {
       "kde_areas": [
         1.0,
@@ -880,587 +61,1219 @@
     "audio": {
       "scenes": 9,
       "sentences": 124,
-      "total_seconds": 576.4666666666667
+      "total_seconds": 583.8666666666667
     }
-  },
-  "recap_numerics": {
-    "bayes_observed_weights": [
-      0.225,
-      0.14
-    ],
-    "bayes_observed_total": 0.365,
-    "bayes_posterior": [
-      0.6164383561643836,
-      0.3835616438356165
-    ],
-    "equal_loss_risk_for_0.6_0.4": [
-      0.4,
-      0.6
-    ],
-    "grid_counts": [
-      5,
-      25
-    ],
-    "ten_bins_six_dimensions": 1000000
   },
   "captions": {
     "count": 124,
-    "max_width": 9.34296875,
+    "max_width": 9.3296875,
     "max_height": 0.7010937500000001,
-    "script_manifest_readings_equal": true
+    "width_id": "scene02-06-02",
+    "height_id": "scene05-07-02"
   },
-  "pcm_preservation": {
-    "unchanged_sentence_pcm": 118,
-    "unchanged_scene_wavs": 7
-  },
-  "frames_reviewed": [
-    {
-      "name": "scene01-beat02",
-      "time": 12.033333333333324,
-      "kind": "beat"
-    },
-    {
-      "name": "scene02-beat02",
-      "time": 62.633333333334555,
-      "kind": "beat"
-    },
-    {
-      "name": "scene03-beat02",
-      "time": 119.06666666666524,
-      "kind": "beat"
-    },
-    {
-      "name": "scene04-beat02",
-      "time": 188.09999999999468,
-      "kind": "beat"
-    },
-    {
-      "name": "scene05-beat02",
-      "time": 241.93333333332492,
-      "kind": "beat"
-    },
-    {
-      "name": "scene06-beat02",
-      "time": 304.1666666666548,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-beat02",
-      "time": 368.66666666665117,
-      "kind": "beat"
-    },
-    {
-      "name": "scene07-recap-bayes-01-before",
-      "time": 380.7999999999835,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-introduce-0.15",
-      "time": 381.2199999999835,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-introduce-0.85",
-      "time": 382.2466666666501,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-select-observation-0.15",
-      "time": 382.75666666665006,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-math",
-      "time": 383.86933333331683,
-      "kind": "math",
-      "display": "1.2では、観測に合う面積を切り出し、合計を$1$にそろえました。"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-select-observation-0.85",
-      "time": 384.10999999998336,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-collect-areas-0.15",
-      "time": 384.4699999999833,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-collect-areas-0.85",
-      "time": 384.79666666664997,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-normalize-0.15",
-      "time": 385.14666666664993,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-normalize-0.85",
-      "time": 386.45333333331655,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-map-to-classes-0.15",
-      "time": 387.2533333333165,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-R1.2-map-to-classes-0.85",
-      "time": 389.679999999983,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-before",
-      "time": 390.399999999983,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-bayes-01-after",
-      "time": 390.7999999999835,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-posterior-bars-0.15",
-      "time": 391.2099999999829,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-posterior-bars-0.85",
-      "time": 394.05666666664945,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-choose-largest-0.15",
-      "time": 395.0766666666494,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-choose-largest-0.85",
-      "time": 396.9899999999826,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-map-to-current-colors-0.15",
-      "time": 397.85999999998256,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-R1.5-map-to-current-colors-0.85",
-      "time": 400.0066666666491,
-      "kind": "recap"
-    },
-    {
-      "name": "scene07-recap-decision-01-after",
-      "time": 401.0666666666496,
-      "kind": "recap"
-    },
-    {
-      "name": "scene08-beat02",
-      "time": 452.89999999997974,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-beat02",
-      "time": 516.1999999999762,
-      "kind": "beat"
-    },
-    {
-      "name": "scene09-recap-grid-01-before",
-      "time": 531.6666666666584,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-five-cells-0.15",
-      "time": 532.3766666666589,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-five-cells-0.85",
-      "time": 534.7566666666607,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-math",
-      "time": 534.8799999999918,
-      "kind": "math",
-      "display": "1.4では、一つの軸の$5$区画が、二つの軸では$25$区画になりました。"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.15",
-      "time": 535.5666666666614,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.85",
-      "time": 536.9666666666626,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-generalize-0.15",
-      "time": 537.3566666666628,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-generalize-0.85",
-      "time": 537.7766666666632,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.15",
-      "time": 538.0966666666634,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.85",
-      "time": 539.1699999999977,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-repeated-multiplication-0.15",
-      "time": 539.9099999999983,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-02-math",
-      "time": 540.3466666666584,
-      "kind": "math",
-      "display": "各軸$10$分割でも、軸が増えるたびに箱の数が掛け算で増えます。"
-    },
-    {
-      "name": "scene09-recap-grid-01-R1.4-repeated-multiplication-0.85",
-      "time": 542.2900000000001,
-      "kind": "recap"
-    },
-    {
-      "name": "scene09-recap-grid-01-after",
-      "time": 543.3999999999919,
-      "kind": "recap"
-    }
-  ],
-  "reading_review": {
-    "queried_sentences": 124,
-    "new_sentences_manually_checked": 6,
-    "fixed_reading": "誤分類: アヤマブンルイ → ゴブンルイ",
-    "full_listening": false
-  },
-  "display_reading_matches": 0,
-  "render": {
-    "command": "/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_2_5_nonparametric_methods.py PRML25NonparametricMethods",
+  "audio_scenes": 9,
+  "audio_sentences": 124,
+  "audio_pcm_seconds": 583.8666666666667,
+  "decode_full_video_and_audio": {
     "exit_code": 0,
-    "animations": 81
+    "ffmpeg_error_log_bytes": 0
   },
-  "video_sha256": "b631d47063b8a910549953fd5067fcd8b7f02867970bc38af623664af4118043",
-  "duration_comparison": {
-    "old_video": 545.266011,
-    "new_video": 576.466011,
-    "increase": 31.199999999999932,
-    "increase_percent": 5.721977781593268,
-    "audio_video_difference": 0.02465600000004997
-  },
-  "recap_phrase_timing": [
-    {
-      "id": "scene07-recap-bayes-01",
-      "phrases": [
+  "review": {
+    "frames": [
+      {
+        "name": "scene01-beat01",
+        "time": 4.866666666666666,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat01-story-12",
+        "time": 1.168,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat01-story-88",
+        "time": 8.565333333333333,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat01-action01-15",
+        "time": 0.83,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat01-action01-85",
+        "time": 4.703333333333333,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat01-action02-15",
+        "time": 6.103333333333331,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat01-action02-85",
+        "time": 8.763333333333321,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-01-01-math",
+        "time": 2.7573333333333334,
+        "kind": "math",
+        "display": "この60点の真ん中、$x=0.5$には、次の点も出やすいでしょうか。"
+      },
+      {
+        "name": "scene01-beat02",
+        "time": 13.93333333333332,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat02-story-12",
+        "time": 10.74133333333332,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat02-story-88",
+        "time": 17.12533333333332,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat02-action01-15",
+        "time": 10.413333333333316,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat02-action01-85",
+        "time": 13.586666666666638,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat02-action02-15",
+        "time": 14.786666666666633,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat02-action02-85",
+        "time": 17.213333333333292,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat03",
+        "time": 23.299999999999958,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat03-story-12",
+        "time": 19.373333333333292,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat03-story-88",
+        "time": 27.226666666666624,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-03-01-math",
+        "time": 21.082666666666626,
+        "kind": "math",
+        "display": "1つのガウス分布を当てはめると、中央の密度は約$1.95$。山になりました。"
+      },
+      {
+        "name": "scene01-beat04",
+        "time": 34.09999999999992,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat04-story-12",
+        "time": 29.818666666666587,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat04-story-88",
+        "time": 38.38133333333326,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-04-02-math",
+        "time": 36.09866666666658,
+        "kind": "math",
+        "display": "緑の生成分布は中央で約$0.055$。1つの山という仮定が、谷を埋めています。"
+      },
+      {
+        "name": "scene01-beat05",
+        "time": 44.00000000000029,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat06",
+        "time": 53.10000000000072,
+        "kind": "beat"
+      },
+      {
+        "name": "scene01-beat06-story-12",
+        "time": 49.42666666666738,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-story-88",
+        "time": 56.77333333333405,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action01-15",
+        "time": 48.74666666666741,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action01-85",
+        "time": 50.98666666666752,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action02-15",
+        "time": 51.51666666666755,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action02-85",
+        "time": 51.75000000000089,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action03-15",
+        "time": 52.60000000000093,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action03-85",
+        "time": 56.33333333333445,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action04-15",
+        "time": 57.20333333333449,
+        "kind": "story"
+      },
+      {
+        "name": "scene01-beat06-action04-85",
+        "time": 57.53000000000118,
+        "kind": "story"
+      },
+      {
+        "name": "scene02-beat01",
+        "time": 61.96666666666786,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat02",
+        "time": 70.73333333333471,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat02-story-12",
+        "time": 67.13600000000137,
+        "kind": "story"
+      },
+      {
+        "name": "scene02-beat02-story-88",
+        "time": 74.33066666666805,
+        "kind": "story"
+      },
+      {
+        "name": "scene02-02-01-math",
+        "time": 67.96266666666804,
+        "kind": "math",
+        "display": "中央のビンは$0$個。1つのガウスでは山だった場所です。"
+      },
+      {
+        "name": "scene02-02-02-math",
+        "time": 72.49600000000137,
+        "kind": "math",
+        "display": "各ビンの面積は、入った点数を全体の$60$点で割った割合です。"
+      },
+      {
+        "name": "scene02-beat03",
+        "time": 79.8666666666675,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat03-story-12",
+        "time": 76.5226666666675,
+        "kind": "story"
+      },
+      {
+        "name": "scene02-beat03-story-88",
+        "time": 83.2106666666675,
+        "kind": "story"
+      },
+      {
+        "name": "scene02-03-01-math",
+        "time": 77.70133333333418,
+        "kind": "math",
+        "display": "幅を$\\Delta_i$とすると、高さは割合を幅で割った値です。"
+      },
+      {
+        "name": "scene02-beat04",
+        "time": 88.766666666667,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat05",
+        "time": 97.8666666666665,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat06",
+        "time": 106.83333333333263,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-beat07",
+        "time": 115.73333333333214,
+        "kind": "beat"
+      },
+      {
+        "name": "scene02-07-01-math",
+        "time": 113.24799999999881,
+        "kind": "math",
+        "display": "幅が変わっても、全ての棒の面積の和は$1$です。"
+      },
+      {
+        "name": "scene03-beat01",
+        "time": 124.59999999999829,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-01-01-math",
+        "time": 122.46933333333163,
+        "kind": "math",
+        "display": "調べたい位置$x$へ、区切りから自由な窓$R$を置きます。"
+      },
+      {
+        "name": "scene03-beat02",
+        "time": 131.9999999999978,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-02-01-math",
+        "time": 130.1706666666645,
+        "kind": "math",
+        "display": "領域の中の個数を$K$と呼びます。"
+      },
+      {
+        "name": "scene03-beat03",
+        "time": 139.43333333333078,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-03-02-math",
+        "time": 141.4773333333308,
+        "kind": "math",
+        "display": "$P\\simeq K/N$という近似です。"
+      },
+      {
+        "name": "scene03-beat04",
+        "time": 148.96666666666363,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-04-01-math",
+        "time": 145.93333333333032,
+        "kind": "math",
+        "display": "領域の体積を$V$とします。1次元なら窓の幅です。"
+      },
+      {
+        "name": "scene03-beat05",
+        "time": 158.7333333333297,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-05-01-math",
+        "time": 156.49066666666306,
+        "kind": "math",
+        "display": "したがって、密度の推定値は$K/(NV)$です。"
+      },
+      {
+        "name": "scene03-beat06",
+        "time": 167.36666666666252,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-beat07",
+        "time": 178.16666666666208,
+        "kind": "beat"
+      },
+      {
+        "name": "scene03-02-01-sync-0.15",
+        "time": 129.79413333333116,
+        "kind": "sync"
+      },
+      {
+        "name": "scene03-02-01-sync-0.85",
+        "time": 133.8111999999978,
+        "kind": "sync"
+      },
+      {
+        "name": "scene04-beat01",
+        "time": 189.19999999999465,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat02",
+        "time": 198.09999999999417,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat03",
+        "time": 206.73333333332695,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat04",
+        "time": 215.19999999999317,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-beat05",
+        "time": 225.26666666665932,
+        "kind": "beat"
+      },
+      {
+        "name": "scene04-05-01-math",
+        "time": 222.14133333332597,
+        "kind": "math",
+        "display": "$D$次元では、一辺が$h$の箱の体積は$h^D$です。"
+      },
+      {
+        "name": "scene04-beat06",
+        "time": 234.46666666665868,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat01",
+        "time": 241.73333333332494,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat02",
+        "time": 249.13333333332452,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat03",
+        "time": 257.6333333333241,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-03-01-math",
+        "time": 254.61599999999078,
+        "kind": "math",
+        "display": "各山の標準偏差が、幅のつまみ$h$です。"
+      },
+      {
+        "name": "scene05-beat04",
+        "time": 266.76666666665693,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-04-01-math",
+        "time": 264.4639999999903,
+        "kind": "math",
+        "display": "幅$h$を小さくすれば、中央の谷はもっと深くなる？"
+      },
+      {
+        "name": "scene05-beat05",
+        "time": 275.1333333333231,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat06",
+        "time": 283.566666666656,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-beat07",
+        "time": 293.53333333332216,
+        "kind": "beat"
+      },
+      {
+        "name": "scene05-04-01-sync-0.15",
+        "time": 263.65119999999024,
+        "kind": "sync"
+      },
+      {
+        "name": "scene05-04-01-sync-0.85",
+        "time": 269.4901333333236,
+        "kind": "sync"
+      },
+      {
+        "name": "scene06-beat01",
+        "time": 303.29999999998813,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-01-01-math",
+        "time": 301.03999999998814,
+        "kind": "math",
+        "display": "発想を逆にして、点の個数$K$を$7$に固定します。"
+      },
+      {
+        "name": "scene06-beat02",
+        "time": 311.8999999999877,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-beat03",
+        "time": 320.26666666665386,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-beat04",
+        "time": 328.5333333333201,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-beat05",
+        "time": 335.9333333333196,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-05-01-math",
+        "time": 333.7813333333196,
+        "kind": "math",
+        "display": "今度は$K$を小さくします。"
+      },
+      {
+        "name": "scene06-beat06",
+        "time": 344.1999999999859,
+        "kind": "beat"
+      },
+      {
+        "name": "scene06-06-01-math",
+        "time": 340.8319999999859,
+        "kind": "math",
+        "display": "$K$を増やすと、広い範囲の点が必要になります。"
+      },
+      {
+        "name": "scene06-beat07",
+        "time": 355.09999999998536,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat01",
+        "time": 365.46666666665135,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat02",
+        "time": 374.33333333331746,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-02-01-math",
+        "time": 372.27999999998417,
+        "kind": "math",
+        "display": "色を区別せず、近い$K=5$個の点を集めます。"
+      },
+      {
+        "name": "scene07-beat03",
+        "time": 382.333333333317,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat04",
+        "time": 390.8666666666499,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-recap-bayes-01-math",
+        "time": 388.9359999999832,
+        "kind": "math",
+        "display": "1.2では、観測に合う面積を切り出し、合計を$1$にそろえました。"
+      },
+      {
+        "name": "scene07-recap-bayes-01-before",
+        "time": 385.8666666666499,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-after",
+        "time": 395.8666666666499,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-introduce-0.15",
+        "time": 386.28666666664986,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-introduce-0.85",
+        "time": 387.3133333333165,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-select-observation-0.15",
+        "time": 387.82333333331644,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-select-observation-0.85",
+        "time": 389.17666666664974,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-collect-areas-0.15",
+        "time": 389.5366666666497,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-collect-areas-0.85",
+        "time": 389.86333333331635,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-normalize-0.15",
+        "time": 390.2133333333163,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-normalize-0.85",
+        "time": 391.51999999998293,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-map-to-classes-0.15",
+        "time": 392.3199999999829,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-bayes-01-R1.2-map-to-classes-0.85",
+        "time": 394.7466666666494,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-beat05",
+        "time": 400.7999999999827,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-recap-decision-01-before",
+        "time": 395.46666666664936,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-after",
+        "time": 406.133333333316,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-R1.5-posterior-bars-0.15",
+        "time": 396.2766666666493,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-R1.5-posterior-bars-0.85",
+        "time": 399.1233333333158,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-R1.5-choose-largest-0.15",
+        "time": 400.14333333331575,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-R1.5-choose-largest-0.85",
+        "time": 402.056666666649,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-R1.5-map-to-current-colors-0.15",
+        "time": 402.92666666664894,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-recap-decision-01-R1.5-map-to-current-colors-0.85",
+        "time": 405.0733333333155,
+        "kind": "recap"
+      },
+      {
+        "name": "scene07-beat06",
+        "time": 410.1666666666488,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-04-02-math",
+        "time": 411.85333333331545,
+        "kind": "math",
+        "display": "$N_k$はクラス全体の個数、$K_k$は円の中の個数です。"
+      },
+      {
+        "name": "scene07-beat07",
+        "time": 419.6333333333149,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-beat08",
+        "time": 429.999999999981,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-06-01-math",
+        "time": 427.56533333331436,
+        "kind": "math",
+        "display": "共通の体積と個数が消えて、$K_k/K$だけが残ります。"
+      },
+      {
+        "name": "scene07-06-02-math",
+        "time": 432.50399999998103,
+        "kind": "math",
+        "display": "赤は$3/5$、青は$2/5$。だから赤を選びます。"
+      },
+      {
+        "name": "scene07-beat09",
+        "time": 439.6666666666471,
+        "kind": "beat"
+      },
+      {
+        "name": "scene07-recap-bayes-01-sync-0.15",
+        "time": 387.4474666666499,
+        "kind": "sync"
+      },
+      {
+        "name": "scene07-recap-bayes-01-sync-0.85",
+        "time": 393.8911999999832,
+        "kind": "sync"
+      },
+      {
+        "name": "scene07-recap-decision-01-sync-0.15",
+        "time": 397.14826666664936,
+        "kind": "sync"
+      },
+      {
+        "name": "scene07-recap-decision-01-sync-0.85",
+        "time": 404.0623999999827,
+        "kind": "sync"
+      },
+      {
+        "name": "scene07-07-01-sync-0.15",
+        "time": 436.43093333331376,
+        "kind": "sync"
+      },
+      {
+        "name": "scene07-07-01-sync-0.85",
+        "time": 442.48639999998045,
+        "kind": "sync"
+      },
+      {
+        "name": "scene08-beat01",
+        "time": 448.6666666666466,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-beat02",
+        "time": 458.83333333331274,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-beat03",
+        "time": 469.13333333331207,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-03-01-math",
+        "time": 466.17066666664545,
+        "kind": "math",
+        "display": "$K=5$に変えると、境界はどう動くでしょう。"
+      },
+      {
+        "name": "scene08-beat04",
+        "time": 478.43333333331157,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-04-01-math",
+        "time": 475.7706666666449,
+        "kind": "math",
+        "display": "さらに$K=11$では、もっと広く票を集めます。"
+      },
+      {
+        "name": "scene08-beat05",
+        "time": 487.9666666666444,
+        "kind": "beat"
+      },
+      {
+        "name": "scene08-beat06",
+        "time": 499.49999999997715,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat01",
+        "time": 511.0666666666431,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat02",
+        "time": 520.9999999999791,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat03",
+        "time": 531.3666666666538,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat04",
+        "time": 542.3333333333289,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-recap-grid-01-math",
+        "time": 539.6799999999956,
+        "kind": "math",
+        "display": "1.4では、1つの軸の$5$区画が、2つの軸では$25$区画になりました。"
+      },
+      {
+        "name": "scene09-recap-grid-02-math",
+        "time": 545.1466666666622,
+        "kind": "math",
+        "display": "各軸$10$分割でも、軸が増えるたびに箱の数が掛け算で増えます。"
+      },
+      {
+        "name": "scene09-recap-grid-01-before",
+        "time": 536.4666666666623,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-after",
+        "time": 548.1999999999957,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-five-cells-0.15",
+        "time": 537.1766666666628,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-five-cells-0.85",
+        "time": 539.5566666666646,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.15",
+        "time": 540.3666666666652,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.85",
+        "time": 541.7666666666664,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-generalize-0.15",
+        "time": 542.1566666666666,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-generalize-0.85",
+        "time": 542.576666666667,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.15",
+        "time": 542.8966666666672,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.85",
+        "time": 543.9700000000015,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-repeated-multiplication-0.15",
+        "time": 544.7100000000021,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-recap-grid-01-R1.4-repeated-multiplication-0.85",
+        "time": 547.0900000000039,
+        "kind": "recap"
+      },
+      {
+        "name": "scene09-beat05",
+        "time": 553.333333333338,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat05-story-12",
+        "time": 549.2800000000046,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat05-story-88",
+        "time": 557.3866666666713,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat05-action01-15",
+        "time": 548.7300000000052,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat05-action01-85",
+        "time": 552.1366666666746,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat05-action02-15",
+        "time": 553.6866666666758,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat05-action02-85",
+        "time": 557.5133333333456,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-04-01-math",
+        "time": 550.421333333338,
+        "kind": "math",
+        "display": "各軸を$M$分割すると、$D$次元のビン数は$M^D$です。"
+      },
+      {
+        "name": "scene09-04-02-math",
+        "time": 555.5786666666713,
+        "kind": "math",
+        "display": "各軸$10$分割でも、$6$次元では100万のビン。これが次元の呪いです。"
+      },
+      {
+        "name": "scene09-beat06",
+        "time": 563.7000000000132,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat07",
+        "time": 576.3000000000211,
+        "kind": "beat"
+      },
+      {
+        "name": "scene09-beat07-story-12",
+        "time": 570.5493333333545,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-story-88",
+        "time": 582.0506666666878,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action01-15",
+        "time": 569.1433333333548,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action01-85",
+        "time": 571.0566666666897,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action02-15",
+        "time": 571.5766666666901,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action02-85",
+        "time": 572.0900000000238,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action03-15",
+        "time": 572.7200000000244,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action03-85",
+        "time": 575.1466666666929,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action04-15",
+        "time": 575.7866666666935,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action04-85",
+        "time": 576.3466666666939,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action05-15",
+        "time": 577.5166666666948,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-beat07-action05-85",
+        "time": 582.4166666666987,
+        "kind": "story"
+      },
+      {
+        "name": "scene09-06-01-math",
+        "time": 572.5946666666878,
+        "kind": "math",
+        "display": "同じ$x=0.5$。1つのガウスでは密度$1.95$、近所から作る曲線では約$0.40$です。"
+      },
+      {
+        "name": "scene09-recap-grid-01-sync-0.15",
+        "time": 538.3066666666623,
+        "kind": "sync"
+      },
+      {
+        "name": "scene09-recap-grid-01-sync-0.85",
+        "time": 545.9599999999956,
+        "kind": "sync"
+      }
+    ],
+    "sync": [
+      {
+        "scene": "scene03",
+        "beat": 2,
+        "sentence": "scene03-02-01",
+        "speech_onset": 129.01745833333163,
+        "action_start": 128.93333333333115,
+        "action_end": 134.6719999999978,
+        "phases": []
+      },
+      {
+        "scene": "scene05",
+        "beat": 4,
+        "sentence": "scene05-04-01",
+        "speech_onset": 262.47195833332495,
+        "action_start": 262.39999999999026,
+        "action_end": 270.7413333333236,
+        "phases": []
+      },
+      {
+        "scene": "scene07",
+        "beat": 4,
+        "sentence": "scene07-recap-bayes-01",
+        "speech_onset": 386.1124166666513,
+        "action_start": 386.0666666666499,
+        "action_end": 395.2719999999832,
+        "phases": [
+          {
+            "name": "R1.2 introduce",
+            "start": 386.0666666666499,
+            "end": 387.5333333333165
+          },
+          {
+            "name": "R1.2 select observation",
+            "start": 387.5333333333165,
+            "end": 389.4666666666497
+          },
+          {
+            "name": "R1.2 collect areas",
+            "start": 389.4666666666497,
+            "end": 389.93333333331634
+          },
+          {
+            "name": "R1.2 normalize",
+            "start": 389.93333333331634,
+            "end": 391.7999999999829
+          },
+          {
+            "name": "R1.2 map to classes",
+            "start": 391.7999999999829,
+            "end": 395.26666666664937
+          },
+          {
+            "name": "breath",
+            "start": 395.26666666664937,
+            "end": 395.66666666664935
+          }
+        ]
+      },
+      {
+        "scene": "scene07",
+        "beat": 5,
+        "sentence": "scene07-recap-decision-01",
+        "speech_onset": 395.711208333318,
+        "action_start": 395.66666666664935,
+        "action_end": 405.5439999999827,
+        "phases": [
+          {
+            "name": "R1.5 posterior bars",
+            "start": 395.66666666664935,
+            "end": 399.7333333333158
+          },
+          {
+            "name": "R1.5 choose largest",
+            "start": 399.7333333333158,
+            "end": 402.46666666664896
+          },
+          {
+            "name": "R1.5 map to current colors",
+            "start": 402.46666666664896,
+            "end": 405.53333333331545
+          },
+          {
+            "name": "breath",
+            "start": 405.53333333331545,
+            "end": 405.93333333331543
+          }
+        ]
+      },
+      {
+        "scene": "scene07",
+        "beat": 9,
+        "sentence": "scene07-07-01",
+        "speech_onset": 435.22074999998466,
+        "action_start": 435.1333333333138,
+        "action_end": 443.78399999998044,
+        "phases": []
+      },
+      {
+        "scene": "scene09",
+        "beat": 4,
+        "sentence": "scene09-recap-grid-01",
+        "speech_onset": 536.7145833333097,
+        "action_start": 536.6666666666623,
+        "action_end": 547.5999999999956,
+        "phases": [
+          {
+            "name": "R1.4 five cells",
+            "start": 536.6666666666623,
+            "end": 540.066666666665
+          },
+          {
+            "name": "R1.4 copy into 25 cells",
+            "start": 540.066666666665,
+            "end": 542.0666666666666
+          },
+          {
+            "name": "R1.4 generalize",
+            "start": 542.0666666666666,
+            "end": 542.6666666666671
+          },
+          {
+            "name": "R1.4 map to ten bins",
+            "start": 542.6666666666671,
+            "end": 544.2000000000016
+          },
+          {
+            "name": "R1.4 repeated multiplication",
+            "start": 544.2000000000016,
+            "end": 547.6000000000043
+          },
+          {
+            "name": "breath",
+            "start": 547.6000000000043,
+            "end": 548.0000000000047
+          }
+        ]
+      }
+    ],
+    "scene_duration_max_delta": 5.680078629666241e-11,
+    "probe": {
+      "programs": [],
+      "streams": [
         {
-          "text": "イッショオ",
-          "start": 0.07407407407407407,
-          "end": 0.4906583007563044
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 854,
+          "height": 480,
+          "r_frame_rate": "15/1",
+          "duration": "583.866011"
         },
         {
-          "text": "ニ",
-          "start": 0.4906583007563044,
-          "end": 0.6390684300826656
-        },
-        {
-          "text": "セツデワ",
-          "start": 0.6390684300826656,
-          "end": 1.1720827417793098
-        },
-        {
-          "text": "カンソクニ",
-          "start": 1.4567921644559612,
-          "end": 2.078182655490107
-        },
-        {
-          "text": "アウ",
-          "start": 2.078182655490107,
-          "end": 2.244284153950435
-        },
-        {
-          "text": "メンセキオ",
-          "start": 2.244284153950435,
-          "end": 2.8538277837689274
-        },
-        {
-          "text": "キリダシ",
-          "start": 2.8538277837689274,
-          "end": 3.3858598054007247
-        },
-        {
-          "text": "ゴオケエオ",
-          "start": 3.890210357253198,
-          "end": 4.519000154402521
-        },
-        {
-          "text": "イチニ",
-          "start": 4.519000154402521,
-          "end": 4.869036840343917
-        },
-        {
-          "text": "ソロエマシタ",
-          "start": 4.869036840343917,
-          "end": 5.62447550078785
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0",
+          "duration": "583.893333"
         }
-      ]
+      ],
+      "format": {
+        "duration": "583.894000",
+        "size": "13765025"
+      }
     },
-    {
-      "id": "scene07-recap-bayes-02",
-      "phrases": [
-        {
-          "text": "コンカイワ",
-          "start": 0.07407407407407407,
-          "end": 0.7518167658536523
-        },
-        {
-          "text": "カンソクゴノ",
-          "start": 1.028187940242114,
-          "end": 1.7391952737062064
-        },
-        {
-          "text": "クラスカクリツオ",
-          "start": 1.7391952737062064,
-          "end": 2.666452977116461
-        },
-        {
-          "text": "モトメマス",
-          "start": 2.666452977116461,
-          "end": 3.3621604639898846
-        }
-      ]
-    },
-    {
-      "id": "scene07-recap-decision-01",
-      "phrases": [
-        {
-          "text": "イッショオ",
-          "start": 0.07407407407407407,
-          "end": 0.5369933959510591
-        },
-        {
-          "text": "ゴ",
-          "start": 0.5369933959510591,
-          "end": 0.6414706904303145
-        },
-        {
-          "text": "セツデワ",
-          "start": 0.6414706904303145,
-          "end": 1.1915744298862085
-        },
-        {
-          "text": "ゴブンルイノ",
-          "start": 1.467705336847791,
-          "end": 2.104894480495541
-        },
-        {
-          "text": "ソンシツガ",
-          "start": 2.104894480495541,
-          "end": 2.751365657481882
-        },
-        {
-          "text": "ヒトシイ",
-          "start": 2.751365657481882,
-          "end": 3.291783549029518
-        },
-        {
-          "text": "トキ",
-          "start": 3.291783549029518,
-          "end": 3.6408814756130727
-        },
-        {
-          "text": "モットモ",
-          "start": 4.08615471822796,
-          "end": 4.558406499386937
-        },
-        {
-          "text": "カクリツノ",
-          "start": 4.558406499386937,
-          "end": 5.158106542847775
-        },
-        {
-          "text": "タカイ",
-          "start": 5.158106542847775,
-          "end": 5.519255204057251
-        },
-        {
-          "text": "クラスオ",
-          "start": 5.519255204057251,
-          "end": 5.997502612294974
-        },
-        {
-          "text": "エラビマシタ",
-          "start": 5.997502612294974,
-          "end": 6.693641346361901
-        }
-      ]
-    },
-    {
-      "id": "scene07-recap-decision-02",
-      "phrases": [
-        {
-          "text": "コンカイモ",
-          "start": 0.07407407407407407,
-          "end": 0.7253197728207817
-        },
-        {
-          "text": "コノ",
-          "start": 0.9642802850791702,
-          "end": 1.2384799636072583
-        },
-        {
-          "text": "カクリツノ",
-          "start": 1.2384799636072583,
-          "end": 1.8540441006146096
-        },
-        {
-          "text": "ダイショオデ",
-          "start": 1.8540441006146096,
-          "end": 2.4277300900883145
-        },
-        {
-          "text": "エラビマス",
-          "start": 2.4277300900883145,
-          "end": 3.031971538370406
-        }
-      ]
-    },
-    {
-      "id": "scene09-recap-grid-01",
-      "phrases": [
-        {
-          "text": "イッショオ",
-          "start": 0.07407407407407407,
-          "end": 0.5371754867611108
-        },
-        {
-          "text": "ヨン",
-          "start": 0.5371754867611108,
-          "end": 0.768356268328649
-        },
-        {
-          "text": "セツデワ",
-          "start": 0.768356268328649,
-          "end": 1.2924586784232546
-        },
-        {
-          "text": "ヒトツノ",
-          "start": 1.5086439799655367,
-          "end": 2.0030562265051737
-        },
-        {
-          "text": "ジクノ",
-          "start": 2.0030562265051737,
-          "end": 2.3623535736567445
-        },
-        {
-          "text": "ゴクカクガ",
-          "start": 2.3623535736567445,
-          "end": 3.071102767216938
-        },
-        {
-          "text": "フタツノ",
-          "start": 3.374431383968503,
-          "end": 3.8786537961827383
-        },
-        {
-          "text": "ジクデワ",
-          "start": 3.8786537961827383,
-          "end": 4.346408182686125
-        },
-        {
-          "text": "ニジュウ",
-          "start": 4.346408182686125,
-          "end": 4.721818483124176
-        },
-        {
-          "text": "ゴクカクニ",
-          "start": 4.721818483124176,
-          "end": 5.301689596225818
-        },
-        {
-          "text": "ナリマシタ",
-          "start": 5.301689596225818,
-          "end": 5.92128431107159
-        }
-      ]
-    },
-    {
-      "id": "scene09-recap-grid-02",
-      "phrases": [
-        {
-          "text": "カクジクジュウブンカツデモ",
-          "start": 0.07407407407407407,
-          "end": 1.5143535392427885
-        },
-        {
-          "text": "ジクガ",
-          "start": 1.8311210717591975,
-          "end": 2.2041145280279495
-        },
-        {
-          "text": "フエル",
-          "start": 2.2041145280279495,
-          "end": 2.547735425885077
-        },
-        {
-          "text": "タビニ",
-          "start": 2.547735425885077,
-          "end": 2.9060600928410336
-        },
-        {
-          "text": "ハコノ",
-          "start": 2.9060600928410336,
-          "end": 3.2963651662899385
-        },
-        {
-          "text": "カズガ",
-          "start": 3.2963651662899385,
-          "end": 3.6782339128355184
-        },
-        {
-          "text": "カケザンデ",
-          "start": 3.6782339128355184,
-          "end": 4.289933095651644
-        },
-        {
-          "text": "フエマス",
-          "start": 4.289933095651644,
-          "end": 4.827384631666872
-        }
+    "audio_logs": {
+      "silence": [],
+      "volume": [
+        "[Parsed_volumedetect_0 @ 0x58e16a8383c0] mean_volume: -26.6 dB",
+        "[Parsed_volumedetect_0 @ 0x58e16a8383c0] max_volume: -5.8 dB"
       ]
     }
+  },
+  "manually_inspected_frames": [
+    "scene01-beat01-story-88",
+    "scene01-beat02-story-88",
+    "scene01-beat06-action02-15",
+    "scene01-beat06-action03-15",
+    "scene01-beat06-action03-85",
+    "scene01-beat06-action04-85",
+    "scene02-beat02-story-12",
+    "scene02-beat02-story-88",
+    "scene02-beat03-story-88",
+    "scene03-beat02",
+    "scene03-beat05",
+    "scene03-beat07",
+    "scene04-beat02",
+    "scene04-beat05",
+    "scene05-beat01",
+    "scene05-beat04",
+    "scene05-beat05",
+    "scene05-beat06",
+    "scene06-beat01",
+    "scene06-beat03",
+    "scene06-beat05",
+    "scene06-beat07",
+    "scene07-beat01",
+    "scene07-beat03",
+    "scene07-beat04",
+    "scene07-beat05",
+    "scene07-beat07",
+    "scene07-beat09",
+    "scene08-beat01",
+    "scene08-beat03",
+    "scene08-beat04",
+    "scene08-beat06",
+    "scene09-beat05-story-12",
+    "scene09-beat05-action01-85",
+    "scene09-beat05-action02-15",
+    "scene09-beat05-story-88",
+    "scene09-beat07-action01-85",
+    "scene09-beat07-action02-85",
+    "scene09-beat07-action03-85",
+    "scene09-beat07-action04-85",
+    "scene09-beat07-story-88",
+    "scene07-recap-bayes-01-R1.2-select-observation-0.15",
+    "scene07-recap-bayes-01-R1.2-normalize-0.85",
+    "scene07-recap-decision-01-R1.5-posterior-bars-0.15",
+    "scene07-recap-decision-01-R1.5-choose-largest-0.85",
+    "scene09-recap-grid-01-R1.4-copy-into-25-cells-0.15",
+    "scene09-recap-grid-01-R1.4-map-to-ten-bins-0.85",
+    "scene01-beat05",
+    "scene01-beat06-story-12",
+    "scene01-beat06-action01-15",
+    "scene01-beat06-action01-85",
+    "scene01-beat06-action02-85",
+    "scene01-beat06-story-88"
   ],
-  "recap_sync_checks": [
-    {
-      "sentence": "scene07-recap-bayes-01",
-      "phrase": "ゴオケエオ",
-      "phrase_start": 384.8902103572367,
-      "animation_start": 384.86666666664996,
-      "difference": -0.023543690586734556
-    },
-    {
-      "sentence": "scene07-recap-decision-01",
-      "phrase": "モットモ",
-      "phrase_start": 394.68615471821096,
-      "animation_start": 394.6666666666494,
-      "difference": -0.01948805156155231
-    },
-    {
-      "sentence": "scene09-recap-grid-01",
-      "phrase": "フタツノ",
-      "phrase_start": 535.241098050627,
-      "animation_start": 535.2666666666612,
-      "difference": 0.02556861603420657
-    }
-  ]
+  "human_listening": "未実施。audio_query の全124文の読み、WAVハッシュ、無音・音量を確認。",
+  "frame_change_audit": {
+    "compared_to_previous_full_render": 184,
+    "unchanged_frames": 174,
+    "changed_frames": [
+      "scene01-beat06-story-88",
+      "scene01-beat06-action01-15",
+      "scene01-beat06-action01-85",
+      "scene01-beat05",
+      "scene01-beat06-story-12",
+      "scene01-beat06-action02-15",
+      "scene01-beat06-action03-15",
+      "scene01-beat06-action02-85",
+      "scene01-beat06-action03-85",
+      "scene01-beat06"
+    ]
+  }
 }

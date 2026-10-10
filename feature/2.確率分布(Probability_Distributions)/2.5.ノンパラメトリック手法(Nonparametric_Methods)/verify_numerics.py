@@ -11,6 +11,21 @@ from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
 def main():
     results={}
     assert 0<SAMPLES.min()<SAMPLES.max()<1
+    center=.5
+    hook={'x':center,'true':float(truth(center)),
+          'one_gaussian':float(fitted_gaussian(center)),
+          'kernel_h006':float(kde(center,.06)),
+          'samples_in_width012':local_count(center,.12)}
+    assert hook['samples_in_width012']==1
+    assert hook['true']<hook['kernel_h006']<hook['one_gaussian']
+    assert round(hook['true'],3)==.055
+    assert round(hook['one_gaussian'],2)==1.95
+    assert round(hook['kernel_h006'],2)==.40
+    values,edges,counts=histogram(.08)
+    assert abs(edges[6]-.48)<1e-12 and abs(edges[7]-.56)<1e-12
+    assert counts[6]==0 and values[6]==0
+    hook['empty_center_bin']=[float(edges[6]),float(edges[7])]
+    results['story_hook']=hook
     integral=lambda y,x:float(np.trapezoid(y,x))
     x=np.linspace(-3,4,30001)
     areas=[integral(kde(x,h),x) for h in [.012,.06,.25]]

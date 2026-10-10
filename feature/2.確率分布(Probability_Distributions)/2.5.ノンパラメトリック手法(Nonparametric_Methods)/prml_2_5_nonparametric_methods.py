@@ -122,17 +122,28 @@ class PRML25NonparametricMethods(NarratedScene):
     def question(self):
         ax=self.density_axes(5)
         dots=self.rug(ax)
-        self.beat(LaggedStart(*[FadeIn(d,shift=UP*.2) for d in dots],lag_ratio=.02))
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('60点を表示',first,lambda:LaggedStart(*[FadeIn(d,shift=UP*.2) for d in dots],lag_ratio=.02)),
+            ('左右の集まり',second,lambda:LaggedStart(*[Indicate(d,color=DATA,scale_factor=1.15) for d in dots],lag_ratio=.02)),
+        ])
         x=ValueTracker(.15)
         indicator=always_redraw(lambda:Arrow(ax.c2p(x.get_value(),1.5),ax.c2p(x.get_value(),.15),buff=0,color=COUNT))
         self.add(indicator)
-        self.beat(x.animate.set_value(.85))
+        self.beat(phases=[('中央へ',self.sentence_duration(0),lambda:x.animate.set_value(.5)),
+                          ('予想する',self.sentence_duration(1),lambda:Indicate(indicator,color=COUNT,scale_factor=1.03))])
         fit=curve(ax,GRID,fitted_gaussian(GRID));self.remove(indicator)
-        label=jp('赤：単一ガウスの推定',22,MODEL).move_to([0,2.1,0]);self.add(label)
-        self.beat(Create(fit))
+        center=.5
+        guide=DashedLine(ax.c2p(center,0),ax.c2p(center,2.15),color=COUNT,stroke_width=1.7)
+        model_dot=Dot(ax.c2p(center,float(fitted_gaussian(center))),radius=.075,color=MODEL)
+        model_value=MathTex(r'\widehat p_G(0.5)=1.95',font_size=30,color=MODEL).move_to([-2.25,2.1,0])
+        self.beat(Create(fit),FadeIn(guide),FadeIn(model_dot),FadeIn(model_value))
         true=curve(ax,GRID,truth(GRID),TRUE,2)
-        self.remove(label);label=jp('緑：実験の生成分布　　赤：推定',22).move_to([0,2.1,0]);self.add(label)
-        self.beat(Create(true))
+        true_dot=Dot(ax.c2p(center,float(truth(center))),radius=.075,color=TRUE)
+        true_value=MathTex(r'p_{\rm gen}(0.5)=0.055',font_size=30,color=TRUE).move_to([2.25,2.1,0])
+        self.beat(Create(true),FadeIn(true_dot),FadeIn(true_value))
+        # Use a visible high-density interval for the area explanation. The
+        # narrow central valley remains marked separately at x=0.5.
         right=ValueTracker(.201)
         def area():
             z=np.linspace(.2,right.get_value(),100)
@@ -141,7 +152,16 @@ class PRML25NonparametricMethods(NarratedScene):
         shade=always_redraw(area);self.add(shade)
         self.formula(r'P(a<x<b)=\int_a^b p(x)\,dx')
         self.beat(right.animate.set_value(.38))
-        self.beat(Transform(fit,curve(ax,GRID,kde(GRID,.06))),FadeOut(shade))
+        kde_value=MathTex(r'\widehat p_{\rm KDE}(0.5)=0.40',font_size=30,color=MODEL).move_to(model_value)
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('谷を問う',first,lambda:Indicate(model_dot,color=MODEL,scale_factor=1.2)),
+            ('旧値を外す',.35,lambda:FadeOut(model_value)),
+            ('近所から作る',second-.8,lambda:AnimationGroup(
+                Transform(fit,curve(ax,GRID,kde(GRID,.06))),
+                model_dot.animate.move_to(ax.c2p(center,float(kde(center,.06)))),FadeOut(shade))),
+            ('新しい値',.45,lambda:FadeIn(kde_value)),
+        ])
 
     def histograms(self):
         w=ValueTracker(.1);offset=ValueTracker(0)
@@ -151,14 +171,16 @@ class PRML25NonparametricMethods(NarratedScene):
         self.add(self.rug(ax),bars)
         self.slider(w,.025,.5,r'\Delta')
         self.beat(w.animate.set_value(.08))
-        select=SurroundingRectangle(bars[3],color=COUNT,buff=.02)
+        # This bin covers [0.48, 0.56) and contains no samples. Mark its extent
+        # explicitly: a surrounding rectangle on a zero-height bar is unreadable.
+        select=Rectangle(width=.8,height=.52,color=COUNT,stroke_width=2).move_to(ax.c2p(.52,0)+UP*.26)
+        zero=tex(r'n_i=0',25,COUNT).next_to(select,UP,buff=.12)
         f=self.formula(r'\text{area}=n_i/N',colors={'n_i':COUNT,'N':DATA})
-        self.beat(Create(select))
-        self.remove(select,f)
+        self.beat(Create(select),FadeIn(zero))
+        self.remove(f)
         f=self.formula(r'p_i={n_i\over N\Delta_i},\qquad p_i\Delta_i={n_i\over N}',colors={'n_i':COUNT,r'\Delta_i':VOLUME})
-        # Animate the independent outline, preserving the redraw group as one root.
-        self.beat(Create(select),Indicate(f,color=COUNT,scale_factor=1.01))
-        self.remove(select)
+        self.beat(Indicate(select,color=COUNT,scale_factor=1.02),Indicate(f,color=COUNT,scale_factor=1.01))
+        self.remove(select,zero)
         self.beat(w.animate.set_value(.025))
         self.beat(w.animate.set_value(.5))
         self.beat(phases=[('restore_width',self.sentence_duration(0),lambda:w.animate.set_value(.08)),
@@ -425,7 +447,7 @@ class PRML25NonparametricMethods(NarratedScene):
         # Two-point construction in a separate explanatory inset, labelled as such.
         p1=np.array([2.5,.1,0]);p2=np.array([4.5,.1,0]);mid=(p1+p2)/2
         inset=VGroup(Dot(p1,color=MODEL),Dot(p2,color=DATA),Line(p1,p2,color=MUTED),
-                     DashedLine(mid+UP*.8,mid+DOWN*.8,color=COUNT),jp('二点だけの場合',20).move_to([3.5,-1.2,0]))
+                     DashedLine(mid+UP*.8,mid+DOWN*.8,color=COUNT),jp('2点だけの場合',20).move_to([3.5,-1.2,0]))
         self.beat(Create(inset))
         for k,target in [(5,(-.5,.3)),(11,(1.2,.2)),(5,(-.5,.3))]:
             self.remove(bg,label)
@@ -442,7 +464,7 @@ class PRML25NonparametricMethods(NarratedScene):
         self.beat(cursor.animate.move_to(ax.c2p(.6,.5)))
 
     def cost(self):
-        ax=self.density_axes(5);x=ValueTracker(.28);mode=ValueTracker(0)
+        ax=self.density_axes(5);x=ValueTracker(.5);mode=ValueTracker(0)
         width=lambda:(1-mode.get_value())*.12+mode.get_value()*2*float(knn_radius(x.get_value(),7))
         win=self.window(ax,x,width,4.4);rug=self.rug(ax,lambda p:abs(p-x.get_value())<=width()/2)
         self.add(rug,win,curve(ax,GRID,kde(GRID,.06),MODEL))
@@ -460,11 +482,13 @@ class PRML25NonparametricMethods(NarratedScene):
         grid=always_redraw(lambda:VGroup(*[
             Square(side_length=.24,color=DATA,fill_opacity=.25).move_to([-1.35+i*.28,1.0-j*.43,0])
             for j in range(round(count.get_value())) for i in range(10)]))
-        self.add(grid,readout('D=',lambda:round(count.get_value()),[-3.8,1.8,0],COUNT,0),
-                 readout('10^D=',lambda:10**round(count.get_value()),[1.8,1.8,0],VOLUME,0),
-                 jp('各行は一つの軸\n各軸を10分割',22).move_to([3.7,0,0]))
+        bins=readout('10^D=',lambda:10**round(count.get_value()),[1.8,1.8,0],VOLUME,0)
+        self.add(grid,readout('D=',lambda:round(count.get_value()),[-3.8,1.8,0],COUNT,0),bins,
+                 jp('各行は1つの軸\n各軸を10分割',22).move_to([3.7,0,0]))
         self.formula(r'M^D\quad (M=10)',size=36)
-        self.beat(count.animate.set_value(6))
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[('6次元まで増やす',first,lambda:count.animate.set_value(6)),
+                          ('100万を示す',second,lambda:Indicate(bins,color=VOLUME,scale_factor=1.03))])
         self.clear();self.add(jp(self.story['title'],34).move_to([0,3.35,0]),
                               jp('候補を絞って、近い点を探す',26).move_to([0,2.0,0]))
         nodes=[np.array([0,1.0,0]),np.array([-2,0,0]),np.array([2,0,0]),np.array([-3,-1,0]),np.array([-1,-1,0]),np.array([1,-1,0]),np.array([3,-1,0])]
@@ -474,4 +498,23 @@ class PRML25NonparametricMethods(NarratedScene):
         self.clear();self.add(jp('近くの点を数え、広さで割る',34).move_to([0,3.35,0]))
         ax=self.density_axes(5);self.add(self.rug(ax))
         self.formula(r'\widehat p(x)={K\over NV}',colors={'K':COUNT,'V':VOLUME})
-        self.beat(Create(curve(ax,GRID,kde(GRID,.06))),Create(curve(ax,GRID,truth(GRID),TRUE,2,.5)))
+        center=.5
+        guide=DashedLine(ax.c2p(center,0),ax.c2p(center,2.15),color=COUNT,stroke_width=1.7)
+        gaussian_curve=curve(ax,GRID,fitted_gaussian(GRID),MODEL)
+        generated_curve=curve(ax,GRID,truth(GRID),TRUE,2,.75)
+        gaussian_dot=Dot(ax.c2p(center,float(fitted_gaussian(center))),radius=.075,color=MODEL)
+        generated_dot=Dot(ax.c2p(center,float(truth(center))),radius=.075,color=TRUE)
+        value=MathTex(r'\widehat p_G(0.5)=1.95',font_size=30,color=MODEL).move_to([-2.25,2.1,0])
+        true_value=MathTex(r'p_{\rm gen}(0.5)=0.055',font_size=30,color=TRUE).move_to([2.25,2.1,0])
+        self.add(guide)
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        kde_value=MathTex(r'\widehat p_{\rm KDE}(0.5)=0.40',font_size=30,color=MODEL).move_to(value)
+        self.beat(phases=[
+            ('冒頭の予測',first*.35,lambda:AnimationGroup(Create(gaussian_curve),FadeIn(gaussian_dot),FadeIn(value))),
+            ('旧値を外す',first*.10,lambda:FadeOut(value)),
+            ('近所から再推定',first*.45,lambda:AnimationGroup(Create(generated_curve),FadeIn(generated_dot),FadeIn(true_value),
+                Transform(gaussian_curve,curve(ax,GRID,kde(GRID,.06))),
+                gaussian_dot.animate.move_to(ax.c2p(center,float(kde(center,.06)))))),
+            ('新しい値',first*.10,lambda:FadeIn(kde_value)),
+            ('問いの答え',second,lambda:Indicate(gaussian_dot,color=MODEL,scale_factor=1.1)),
+        ])
