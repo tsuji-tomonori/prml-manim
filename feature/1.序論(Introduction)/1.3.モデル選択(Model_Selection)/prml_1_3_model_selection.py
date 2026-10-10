@@ -103,15 +103,14 @@ class PRML13ModelSelection(NarratedScene):
         self.legend([('訓練',BLUE_DATA),('予測',MODEL_RED),('ずれ',YELLOW_ERROR)])
         ax,_=self.graph()
         points=dots(ax,model.X,model.T)
-        d=ValueTracker(1)
+        d=ValueTracker(9)
         w=lambda:model.interpolated_weights(d.get_value())
         line=always_redraw(lambda:curve(ax,w()))
         errs=always_redraw(lambda:residuals(ax,w(),model.X,model.T))
         self.slider(d)
         badge=jp('整数で候補を比較',18,MUTED).move_to([4.5,-2.55,0])
         self.add(badge)
-        self.beat(LaggedStart(*[FadeIn(p) for p in points],lag_ratio=.08))
-        self.add(line)
+        self.beat(LaggedStart(*[FadeIn(p) for p in points],lag_ratio=.08),Create(line))
         scan,probe=self.cursor(ax,w)
         self.beat(scan.animate.set_value(1))
         self.remove(probe)
@@ -122,22 +121,33 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(d.animate.set_value(9))
         self.beat(d.animate.set_value(5))
         self.beat(d.animate.set_value(9))
-        q=jp('未知の点でも、当たる？',28,ORANGE_DATA).move_to([0,-1.98,0])
-        self.beat(Write(q))
+        guide=DashedLine(ax.c2p(model.STORY_X,-1.35),ax.c2p(model.STORY_X,1.35),
+                         color=ORANGE_DATA,stroke_width=2)
+        probe_label=tex(f'x={model.STORY_X:.3f}',25,ORANGE_DATA).move_to([4.5,.9,0])
+        q=jp('この点の観測値は？',27,ORANGE_DATA).move_to([0,-1.98,0])
+        self.beat(Create(guide),FadeIn(probe_label),Write(q))
 
     def validation(self):
         legend=self.legend([('訓練',BLUE_DATA),('検証',ORANGE_DATA),('予測',MODEL_RED)])
         ax,axes_group=self.graph()
         train=dots(ax,model.X,model.T)
         valid=dots(ax,model.XV,model.TV,ORANGE_DATA)
+        target=valid[model.STORY_VALIDATION_INDEX]
+        halo=Circle(radius=.16,color=YELLOW_ERROR,stroke_width=2).move_to(target)
         d=ValueTracker(9); w=lambda:model.interpolated_weights(d.get_value())
         line=always_redraw(lambda:curve(ax,w()))
         errs=always_redraw(lambda:residuals(ax,w(),model.XV,model.TV,ORANGE_DATA))
         slider=self.slider(d)
         self.add(train,line)
-        self.beat(LaggedStart(*[FadeIn(p) for p in valid],lag_ratio=.04))
-        self.beat(Create(errs))
-        self.beat(d.animate.set_value(3))
+        self.beat(LaggedStart(*[FadeIn(p) for p in valid],lag_ratio=.04),FadeIn(halo))
+        observed=jp(f'観測 {model.STORY_T:.3f}',21,ORANGE_DATA)
+        pred9=jp(f'd=9 予測 {model.STORY_PREDICTIONS[9]:.3f}',21,MODEL_RED)
+        gap9=jp(f'ずれ {model.STORY_RESIDUALS[9]:.3f}',21,YELLOW_ERROR)
+        figures=VGroup(observed,pred9,gap9).arrange(DOWN,buff=.16).move_to([4.65,.65,0])
+        self.beat(Create(errs),FadeIn(figures))
+        pred3=jp(f'd=3 予測 {model.STORY_PREDICTIONS[3]:.3f}',21,MODEL_RED).move_to([4.65,-.58,0])
+        gap3=jp(f'ずれ {model.STORY_RESIDUALS[3]:.3f}',21,YELLOW_ERROR).move_to([4.65,-1.12,0])
+        self.beat(d.animate.set_value(3),FadeIn(pred3),FadeIn(gap3),Indicate(halo,color=YELLOW_ERROR))
         formula=MathTex(r'E_{\rm val}', '=',r'\frac1{N_{\rm val}}\sum_n',r'(y(x_n)-t_n)^2',font_size=29)
         formula[0].set_color(ORANGE_DATA); formula[3].set_color(ORANGE_DATA)
         formula.move_to([0,-2.03,0])
@@ -172,12 +182,9 @@ class PRML13ModelSelection(NarratedScene):
         """
         self.clear()
         self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
-        frame = RoundedRectangle(width=10.5, height=4.55, corner_radius=.12,
-                                 stroke_color=AID_OPERATION, stroke_width=1.2,
-                                 fill_color=BG, fill_opacity=1).move_to([0,.05,0])
-        heading = jp('復習: 1.1 RMS（説明用の二点の例）',25)
+        heading = jp('復習: 1.1 RMS（説明用の2点の例）',25)
         heading.move_to([-4.9,1.94,0],aligned_edge=LEFT)
-        card = VGroup(frame,heading)
+        card = heading
         stages = VGroup(*[jp(label,25,AID_OPERATION).move_to([x,1.25,0])
                           for label,x in [('二乗',-3.2),('平均',0),('平方根',3.2)]])
         arrows = VGroup(Arrow([-3.85,-.3,0],[-3.85,.6,0],buff=0,color=AID_INPUT),
@@ -343,11 +350,14 @@ class PRML13ModelSelection(NarratedScene):
         self.legend([('1マス＝1候補',BLUE_DATA),('交差検証＝候補ごとに4回',ORANGE_DATA)])
         def grid(layers, rows):
             group=VGroup()
+            side=.61 if layers==1 else .32
+            step=.74 if layers==1 else .39
             for layer in range(layers):
                 for r in range(rows):
                     for c in range(5):
-                        box=Square(side_length=.61,color=BLUE_DATA,fill_color=BG,fill_opacity=1 if layers>1 else .25)
-                        box.move_to([-4.4+c*.74+layer*.3,1.25-r*.74+layer*.25,0]); group.add(box)
+                        box=Square(side_length=side,color=BLUE_DATA,fill_color=BG,fill_opacity=.25)
+                        box.move_to([-4.4+c*step+layer*(2.15 if layers>1 else 0),
+                                     1.25-r*step,0]); group.add(box)
             return group
         g=grid(1,1)
         self.beat(LaggedStart(*[FadeIn(b) for b in g],lag_ratio=.15))
@@ -365,12 +375,25 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(counter.animate.set_value(80),Write(f80))
         scan.clear_updaters(); self.remove(scan)
         g60=grid(3,4)
-        self.beat(ReplacementTransform(g20,g60),counter.animate.set_value(240),
-                  Transform(formula,tex(r'5\times4\times3=60',34).move_to(formula)),
-                  Transform(f80,tex(r'60\times4=240',32,ORANGE_DATA).move_to(f80)))
+        formula60=tex(r'5\times4\times3=60',34).move_to(formula)
+        f240=tex(r'60\times4=240',32,ORANGE_DATA).move_to(f80)
+        extra=jp('別の設定：3通り',20,PURPLE_TERM).move_to([-2.55,-1.3,0])
+        layer_labels=VGroup(*[jp(f'設定{i+1}',18,PURPLE_TERM)
+                              .move_to([-3.62+2.15*i,1.74,0]) for i in range(3)])
+        first,second=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('show three separate candidate grids',first,
+             lambda: AnimationGroup(ReplacementTransform(g20,g60),FadeOut(formula),
+                                    FadeOut(f80),FadeIn(formula60),FadeIn(extra),
+                                    FadeIn(layer_labels))),
+            ('count four fits per candidate',second,
+             lambda: AnimationGroup(counter.animate.set_value(240),FadeIn(f240))),
+        ])
         general=tex(r'k^h\ \mathrm{candidates}\quad\Longrightarrow\quad S k^h\ \mathrm{runs}',34,YELLOW_ERROR).move_to([0,-2.55,0])
         self.beat(Write(general))
-        self.beat(Indicate(runs,color=YELLOW_ERROR),Indicate(g60,color=YELLOW_ERROR))
+        self.beat(Indicate(runs,color=YELLOW_ERROR),
+                  *[Flash(g60[i].get_center(),color=YELLOW_ERROR,flash_radius=.45)
+                    for i in (0,20,40)])
 
     def aic(self):
         formula=MathTex(r'\ln p(\mathcal D\mid\mathbf w_{\rm ML})','-', 'M',font_size=34)
@@ -389,7 +412,7 @@ class PRML13ModelSelection(NarratedScene):
         # shift. Measure only visible glyphs when drawing the reference frame.
         recap_label=VGroup(*[g for g in jp('復習: 1.2 尤度',20) if g.has_points()])
         recap_label.move_to([-4.4,2.65,0])
-        recap=VGroup(SurroundingRectangle(recap_label,color=AID_OPERATION,buff=.12),recap_label)
+        recap=recap_label
         likelihood_label=tex(r'p(\mathcal D\mid\mathbf w)',35,BLUE_DATA).move_to([0,-2.3,0])
         meaning=VGroup(tex(r'\mathcal D',24,BLUE_DATA),jp('：訓練データ',20),tex(r'\mathbf w',24,BLUE_DATA),jp('：係数',20)).arrange(RIGHT,buff=.13).move_to([0,-2.8,0])
         self.add(recap)  # Readable as soon as the section number is spoken.
@@ -437,7 +460,7 @@ class PRML13ModelSelection(NarratedScene):
         self.beat(Write(aic),Indicate(selected,color=YELLOW_ERROR))
 
     def limits(self):
-        legend=self.legend([('観測',BLUE_DATA),('最適な係数の一本',MODEL_RED),('別の係数（模式図）',PURPLE_TERM)])
+        legend=self.legend([('観測',BLUE_DATA),('最適な係数の1本',MODEL_RED),('別の係数（模式図）',PURPLE_TERM)])
         ax,ag=self.graph()
         data=dots(ax,model.X,model.T); line=curve(ax,model.WEIGHTS[2])
         self.add(data,line)
@@ -447,15 +470,32 @@ class PRML13ModelSelection(NarratedScene):
             w=model.WEIGHTS[2].copy();w[0]+=shift;w[1]-=shift*.8
             variants.add(curve(ax,w,PURPLE_TERM).set_stroke(opacity=.35,width=2))
         self.beat(LaggedStart(*[Create(v) for v in variants],lag_ratio=.1))
-        note=jp('一本の最適解と、係数の不確かさ',26,YELLOW_ERROR).move_to([0,-2.15,0])
+        note=jp('1本の最適解と、係数の不確かさ',26,YELLOW_ERROR).move_to([0,-2.15,0])
         self.beat(Write(note),Indicate(variants,color=PURPLE_TERM))
         road=VGroup(tex(r'\mathrm{BIC}\ \to\ 4.4.1',28,PURPLE_TERM),jp('ベイズ的モデル比較 → 3.4',23,GREEN_TEST)).arrange(RIGHT,buff=.7).move_to([0,-2.75,0])
         self.beat(Write(road))
         self.beat(LaggedStart(*[Indicate(v,color=PURPLE_TERM,scale_factor=1.025) for v in variants],lag_ratio=.2))
         self.remove(*variants.get_family(),note,road,legend)
         self.legend([('訓練',BLUE_DATA),('予測',MODEL_RED),('検証',ORANGE_DATA)])
-        valid=dots(ax,model.XV,model.TV,ORANGE_DATA)
-        question=jp('未知の点を予測するために、選ぶ',27,ORANGE_DATA).move_to([0,-2.15,0])
-        self.beat(FadeIn(valid),Write(question))
-        roles=VGroup(*[jp(s,23,c) for s,c in [('学ぶ',BLUE_DATA),('選ぶ',ORANGE_DATA),('最後に測る',GREEN_TEST)]]).arrange(RIGHT,buff=.8).move_to([0,-2.75,0])
-        self.beat(LaggedStart(*[Write(r) for r in roles],lag_ratio=.5))
+        target=Dot(ax.c2p(model.STORY_X,model.STORY_T),radius=.1,color=ORANGE_DATA)
+        point_label=tex(f'x={model.STORY_X:.3f}',24,ORANGE_DATA).move_to([4.6,1.6,0])
+        observation=jp(f'観測 {model.STORY_T:.3f}',21,ORANGE_DATA).move_to([4.6,1.05,0])
+        prediction9=jp(f'd=9 予測 {model.STORY_PREDICTIONS[9]:.3f}',21,MODEL_RED).move_to([4.6,.5,0])
+        residual9=jp(f'ずれ {model.STORY_RESIDUALS[9]:.3f}',21,YELLOW_ERROR).move_to([4.6,-.05,0])
+        gap=Line(ax.c2p(model.STORY_X,model.STORY_T),
+                 ax.c2p(model.STORY_X,model.STORY_PREDICTIONS[9]),
+                 color=YELLOW_ERROR,stroke_width=4)
+        conclusion=jp('10点を通る九次式',25,MODEL_RED).move_to([0,-2.15,0])
+        self.beat(Transform(line,curve(ax,model.WEIGHTS[8])),FadeIn(target),Create(gap),
+                  FadeIn(point_label),FadeIn(observation),FadeIn(prediction9),
+                  FadeIn(residual9),Write(conclusion))
+        prediction3=jp(f'd=3 予測 {model.STORY_PREDICTIONS[3]:.3f}',21,MODEL_RED).move_to([4.6,-.65,0])
+        residual3=jp(f'ずれ {model.STORY_RESIDUALS[3]:.3f}',21,YELLOW_ERROR).move_to([4.6,-1.2,0])
+        new_gap=Line(ax.c2p(model.STORY_X,model.STORY_T),
+                     ax.c2p(model.STORY_X,model.STORY_PREDICTIONS[3]),
+                     color=YELLOW_ERROR,stroke_width=4)
+        answer=jp('検証24点で選んだ三次式',25,ORANGE_DATA).move_to(conclusion)
+        self.remove(conclusion)
+        self.beat(Transform(line,curve(ax,model.WEIGHTS[2])),Transform(gap,new_gap),
+                  FadeIn(prediction3),FadeIn(residual3),FadeIn(answer),
+                  Indicate(target,color=ORANGE_DATA))

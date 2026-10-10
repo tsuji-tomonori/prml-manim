@@ -18,6 +18,19 @@ class ModelSelectionChecks(unittest.TestCase):
             residual=m.predict(w,m.X)-m.T
             np.testing.assert_allclose(m.design(m.X,int(degree)).T@residual,0,atol=1e-7)
 
+    def test_opening_point_returns_unchanged(self):
+        i = m.STORY_VALIDATION_INDEX
+        self.assertEqual(m.STORY_X, float(m.XV[i]))
+        self.assertEqual(m.STORY_T, float(m.TV[i]))
+        self.assertEqual(f'{m.STORY_X:.3f}', '0.043')
+        self.assertEqual(f'{m.STORY_T:.3f}', '0.354')
+        self.assertEqual(f'{m.STORY_PREDICTIONS[9]:.3f}', '-0.354')
+        self.assertEqual(f'{m.STORY_PREDICTIONS[3]:.3f}', '0.372')
+        for d in (3, 9):
+            self.assertAlmostEqual(m.STORY_RESIDUALS[d],
+                                   abs(m.predict(m.WEIGHTS[d-1], [m.STORY_X])[0] - m.STORY_T))
+        self.assertGreater(m.STORY_RESIDUALS[9], m.STORY_RESIDUALS[3])
+
     def test_cross_validation_held_out_independence(self):
         np.testing.assert_array_equal(np.sort(np.concatenate(m.FOLDS)),np.arange(24))
         self.assertEqual([len(x) for x in m.FOLDS],[6]*4)
