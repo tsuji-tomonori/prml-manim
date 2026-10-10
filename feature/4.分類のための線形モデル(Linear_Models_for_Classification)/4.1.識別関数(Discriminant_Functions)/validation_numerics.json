@@ -6,6 +6,16 @@
     -0.6620869053178431,
     1.6620869053178435
   ],
+  "white_point_scores": {
+    "initial": [
+      0.491904799132946,
+      0.5080952008670547
+    ],
+    "moved": [
+      0.5118041178601006,
+      0.48819588213989973
+    ]
+  },
   "middle_class_selected": 0,
   "fisher_J": [
     0.06779718700474145,
@@ -34,7 +44,7 @@
     "horizontal_squared_deviation_sum": 10
   },
   "audio_scenes": 10,
-  "sentences": 121,
-  "audio_seconds": 576.4,
+  "sentences": 123,
+  "audio_seconds": 613.8,
   "checks_passed": 9
 }

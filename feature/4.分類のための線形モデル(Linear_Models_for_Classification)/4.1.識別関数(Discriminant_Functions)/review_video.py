@@ -23,7 +23,7 @@ def main():
     # Include every phase of each new card and its neighbouring original shots.
     for si,bi in [(0,0),(3,0),(3,3),(4,0),(4,7),(4,6),(4,8),(9,0)]:
         scene=timeline[si];b=scene['beats'][bi]
-        times=[b['start']-.15,b['start']+.25,b['end']-.2,b['end']+.2]
+        times=[max(0,b['start']-.15),b['start']+.25,b['end']-.2,b['end']+.2]
         times += [(a['start']+a['end'])/2 for a in b.get('actions',[]) if a['name']!='breath']
         for j,t in enumerate(times):
             frames.append({'label':f"{scene['id']} review beat {bi+1} phase {j}",'time':t})
