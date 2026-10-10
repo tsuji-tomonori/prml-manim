@@ -1,4 +1,29 @@
 {
+  "opening_and_return": {
+    "sequence": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "counts": [
+      3,
+      1,
+      0
+    ],
+    "mle": [
+      0.75,
+      0.25,
+      0.0
+    ],
+    "predictive": [
+      0.5714285714285714,
+      0.2857142857142857,
+      0.14285714285714285
+    ],
+    "yellow": 0.14285714285714285,
+    "yellow_by_quadrature": 0.14285714285714296
+  },
   "enumeration": {
     "sequences": 81,
     "matches": 12,
@@ -36,6 +61,15 @@
       ],
       "integral": 0.9999999999999999,
       "mean_red": 0.33333333333333326
+    },
+    {
+      "alpha": [
+        4,
+        2,
+        1
+      ],
+      "integral": 1.0000000000000009,
+      "mean_red": 0.5714285714285718
     },
     {
       "alpha": [
@@ -80,7 +114,7 @@
   },
   "audio": {
     "scenes": 9,
-    "sentences": 116,
-    "total_seconds": 706.6
+    "sentences": 122,
+    "total_seconds": 703.4666666666667
   }
 }
