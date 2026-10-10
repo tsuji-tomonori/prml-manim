@@ -31,6 +31,12 @@ assert span<1.75
 assert np.max(np.abs(T[:8]))<1.75
 assert np.all(METRICS[:,:2]>=0)
 assert -3<BEST<3
+for level, expected in [(-3, (.830, 1.457)), (BEST, (.817, .999)), (3, (.402, .299))]:
+    for index, shown in zip(STORY_SETS, expected):
+        assert round(story_prediction(index, level), 3) == shown
+assert round(float(truth(STORY_X)), 3) == 1.000
+for level, shown in [(-3, .101), (BEST, .084), (3, .225)]:
+    assert round(experiment(level)['expected'], 3) == shown
 m=json.loads(MANIFEST.read_text())
 assert len(m['scenes'])==len(SCENES)==8
 for story,entry in zip(SCENES,m['scenes']): assert valid_entry(story,entry)

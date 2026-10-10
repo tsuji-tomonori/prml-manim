@@ -79,9 +79,7 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         saved = [m for m in self.mobjects if m is not self.subtitle]
         header = [m for m in saved if m.get_center()[1] > 3]
         self.clear()
-        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
-                                 color='#FFFF00', stroke_width=1.2).move_to([0,.1,0])
-        self.add(*header, frame, jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
+        self.add(*header, jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
         return saved
 
     def restore_body(self, saved):
@@ -122,7 +120,7 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         self.restore_body(saved)
 
     def two_averages_aid(self):
-        saved = self.aid_card('補足: 二段階の平均')
+        saved = self.aid_card('補足: 2段階の平均')
         blue, yellow, green = '#58C4DD', '#FFFF00', '#83C167'
         predictions = np.array([[0,1],[2,2],[4,3]])
         means = predictions.mean(axis=0)
@@ -153,7 +151,8 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         self.beat(phases=[
             ('V07b select columns',a*.40,lambda:Create(boxes)),
             ('V07b mean predictions',a*.60,lambda:AnimationGroup(FadeIn(mean_label),FadeIn(mean_values,shift=UP*.18))),
-            ('V07b square deviations',b*.56,lambda:AnimationGroup(FadeOut(boxes),Transform(cells,square_cells),FadeIn(tiles))),
+            ('V07b square deviations',b*.56,lambda:AnimationGroup(
+                FadeOut(boxes),Succession(FadeOut(cells),FadeIn(square_cells)),FadeIn(tiles))),
             ('V07b average over datasets',b*.44,lambda:AnimationGroup(FadeIn(variance_label),FadeIn(variances))),
             ('V07b average over inputs',c*.58,lambda:FadeIn(total,shift=UP*.18)),
             ('V07b general input weights',c*.42,lambda:FadeIn(general)),
@@ -162,22 +161,41 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
 
     def question(self):
         ax=self.axes()
+        x0=STORY_X
         tr=ValueTracker(-3)
         sample=dots(ax,0)
         line=curve(ax,experiment(-3)['curves'][0])
+        guide=DashedLine(ax.c2p(x0,-1.65),ax.c2p(x0,1.65),color=MUTED,stroke_width=2)
+        value=lambda i,l:float(story_prediction(i,l))
+        marker=Dot(ax.c2p(x0,value(0,-3)),radius=.085,color=MEAN)
+        readout=self.formula(r'\ln\lambda=-3,\quad y(0.25)=0.830',size=32)
+        readout.set_opacity(0)
         self.add(sample)
-        self.beat(Create(line))
-        self.beat(Transform(sample,dots(ax,1)),Transform(line,curve(ax,experiment(-3)['curves'][1])))
-        self.beat(Transform(sample,dots(ax,2)),Transform(line,curve(ax,experiment(-3)['curves'][2])))
+        self.beat(Create(line),Create(guide),FadeIn(marker),FadeIn(readout))
+        next_label=tex(r'\ln\lambda=-3,\quad y(0.25)=1.457',32).move_to(readout)
+        self.beat(Transform(sample,dots(ax,2)),Transform(line,curve(ax,experiment(-3)['curves'][2])),
+                  marker.animate.move_to(ax.c2p(x0,value(2,-3))),
+                  Succession(FadeOut(readout),FadeIn(next_label)))
+        readout=next_label
+        first=Dot(ax.c2p(x0,value(0,-3)),radius=.06,color=MODEL_RED)
+        gap=Line(first.get_center(),marker.get_center(),color=VAR,stroke_width=5)
+        self.beat(FadeIn(first),Create(gap))
         self.drop(line)
         line=always_redraw(lambda:curve(ax,experiment(float(tr.get_value()))['curves'][2]))
-        self.add(line)
-        self.beat(tr.animate.set_value(3))
+        moving_dot=always_redraw(lambda:Dot(ax.c2p(x0,value(2,float(tr.get_value()))),radius=.085,color=MEAN))
+        self.add(line,moving_dot)
+        self.drop(marker,first,gap)
+        strong_label=tex(r'\ln\lambda=3,\quad y(0.25)=0.299',32).move_to(readout)
+        self.beat(tr.animate.set_value(3),Succession(FadeOut(readout),FadeIn(strong_label)))
+        readout=strong_label
         true=curve(ax,truth(GRID),TRUE_GREEN,4)
-        self.beat(Create(true),self.flash(line))
-        summary=self.formula(r'\text{bias}^2', '+',r'\text{variance}',size=38)
-        summary[0].set_color(BIAS);summary[2].set_color(VAR)
-        self.beat(Transform(sample,dots(ax,3)),FadeOut(line),Create(curve(ax,experiment(3)['curves'][3])))
+        strong0=curve(ax,experiment(3)['curves'][0])
+        true_dot=Dot(ax.c2p(x0,truth(x0)),radius=.09,color=TRUE_GREEN)
+        final_label=tex(r'\ln\lambda=3,\quad y(0.25)=0.402,\quad h(0.25)=1',30).move_to(readout)
+        self.beat(Transform(sample,dots(ax,0)),FadeOut(line),FadeOut(moving_dot),
+                  Create(strong0),Create(true),FadeIn(true_dot),
+                  Succession(FadeOut(readout),FadeIn(final_label)))
+        self.beat(self.flash(strong0),pulse(true_dot,scale_factor=1.35))
 
     def noise(self):
         ax=self.axes(width=7,height=3.25,center=(-2,.35,0))
@@ -215,7 +233,7 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         pred=experiment(BEST)['curves']
         sample=dots(ax,0); line=curve(ax,pred[0]); true=curve(ax,truth(GRID),TRUE_GREEN)
         self.add(true,sample)
-        badge=self.formula('N=25',r'\qquad L=100')
+        badge=self.formula('N=25',r'\qquad L=100',r'\qquad\ln\lambda=0.1')
         self.add(jp('表示20本・平均100本',19,MUTED).move_to([3.8,2.18,0]))
         self.beat(Create(line))
         self.beat(Transform(sample,dots(ax,1)),Transform(line,curve(ax,pred[1])),start_sentence=1)
@@ -385,24 +403,50 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
 
     def limits(self):
         ax=self.axes()
-        d=experiment(BEST)
-        cloud=VGroup(*[curve(ax,v,MODEL_RED,1.3,.28) for v in d['curves'][:20]])
-        sample=dots(ax,0);one=curve(ax,d['curves'][0]);true=curve(ax,truth(GRID),TRUE_GREEN)
-        self.add(cloud,true)
-        self.beat(FadeOut(cloud),FadeIn(sample),Create(one))
-        unknown=jp('本当の平均は、通常は未知',28,TRUE_GREEN).move_to([0,-2.4,0]);self.add(unknown)
-        self.beat(true.animate.set_stroke(opacity=.1),pulse(unknown,scale_factor=1.03))
-        more=VGroup(*[Dot(ax.c2p(u,t),radius=.025,color=BLUE_DATA) for u,t in zip(X[1:8].ravel(),T[1:8].ravel())])
-        self.beat(LaggedStart(*[FadeIn(t) for t in more],lag_ratio=.01))
-        self.drop(more,unknown)
-        f=self.formula(r'p(\mathbf w\mid\mathcal D)',size=38);f.set_color(VAR)
-        self.beat(FadeOut(one),FadeIn(cloud),pulse(f,scale_factor=1.03))
-        # Schematic candidate curves illustrate posterior weighting, not posterior samples.
-        note=jp('次節の概念図：係数の候補に重みを付ける',22,MUTED).move_to([0,2.16,0]);self.add(note)
-        self.drop(f)
-        f=self.formula(r'\int y(x,\mathbf w)\,p(\mathbf w\mid\mathcal D)\,d\mathbf w',size=34);f.set_color(MEAN)
-        self.beat(LaggedStart(*[self.flash(c,VAR) for c in cloud[:6]],lag_ratio=.12),pulse(f,scale_factor=1.02))
-        self.drop(f)
-        final=self.formula(r'\text{expected loss}=',r'\text{bias}^2','+',r'\text{variance}','+',r'\text{noise}',size=36)
-        final[1].set_color(BIAS);final[3].set_color(VAR);final[5].set_color(NOISE)
-        self.beat(FadeOut(cloud),Create(curve(ax,d['mean'],MEAN,4)),true.animate.set_stroke(opacity=1),pulse(final,scale_factor=1.02))
+        x0=STORY_X
+        def prediction_dot(index, log_lambda, color=MEAN):
+            return Dot(ax.c2p(x0,story_prediction(index,log_lambda)),radius=.085,color=color)
+        guide=DashedLine(ax.c2p(x0,-1.65),ax.c2p(x0,1.65),color=MUTED,stroke_width=2)
+        sample=dots(ax,0)
+        first_curve=curve(ax,experiment(-3)['curves'][0])
+        first_dot=prediction_dot(0,-3)
+        label=self.formula(r'\ln\lambda=-3,\quad y_0(0.25)=0.830',size=31)
+        label.set_opacity(0)
+        self.add(sample)
+        self.beat(Create(first_curve),Create(guide),FadeIn(first_dot),FadeIn(label))
+        second_curve=curve(ax,experiment(-3)['curves'][2],MODEL_RED,2.3,.65)
+        second_dot=prediction_dot(2,-3,VAR)
+        weak_label=tex(r'\ln\lambda=-3:\quad 0.830,\ 1.457',31).move_to(label)
+        self.beat(Transform(sample,dots(ax,2)),Create(second_curve),FadeIn(second_dot),
+                  Succession(FadeOut(label),FadeIn(weak_label)))
+        label=weak_label
+        strong0=curve(ax,experiment(3)['curves'][0])
+        strong2=curve(ax,experiment(3)['curves'][2],MODEL_RED,2.3,.65)
+        strong_label=tex(r'\ln\lambda=3:\quad 0.402,\ 0.299\quad (h=1)',30).move_to(label)
+        truth_line=curve(ax,truth(GRID),TRUE_GREEN,3.5)
+        truth_dot=Dot(ax.c2p(x0,truth(x0)),radius=.08,color=TRUE_GREEN)
+        self.beat(Transform(first_curve,strong0),Transform(second_curve,strong2),
+                  first_dot.animate.move_to(prediction_dot(0,3).get_center()),
+                  second_dot.animate.move_to(prediction_dot(2,3).get_center()),
+                  Succession(FadeOut(label),FadeIn(strong_label)),Create(truth_line),FadeIn(truth_dot))
+        label=strong_label
+        middle0=curve(ax,experiment(BEST)['curves'][0])
+        middle2=curve(ax,experiment(BEST)['curves'][2],MODEL_RED,2.3,.65)
+        middle_label=tex(r'\ln\lambda=0.1:\quad 0.817,\ 0.999\quad (h=1)',30).move_to(label)
+        self.beat(Transform(first_curve,middle0),Transform(second_curve,middle2),
+                  first_dot.animate.move_to(prediction_dot(0,BEST).get_center()),
+                  second_dot.animate.move_to(prediction_dot(2,BEST).get_center()),
+                  Succession(FadeOut(label),FadeIn(middle_label)),pulse(truth_dot,scale_factor=1.35))
+        label=middle_label
+        self.drop(label)
+        scores=self.formula(r'\mathbb E[L]:\quad 0.101\ (\ln\lambda=-3),\quad '
+                            r'\mathbf{0.084}\ (0.1),\quad 0.225\ (3)',size=30)
+        scores.set_color(MEAN)
+        self.beat(FadeOut(second_curve),FadeOut(second_dot),
+                  truth_line.animate.set_stroke(opacity=.18),FadeOut(truth_dot),pulse(scores,scale_factor=1.02))
+        caveat=jp('実際には訓練データは1組・真の平均は未知',23,MUTED).move_to([0,2.17,0])
+        self.drop(scores)
+        posterior=self.formula(r'p(\mathbf w\mid\mathcal D)\quad\longrightarrow\quad '
+                               r'\int y(x,\mathbf w)p(\mathbf w\mid\mathcal D)\,d\mathbf w',size=31)
+        posterior.set_color(VAR)
+        self.beat(FadeIn(caveat),FadeIn(posterior),self.flash(first_curve,VAR))

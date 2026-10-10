@@ -52,7 +52,9 @@ def main():
             for i, action in enumerate(a for a in beat['actions'] if a['name'] != 'breath'):
                 assert beat['start'] <= action['start'] < action['end'] <= beat['end']+1e-6
                 frames.extend([(f'{tag}-action{i}-start',action['start']+.067),
-                               (f'{tag}-action{i}-end',action['end']-.067)])
+                               (f'{tag}-action{i}-middle',(action['start']+action['end'])/2),
+                               (f'{tag}-action{i}-end',action['end']-.067),
+                               (f'{tag}-action{i}-after',action['end']+.067)])
             speech=[]
             for c in beat['cues']:
                 lo = round((c['start']-scene['start'])*sample_rate)
