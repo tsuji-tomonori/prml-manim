@@ -38,13 +38,19 @@ def main():
     pts,labels=class_data();inside=np.all((pts>=[.2,.4])&(pts<[.6,.8]),axis=1)
     counts=np.bincount(labels[inside],minlength=3)
     assert counts.argmax()==0
+    neighborhood_counts=class_neighborhood_counts()
+    assert neighborhood_counts.shape==(9,3)
+    assert neighborhood_counts[0].tolist()==[22,12,0]
+    assert neighborhood_counts[-1].tolist()==[0,0,0]
+    assert (np.diff(neighborhood_counts.sum(axis=1))<=0).all()
+    assert np.array_equal(class_neighborhood_masks()[0],inside)
     for a in np.linspace(-1,1,21):
         image=object_pixels(.4,-.3,a)
         assert image.shape==(16,16) and np.all((image>=0)&(image<=1))
     assert np.linalg.norm(object_pixels(angle=.2)-object_pixels(angle=.2001))<.01
     print('PASS majority class',counts.tolist(),'and smooth bounded pixel data')
     manifest=json.loads(MANIFEST.read_text())
-    assert len(manifest['scenes'])==len(SCENES)==8
+    assert len(manifest['scenes'])==len(SCENES)==9
     for s,e in zip(SCENES,manifest['scenes']):
         assert valid_entry(s,e),s['id']
     assert {p.stem for p in MANIFEST.parent.glob('*.wav')}=={s['id'] for s in SCENES}
