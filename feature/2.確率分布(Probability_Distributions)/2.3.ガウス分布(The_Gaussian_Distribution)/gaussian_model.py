@@ -90,9 +90,39 @@ def von_mises(theta,center=0.,concentration=1.):
 MIX_DATA=np.r_[np.random.default_rng(2311).normal(-1.7,.55,45),np.random.default_rng(2312).normal(1.5,.7,55)]
 
 
-def mixture(x,weight=.45):
-    return weight*normal(x,-1.7,.55)+(1-weight)*normal(x,1.5,.7)
+def fit_two_gaussians(data=MIX_DATA):
+    """EM fit of two 1D Gaussians to the fixed opening/closing observations."""
+    weight, means, scales = .45, np.array([-1.7, 1.5]), np.array([.55, .7])
+    previous = -np.inf
+    for _ in range(200):
+        a = weight * normal(data, means[0], scales[0])
+        b = (1 - weight) * normal(data, means[1], scales[1])
+        density = a + b
+        likelihood = float(np.log(density).sum())
+        if likelihood - previous < 1e-11:
+            break
+        previous = likelihood
+        r = a / density
+        mass = np.array([r.sum(), (1-r).sum()])
+        weight = mass[0] / len(data)
+        means = np.array([(r*data).sum()/mass[0], ((1-r)*data).sum()/mass[1]])
+        scales = np.sqrt(np.array([
+            (r*(data-means[0])**2).sum()/mass[0],
+            ((1-r)*(data-means[1])**2).sum()/mass[1],
+        ]))
+    return float(weight), means, scales
 
 
-def responsibility(x,weight=.45):
-    return weight*normal(x,-1.7,.55)/mixture(x,weight)
+MIX_WEIGHT, MIX_MEANS, MIX_SCALES = fit_two_gaussians()
+
+
+def mixture(x,weight=None):
+    if weight is None:
+        weight = MIX_WEIGHT
+    return weight*normal(x,MIX_MEANS[0],MIX_SCALES[0])+(1-weight)*normal(x,MIX_MEANS[1],MIX_SCALES[1])
+
+
+def responsibility(x,weight=None):
+    if weight is None:
+        weight = MIX_WEIGHT
+    return weight*normal(x,MIX_MEANS[0],MIX_SCALES[0])/mixture(x,weight)
