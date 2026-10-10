@@ -73,10 +73,8 @@ class PRML35EvidenceApproximation(NarratedScene):
         saved=[m for m in self.mobjects if m is not self.subtitle]
         header=[m for m in saved if m.get_center()[1]>3.0]
         self.clear()
-        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
-                               color='#FFFF00',stroke_width=1.2).move_to([0,.1,0])
         label=jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
-        self.add(*header,frame,label)
+        self.add(*header,label)
         return saved
 
     def restore_review(self, saved):
@@ -178,18 +176,32 @@ class PRML35EvidenceApproximation(NarratedScene):
 
     def question(self):
         ax,dots=self.regression();self.remove(dots)
-        tr=ValueTracker(1.2);curve=always_redraw(lambda:path(ax,U,PU@at(tr.get_value())['mean']))
-        sl=self.slider(tr);self.add(curve)
-        self.legend([('観測',DATA),('事後平均',MODEL)])
-        self.beat(LaggedStart(*[FadeIn(d) for d in dots],lag_ratio=.12))
-        self.beat(tr.animate.set_value(-6))
-        self.beat(tr.animate.set_value(6))
-        self.beat(tr.animate.set_value(OPT))
+        tr=ValueTracker(1.2)
+        curve=always_redraw(lambda:path(ax,U,PU@at(tr.get_value())['mean']))
+        guide=DashedLine(ax.c2p(HIDDEN_X,-1.5),ax.c2p(HIDDEN_X,1.45),color=EV_COLOR,stroke_opacity=.55)
+        unknown=tex('?',32,EV_COLOR).move_to(ax.c2p(HIDDEN_X,1.5)+UP*.2)
+        mark=always_redraw(lambda:Dot(ax.c2p(HIDDEN_X,hidden_prediction(tr.get_value())),color=EV_COLOR,radius=.09))
+        sl=self.slider(tr)
+        legend=self.legend([('観測',DATA),('予測',MODEL)])
+        self.beat(LaggedStart(*[FadeIn(d) for d in dots],lag_ratio=.12),Create(guide),FadeIn(unknown))
+        prediction=number(r'\hat y(0.75)=',lambda:hidden_prediction(tr.get_value()),[-3.5,2.05,0],EV_COLOR,2)
+        self.add(curve,mark,prediction)
+        first=self.sentence_duration(0);second=self.sentence_duration(1)
+        self.beat(phases=[('predict before moving',.85,lambda:Wait()),
+                          ('weaken prior',first-.85,lambda:tr.animate.set_value(-6)),
+                          ('show first prediction',second,lambda:Indicate(mark,scale_factor=1.15))])
+        first=self.sentence_duration(0);second=self.sentence_duration(1)
+        self.beat(phases=[('strengthen prior',first,lambda:tr.animate.set_value(6)),
+                          ('show changed prediction',second,lambda:Indicate(mark,scale_factor=1.15))])
+        first=self.sentence_duration(0);second=self.sentence_duration(1)
+        self.beat(phases=[('return to middle',first,lambda:tr.animate.set_value(1.2)),
+                          ('ask how to choose',second,lambda:Indicate(prediction,scale_factor=1.04))])
+        self.remove(mark,prediction,unknown,guide)
         basis=VGroup(*[path(ax,U,PU[:,j],COLORS[j],1.4).set_stroke(opacity=.55) for j in range(10)])
         self.beat(LaggedStart(*[Create(m) for m in basis],lag_ratio=.15))
         self.remove(*basis.get_family())
         f=self.formula(r'p(\mathbf w|\alpha)=\mathcal N(\mathbf0,\alpha^{-1}I),\quad \sigma^2=\beta^{-1},\quad \lambda_{\rm reg}=\alpha/\beta',pos=(0,2.1,0),size=26)
-        self.beat(Indicate(f,scale_factor=1.03),tr.animate.set_value(OPT+.5))
+        self.beat(Indicate(f,scale_factor=1.03),tr.animate.set_value(1.2))
 
     def integrate_or_choose(self):
         ax,dots=self.regression(height=2.8,center=(0,.55,0));s=at(OPT)
@@ -258,8 +270,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         self.add(jp('山の高さ × 幅 → 対数で足し算',27).move_to([0,2.2,0]))
         self.add(log1,log2)
         self.beat(Indicate(log1,scale_factor=1.015),Indicate(log2,scale_factor=1.015))
-        brace=SurroundingRectangle(VGroup(log1,log2),color=EV_COLOR,buff=.25)
-        self.beat(Create(brace),Indicate(log1[1]),Indicate(log2[1]))
+        self.beat(Indicate(log1[1],color=EV_COLOR),Indicate(log2[1],color=EV_COLOR))
 
     def degree(self):
         ax,dots=self.regression(center=(0,.9,0),width=8,height=2.5)
@@ -377,7 +388,8 @@ class PRML35EvidenceApproximation(NarratedScene):
 
     def prediction(self):
         ax,dots=self.regression(height=3.1,center=(0,.25,0),span=2)
-        s=ITER[-1];mean=PU@s['mean'];sd=np.sqrt(1/s['beta']+np.einsum('ij,jk,ik->i',PU,s['cov'],PU))
+        # Return to the exact fixed-beta experiment used in the opening.
+        s=at(OPT);mean=PU@s['mean'];sd=np.sqrt(1/s['beta']+np.einsum('ij,jk,ik->i',PU,s['cov'],PU))
         samples=np.random.default_rng(19).multivariate_normal(s['mean'],s['cov'],8)
         curves=VGroup(*[path(ax,U,PU@w,POST,1.3).set_stroke(opacity=.5) for w in samples]);self.add(path(ax,U,mean,MODEL))
         self.beat(LaggedStart(*[Create(c) for c in curves],lag_ratio=.12))
@@ -388,10 +400,18 @@ class PRML35EvidenceApproximation(NarratedScene):
         def slice_():
             x=tr.get_value();p=design([x])[0];m=p@s['mean'];v=np.sqrt(1/s['beta']+p@s['cov']@p)
             return VGroup(Line(ax.c2p(x,m-2*v),ax.c2p(x,m+2*v),color=EV_COLOR,stroke_width=4),Dot(ax.c2p(x,m),color=EV_COLOR))
-        marker=always_redraw(slice_);self.add(marker);self.beat(tr.animate.set_value(.9))
-        note=self.formula(r'\alpha=\hat\alpha,\quad\beta=\hat\beta',pos=(0,2.5,0),size=31,color=PRIOR)
-        self.beat(tr.animate.set_value(.45),Indicate(note))
-        self.remove(note)
-        flow=VGroup(jp('重みを積分',25,POST),tex(r'\longrightarrow',28),jp('精度を選ぶ',25,PRIOR),tex(r'\longrightarrow',28),jp('予測を平均',25,EV_COLOR)).arrange(RIGHT,buff=.25).move_to([0,2.55,0])
-        self.beat(LaggedStart(*[FadeIn(m) for m in flow],lag_ratio=.15),tr.animate.set_value(.75))
-        self.beat(tr.animate.set_value(.25),self.emphasis(path(ax,U,mean,MODEL)))
+        marker=always_redraw(slice_);self.add(marker);self.beat(tr.animate.set_value(HIDDEN_X))
+        truth=Circle(radius=.17,color=ORANGE,stroke_width=3).move_to(ax.c2p(HIDDEN_X,HIDDEN_TRUE))
+        label=tex(r'\hat y(0.75)=-0.94,\qquad \sin(2\pi\cdot0.75)=-1.00',30,EV_COLOR).move_to([0,2.52,0])
+        fixed=tex(r'\alpha=\hat\alpha,\qquad\beta=16',30,PRIOR).move_to([0,2.52,0])
+        first=self.sentence_duration(0);second=self.sentence_duration(1)
+        reveal=min(1.1,first*.45);clear=.35;show=.75
+        self.beat(phases=[('reveal generated wave',reveal,lambda:AnimationGroup(FadeIn(truth),FadeIn(label))),
+                          ('read prediction and truth',first-reveal,lambda:Wait()),
+                          ('clear result formula',clear,lambda:FadeOut(label)),
+                          ('show fixed precisions',show,lambda:FadeIn(fixed)),
+                          ('explain omitted precision uncertainty',second-clear-show,lambda:Wait())])
+        self.remove(label,fixed)
+        comparison=self.formula(r'-0.71,\ -0.23\quad\longrightarrow\quad -0.94',pos=(0,2.52,0),size=31,color=EV_COLOR)
+        self.beat(Indicate(comparison,scale_factor=1.015),self.emphasis(path(ax,U,mean,MODEL)))
+        self.beat(Indicate(truth,color=ORANGE),Indicate(marker,scale_factor=1.04))

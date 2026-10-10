@@ -64,3 +64,13 @@ def scalar(logalpha):
     grid=np.linspace(-10,10,16001)
     prior=normal(grid,0,1/alpha);likelihood=normal(1.2,grid,.35**2)
     return float(np.trapezoid(prior*likelihood,grid)),float(normal(1.2,0,1/alpha+.35**2))
+
+# The unseen input used at both ends of the story. The target is the noiseless
+# generating wave, held out from evidence selection and fitting.
+HIDDEN_X = 0.75
+HIDDEN_TRUE = float(np.sin(2*np.pi*HIDDEN_X))
+def hidden_prediction(logalpha):
+    return float(design([HIDDEN_X])[0] @ at(float(logalpha))['mean'])
+HIDDEN_WEAK = hidden_prediction(-6)
+HIDDEN_STRONG = hidden_prediction(6)
+HIDDEN_SELECTED = hidden_prediction(OPT)
