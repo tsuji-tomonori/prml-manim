@@ -18,6 +18,18 @@ def main():
     np.testing.assert_allclose(P@P,P,atol=1e-11)
     checks['least_squares']={'normal_residual':float(np.linalg.norm(PHI.T@residual)),
                               'noise_variance_ml':float(np.mean(residual**2))}
+    # The opening and ending use the same independent observation. Compare
+    # displayed roundings as well as full-precision predictions.
+    assert not np.any(np.isclose(X, HOLDOUT_X))
+    np.testing.assert_allclose(HOLDOUT_T, target(.68)+.06)
+    np.testing.assert_allclose(HOLDOUT_LINEAR, np.array([HOLDOUT_X,1.])@LINEAR_COEF)
+    np.testing.assert_allclose(HOLDOUT_RIDGE, design([HOLDOUT_X])@fit(.1),atol=1e-12)
+    assert abs(HOLDOUT_T-HOLDOUT_RIDGE)<abs(HOLDOUT_T-HOLDOUT_LINEAR)
+    assert (round(HOLDOUT_T,2),round(HOLDOUT_LINEAR,2),round(HOLDOUT_RIDGE,2))==(-.92,-.24,-.86)
+    checks['heldout_story']={'x':HOLDOUT_X,'observation':HOLDOUT_T,
+        'linear_prediction':HOLDOUT_LINEAR,'ridge_lambda':HOLDOUT_RIDGE_LAMBDA,
+        'ridge_prediction':HOLDOUT_RIDGE,'linear_abs_error':abs(HOLDOUT_T-HOLDOUT_LINEAR),
+        'ridge_abs_error':abs(HOLDOUT_T-HOLDOUT_RIDGE)}
     # Actual normalized Gaussian log likelihood, independently evaluated.
     beta=12.;w=fit(.1)
     logp=np.log(np.sqrt(beta/(2*np.pi))*np.exp(-beta*(T-PHI@w)**2/2)).sum()

@@ -47,6 +47,15 @@ def main():
             if any(c['id'] in ['scene07-02-02','scene08-02-01'] for c in b['cues']):
                 for suffix,t in [('before',b['start']-.2),('during',(b['start']+b['end'])/2),('after',b['end']+.2)]:
                     frames[f'reference-{sc["id"]}-{suffix}']=t
+    # Inspect the moving prediction and the reveal, not just scene endpoints.
+    for si,indices in {0:[0,1,2,4,6],1:[1,2,3],2:[5],3:[2,3],
+                       4:[3],5:[4,5],6:[3,4,5],7:[3,4],8:[5,7,8]}.items():
+        sc=timeline[si]
+        for bi in indices:
+            b=sc['beats'][bi]
+            for fraction in [.15,.5,.85]:
+                frames[f'story-{sc["id"]}-beat{bi+1:02}-{fraction}']=b['start']+(b['end']-b['start'])*fraction
+            frames[f'story-{sc["id"]}-beat{bi+1:02}-after']=b['end']+.12
     for si,bi in added+[(0,4),(4,3),(6,3)]:
         sc=timeline[si];b=sc['beats'][bi];entry=manifest[si]
         with wave.open(str(ROOT/entry['path']),'rb') as w:
@@ -58,6 +67,9 @@ def main():
         sync.append(dict(scene=sc['id'],beat=bi+1,action_start=b['action_start'],action_end=b['action_end'],pcm_onset=onset))
         for frac in [.15,.85]:
             frames[f"sync-{sc['id']}-{frac}"]=b['action_start']+(b['action_end']-b['action_start'])*frac
+    # Container and frame timestamps differ slightly at the last frame.
+    last_frame=max(0,timeline[-1]['end']-.25)
+    frames={key:min(t,last_frame) for key,t in frames.items()}
     for key,t in frames.items():
         subprocess.run(['ffmpeg','-loglevel','error','-y','-ss',str(t),'-i',str(VIDEO),'-frames:v','1',str(OUT/f'{key}.png')],check=True)
     keys=list(frames)

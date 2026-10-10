@@ -115,10 +115,8 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         """Use the chapter-wide card; suspend the original body until this beat ends."""
         saved = [m for m in self.mobjects if m is not self.subtitle]
         self.clear()
-        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
-                                 color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0])
         heading = jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
-        self.add(self.header, frame, heading)
+        self.add(self.header, heading)
         return saved
 
     def restore_body(self, saved):
@@ -180,7 +178,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.restore_body(saved)
 
     def matrix_aid(self):
-        saved = self.aid_card('補足: 一行から、一つの予測へ')
+        saved = self.aid_card('補足: 1行から、1つの予測へ')
         self.add(jp('説明用の例：基底は 1 と x',20,MUTED).move_to([0,1.45,0]))
         matrix = Matrix([[1,2],[1,1]],element_to_mobject_config={'font_size':32},h_buff=.8,v_buff=.7)
         matrix.set_color(AID_INPUT).move_to([-2.4,.5,0])
@@ -216,7 +214,7 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
 
     def gradient_aid(self):
         saved = self.aid_card('補足: 勾配と、逆向きの一歩')
-        self.add(jp('説明用の例：今回の一点だけの誤差',20,MUTED).move_to([0,1.45,0]))
+        self.add(jp('説明用の例：今回の1点だけの誤差',20,MUTED).move_to([0,1.45,0]))
         ax = Axes(x_range=[-.5,2.5,1],y_range=[-.5,2.5,1],x_length=2.7,y_length=2.7,
                   tips=False,axis_config={'color':MUTED,'include_ticks':False}).move_to([-2.5,-.35,0])
         contours = VGroup(*[Line(ax.c2p(max(-.5,c-2.5),min(2.5,c+.5)),
@@ -242,11 +240,20 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
     def knobs(self):
         ax=self.axes()
         d=dots(ax)
-        self.beat(LaggedStart(*[FadeIn(o) for o in d],lag_ratio=.1))
-        line=curve(ax,np.polyval(np.polyfit(X,T,1),U),MUTED)
-        self.beat(Create(line),self.equation(r'y=w_0+w_1x'))
+        guide=DashedLine(ax.c2p(HOLDOUT_X,-1.65),ax.c2p(HOLDOUT_X,1.65),color=GOLD,stroke_width=2)
+        x_label=tex(r'x=0.68',22,GOLD).next_to(ax.c2p(HOLDOUT_X,-1.65),DOWN,buff=.25)
+        self.beat(LaggedStart(*[FadeIn(o) for o in d],lag_ratio=.1),Create(guide),FadeIn(x_label))
+        line=curve(ax,np.polyval(LINEAR_COEF,U),MUTED)
+        prediction=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_LINEAR),radius=.075,color=MUTED)
+        guess=self.note('直線の予測  -0.24',(3.7,1.1,0),MUTED,22)
+        self.beat(Create(line),FadeIn(prediction),FadeIn(guess),self.equation(r'y=w_0+w_1x'),
+                  end_sentence=1)
+        answer=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_T),radius=.09,color=GOLD)
+        residual=Line(prediction.get_center(),answer.get_center(),color=GOLD,stroke_width=4)
+        observed=self.note('観測  -0.92  /  差  0.68',(3.7,.2,0),GOLD,22)
+        self.beat(FadeIn(answer),Create(residual),FadeIn(observed),end_sentence=1)
         self.squares_recap()
-        self.remove(line)
+        self.remove(line,guide,x_label,prediction,guess,answer,residual,observed)
         w0,w1,w2=[ValueTracker(0) for _ in range(3)]
         g=gaussian(U,[.28,.73],.15)
         pieces=VGroup(*[always_redraw(lambda j=j:curve(ax,[w1,w2][j].get_value()*g[:,j],COLORS[j+1])) for j in range(2)])
@@ -343,10 +350,12 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         duplicate=cols[1].copy().set_color(PURPLE).move_to(cols[2])
         duplicate_y=.2+.2*small[:,1]
         duplicate_ym=DecimalMatrix(duplicate_y[:,None],element_to_mobject_config={'num_decimal_places':2,'font_size':27},v_buff=.7).move_to(ym)
-        self.beat(Transform(cols[2],duplicate),Transform(ym,duplicate_ym),
-                  Transform(basislines[1],basislines[0].copy().set_color(PURPLE)),
+        self.beat(Succession(FadeOut(cols[2]),FadeIn(duplicate)),
+                  Succession(FadeOut(ym),FadeIn(duplicate_ym)),
+                  Succession(FadeOut(basislines[1]),FadeIn(basislines[0].copy().set_color(PURPLE))),
                   self.equation(r'\mathbf w=\Phi^\dagger\mathbf t\qquad(\mathrm{SVD})'),
-                  FadeIn(self.note('別の例：同じ基底を2回使う',(1.5,-1.2,0),GOLD,22)))
+                  FadeIn(self.note('別の例：同じ基底を2回使う',(1.5,-1.2,0),GOLD,22)),
+                  end_sentence=1)
         self.beat(self.equation(r'w_0=\bar t-\sum_{j=1}^{M-1}w_j\bar\phi_j'),Indicate(cols[0],color=DATA))
 
     def projection(self):
@@ -495,3 +504,27 @@ class PRML31LinearBasisFunctionModels(NarratedScene):
         self.add(live_dots)
         self.beat(change.animate.set_value(.3))
         self.beat(change.animate.set_value(0),self.equation(r'\mathbf x\ \longrightarrow\ \boldsymbol\phi(\mathbf x)\ \longrightarrow\ \mathbf w^T\boldsymbol\phi(\mathbf x)',BASIS))
+        # Return to exactly the held-out point shown in the opening. Keep both
+        # predictions on one graph so the comparison uses the same scale.
+        self.clear()
+        self.add(self.header)
+        ax=self.axes(span=1.8)
+        blend=ValueTracker(0)
+        y0=np.polyval(LINEAR_COEF,U)
+        y1=GRID@fit(HOLDOUT_RIDGE_LAMBDA)
+        estimate=lambda:HOLDOUT_LINEAR+blend.get_value()*(HOLDOUT_RIDGE-HOLDOUT_LINEAR)
+        live=always_redraw(lambda:curve(ax,(1-blend.get_value())*y0+blend.get_value()*y1,
+                                        MODEL if blend.get_value()<.5 else BASIS))
+        guide=DashedLine(ax.c2p(HOLDOUT_X,-1.8),ax.c2p(HOLDOUT_X,1.8),color=GOLD,stroke_width=2)
+        observation=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_T),radius=.09,color=GOLD)
+        predicted=always_redraw(lambda:Dot(ax.c2p(HOLDOUT_X,estimate()),radius=.075,color=MODEL))
+        gap=always_redraw(lambda:Line(ax.c2p(HOLDOUT_X,estimate()),ax.c2p(HOLDOUT_X,HOLDOUT_T),
+                                      color=GOLD,stroke_width=4))
+        result=readout(r'|t-y|=',lambda:abs(HOLDOUT_T-estimate()),(3.8,.8,0),GOLD)
+        labels=VGroup(self.note('保留した観測  -0.92',(3.8,1.65,0),GOLD,21),
+                      tex(r'x=0.68',24,GOLD).move_to([3.8,-.2,0]))
+        self.add(dots(ax),guide,observation,live,predicted,gap,result,labels)
+        self.beat(self.equation(r'y_{\mathrm{line}}(0.68)=-0.24',MUTED))
+        final_formula=self.equation(r'\lambda=0.1,\quad y_{\mathrm{basis}}(0.68)=-0.86',BASIS)
+        self.beat(phases=[('heldout refit',self.sentence_duration(0)*.65,
+                          lambda:AnimationGroup(blend.animate.set_value(1),final_formula))])
