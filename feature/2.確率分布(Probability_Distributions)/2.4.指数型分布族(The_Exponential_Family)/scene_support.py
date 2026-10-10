@@ -105,20 +105,23 @@ class NarratedScene(Scene):
         self.bi+=1
 
     def highlight(self,m,color=YELLOW):
-        return lambda: ShowPassingFlash(SurroundingRectangle(m,buff=.12,color=color),time_width=.7)
+        return lambda: AnimationGroup(Indicate(m,color=color,scale_factor=1.0))
 
     def change(self, current, target):
-        """Finish symbol changes early, then trace the readable completed formula."""
-        return AnimationGroup(
-            Transform(current, target, rate_func=lambda a:smooth(min(1,10*a))),
-            ShowPassingFlash(SurroundingRectangle(target,buff=.1,color=YELLOW),time_width=.5))
+        """Let the formula change while the corresponding sentence is spoken."""
+        source = current.copy()
+        destination = target.copy()
+
+        def crossfade(mobject, alpha):
+            if alpha < .5:
+                mobject.become(source).set_opacity(1 - 2 * alpha)
+            else:
+                mobject.become(destination).set_opacity(2 * alpha - 1)
+
+        return AnimationGroup(UpdateFromAlphaFunc(current, crossfade, rate_func=smooth))
 
     def match(self, current, target):
-        return AnimationGroup(
-            TransformMatchingTex(current,target,rate_func=lambda a:smooth(min(1,10*a))),
-            ShowPassingFlash(SurroundingRectangle(target,buff=.1,color=YELLOW),time_width=.5))
+        return AnimationGroup(TransformMatchingTex(current,target,rate_func=smooth))
 
     def replace(self, current, target):
-        return AnimationGroup(
-            ReplacementTransform(current,target,rate_func=lambda a:smooth(min(1,10*a))),
-            ShowPassingFlash(SurroundingRectangle(target,buff=.1,color=YELLOW),time_width=.5))
+        return AnimationGroup(ReplacementTransform(current,target,rate_func=smooth))

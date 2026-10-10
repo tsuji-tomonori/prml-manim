@@ -1,4 +1,4 @@
-"""Extract scene samples and every changed review cue with surrounding frames."""
+"""Extract scene samples and changed story/review cues with surrounding frames."""
 import json
 import subprocess
 import wave
@@ -16,22 +16,23 @@ def main():
     manifest=json.loads((ROOT/'assets/voicevox/manifest.json').read_text())
     frames=[]
     for s in timeline:
-        b=s['beats'][-2]
-        c=b['cues'][-1]
-        frames.append(dict(name=s['id']+'-existing',time=c['start']+.8*(c['end']-c['start'])))
+        for name,b in [('opening',s['beats'][0]),('middle',s['beats'][len(s['beats'])//2]),('ending',s['beats'][-1])]:
+            c=b['cues'][-1]
+            frames.append(dict(name=s['id']+'-'+name,time=c['start']+.8*(c['end']-c['start'])))
     for s in timeline:
         for b in s['beats']:
-            if not any('-aid-' in c['id'] or '-recap-' in c['id'] for c in b['cues']):
+            if not any(any(tag in c['id'] for tag in ('-aid-','-recap-','-question-','-answer-')) for c in b['cues']):
                 continue
-            frames.append(dict(name=b['cues'][0]['id']+'-before',time=b['start']-.15))
+            frames.append(dict(name=b['cues'][0]['id']+'-before',time=max(0,b['start']-.15)))
             for c in b['cues']:
                 for fraction in [.15,.85]:
                     frames.append(dict(name=c['id']+f'-phase{fraction}',time=c['start']+fraction*(c['end']-c['start'])))
             frames.append(dict(name=b['cues'][-1]['id']+'-end',time=b['end']-.12))
             frames.append(dict(name=b['cues'][-1]['id']+'-after',time=b['end']+.5))
     sync=[]
-    wanted={'scene02-aid-dot-02','scene06-recap-mean-02','scene06-aid-curvature-03',
-            'scene06-04-02','scene08-01-01'}
+    wanted={'scene01-question-02','scene02-aid-dot-02','scene06-recap-mean-02',
+            'scene06-aid-curvature-03','scene06-04-02','scene07-03-02',
+            'scene08-01-01','scene10-answer-03'}
     for s in timeline:
         for b in s['beats']:
             for c in b['cues']:
@@ -43,7 +44,7 @@ def main():
                 audible=np.flatnonzero(abs(pcm[lo:hi])>10**(-45/20))
                 onset=s['start']+(lo+audible[0])/rate
                 sync.append(dict(id=c['id'],display=c['display'],onset=onset,action_start=c['start'],action_end=c['end']))
-                if '-aid-' not in c['id'] and '-recap-' not in c['id']:
+                if not any(tag in c['id'] for tag in ('-aid-','-recap-','-question-','-answer-')):
                     for t,name in [(c['start']-.15,'before'),((c['start']+c['end'])/2,'during'),(c['end']+.5,'after')]:
                         frames.append(dict(name=c['id']+'-'+name,time=t))
     for i,f in enumerate(frames):

@@ -44,6 +44,19 @@ def main():
     errors['variance_derivative']=float(np.max(abs(second-sigmoid(grid)*(1-sigmoid(grid)))))
     assert errors['mean_derivative']<2e-8 and errors['variance_derivative']<2e-8
     eta=np.log(COINS.mean()/(1-COINS.mean()))
+    assert len(COINS)==10 and int(COINS.sum())==7
+    ml_prediction=float(COINS.mean())
+    posterior_a=2+int(COINS.sum())
+    posterior_b=2+len(COINS)-int(COINS.sum())
+    posterior_prediction=posterior_a/(posterior_a+posterior_b)
+    assert np.isclose(ml_prediction, .7)
+    assert (posterior_a,posterior_b)==(9,5)
+    assert np.isclose(posterior_prediction, 9/14)
+    captions={s['id']:s['display'] for scene in SCENES for b in scene['beats'] for s in b['segments']}
+    assert '7/10=0.700' in captions['scene01-question-02']
+    assert '9/14\\simeq0.643' in captions['scene01-question-02']
+    assert '7/10=0.700' in captions['scene10-answer-02']
+    assert '9/14\\simeq0.643' in captions['scene10-answer-03']
     assert np.all(log_likelihood(eta)>=log_likelihood(grid))
     for m in [.1,.4,.7,.95]:
         direct=np.prod(m**COINS*(1-m)**(1-COINS))
@@ -73,11 +86,17 @@ def main():
     manifest=json.loads((ROOT/'assets/voicevox/manifest.json').read_text())
     assert len(manifest['scenes'])==len(SCENES)==10
     assert {p.stem for p in (ROOT/'assets/voicevox').glob('*.wav')}=={s['id'] for s in SCENES}
+    source_segments=[seg for scene in SCENES for b in scene['beats'] for seg in b['segments']]
+    expected=[(seg['id'],seg['display'],seg['speech']) for seg in source_segments]
+    recorded=json.loads((ROOT/'reading_check.json').read_text())['sentences']
+    assert [(r['id'],r['display'],r['speech']) for r in recorded]==expected
+    script=(ROOT/'narration_script.md').read_text()
+    assert re.findall(r'^- (.*?) display: (.*)\n  speech: (.*)$',script,re.M)==expected
     for s,en in zip(SCENES,manifest['scenes']):
         assert valid_entry(s,en)
         for seg in [seg for b in s['beats'] for seg in b['segments']]:
             assert not re.search('エックス|イータ|ミュー|シグマ|ラムダ|ニュー|カイ',seg['display'])
         assert all(abs(d*15-round(d*15))<1e-9 for d in en['beat_durations'])
-    print(json.dumps(dict(checks='8 original groups + review examples passed',errors=errors,coin_mean=float(COINS.mean()),gaussian_sum=float(POINTS.sum()),gaussian_square_sum=float((POINTS**2).sum()),gaussian_mean=float(POINTS.mean()),gaussian_variance=float(POINTS.var()),posterior_mean=9/14,audio_seconds=sum(e['duration'] for e in manifest['scenes'])),indent=2))
+    print(json.dumps(dict(checks='8 original groups + review examples + opening/ending coin passed',errors=errors,coin_mean=ml_prediction,gaussian_sum=float(POINTS.sum()),gaussian_square_sum=float((POINTS**2).sum()),gaussian_mean=float(POINTS.mean()),gaussian_variance=float(POINTS.var()),posterior_mean=posterior_prediction,audio_seconds=sum(e['duration'] for e in manifest['scenes'])),indent=2))
 
 if __name__=='__main__': main()

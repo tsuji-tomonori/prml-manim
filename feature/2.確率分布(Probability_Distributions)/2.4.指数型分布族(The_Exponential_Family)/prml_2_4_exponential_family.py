@@ -28,7 +28,26 @@ class PRML24ExponentialFamily(NarratedScene):
             group.add(bar,value,label)
         return VGroup(display_axes,group)
 
+    def coin_record(self, y=1.05):
+        """The exact ten observations reused in the opening and answer."""
+        return VGroup(*[
+            VGroup(Circle(radius=.27, color=RED if x else BLUE, fill_opacity=.55),
+                   jp('表' if x else '裏', 20)).move_to([-4.5+i, y, 0])
+            for i, x in enumerate(COINS)
+        ])
+
     def weights(self):
+        record=self.coin_record()
+        count=jp('10回の記録：表7回・裏3回',26).move_to([0,.2,0])
+        first=VGroup(jp('予測 A',26,YELLOW),tex(r'7/10=0.700',34,YELLOW)).arrange(RIGHT,buff=.4).move_to([0,-.75,0])
+        second=VGroup(jp('予測 B',26,PURPLE),tex(r'9/14\simeq0.643',34,PURPLE)).arrange(RIGHT,buff=.4).move_to([0,-1.55,0])
+        self.beat(
+            AnimationGroup(LaggedStart(*[FadeIn(c) for c in record],lag_ratio=.09),FadeIn(count)),
+            LaggedStart(FadeIn(first,rate_func=lambda a:smooth(min(1,6*a))),
+                        FadeIn(second,rate_func=lambda a:smooth(min(1,6*a))),lag_ratio=.65),
+            Indicate(second,color=YELLOW,scale_factor=1.0),
+        )
+        self.remove(record,*record,count,first,second)
         eta=ValueTracker(0.)
         norm=ValueTracker(1.)
         def vals():
@@ -82,10 +101,8 @@ class PRML24ExponentialFamily(NarratedScene):
     def review_body(self, label):
         body=[m for m in self.mobjects if m is not self.header and m is not self.subtitle]
         self.remove(*body)
-        frame=RoundedRectangle(width=11.6,height=5.1,corner_radius=.12,
-                               color='#FFFF00',stroke_width=1.3)
         heading=jp(label,24).move_to([-5.4,2.17,0],aligned_edge=LEFT)
-        self.add(frame,heading)
+        self.add(heading)
         return body
 
     def restore_body(self, body):
@@ -114,12 +131,11 @@ class PRML24ExponentialFamily(NarratedScene):
         total=tex(r'\eta^T u=2-3=-1',38,green).move_to([0,-1.55,0])
         # The example retains signs; projection geometry is unnecessary here.
         self.beat(
-            AnimationGroup(TransformFromCopy(col,row),FadeIn(rowname),GrowArrow(arrow)),
+            AnimationGroup(FadeIn(row),FadeIn(rowname),GrowArrow(arrow)),
             AnimationGroup(FadeIn(u),FadeIn(uname),
-                LaggedStart(*[TransformFromCopy(VGroup(row.get_entries()[i],u.get_entries()[i]),products[i])
+                LaggedStart(*[FadeIn(products[i])
                               for i in range(2)],lag_ratio=.4)),
-            AnimationGroup(TransformFromCopy(products,total),
-                           ShowPassingFlash(SurroundingRectangle(products,color=yellow),time_width=.7)),
+            AnimationGroup(FadeIn(total,rate_func=lambda a:smooth(min(1,6*a)))),
         )
         self.restore_body(body)
 
@@ -191,7 +207,7 @@ class PRML24ExponentialFamily(NarratedScene):
         comparison=tex(r'\mu:0.50\to0.10\quad A^{\prime\prime}:0.25\to0.09',24).move_to([-.3,-2.3,0])
         self.add(upper,top,top_tan,tag1,slope)
         self.beat(
-            AnimationGroup(FadeIn(lower),FadeIn(bottom),TransformFromCopy(slope[0],tag2),FadeIn(xs),
+            AnimationGroup(FadeIn(lower),FadeIn(bottom),FadeIn(tag2),FadeIn(xs),
                            FadeIn(low_tan),FadeIn(dot)),
             AnimationGroup(FadeIn(second),FadeIn(equals),FadeIn(bars),FadeIn(labels)),
             AnimationGroup(eta.animate(rate_func=lambda a:smooth(np.clip((a-.45)/.4,0,1)))
@@ -228,9 +244,9 @@ class PRML24ExponentialFamily(NarratedScene):
         self.beat(lambda:sigma.animate.set_value(.55),lambda:sigma.animate.set_value(1.))
         expansion=MathTex(r'-\frac{(x-\mu)^2}{2\sigma^2}=',r'\frac{\mu}{\sigma^2}x',r'-\frac{1}{2\sigma^2}x^2',r'-\frac{\mu^2}{2\sigma^2}',font_size=31).move_to([0,2.4,0])
         expansion[1].set_color(YELLOW); expansion[2].set_color(PURPLE)
-        self.beat(self.match(eq,expansion),self.highlight(expansion[1:3]))
+        self.beat(self.change(eq,expansion),self.highlight(graph))
         natural=formula(r'\eta_1=\mu/\sigma^2,\quad\eta_2=-1/(2\sigma^2),\quad u(x)=(x,x^2)^{\mathrm T}',(0,2.5,0),28)
-        self.remove(expansion);self.add(natural)
+        self.remove(eq);self.add(natural)
         nums=VGroup(readout(r'\eta_1=',lambda:gaussian_natural(mu.get_value(),sigma.get_value())[0],(-3,1.7,0)),
                     readout(r'\eta_2=',lambda:gaussian_natural(mu.get_value(),sigma.get_value())[1],(3,1.7,0),PURPLE))
         self.add(nums)
@@ -305,8 +321,12 @@ class PRML24ExponentialFamily(NarratedScene):
         self.add(ax,labels,graph,mean,eq,counts)
         self.beat(self.highlight(graph),self.highlight(eq))
         self.beat(self.change(eq,formula(r'p(\mu)=\operatorname{Beta}(\mu|a,b)')),t.animate.set_value(1))
-        self.beat(self.highlight(counts),self.change(eq,formula(r'\operatorname{Beta}(2,2)\ \longrightarrow\ \operatorname{Beta}(9,5)')))
-        self.remove(ax,labels,graph,mean,counts,eq)
+        prediction=formula(r'p(x_{\rm next}=1|X)=\mathbb E[\mu|X]=9/14\simeq0.643',(0,-2.35,0),30)
+        self.beat(self.highlight(counts),AnimationGroup(
+            self.change(eq,formula(r'\operatorname{Beta}(2,2)\ \longrightarrow\ \operatorname{Beta}(9,5)')),
+            FadeOut(counts,rate_func=lambda a:smooth(min(1,4*a))),
+            FadeIn(prediction,rate_func=lambda a:smooth(max(0,min(1,4*(a-.25)))))))
+        self.remove(ax,labels,graph,mean,counts,eq,prediction)
         prior=formula(r'p(\eta|\chi,\nu)=f(\chi,\nu)g(\eta)^\nu\exp\{\nu\eta^{\mathrm T}\chi\}',(0,1.8,0),33)
         post=formula(r'p(\eta|X,\chi,\nu)\propto g(\eta)^{\nu+N}\exp\{\eta^{\mathrm T}(\nu\chi+S)\}',(0,.55,0),33)
         self.beat(FadeIn(prior),FadeIn(post))
@@ -374,6 +394,20 @@ class PRML24ExponentialFamily(NarratedScene):
         self.beat(self.change(eq,stats),FadeIn(model))
         post=formula(r'(\nu\chi,\nu)\longrightarrow(\nu\chi+S,\nu+N)')
         self.beat(self.change(eq,post),self.highlight(eq))
+        self.remove(ax,labels,model,dots,eq)
+        record=self.coin_record(1.25)
+        count=jp('同じ10回：表7回・裏3回',26).move_to([0,.38,0])
+        ml=VGroup(jp('最尤を使う予測',24,YELLOW),tex(r'7/10=0.700',32,YELLOW)).arrange(RIGHT,buff=.35).move_to([0,-.6,0])
+        bayes=VGroup(jp('事後予測',24,PURPLE),
+                     tex(r'\operatorname{Beta}(2,2)\Rightarrow9/14\simeq0.643',30,PURPLE)
+                     ).arrange(RIGHT,buff=.35).move_to([0,-1.43,0])
+        self.beat(
+            AnimationGroup(LaggedStart(*[FadeIn(c) for c in record],lag_ratio=.08),FadeIn(count)),
+            AnimationGroup(FadeIn(ml,rate_func=lambda a:smooth(min(1,5*a)))),
+            AnimationGroup(FadeIn(bayes,rate_func=lambda a:smooth(min(1,10*a)))),
+        )
+        self.remove(record,*record,count,ml,bayes)
+        self.add(ax,labels,model,dots,eq)
         mixed=curve(ax,lambda x:.5*normal(x,-1.2,.45)+.5*normal(x,1.1,.5),-3,3,PURPLE,True)
         note=jp('一般のガウス混合は、この単純な形の外へ',26,PURPLE).move_to([0,2.4,0])
         self.beat(self.highlight(model),AnimationGroup(Transform(model,mixed),self.replace(eq,note)))
