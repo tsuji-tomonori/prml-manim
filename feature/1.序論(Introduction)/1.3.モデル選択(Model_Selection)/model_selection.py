@@ -38,6 +38,12 @@ WEIGHTS = [np.pad(fit(X, T, int(d)), (0, 9-int(d))) for d in DEGREES]
 TRAIN = np.array([mse(w, X, T) for w in WEIGHTS])
 VALID = np.array([mse(w, XV, TV) for w in WEIGHTS])
 SELECTED = int(DEGREES[np.argmin(VALID)])
+# One held-out validation observation anchors the opening and the ending.
+STORY_VALIDATION_INDEX = 1
+STORY_X = float(XV[STORY_VALIDATION_INDEX])
+STORY_T = float(TV[STORY_VALIDATION_INDEX])
+STORY_PREDICTIONS = {d: float(predict(WEIGHTS[d-1], [STORY_X])[0]) for d in (3, 9)}
+STORY_RESIDUALS = {d: abs(STORY_PREDICTIONS[d] - STORY_T) for d in (3, 9)}
 # Only the selected model is evaluated against the final test set.
 TEST_MSE = mse(WEIGHTS[SELECTED-1], XT, TT)
 LOG_LIKELIHOOD = -len(X)*np.log(SIGMA*np.sqrt(2*np.pi)) - len(X)*TRAIN/(2*SIGMA**2)
