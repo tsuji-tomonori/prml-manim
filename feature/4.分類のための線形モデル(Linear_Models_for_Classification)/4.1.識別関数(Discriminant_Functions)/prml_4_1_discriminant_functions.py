@@ -90,7 +90,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
                  readout('y_1=',lambda:scores(np.array([0,0]),teaser_W())[0,0],[3.45,.8,0],BLUE_CLS,3),
                  readout('y_2=',lambda:scores(np.array([0,0]),teaser_W())[0,1],[3.45,0,0],ORANGE_CLS,3))
         self.beat(phases=[
-            ('predict white point',self.sentence_duration(0),lambda:Indicate(teaser_probe,scale_factor=1.2)),
+            ('predict white point',self.sentence_duration(0),lambda:Flash(teaser_probe,color=YELLOW_W)),
             ('move correctly classified orange points',self.sentence_duration(1),
              lambda:teaser_amount.animate.set_value(1)),
         ])
@@ -475,7 +475,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.beat(Create(cut),Write(f2),Circumscribe(target,color=GREEN_CLS))
 
     def summary(self):
-        self.hint('冒頭と同じ点・同じ移動：白い点 (0, 0)')
+        self.hint('冒頭の白い点 (0, 0) から、学習基準を振り返る')
         ax=self.axes(xr=(-2.6,2.4,1),yr=(-4.2,1.8,1),width=3.5,height=4.2,center=(-2.6,.1,0));amount=ValueTracker(0)
         dots=always_redraw(lambda:cloud(ax,ls_data(amount.get_value())));self.add(dots)
         W=lambda:least_squares(ls_data(amount.get_value()))
