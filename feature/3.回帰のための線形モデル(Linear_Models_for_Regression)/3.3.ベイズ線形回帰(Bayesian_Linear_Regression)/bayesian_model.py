@@ -1,6 +1,8 @@
 """Numerical source for all plots; synthetic data, no textbook figure copying."""
 import numpy as np
 ALPHA, BETA = 2., 25.
+FORECAST_X = 1.5
+HELD_OUT_T = .15 + .65 * FORECAST_X + np.random.default_rng(3304).normal(0, .2)
 rng = np.random.default_rng(3303)
 X = np.r_[.65, -.65, rng.uniform(-1, 1, 18)]
 T = .15 + .65 * X + rng.normal(0, .2, len(X))
