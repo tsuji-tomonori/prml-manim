@@ -55,7 +55,8 @@ def pending_entry(scene):
 def save_manifest(entries):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     temporary = MANIFEST.with_suffix(".tmp.json")
-    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER, "scenes": entries},
+    temporary.write_text(json.dumps({"version": 4, "speaker": SPEAKER,
+                                    "settings": SYNTHESIS_SETTINGS, "scenes": entries},
                                     ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(MANIFEST)
 
@@ -101,7 +102,10 @@ def reusable_sentences():
     result = {}
     if not MANIFEST.exists():
         return result
-    for entry in json.loads(MANIFEST.read_text()).get('scenes', []):
+    old_manifest = json.loads(MANIFEST.read_text())
+    if old_manifest.get('settings') != SYNTHESIS_SETTINGS:
+        return result
+    for entry in old_manifest.get('scenes', []):
         path = OUTPUT_DIR / f"{entry['id']}.wav"
         if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != entry.get('wav_sha256'):
             continue

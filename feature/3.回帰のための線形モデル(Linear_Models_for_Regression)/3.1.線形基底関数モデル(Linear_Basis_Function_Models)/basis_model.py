@@ -20,6 +20,13 @@ def design(x, centers=CENTERS, scale=SCALE):
 
 PHI=design(X)
 
+# One held-out observation for the opening question and the final comparison.
+# It is never included in PHI or T when fitting the weights.
+HOLDOUT_X = .68
+HOLDOUT_T = float(target(HOLDOUT_X) + .06)
+LINEAR_COEF = np.polyfit(X, T, 1)
+HOLDOUT_LINEAR = float(np.polyval(LINEAR_COEF, HOLDOUT_X))
+
 def fit(lam=0, t=T):
     """Augmented least squares avoids explicitly forming a normal-equation inverse.
 
@@ -33,6 +40,8 @@ def fit(lam=0, t=T):
                            np.concatenate([t,pad]),rcond=None)[0]
 
 W_ML=fit()
+HOLDOUT_RIDGE_LAMBDA = .1
+HOLDOUT_RIDGE = float((design([HOLDOUT_X]) @ fit(HOLDOUT_RIDGE_LAMBDA)).item())
 
 def error(w,t=T):
     return float(np.sum((t-PHI@w)**2)/2)

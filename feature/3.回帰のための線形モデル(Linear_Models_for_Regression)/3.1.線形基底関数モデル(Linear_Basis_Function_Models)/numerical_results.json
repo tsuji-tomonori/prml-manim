@@ -3,6 +3,15 @@
     "normal_residual": 8.025463725450834e-14,
     "noise_variance_ml": 0.008904525602347195
   },
+  "heldout_story": {
+    "x": 0.68,
+    "observation": -0.9220813010597568,
+    "linear_prediction": -0.238942684939067,
+    "ridge_lambda": 0.1,
+    "ridge_prediction": -0.8575080190909942,
+    "linear_abs_error": 0.6831386161206898,
+    "ridge_abs_error": 0.06457328196876266
+  },
   "gaussian_likelihood": true,
   "ridge": {
     "max_curve_abs": 1.015409287625038,
@@ -46,7 +55,7 @@
   },
   "audio": {
     "scenes": 9,
-    "sentences": 142,
-    "duration": 660.7333333333333
+    "sentences": 148,
+    "duration": 718.6666666666666
   }
 }
