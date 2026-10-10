@@ -37,6 +37,16 @@ def main():
     print('Plot range: PASS; mean max',span,'RMS range',TEST.min(),TEST.max())
     assert int(np.argmax([s['logev'] for s in POLY]))==3
     print('Polynomial optimum d=3:',POLY[3]['logev'])
+    assert HIDDEN_X not in X and HIDDEN_TRUE == -1.0
+    for z,expected in [(-6,HIDDEN_WEAK),(6,HIDDEN_STRONG),(OPT,HIDDEN_SELECTED)]:
+        np.testing.assert_allclose(hidden_prediction(z),expected,atol=1e-12)
+    np.testing.assert_allclose([HIDDEN_WEAK,HIDDEN_STRONG,HIDDEN_SELECTED],
+                               [-0.7143597518460014,-0.23049363245775223,-0.944805486915999],atol=1e-10)
+    assert abs(HIDDEN_SELECTED-HIDDEN_TRUE) < abs(HIDDEN_WEAK-HIDDEN_TRUE)
+    assert abs(HIDDEN_SELECTED-HIDDEN_TRUE) < abs(HIDDEN_STRONG-HIDDEN_TRUE)
+    assert [round(v,2) for v in (HIDDEN_WEAK,HIDDEN_STRONG,HIDDEN_SELECTED,HIDDEN_TRUE)] == [-0.71,-0.23,-0.94,-1.0]
+    print('Unseen x=0.75 callback and fixed-beta predictions: PASS',
+          HIDDEN_WEAK,HIDDEN_STRONG,HIDDEN_SELECTED,HIDDEN_TRUE)
     # Independent small examples used by V13a and V10.
     w=np.linspace(-3,4,101)
     np.testing.assert_allclose(2*w*w-4*w+5,2*(w-1)**2+3)

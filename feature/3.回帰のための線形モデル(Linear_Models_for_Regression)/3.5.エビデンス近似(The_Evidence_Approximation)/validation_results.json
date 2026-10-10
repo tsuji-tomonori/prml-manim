@@ -1,4 +1,10 @@
 {
+  "source": "Bishop (2006) §3.5, printed pp.165–172, PDF pp.185–192; Eq. (3.74)–(3.99), Fig. 3.14–3.17; prediction Eq. (3.59)",
+  "render": {
+    "command": "/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_3_5_evidence_approximation.py PRML35EvidenceApproximation",
+    "complete_renders": 4,
+    "final_animations": 114
+  },
   "ffprobe": {
     "programs": [],
     "streams": [
@@ -9,491 +15,686 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "574.799678"
+        "duration": "514.733333"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "574.826667"
+        "duration": "514.773333"
       }
     ],
     "format": {
-      "duration": "574.827000",
-      "size": "13531708"
+      "duration": "514.774000",
+      "size": "12304857"
     }
   },
-  "old_video_seconds": 536.866667,
-  "video_seconds": 574.799678,
-  "audio_seconds": 574.826667,
-  "av_difference_seconds": 0.026989000000071428,
-  "increase_seconds": 37.933010999999965,
-  "increase_percent": 7.065629760917891,
-  "sha256": "a28eba5301dc760141244dafec0386e643a0a71b3ec08375c0711ca2114556f7",
-  "long_silences": 0,
+  "video_sha256": "754882b3be49730518f5a46612a6f2cae3aeb6ea4973e637ae92e0135145fed3",
+  "audio_video_difference_seconds": 0.04,
+  "long_silences_3s": 0,
   "mean_volume_db": -26.3,
-  "max_volume_db": -6.4,
+  "max_volume_db": -7.1,
+  "full_decode": "PASS",
+  "script": {
+    "scenes": 10,
+    "beats": 63,
+    "sentences": 128,
+    "speaker": "VOICEVOX:WhiteCUL 23",
+    "speedScale": 1.08,
+    "intonationScale": 1.08,
+    "audio_query_all_sentences_reviewed": true,
+    "full_listening": false,
+    "wav_hash_script_duration": "PASS"
+  },
   "captions": {
     "count": 128,
-    "max_width": 9.37421875,
-    "max_height": 0.6995312500000006
+    "max_width": 8.746875,
+    "limit_width": 12.9,
+    "max_height": 0.7023437499999998,
+    "limit_height": 0.9,
+    "max_title_width": 7.3296875,
+    "forbidden_phonetic_or_kanji_count": 0
   },
-  "max_timing_error": 4.4138914745417424e-11,
-  "sync": [
+  "max_manifest_timeline_error_seconds": 2.3590018827235326e-11,
+  "scene_starts": [
     {
-      "name": "R2.3 circle to ellipse",
-      "start": 157.9333333333295,
-      "end": 162.2666666666626,
-      "first_voice": 158.0027083333295,
-      "last_voice": 162.1484583333295
+      "scene": "scene01",
+      "start": 0.0,
+      "duration": 54.133
     },
     {
-      "name": "R2.3 covariance to precision",
-      "start": 162.2666666666626,
-      "end": 166.46666666666235,
-      "first_voice": 162.36237499999618,
-      "last_voice": 166.27770833332949
+      "scene": "scene02",
+      "start": 54.133,
+      "duration": 50.267
     },
     {
-      "name": "R2.3 higher curvature narrower widths",
-      "start": 166.46666666666235,
-      "end": 169.86666666666216,
-      "first_voice": 166.6333333333295,
-      "last_voice": 169.74912499999616
+      "scene": "scene03",
+      "start": 104.4,
+      "duration": 49.667
     },
     {
-      "name": "V13a same quadratic",
-      "start": 188.93333333332774,
-      "end": 192.33333333332754,
-      "first_voice": 189.00541666666282,
-      "last_voice": 192.3332083333295
+      "scene": "scene04",
+      "start": 154.067,
+      "duration": 78.733
     },
     {
-      "name": "V13a clear expanded form",
-      "start": 192.33333333332754,
-      "end": 192.73333333332752,
-      "first_voice": 192.3333333333295,
-      "last_voice": 192.4613333333295
+      "scene": "scene05",
+      "start": 232.8,
+      "duration": 48.6
     },
     {
-      "name": "V13a show completed square",
-      "start": 192.73333333332752,
-      "end": 194.59999999999408,
-      "first_voice": 192.7659583333295,
-      "last_voice": 194.43829166666285
+      "scene": "scene06",
+      "start": 281.4,
+      "duration": 45.2
     },
     {
-      "name": "V13a minimum at w=1",
-      "start": 194.59999999999408,
-      "end": 197.93333333332723,
-      "first_voice": 194.6388333333295,
-      "last_voice": 197.93329166666283
+      "scene": "scene07",
+      "start": 326.6,
+      "duration": 45.533
     },
     {
-      "name": "V13a constant height 3",
-      "start": 197.93333333332723,
-      "end": 199.7999999999938,
-      "first_voice": 197.9333333333295,
-      "last_voice": 199.65112499999617
+      "scene": "scene08",
+      "start": 372.133,
+      "duration": 43.333
     },
     {
-      "name": "V10 clear unit width label",
-      "start": 217.06666666665947,
-      "end": 217.46666666665945,
-      "first_voice": 217.13879166666283,
-      "last_voice": 217.46662499999616
+      "scene": "scene09",
+      "start": 415.467,
+      "duration": 48.933
     },
     {
-      "name": "V10 curvature to standard deviations",
-      "start": 217.46666666665945,
-      "end": 221.6666666666592,
-      "first_voice": 217.46666666666283,
-      "last_voice": 221.66662499999617
-    },
-    {
-      "name": "V10 show half width",
-      "start": 221.6666666666592,
-      "end": 222.13333333332585,
-      "first_voice": 221.66666666666282,
-      "last_voice": 222.01437499999616
-    },
-    {
-      "name": "V10 product of widths",
-      "start": 222.13333333332585,
-      "end": 226.59999999999226,
-      "first_voice": 222.23333333332948,
-      "last_voice": 226.48829166666283
-    },
-    {
-      "name": "V10 common Gaussian factor and peak",
-      "start": 226.59999999999226,
-      "end": 231.13333333332534,
-      "first_voice": 226.69066666666282,
-      "last_voice": 231.0049999999962
+      "scene": "scene10",
+      "start": 464.4,
+      "duration": 50.333
     }
   ],
-  "frame_samples": [
+  "key_action_voice_overlaps": [
     {
-      "id": "scene01",
-      "time": 19.66666666666663,
-      "reason": "existing scene"
+      "scene": "scene01",
+      "beat": 2,
+      "action": "weaken prior",
+      "start": 10.067,
+      "end": 12.933,
+      "speech_overlap_seconds": 2.867
     },
     {
-      "id": "scene02",
-      "time": 71.60000000000136,
-      "reason": "existing scene"
+      "scene": "scene01",
+      "beat": 2,
+      "action": "show first prediction",
+      "start": 12.933,
+      "end": 17.333,
+      "speech_overlap_seconds": 4.384
     },
     {
-      "id": "scene03",
-      "time": 125.76666666666486,
-      "reason": "existing scene"
+      "scene": "scene01",
+      "beat": 3,
+      "action": "strengthen prior",
+      "start": 17.733,
+      "end": 21.8,
+      "speech_overlap_seconds": 4.067
     },
     {
-      "id": "scene04",
-      "time": 183.99999999999497,
-      "reason": "existing scene"
+      "scene": "scene01",
+      "beat": 3,
+      "action": "show changed prediction",
+      "start": 21.8,
+      "end": 26.8,
+      "speech_overlap_seconds": 5.0
     },
     {
-      "id": "scene05",
-      "time": 273.16666666665657,
-      "reason": "existing scene"
+      "scene": "scene10",
+      "beat": 4,
+      "action": "reveal generated wave",
+      "start": 488.333,
+      "end": 489.4,
+      "speech_overlap_seconds": 1.067
     },
     {
-      "id": "scene06",
-      "time": 324.43333333332026,
-      "reason": "existing scene"
-    },
-    {
-      "id": "scene07",
-      "time": 378.6999999999839,
-      "reason": "existing scene"
-    },
-    {
-      "id": "scene08",
-      "time": 433.39999999998076,
-      "reason": "existing scene"
-    },
-    {
-      "id": "scene09",
-      "time": 484.3333333333112,
-      "reason": "existing scene"
-    },
-    {
-      "id": "scene10",
-      "time": 541.1999999999957,
-      "reason": "existing scene"
-    },
-    {
-      "id": "scene04-beat1",
-      "time": 169.71666666666283,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat2",
-      "time": 178.51666666666213,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat3",
-      "time": 188.3833333333283,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat4",
-      "time": 199.58333333332772,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat5",
-      "time": 207.18333333332708,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat6",
-      "time": 216.51666666666,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat7",
-      "time": 230.91666666665947,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat8",
-      "time": 240.78333333332532,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-beat9",
-      "time": 250.4499999999914,
-      "reason": "all scene04 beats"
-    },
-    {
-      "id": "scene04-recap-before",
-      "time": 157.6333333333295,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-recap-enter",
-      "time": 158.5333333333295,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-recap-exit",
-      "time": 169.96666666666283,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-recap-after",
-      "time": 170.56666666666285,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-recap-01",
-      "time": 160.09866666666284,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-recap-02",
-      "time": 166.06133333332951,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-recap-action0",
-      "time": 160.09999999999604,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-recap-action1",
-      "time": 164.36666666666247,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-recap-action2",
-      "time": 168.16666666666225,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-square-before",
-      "time": 188.63333333332773,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-square-enter",
-      "time": 189.53333333332773,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-square-exit",
-      "time": 199.83333333332772,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-square-after",
-      "time": 200.43333333332774,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-square-01",
-      "time": 191.75466666666108,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-square-02",
-      "time": 197.17333333332772,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-square-action0",
-      "time": 190.63333333332764,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-square-action1",
-      "time": 192.53333333332753,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-square-action2",
-      "time": 193.6666666666608,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-square-action3",
-      "time": 196.26666666666065,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-square-action4",
-      "time": 198.8666666666605,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-volume-before",
-      "time": 216.76666666665946,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-volume-enter",
-      "time": 217.66666666665947,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-volume-exit",
-      "time": 231.16666666665947,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-volume-after",
-      "time": 231.7666666666595,
-      "reason": "insert transition"
-    },
-    {
-      "id": "scene04-volume-01",
-      "time": 219.60533333332614,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-volume-02",
-      "time": 224.3679999999928,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-volume-03",
-      "time": 228.85333333332613,
-      "reason": "new caption"
-    },
-    {
-      "id": "scene04-volume-action0",
-      "time": 217.26666666665946,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-volume-action1",
-      "time": 219.56666666665933,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-volume-action2",
-      "time": 221.89999999999253,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-volume-action3",
-      "time": 224.36666666665906,
-      "reason": "new action"
-    },
-    {
-      "id": "scene04-volume-action4",
-      "time": 228.8666666666588,
-      "reason": "new action"
-    },
-    {
-      "id": "reference-0",
-      "time": 103.79999999999926,
-      "reason": "3.4 reference label"
-    },
-    {
-      "id": "reference-1",
-      "time": 112.43333333333258,
-      "reason": "3.4 reference label"
-    },
-    {
-      "id": "reference-2",
-      "time": 113.23333333333258,
-      "reason": "3.4 reference label"
+      "scene": "scene10",
+      "beat": 4,
+      "action": "show fixed precisions",
+      "start": 492.733,
+      "end": 493.467,
+      "speech_overlap_seconds": 0.733
     }
   ],
-  "new_cards": [
-    {
-      "id": "scene04-recap-01",
-      "start": 157.9333333333295,
-      "end": 170.26666666666284,
-      "duration": 12.333333333333343
-    },
-    {
-      "id": "scene04-square-01",
-      "start": 188.93333333332774,
-      "end": 200.13333333332773,
-      "duration": 11.199999999999989
-    },
-    {
-      "id": "scene04-volume-01",
-      "start": 217.06666666665947,
-      "end": 231.46666666665948,
-      "duration": 14.400000000000006
-    }
-  ],
-  "listened_in_full": false,
-  "visual_review": {
-    "first_render_frames_viewed": 51,
-    "final_frames": 54,
-    "identical_frames": 38,
-    "changed_frames": [
-      10,
-      21,
-      24,
-      26,
-      27,
-      35,
-      36,
-      37,
-      38,
-      40,
-      43,
-      46,
-      47,
-      48,
-      49,
-      50
-    ],
-    "changed_frames_viewed": true
+  "callback": {
+    "unseen_x": 0.75,
+    "generating_wave": -1.0,
+    "fixed_beta": 16,
+    "log_alpha_weak": -6,
+    "prediction_weak": -0.7143597518460014,
+    "log_alpha_strong": 6,
+    "prediction_strong": -0.23049363245775223,
+    "selected_log_alpha": 1.1758185615549976,
+    "prediction_selected": -0.944805486915999
   },
-  "phrase_timing_estimates": [
-    {
-      "id": "scene04-recap-02",
-      "phrase": "マガリ",
-      "estimated_start": 166.6141254429144,
-      "estimated_end": 166.98960442666765,
-      "method": "audio_query phoneme lengths / speedScale; estimated, not listening"
-    },
-    {
-      "id": "scene04-square-02",
-      "phrase": "タニソコ",
-      "estimated_start": 196.8465241502435,
-      "estimated_end": 197.38042919609723,
-      "method": "audio_query phoneme lengths / speedScale; estimated, not listening"
-    },
-    {
-      "id": "scene04-volume-02",
-      "phrase": "ハバノセキ",
-      "estimated_start": 222.21807407407408,
-      "estimated_end": 222.87921226396165,
-      "method": "audio_query phoneme lengths / speedScale; estimated, not listening"
-    }
-  ],
+  "frame_review": {
+    "final_extracted_count": 84,
+    "scene_count": 10,
+    "earlier_frames_compared": 82,
+    "earlier_frames_pixel_identical": 79,
+    "new_transition_frames": 2,
+    "changed_frames_reviewed": 3,
+    "selection": "beat midpoints plus beginning and end of key actions",
+    "frames": [
+      {
+        "scene": "scene01",
+        "beat": 1,
+        "phase": "mid",
+        "time": 4.6
+      },
+      {
+        "scene": "scene01",
+        "beat": 2,
+        "phase": "0.18",
+        "time": 10.736
+      },
+      {
+        "scene": "scene01",
+        "beat": 2,
+        "phase": "mid",
+        "time": 13.467
+      },
+      {
+        "scene": "scene01",
+        "beat": 2,
+        "phase": "0.50",
+        "time": 13.467
+      },
+      {
+        "scene": "scene01",
+        "beat": 2,
+        "phase": "0.97",
+        "time": 17.477
+      },
+      {
+        "scene": "scene01",
+        "beat": 3,
+        "phase": "mid",
+        "time": 22.467
+      },
+      {
+        "scene": "scene01",
+        "beat": 3,
+        "phase": "0.50",
+        "time": 22.467
+      },
+      {
+        "scene": "scene01",
+        "beat": 3,
+        "phase": "0.97",
+        "time": 26.916
+      },
+      {
+        "scene": "scene01",
+        "beat": 4,
+        "phase": "mid",
+        "time": 30.567
+      },
+      {
+        "scene": "scene01",
+        "beat": 4,
+        "phase": "0.50",
+        "time": 30.567
+      },
+      {
+        "scene": "scene01",
+        "beat": 5,
+        "phase": "mid",
+        "time": 38.067
+      },
+      {
+        "scene": "scene01",
+        "beat": 6,
+        "phase": "mid",
+        "time": 48.167
+      },
+      {
+        "scene": "scene02",
+        "beat": 1,
+        "phase": "mid",
+        "time": 58.267
+      },
+      {
+        "scene": "scene02",
+        "beat": 2,
+        "phase": "mid",
+        "time": 66.533
+      },
+      {
+        "scene": "scene02",
+        "beat": 3,
+        "phase": "mid",
+        "time": 75.1
+      },
+      {
+        "scene": "scene02",
+        "beat": 4,
+        "phase": "mid",
+        "time": 83.367
+      },
+      {
+        "scene": "scene02",
+        "beat": 5,
+        "phase": "mid",
+        "time": 91.6
+      },
+      {
+        "scene": "scene02",
+        "beat": 6,
+        "phase": "mid",
+        "time": 100.2
+      },
+      {
+        "scene": "scene03",
+        "beat": 1,
+        "phase": "mid",
+        "time": 108.633
+      },
+      {
+        "scene": "scene03",
+        "beat": 2,
+        "phase": "mid",
+        "time": 117.133
+      },
+      {
+        "scene": "scene03",
+        "beat": 3,
+        "phase": "mid",
+        "time": 125.5
+      },
+      {
+        "scene": "scene03",
+        "beat": 4,
+        "phase": "mid",
+        "time": 133.967
+      },
+      {
+        "scene": "scene03",
+        "beat": 5,
+        "phase": "mid",
+        "time": 142.133
+      },
+      {
+        "scene": "scene03",
+        "beat": 6,
+        "phase": "mid",
+        "time": 150.0
+      },
+      {
+        "scene": "scene04",
+        "beat": 1,
+        "phase": "0.12",
+        "time": 155.123
+      },
+      {
+        "scene": "scene04",
+        "beat": 1,
+        "phase": "mid",
+        "time": 158.467
+      },
+      {
+        "scene": "scene04",
+        "beat": 1,
+        "phase": "0.85",
+        "time": 161.547
+      },
+      {
+        "scene": "scene04",
+        "beat": 2,
+        "phase": "mid",
+        "time": 166.767
+      },
+      {
+        "scene": "scene04",
+        "beat": 3,
+        "phase": "mid",
+        "time": 174.3
+      },
+      {
+        "scene": "scene04",
+        "beat": 4,
+        "phase": "0.12",
+        "time": 179.373
+      },
+      {
+        "scene": "scene04",
+        "beat": 4,
+        "phase": "mid",
+        "time": 183.933
+      },
+      {
+        "scene": "scene04",
+        "beat": 4,
+        "phase": "0.87",
+        "time": 188.373
+      },
+      {
+        "scene": "scene04",
+        "beat": 5,
+        "phase": "mid",
+        "time": 193.633
+      },
+      {
+        "scene": "scene04",
+        "beat": 6,
+        "phase": "mid",
+        "time": 201.633
+      },
+      {
+        "scene": "scene04",
+        "beat": 7,
+        "phase": "0.12",
+        "time": 207.269
+      },
+      {
+        "scene": "scene04",
+        "beat": 7,
+        "phase": "mid",
+        "time": 211.5
+      },
+      {
+        "scene": "scene04",
+        "beat": 7,
+        "phase": "0.87",
+        "time": 215.619
+      },
+      {
+        "scene": "scene04",
+        "beat": 8,
+        "phase": "mid",
+        "time": 220.967
+      },
+      {
+        "scene": "scene04",
+        "beat": 9,
+        "phase": "mid",
+        "time": 228.833
+      },
+      {
+        "scene": "scene05",
+        "beat": 1,
+        "phase": "mid",
+        "time": 237.8
+      },
+      {
+        "scene": "scene05",
+        "beat": 2,
+        "phase": "mid",
+        "time": 247.333
+      },
+      {
+        "scene": "scene05",
+        "beat": 3,
+        "phase": "mid",
+        "time": 255.7
+      },
+      {
+        "scene": "scene05",
+        "beat": 4,
+        "phase": "mid",
+        "time": 263.233
+      },
+      {
+        "scene": "scene05",
+        "beat": 5,
+        "phase": "mid",
+        "time": 270.567
+      },
+      {
+        "scene": "scene05",
+        "beat": 6,
+        "phase": "mid",
+        "time": 277.8
+      },
+      {
+        "scene": "scene06",
+        "beat": 1,
+        "phase": "mid",
+        "time": 285.6
+      },
+      {
+        "scene": "scene06",
+        "beat": 2,
+        "phase": "mid",
+        "time": 293.5
+      },
+      {
+        "scene": "scene06",
+        "beat": 3,
+        "phase": "mid",
+        "time": 300.867
+      },
+      {
+        "scene": "scene06",
+        "beat": 4,
+        "phase": "mid",
+        "time": 308.067
+      },
+      {
+        "scene": "scene06",
+        "beat": 5,
+        "phase": "mid",
+        "time": 315.1
+      },
+      {
+        "scene": "scene06",
+        "beat": 6,
+        "phase": "mid",
+        "time": 322.6
+      },
+      {
+        "scene": "scene07",
+        "beat": 1,
+        "phase": "mid",
+        "time": 330.333
+      },
+      {
+        "scene": "scene07",
+        "beat": 2,
+        "phase": "mid",
+        "time": 337.8
+      },
+      {
+        "scene": "scene07",
+        "beat": 3,
+        "phase": "mid",
+        "time": 345.833
+      },
+      {
+        "scene": "scene07",
+        "beat": 4,
+        "phase": "mid",
+        "time": 353.467
+      },
+      {
+        "scene": "scene07",
+        "beat": 5,
+        "phase": "mid",
+        "time": 361.0
+      },
+      {
+        "scene": "scene07",
+        "beat": 6,
+        "phase": "mid",
+        "time": 368.667
+      },
+      {
+        "scene": "scene08",
+        "beat": 1,
+        "phase": "mid",
+        "time": 376.533
+      },
+      {
+        "scene": "scene08",
+        "beat": 2,
+        "phase": "mid",
+        "time": 384.133
+      },
+      {
+        "scene": "scene08",
+        "beat": 3,
+        "phase": "0.12",
+        "time": 388.149
+      },
+      {
+        "scene": "scene08",
+        "beat": 3,
+        "phase": "mid",
+        "time": 390.733
+      },
+      {
+        "scene": "scene08",
+        "beat": 3,
+        "phase": "0.88",
+        "time": 393.317
+      },
+      {
+        "scene": "scene08",
+        "beat": 4,
+        "phase": "mid",
+        "time": 397.3
+      },
+      {
+        "scene": "scene08",
+        "beat": 5,
+        "phase": "mid",
+        "time": 404.533
+      },
+      {
+        "scene": "scene08",
+        "beat": 6,
+        "phase": "mid",
+        "time": 412.033
+      },
+      {
+        "scene": "scene09",
+        "beat": 1,
+        "phase": "mid",
+        "time": 419.3
+      },
+      {
+        "scene": "scene09",
+        "beat": 2,
+        "phase": "mid",
+        "time": 427.1
+      },
+      {
+        "scene": "scene09",
+        "beat": 3,
+        "phase": "mid",
+        "time": 434.867
+      },
+      {
+        "scene": "scene09",
+        "beat": 4,
+        "phase": "mid",
+        "time": 443.167
+      },
+      {
+        "scene": "scene09",
+        "beat": 5,
+        "phase": "mid",
+        "time": 451.667
+      },
+      {
+        "scene": "scene09",
+        "beat": 6,
+        "phase": "mid",
+        "time": 460.033
+      },
+      {
+        "scene": "scene10",
+        "beat": 1,
+        "phase": "mid",
+        "time": 468.767
+      },
+      {
+        "scene": "scene10",
+        "beat": 2,
+        "phase": "mid",
+        "time": 476.6
+      },
+      {
+        "scene": "scene10",
+        "beat": 3,
+        "phase": "0.12",
+        "time": 481.059
+      },
+      {
+        "scene": "scene10",
+        "beat": 3,
+        "phase": "mid",
+        "time": 484.2
+      },
+      {
+        "scene": "scene10",
+        "beat": 3,
+        "phase": "0.85",
+        "time": 487.093
+      },
+      {
+        "scene": "scene10",
+        "beat": 4,
+        "phase": "0.12",
+        "time": 489.333
+      },
+      {
+        "scene": "scene10",
+        "beat": 4,
+        "phase": "mid",
+        "time": 492.5
+      },
+      {
+        "scene": "scene10",
+        "beat": 4,
+        "phase": "fixed-transition-mid",
+        "time": 493.0
+      },
+      {
+        "scene": "scene10",
+        "beat": 4,
+        "phase": "fixed-transition-after",
+        "time": 493.7
+      },
+      {
+        "scene": "scene10",
+        "beat": 4,
+        "phase": "0.87",
+        "time": 495.583
+      },
+      {
+        "scene": "scene10",
+        "beat": 5,
+        "phase": "mid",
+        "time": 501.4
+      },
+      {
+        "scene": "scene10",
+        "beat": 5,
+        "phase": "0.87",
+        "time": 504.903
+      },
+      {
+        "scene": "scene10",
+        "beat": 6,
+        "phase": "mid",
+        "time": 510.433
+      }
+    ]
+  },
   "numeric_checks": [
-    "Evidence / predictive covariance / square completion / derivative: PASS; max error 4.760636329592671e-12",
-    "Scalar integral quadrature: PASS; max error 2.7755575615628914e-17",
-    "30 iterations: PASS {'alpha': 3.678367661141862, 'beta': 10.58176866158709, 'gamma': 5.288678190897074, 'logev': -11.925703415001731}",
-    "Plot range: PASS; mean max 1.3033190882518657 RMS range 0.2412147268279772 0.5275274822287828",
-    "Polynomial optimum d=3: -17.82335067500967",
-    "Visual examples: square completion and width product 0.5: PASS",
-    "10 WAV, hashes, 128 readings / captions: PASS; total seconds 574.8"
+    "Independent log evidence vs covariance formulation; max error 4.760636329592671e-12",
+    "Scalar quadrature vs analytical result; max error 2.7755575615628914e-17",
+    "30 joint precision updates and fixed-beta stationary point",
+    "Square completion and determinant width example",
+    "Unseen x=0.75 predictions and displayed rounding"
   ],
-  "render_animations": 102,
-  "preserved_audio": {
-    "unchanged_scene_wav_and_manifest_entries": 9,
-    "scene04_byte_identical_original_sentences": 12,
-    "total_original_sentences_preserved": 121
-  },
-  "reading_review": {
-    "new_sentences": 7,
-    "api_sentences": 128,
-    "fixed_readings": [
-      "二分の一: ニフンノイチ → ニブンノイチ"
-    ],
-    "method": "audio_query mora strings inspected; no full listening"
-  }
+  "limits": [
+    "No full listening pass",
+    "Representative frames rather than every frame visually inspected",
+    "Audience engagement not measured"
+  ]
 }
