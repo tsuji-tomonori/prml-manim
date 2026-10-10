@@ -146,4 +146,4 @@ VOICEVOX:WhiteCUL（ノーマル、speaker 23）。Engine 0.25.2、話速1.08、
 
 音声全編の通し聴取、音素単位の強制アラインメント、全フレームの目視、高品質版のレンダリングは未実施です。抽出したフレームでは、読ませる完成状態の文字・数式・字幕に意図しない重なりやはみ出しは見つかりませんでした。
 
-[今回の作業レポート](../../../reports/working/20260930-0427-prml-2-4-visual-aid-recap.md) / [初版の作業レポート](../../../reports/working/20260927-1644-prml-2-4-3b1b-remake.md)
+[今回の作業レポート](../../../reports/working/20261011-0344-prml-2-4-story.md) / [前回の視覚補足レポート](../../../reports/working/20260930-0427-prml-2-4-visual-aid-recap.md) / [初版の作業レポート](../../../reports/working/20260927-1644-prml-2-4-3b1b-remake.md)
