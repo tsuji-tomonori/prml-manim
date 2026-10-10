@@ -6,7 +6,7 @@ from manim import *
 from scene_support import NarratedScene, jp, tex
 from narration_content import SCENES
 from make_voicevox_narration import MANIFEST
-from bayesian_model import X,T,XR,TR,CENTERS,phi,posterior,predict,samples,kernel
+from bayesian_model import X,T,XR,TR,CENTERS,FORECAST_X,HELD_OUT_T,phi,posterior,predict,samples,kernel
 
 DATA=ManimColor('#58B5ED'); MEAN=ManimColor('#FF6B77')
 PRIOR=ManimColor('#C29AFF'); POST=ManimColor('#77D49A')
@@ -79,16 +79,15 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.add(g);return g
 
     def candidates(self,ax,n,kind='line',alpha=None,beta=None,phase=None):
-        grid=np.linspace(-1,1,100) if kind=='line' else np.linspace(0,1,150)
+        grid=np.linspace(ax.x_range[0],ax.x_range[1],100) if kind=='line' else np.linspace(0,1,150)
         return always_redraw(lambda:VGroup(*[path(ax,grid,phi(grid,kind)@w,c,2.2,.7) for w,c in zip(samples(n.get_value(),alpha.get_value() if alpha else 2,beta.get_value() if beta else 25,kind,phase.get_value() if phase else 0),COLORS)]))
 
     def aid_card(self, label):
-        """Use the same yellow body card as the reviewed 3.1 and 3.2 videos."""
+        """Temporarily replace the body while retaining the chapter recap."""
         saved = [m for m in self.mobjects if m is not self.subtitle]
         header = [m for m in saved if m.get_center()[1] > 3]
         self.clear()
-        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
-                                 color='#FFFF00', stroke_width=1.2).move_to([0,.1,0])
+        frame = VGroup()
         label = jp(label,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
         self.add(*header,frame,label)
         return saved,frame,label
@@ -129,7 +128,7 @@ class PRML33BayesianLinearRegression(NarratedScene):
                       for i,c in enumerate([POST,PRIOR])])
         xlabels=VGroup(tex('x_1',26).next_to(ga.x_axis,RIGHT,buff=.1),tex('x_2',26).next_to(ga.y_axis,UP,buff=.08))
         wlabels=VGroup(tex('w_0',26).move_to(xlabels[0]),tex('w_1',26).move_to(xlabels[1]))
-        mapping=VGroup(jp('二つの係数へ',23),tex(r'(x_1,x_2)\ \to\ (w_0,w_1)',29),
+        mapping=VGroup(jp('2つの係数へ',23),tex(r'(x_1,x_2)\ \to\ (w_0,w_1)',29),
                        tex(r'\mu\ \to\ m_N',29,MEAN),tex(r'\Sigma\ \to\ S_N',29,POST)).arrange(DOWN,buff=.28).move_to([2.45,.15,0])
         center=Dot(ga.c2p(0,0),color=MEAN,radius=.07)
         a,b,c=[self.sentence_duration(i) for i in range(3)]
@@ -138,8 +137,9 @@ class PRML33BayesianLinearRegression(NarratedScene):
             # body objects explicitly, retaining only the title, card and captions.
             header = [m for m in saved if m.get_center()[1] > 3]
             self.clear()
-            self.add(*header,frame,label,self.subtitle,ga,ring,dots,xlabels)
-            return Transform(label,jp('復習: 2.3 ガウス分布',23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
+            new_label=jp('復習: 2.3 ガウス分布',23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
+            self.add(*header,frame,new_label,self.subtitle,ga,ring,dots,xlabels)
+            return Wait()
         self.beat(phases=[
             ('R1.2 recall prior and likelihood',a*.24,lambda:Wait()),
             ('R1.2 multiply',a*.26,lambda:Transform(prior,product)),
@@ -217,13 +217,20 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.restore_body(saved)
 
     def question(self):
-        ax=self.axes();n=ValueTracker(0);a=ValueTracker(.15);b=ValueTracker(.65)
-        dots=self.dots(ax,n);line=always_redraw(lambda:path(ax,[-1,1],[a.get_value()-b.get_value(),a.get_value()+b.get_value()]))
-        self.beat(n.animate.set_value(2),end_sentence=1);self.add(line)
+        ax=self.axes(xr=(-1,1.8,.5));n=ValueTracker(2);a=ValueTracker(.15);b=ValueTracker(.65)
+        dots=self.dots(ax,n)
+        target=DashedLine(ax.c2p(FORECAST_X,-1.45),ax.c2p(FORECAST_X,1.45),color=YELLOW,stroke_width=2)
+        target_label=tex(r'x_*=1.5',26,YELLOW).next_to(target,UP,buff=.06)
+        line=always_redraw(lambda:path(ax,[-1,1.8],[a.get_value()-b.get_value(),a.get_value()+1.8*b.get_value()]))
+        self.beat(Create(target),FadeIn(target_label),end_sentence=1);self.add(line)
         s0=self.slider(a,-.5,.6,[-2.4,-2.4,0],'w_0',MEAN)
         s1=self.slider(b,-.3,1.3,[2.4,-2.4,0],'w_1',YELLOW)
         self.beat(a.animate.set_value(.45));self.beat(b.animate.set_value(1.1))
-        cloud=self.candidates(ax,n);self.beat(FadeOut(line),FadeIn(cloud))
+        cloud=self.candidates(ax,n)
+        estimate=float(predict([FORECAST_X],2)[0][0])
+        result=Dot(ax.c2p(FORECAST_X,estimate),radius=.08,color=MEAN)
+        result_label=VGroup(jp('予測平均',20,MEAN),tex(f'{estimate:.3f}',26,MEAN)).arrange(RIGHT,buff=.13).move_to([2.5,2.6,0])
+        self.beat(FadeOut(line),FadeIn(cloud),FadeIn(result),FadeIn(result_label))
         self.remove(s0,s1);f=self.formula(r't=w_0+w_1x+\epsilon,\qquad',r'\epsilon\sim\mathcal N(0,\beta^{-1})');f[1].set_color(NOISE)
         noise=VGroup(*[Line(ax.c2p(x,.15+.65*x),ax.c2p(x,t),color=NOISE,stroke_width=5) for x,t in zip(X[:2],T[:2])])
         self.beat(Create(noise));self.beat(Indicate(dots[:2],scale_factor=1.1),Circumscribe(f,color=MUTED,buff=.09))
@@ -276,10 +283,24 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.add(f)
         self.beat(Circumscribe(f,color=MUTED,buff=.09))
         g=MathTex(r'S_N^{-1}=',r'\alpha I',r'+',r'\beta\Phi^T\Phi',font_size=32).move_to([0,-2.4,0]);g[1].set_color(PRIOR);g[3].set_color(DATA)
-        self.equation_change(f,g)
+        duration=self.beat_cues()[-1]['end']
+        self.beat(phases=[
+            ('show precision equation',.6,lambda:ReplacementTransform(f,g)),
+            ('explain precision equation',duration-.85,lambda:Circumscribe(g,color=MUTED,buff=.09)),
+            ('clear formula before transpose',.25,lambda:FadeOut(g)),
+        ])
         self.transpose_aid()
+        restored=MathTex(r'S_N^{-1}=',r'\alpha I',r'+',r'\beta\Phi^T\Phi',font_size=32).move_to([0,-2.4,0])
+        restored[1].set_color(PRIOR);restored[3].set_color(DATA)
+        self.add(restored)
         h=tex(r'm_N=\beta S_N\Phi^T\mathbf t\qquad\text{sequential}=\text{batch}',30).move_to([0,-2.4,0])
-        self.equation_change(g,h,Indicate(cs))
+        duration=self.beat_cues()[-1]['end']
+        self.beat(phases=[
+            ('clear precision equation',.25,lambda:FadeOut(restored)),
+            ('show posterior mean',.35,lambda:FadeIn(h)),
+            ('compare sequential and batch',duration-.6,
+             lambda:AnimationGroup(Circumscribe(h,color=MUTED,buff=.09),Indicate(cs))),
+        ])
 
     def regularization(self):
         ax=self.axes((-1.8,.25,0),6.7,3.6);n=ValueTracker(4);alpha=ValueTracker(2);beta=ValueTracker(25)
@@ -371,5 +392,29 @@ class PRML33BayesianLinearRegression(NarratedScene):
         self.remove(f);f=self.formula(r'\beta\ \mathrm{known}:\ \mathcal N\qquad\longrightarrow\qquad (w,\beta)\ \mathrm{unknown}:\ \mathrm{Student}\ t')
         self.beat(Circumscribe(f,color=MUTED,buff=.09));self.remove(f);f=self.formula(r'k(x,z)=\psi(x)^T\psi(z),\qquad\psi(x)=\sqrt\beta\,S_N^{1/2}\phi(x)')
         self.beat(x.animate.set_value(.5),Circumscribe(f,color=MUTED,buff=.09));self.remove(f)
-        f=self.formula(r'p(w)\ \longrightarrow\ p(w\mid\mathbf t)\ \longrightarrow\ p(t_*\mid x_*,\mathbf t)')
-        self.beat(Circumscribe(f,color=MUTED,buff=.09),Indicate(focus))
+        # Return to the same held-out input and observation as the opening.
+        self.clear()
+        self.add(jp(self.story['title'],34).move_to([0,3.35,0]))
+        answer_ax=self.axes(xr=(-1,1.8,.5),yr=(-1.7,1.7,1),width=9)
+        count=ValueTracker(2)
+        self.dots(answer_ax,count)
+        xx=np.linspace(-1,1.8,160)
+        result=lambda:predict(xx,count.get_value())
+        answer_band=always_redraw(lambda:band(answer_ax,xx,result()[0],result()[2],NOISE,.27))
+        answer_line=always_redraw(lambda:path(answer_ax,xx,result()[0],MEAN))
+        cursor=DashedLine(answer_ax.c2p(FORECAST_X,-1.65),answer_ax.c2p(FORECAST_X,1.65),color=YELLOW,stroke_width=2)
+        forecast=tex(r'x_*=1.5',26,YELLOW).next_to(cursor,UP,buff=.04)
+        mu2,_,var2=predict([FORECAST_X],2)
+        mu20,_,var20=predict([FORECAST_X],20)
+        two=jp(f'2点: 平均{mu2[0]:.3f}　予測の幅±{np.sqrt(var2[0]):.3f}',22,MEAN).move_to([0,2.65,0])
+        twenty=jp(f'20点: 平均{mu20[0]:.3f}　予測の幅±{np.sqrt(var20[0]):.3f}',22,POST).move_to([0,2.65,0])
+        heldout=Dot(answer_ax.c2p(FORECAST_X,HELD_OUT_T),color=DATA,radius=.085)
+        heldout_label=tex(f't_*={HELD_OUT_T:.3f}',26,DATA).move_to([2.8,-2.2,0])
+        self.add(answer_line,cursor,forecast,two)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('show two-point uncertainty',a,lambda:FadeIn(answer_band)),
+            ('show twenty-point target',min(.5,b*.12),lambda:AnimationGroup(FadeOut(two),FadeIn(twenty))),
+            ('add data and narrow prediction',b-min(.5,b*.12),lambda:count.animate.set_value(20)),
+            ('check same held-out observation',c,lambda:AnimationGroup(FadeIn(heldout),FadeIn(heldout_label))),
+        ])

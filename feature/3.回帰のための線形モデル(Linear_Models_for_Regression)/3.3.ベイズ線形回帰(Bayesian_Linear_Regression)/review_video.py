@@ -25,6 +25,16 @@ for scene,entry in zip(timeline,manifest):
             if '$' in cue['display']:
                 frames.append(dict(id=cue['id'],time=(cue['start']+cue['end'])/2,reason='math',display=cue['display']))
     for beat in scene['beats']:
+        if scene['id'] in ('scene01','scene09'):
+            for i,action in enumerate(beat.get('actions', [])):
+                if action['name']=='breath': continue
+                for phase in [.15,.85]:
+                    frames.append(dict(id=f"{scene['id']}-story-action{i}-{phase}-{beat['start']:.2f}",
+                                       time=action['start']+phase*(action['end']-action['start']),
+                                       reason=action['name']))
+                frames.append(dict(id=f"{scene['id']}-story-after{i}-{beat['start']:.2f}",
+                                   time=min(beat['end']-.05,action['end']+.12),
+                                   reason='after motion'))
         if not any('aid' in c['id'] or 'recap' in c['id'] for c in beat['cues']):
             continue
         tag=beat['cues'][0]['id']
@@ -36,8 +46,8 @@ for scene,entry in zip(timeline,manifest):
                 frames.append(dict(id=f'{tag}-action{i}-{phase}',
                                    time=action['start']+phase*(action['end']-action['start']),
                                    reason=action['name']))
-    if scene['id'] in ['scene02','scene04','scene06','scene08']:
-        bi={'scene02':3,'scene04':5,'scene06':5,'scene08':1}[scene['id']]
+    if scene['id'] in ['scene01','scene02','scene04','scene06','scene08','scene09']:
+        bi={'scene01':3,'scene02':3,'scene04':5,'scene06':5,'scene08':1,'scene09':5}[scene['id']]
         beat=scene['beats'][bi]
         with wave.open(str(ROOT/'assets/voicevox'/f"{scene['id']}.wav"),'rb') as w:
             pcm=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2')/32768
@@ -51,7 +61,8 @@ for scene,entry in zip(timeline,manifest):
 
 def extract(f):
     dest=OUT/(f['id']+'.png')
-    subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(dest)],check=True)
+    # Decode up to the exact cue time, including frames near animation cuts.
+    subprocess.run(['ffmpeg','-v','error','-y','-i',str(VIDEO),'-ss',str(f['time']),'-frames:v','1',str(dest)],check=True)
 with ThreadPoolExecutor(max_workers=3) as pool:list(pool.map(extract,frames))
 for index in range(0,len(frames),4):
     batch=frames[index:index+4];sheet=Image.new('RGB',(1708,1016),'#202020');draw=ImageDraw.Draw(sheet)

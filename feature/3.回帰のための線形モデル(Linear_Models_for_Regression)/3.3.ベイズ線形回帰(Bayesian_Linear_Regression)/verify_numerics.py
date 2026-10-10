@@ -42,6 +42,17 @@ print('kernel_mean_error',err,'kernel_weight_min',k.min(),'weight_sum_range',k.s
 mu,l,v=predict([-10,10],25,kind='rbf');assert np.allclose(mu,0) and np.allclose(v,.04)
 print('far_field_mean_variance',mu.tolist(),v.tolist())
 
+# The opening and ending use the same untouched test input and observation.
+two_mean,_,two_var=predict([FORECAST_X],2)
+twenty_mean,_,twenty_var=predict([FORECAST_X],20)
+assert np.isclose(HELD_OUT_T,1.2519182136835463)
+assert np.isclose(two_mean[0],.9928588761638092)
+assert np.isclose(np.sqrt(two_var[0]),.3956362806013454)
+assert np.isclose(twenty_mean[0],1.1867809751642686)
+assert np.isclose(np.sqrt(twenty_var[0]),.23340707386792076)
+assert np.sqrt(twenty_var[0]) < np.sqrt(two_var[0])
+print('held_out_forecast',FORECAST_X,HELD_OUT_T,two_mean[0],np.sqrt(two_var[0]),twenty_mean[0],np.sqrt(twenty_var[0]))
+
 # A constant unpenalized basis reproduces constants; penalizing it breaks that identity.
 f=phi(X);x=phi([.3]);h=x@np.linalg.solve(f.T@f,f.T)
 assert np.allclose(h.sum(),1)
@@ -59,4 +70,4 @@ for s in SCENES:
         for t in b['segments']:
             assert not re.search('エックス|ラムダ|ミュー|シグマ|アルファ|ベータ|ティー|エムエヌ|エスエヌ',t['display']),t
 print('audio_hashes_and_display',len(entries),'scenes',sum(len(b['segments']) for s in SCENES for b in s['beats']),'sentences')
-print('PASS: 7 verification groups')
+print('PASS: 8 verification groups')
