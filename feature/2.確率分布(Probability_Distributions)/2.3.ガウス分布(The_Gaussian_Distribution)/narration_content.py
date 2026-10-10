@@ -595,13 +595,99 @@ SCENES[5]['beats'].insert(3, dict(seconds=17,
              speech='今回は線形ガウスモデルです。事後の中心と広がりも式で求められます。'),
     ]))
 
+# The same 100 observations appear in the opening and in the final comparison.
+# Stable IDs in the original lessons and the visual-aid recaps remain unchanged.
+SCENES[0]['title'] = '点がない真ん中が、山頂？'
+SCENES[0]['beats'][0:0] = [
+    dict(seconds=8, pause_after=1.15, visual_note='冒頭：同じ100点を見せ、中央の少なさを予想する',
+         segments=[
+             dict(id='scene01-story-01', display='100個の点。左右に集まり、真ん中には2個だけです。',
+                  speech='100個の点。左右に集まり、真ん中には2個だけです。'),
+             dict(id='scene01-story-02', display='1つの山を当てるなら、頂上はどこだと思いますか。',
+                  speech='1つの山を当てるなら、頂上はどこだと思いますか。'),
+         ]),
+    dict(seconds=8, visual_note='最尤の1山を重ね、点のない中央が山頂になる違和感',
+         segments=[
+             dict(id='scene01-story-03', display='計算すると、点の少ない真ん中が山頂になりました。',
+                  speech='計算すると、点の少ない真ん中が山頂になりました。'),
+             dict(id='scene01-story-04', display='なぜ、1つのガウスはこの2集団を外すのでしょう。',
+                  speech='なぜ、1つのガウスはこの2集団を外すのでしょう。'),
+         ]),
+]
+SCENES[10]['beats'].append(
+    dict(seconds=10, visual_note='冒頭の同じ100点に戻し、中央の密度を1山と2山で比較',
+         segments=[
+             dict(id='scene11-story-01', display='冒頭と同じ100個の点へ戻ります。中央は、やはり2個だけ。',
+                  speech='冒頭と同じ100個の点へ戻ります。中央は、やはり2個だけ。'),
+             dict(id='scene11-story-02', display='中央の密度は、1山で0.224、2山で0.029です。',
+                  speech='中央の密度は、1つの山でゼロ点、二、二、四。2つの山でゼロ点、ゼロ、二、九です。'),
+             dict(id='scene11-story-03', display='1つのガウスには頂上が1つ。2集団には、山が2つ必要でした。',
+                  speech='1つのガウスには頂上が1つ。2集団には、山が2つ必要でした。'),
+         ]))
+
+STORY_EDITS = {
+    'scene01-01-01': ('1山の形は何で決まるのでしょう。まず、つまみを動かします。', '1つの山の形は何で決まるのでしょう。まず、つまみを動かします。'),
+    'scene01-06-02': ('けれど、冒頭の2集団にも、1つの中心と幅で足りるでしょうか。', 'けれど、冒頭の2集団にも、1つの中心と幅で足りるでしょうか。'),
+    'scene02-01-01': ('1山を使いたくなる理由を、偶然の平均で確かめます。', '1つの山を使いたくなる理由を、偶然の平均で確かめます。'),
+    'scene02-06-02': ('平均なら山になります。でも、冒頭の2集団も同じ形でしょうか。', '平均なら山になります。でも、冒頭の2集団も同じ形でしょうか。'),
+    'scene03-01-01': ('1つの数直線を、2つの測定値の平面へ広げたらどうなるでしょう。', '1つの数直線を、2つの測定値の平面へ広げたらどうなるでしょう。'),
+    'scene03-aid-03': ('密度の高さを半分にして、全体の確率を保ちます。では、楕円1つで2山を描けるでしょうか。', '密度の高さを半分にして、全体の確率を保ちます。では、楕円1つで2つの山を描けるでしょうか。'),
+    'scene04-01-01': ('楕円は自由に変えられます。簡単な形に制限すると、何を失うでしょう。', '楕円は自由に変えられます。簡単な形に制限すると、何を失うでしょう。'),
+    'scene04-06-02': ('斜めの関係があれば、一方の観測は手がかりになるでしょうか。', '斜めの関係があれば、一方の観測は手がかりになるでしょうか。'),
+    'scene05-01-01': ('2つの量が連動する点群で、縦の値を知ったら横の予想は？', '2つの量が連動する点群で、縦のあたいを知ったら横の予想は？'),
+    'scene05-06-02': ('切れば予想は変わります。ノイズを含む観測からも逆算できるでしょうか。', '切れば予想は変わります。ノイズを含む観測からも逆算できるでしょうか。'),
+    'scene06-01-01': ('ノイズのある測定値から、本当の量を取り戻してみましょう。', 'ノイズのある測定値から、本当の量を取り戻してみましょう。'),
+    'scene06-06-02': ('観測後の幅は計算できました。そもそも山の中心はどう決めるのでしょう。', '観測後の幅は計算できました。そもそも山の中心はどう決めるのでしょう。'),
+    'scene07-01-01': ('観測した点だけを手がかりに、山の中心を決めてみます。', '観測した点だけを手がかりに、山の中心を決めてみます。'),
+    'scene07-06-02': ('新しい点で平均は更新できます。でも、その値をどれほど信じられるでしょう。', '新しい点で平均は更新できます。でも、そのあたいをどれほど信じられるでしょう。'),
+    'scene08-01-01': ('計算した平均も、少ないデータではまだ揺れます。', '計算した平均も、少ないデータではまだ揺れます。'),
+    'scene08-06-02': ('中心にも幅にも不確かさがあります。では、極端な1点が来たら？', '中心にも幅にも不確かさがあります。では、極端な1点が来たら？'),
+    'scene09-01-01': ('1点だけ遠ざけます。山の中心と幅がどう動くか予想してください。', '1点だけ遠ざけます。山の中心と幅がどう動くか予想してください。'),
+    'scene09-06-02': ('外れ値には厚い裾が役立ちました。では、値が角度だったら？', '外れ値には厚い裾が役立ちました。では、あたいが角度だったら？'),
+    'scene10-06-02': ('角度には円の形が必要でした。冒頭の2集団に必要な形は？', '角度には円の形が必要でした。冒頭の2集団に必要な形は？'),
+    'scene11-01-01': ('冒頭の100個の点に戻ります。1つのガウスで予想した山頂を見てください。', '冒頭の100個の点に戻ります。1つのガウスで予想した山頂を見てください。'),
+    'scene11-01-02': ('点が2個しかない中央が、1山では最も高くなります。', '点が2個しかない中央が、1つの山では最も高くなります。'),
+    'scene11-02-01': ('そこで、同じ100個の点から計算した、2つの山を重ねます。', 'そこで、同じ100個の点から計算した、2つの山を重ねます。'),
+    'scene11-06-01': ('2山なら中央に谷を作れます。所属が不明でも、どう学べたのでしょう。', '2つの山なら中央に谷を作れます。所属が不明でも、どう学べたのでしょう。'),
+    'scene11-06-02': ('その反復学習は第9章で。まず最初の100個の点で答え合わせです。', 'その反復学習は第9章で。まず最初の100個の点で答え合わせです。'),
+}
+for story_scene in SCENES:
+    for story_beat in story_scene['beats']:
+        for story_segment in story_beat['segments']:
+            if story_segment['id'] in STORY_EDITS:
+                story_segment['display'], story_segment['speech'] = STORY_EDITS[story_segment['id']]
+
+# Counts, degrees, fractions and magnitudes are digits in subtitles and titles.
+# Conventional mathematical words such as 二乗 and 一次式 stay in kanji.
+NUMBER_NOTATION = {
+    '二万回': '2万回', '十個': '10個', '二個': '2個',
+    '百次元': '100次元', '五千百五十個': '5150個',
+    '二百個': '200個', '百一個': '101個',
+    '五度': '5度', '三百五十五度': '355度', '百八十度': '180度',
+    'ゼロ度': '0度', 'ゼロへ': '0へ', 'ゼロなら': '0なら',
+    '四点': '4点', '四分の三': r'$\frac{3}{4}$',
+    '二点': '2点', '二つ': '2つ', '一つ': '1つ',
+    '一点': '1点', '一歩': '1歩', '一周': '1周',
+    '六割': '6割', '二より': '2より', '二分の一': r'$\frac{1}{2}$',
+    '面積は一': '面積は1', '面積を一': '面積を1', '全体を一': '全体を1',
+    '合計は一': '合計は1', 'ばらつき一つ分': 'ばらつき1つ分',
+}
+for story_scene in SCENES:
+    for before, after in sorted(NUMBER_NOTATION.items(), key=lambda item: -len(item[0])):
+        story_scene['title'] = story_scene['title'].replace(before, after)
+    for story_beat in story_scene['beats']:
+        for story_segment in story_beat['segments']:
+            for before, after in sorted(NUMBER_NOTATION.items(), key=lambda item: -len(item[0])):
+                story_segment['display'] = story_segment['display'].replace(before, after)
+
+
 def estimated_duration(beat):
     """Silent preview only; voiced renders use measured sentence PCM durations."""
     return max(float(beat["seconds"]), sum(len(s["speech"]) for s in beat["segments"]) / 6.0 + 0.8)
 
 
 SYNTHESIS_SETTINGS = {
-    "speedScale": 1.08, "intonationScale": 0.95,
+    "speedScale": 1.08, "intonationScale": 1.08,
     "prePhonemeLength": 0.08, "postPhonemeLength": 0.12,
     "volumeScale": 1.0,
 }

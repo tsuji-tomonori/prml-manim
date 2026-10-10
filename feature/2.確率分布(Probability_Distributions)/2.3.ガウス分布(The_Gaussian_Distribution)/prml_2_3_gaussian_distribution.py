@@ -110,6 +110,24 @@ class PRML23GaussianDistribution(NarratedScene):
         return bars
 
     def shape(self):
+        opening_ax=self.ax(x=(-4,4,2),y=(0,.5,.2),w=9,h=3.2)
+        opening_dots=VGroup(*[Dot(opening_ax.c2p(x,.012+(i%3)*.013),color=BLUE,radius=.025)
+                              for i,x in enumerate(MIX_DATA)])
+        sparse=Line(opening_ax.c2p(-.55,.055),opening_ax.c2p(.55,.055),color=YELLOW,stroke_width=5)
+        sparse_label=jp('中央 2個',21,YELLOW).move_to([0,-2.12,0])
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('show same 100 observations',a,lambda:FadeIn(opening_dots)),
+            ('mark the sparse middle',b,lambda:AnimationGroup(Create(sparse),FadeIn(sparse_label))),
+        ])
+        opening_single=curve(opening_ax,lambda x:normal(x,MIX_DATA.mean(),MIX_DATA.std()),color=GREEN)
+        peak=DashedLine(opening_ax.c2p(0,0),opening_ax.c2p(0,normal(0,MIX_DATA.mean(),MIX_DATA.std())),color=RED)
+        a,b=[self.sentence_duration(i) for i in range(2)]
+        self.beat(phases=[
+            ('predict the single Gaussian peak',a,lambda:Create(opening_single)),
+            ('reveal the sparse peak',b,lambda:AnimationGroup(Create(peak),self.equation(r'K=1'))),
+        ])
+        self.remove(opening_ax,opening_ax.labels,opening_dots,sparse,sparse_label,opening_single,peak)
         ax=self.ax(x=(-5,5,2),y=(0,.65,.2),w=9,h=3.1,pos=(0,.05,0))
         mu=ValueTracker(0); sd=ValueTracker(.75)
         graph=always_redraw(lambda:curve(ax,lambda x:normal(x,mu.get_value(),sd.get_value()),color=RED))
@@ -190,10 +208,10 @@ class PRML23GaussianDistribution(NarratedScene):
         self.determinant_aid()
 
     def review_card(self,label,height=5.0):
-        frame=RoundedRectangle(width=11.6,height=height,corner_radius=.12,
-                               color='#FFFF00',stroke_width=1.3).move_to([0,0,0])
         heading=jp(label,24).move_to([-5.4,2.18,0],aligned_edge=LEFT)
-        group=VGroup(frame,heading)
+        guide=Line(heading.get_left()+LEFT*.18+DOWN*.25,
+                   heading.get_left()+LEFT*.18+UP*.25,color='#FFFF00',stroke_width=3)
+        group=VGroup(guide,heading)
         self.add(group)
         return group
 
@@ -460,14 +478,16 @@ class PRML23GaussianDistribution(NarratedScene):
         single=curve(ax,lambda x:normal(x,MIX_DATA.mean(),MIX_DATA.std()),color=GREEN)
         self.add(dots)
         self.beat(Create(single),self.equation(r'K=1'))
-        weight=ValueTracker(.45)
+        weight=ValueTracker(MIX_WEIGHT)
         mixture_curve=always_redraw(lambda:curve(ax,lambda x:mixture(x,weight.get_value()),color=PURPLE))
-        components=always_redraw(lambda:VGroup(curve(ax,lambda x:weight.get_value()*normal(x,-1.7,.55),color=BLUE),curve(ax,lambda x:(1-weight.get_value())*normal(x,1.5,.7),color=YELLOW)))
+        components=always_redraw(lambda:VGroup(
+            curve(ax,lambda x:weight.get_value()*normal(x,MIX_MEANS[0],MIX_SCALES[0]),color=BLUE),
+            curve(ax,lambda x:(1-weight.get_value())*normal(x,MIX_MEANS[1],MIX_SCALES[1]),color=YELLOW)))
         self.beat(FadeOut(single),Create(components),Create(mixture_curve),self.equation(r'p(x)=\sum_{k=1}^K\pi_k\mathcal N(x\mid\mu_k,\Sigma_k)'))
         self.add(self.slider(weight,.2,.65,(0,-2.15,0),r'\pi_1',BLUE,3.5))
         self.beat(weight.animate.set_value(.65),self.equation(r'\pi_k\geq0,\qquad\sum_k\pi_k=1'))
         self.remove(dots)
-        point=ValueTracker(-1.7)
+        point=ValueTracker(MIX_MEANS[0])
         marker=always_redraw(lambda:DashedLine(ax.c2p(point.get_value(),0),ax.c2p(point.get_value(),mixture(point.get_value(),weight.get_value())),color=WHITE))
         self.add(marker)
         self.beat(self.equation(r'\gamma_k(x)=\frac{\pi_k\mathcal N(x\mid\mu_k,\Sigma_k)}{\sum_l\pi_l\mathcal N(x\mid\mu_l,\Sigma_l)}'),Indicate(marker,scale_factor=1))
@@ -477,6 +497,22 @@ class PRML23GaussianDistribution(NarratedScene):
         def rbar():
             r=float(responsibility(point.get_value(),weight.get_value()))
             return VGroup(Line(barbase,barbase+RIGHT*3*r,color=BLUE,stroke_width=18),Line(barbase+RIGHT*3*r,barbase+RIGHT*3,color=YELLOW,stroke_width=18))
-        bar=always_redraw(rbar);self.add(bar,readout(r'\gamma_1=',lambda:responsibility(point.get_value(),weight.get_value()),(-3.7,-2.15,0),BLUE),readout(r'\gamma_2=',lambda:1-responsibility(point.get_value(),weight.get_value()),(3.7,-2.15,0),YELLOW))
+        bar=always_redraw(rbar)
+        r1=readout(r'\gamma_1=',lambda:responsibility(point.get_value(),weight.get_value()),(-3.7,-2.15,0),BLUE)
+        r2=readout(r'\gamma_2=',lambda:1-responsibility(point.get_value(),weight.get_value()),(3.7,-2.15,0),YELLOW)
+        self.add(bar,r1,r2)
         self.beat(point.animate.set_value(1.7))
         self.beat(point.animate.set_value(0),self.equation(r'\log p(X)=\sum_n\log\left[\sum_k\pi_k\mathcal N(x_n\mid\mu_k,\Sigma_k)\right]',size=28))
+        self.remove(marker,bar,r1,r2,components)
+        single_again=curve(ax,lambda x:normal(x,MIX_DATA.mean(),MIX_DATA.std()),color=GREEN).set_stroke(opacity=.65)
+        contrast=Line(ax.c2p(0,mixture(0)),ax.c2p(0,normal(0,MIX_DATA.mean(),MIX_DATA.std())),
+                      color=YELLOW,stroke_width=4)
+        a,b,c=[self.sentence_duration(i) for i in range(3)]
+        self.beat(phases=[
+            ('restore the opening observations and fitted weight',a,
+             lambda:AnimationGroup(weight.animate.set_value(MIX_WEIGHT),FadeIn(dots))),
+            ('compare density at the same empty centre',b,
+             lambda:AnimationGroup(FadeIn(single_again),Create(contrast),
+                 self.equation(r'p_1(0)=0.224,\quad p_2(0)=0.029'))),
+            ('answer the opening question',c,lambda:Indicate(mixture_curve,color=YELLOW,scale_factor=1)),
+        ])

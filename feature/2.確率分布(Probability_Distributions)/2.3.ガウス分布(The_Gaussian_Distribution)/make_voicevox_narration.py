@@ -126,7 +126,9 @@ def generate_scene(base, scene):
             speech_ends.append((total_frames - beat_start) / params[2])
             # Only a short breath after actual speech; never pad to the old
             # silent-storyboard duration. Align to the 15fps preview boundaries.
-            target_seconds = math.ceil(((total_frames - beat_start) / params[2] + .35) * 15) / 15
+            # A short pause after the opening question lets viewers predict the peak.
+            target_seconds = math.ceil(((total_frames - beat_start) / params[2] +
+                                        beat.get("pause_after", .35)) * 15) / 15
             target_frames = round(target_seconds * params[2])
             padding = target_frames - (total_frames - beat_start)
             output.writeframes(b"\0" * (padding * params[0] * params[1]))
