@@ -186,14 +186,25 @@ class PRML16InformationTheory(Scene):
         self.beat_index += 1
 
     def surprise(self):
-        cards=VGroup(*[VGroup(RoundedRectangle(width=.85,height=1.25,corner_radius=.08,color=BLUE_DATA),
-            tex(str(i+1),32)).arrange(ORIGIN) for i in range(8)]).arrange(RIGHT,buff=.2).move_to([0,.6,0])
+        # The same four cards, true distribution, and mistaken code return in scene 10.
+        cards=VGroup(*[VGroup(tex(letter,39,COLORS[i]),tex(code,29),
+            tex(f'{Q[i]:.1f}',25,ORANGE_MODEL)).arrange(DOWN,buff=.25)
+            for i,(letter,code) in enumerate(zip('ABCD',Q_CODES))])
+        cards.arrange(RIGHT,buff=.8).move_to([0,.15,0])
+        expected=jp('予想した出やすさ q で作った符号',23,ORANGE_MODEL).move_to([0,2.15,0])
+        fixed=VGroup(jp('固定長',24),tex(r'=2\ \mathrm{bit}',30)).arrange(RIGHT,buff=.16).move_to([0,-1.75,0])
+        self.add(expected,fixed)
         self.beat(LaggedStart(*[FadeIn(c,shift=UP*.2) for c in cards],lag_ratio=.12))
-        self.beat(phases=[('half',self.sentence_duration(0),lambda:cards[4:].animate.set_opacity(.15)),
-            ('quarter',self.sentence_duration(1)*.5,lambda:cards[2:4].animate.set_opacity(.15)),
-            ('eighth',self.sentence_duration(1)*.5,lambda:cards[1:2].animate.set_opacity(.15)),
-            ('identified',self.sentence_duration(2),lambda:pulse(cards[0],color=YELLOW_INFO))])
-        self.remove(*cards.get_family())
+        self.remove(*cards.get_family(),expected,fixed)
+        chart=bars(P,width=8,height=4,bottom=-1.1,color=BLUE_DATA)
+        actual=VGroup(*[tex(f'{v:g}',24,YELLOW_INFO).next_to(chart[i],UP,buff=.15)
+                        for i,v in enumerate(P)])
+        labels=VGroup(*[tex(c,28,COLORS[i]).move_to([-3+2*i,-1.45,0])
+                        for i,c in enumerate('ABCD')])
+        result=self.formula(r'\bar L_q=\sum_xp(x)\ell_q(x)=2.625\ \mathrm{bit}>2\ \mathrm{bit}',size=29)
+        self.add(result,labels,actual)
+        self.beat(LaggedStart(*[GrowFromEdge(bar,DOWN) for bar in chart],lag_ratio=.16))
+        self.remove(*chart.get_family(),actual,labels,result)
         p=ValueTracker(.5)
         ax=self.ax([0,1,.25],[0,4,1],center=(0,.05,0))
         graph=curve(ax,lambda p:-np.log2(p),1/16,1,YELLOW_INFO)
@@ -277,11 +288,9 @@ class PRML16InformationTheory(Scene):
                 and not (isinstance(m, Text) and m.get_y() > 2.7)]
 
     def review_card(self, title):
-        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
-                                 color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0])
         label = VGroup(*[g for g in jp(title,23) if g.has_points()])
         label.move_to([-4.85,2.02,0], aligned_edge=LEFT)
-        self.add(frame,label)
+        self.add(label)
         return label
 
     def density_recap(self):
@@ -303,15 +312,15 @@ class PRML16InformationTheory(Scene):
         uniform = Polygon(uniform_ax.c2p(0,0),uniform_ax.c2p(1,0),uniform_ax.c2p(1,1),
                           uniform_ax.c2p(0,1),color=BLUE_DATA,fill_opacity=.3)
         new_legend = jp('今回：一様分布を区間に分けて伝える',22).move_to([0,1.35,0])
-        a,b,c = [self.sentence_duration(i) for i in range(3)]
+        a,b,c,d = [self.sentence_duration(i) for i in range(4)]
         self.beat(phases=[
-            ('R1.2 recall density area',a,lambda:pulse(area,color=BLUE_DATA)),
-            ('R1.2 widen probability interval',b,lambda:radius.animate.set_value(1.2)),
+            ('R1.2 recall density area',a+b,lambda:pulse(area,color=BLUE_DATA)),
+            ('R1.2 widen probability interval',c,lambda:radius.animate.set_value(1.2)),
             ('R1.2 clear previous density',.4,lambda:AnimationGroup(
                 FadeOut(graph),FadeOut(area),FadeOut(probability),FadeOut(ax),FadeOut(legend))),
             ('R1.2 connect to uniform density',.6,lambda:AnimationGroup(
                 FadeIn(uniform_ax),FadeIn(new_legend),FadeIn(uniform))),
-            ('R1.2 uniform interval for this section',c-1.0,lambda:pulse(uniform,color=BLUE_DATA)),
+            ('R1.2 uniform interval for this section',d-1.0,lambda:pulse(uniform,color=BLUE_DATA)),
         ])
         self.remove(*self.body_objects())
 
@@ -405,8 +414,8 @@ class PRML16InformationTheory(Scene):
             jp('青：y = 0　黄：y = 1',21).move_to([-1.5,-1.65,0]))
         self.add(mosaic,labels)
         self.beat(pulse(mosaic))
-        selected=self.mosaic(.6)[0:2].copy()
-        self.beat(selected.animate.stretch(2,0).move_to([3.5,.2,0]))
+        selected=self.mosaic(.6)[0:2].copy().stretch(2,0).move_to([3.5,.2,0])
+        self.beat(FadeIn(selected))
         cond=tex(r'p(y\mid x=0)=(0.8,0.2)',27).move_to([0,-2.4,0]);self.add(cond)
         defn=tex(r'H[y\mid x]=-\sum_{x,y}p(x,y)\ln p(y\mid x)',26).move_to([3.2,2.1,0])
         self.add(defn)
@@ -425,14 +434,14 @@ class PRML16InformationTheory(Scene):
         self.beat(r.animate.set_value(1),end_sentence=1)
 
     def divergence(self):
-        t=ValueTracker(0)
+        t=ValueTracker(1)
         q=lambda:(1-t.get_value())*P+t.get_value()*Q
         chart=always_redraw(lambda:bars(P,width=8,height=4.5,bottom=-.8,color=BLUE_DATA))
         outlines=always_redraw(lambda:bars(q(),width=8,height=4.5,bottom=-.8,color=ORANGE_MODEL).set_fill(opacity=0).set_stroke(ORANGE_MODEL,3))
         legend=jp('青：本当の確率 p　橙の枠：想定 q',22).move_to([0,2.15,0])
         self.add(chart,outlines,legend)
-        self.beat(t.animate.set_value(.25))
-        self.beat(t.animate.set_value(1))
+        self.beat(pulse(chart))
+        self.beat(pulse(outlines[0],color=ORANGE_MODEL))
         self.remove(chart,outlines,legend)
         self.add(jp('幅：本当の確率 p　高さ：−ln q　面積：平均コスト',21).move_to([0,2.15,0]))
         def areas():
@@ -574,8 +583,20 @@ class PRML16InformationTheory(Scene):
         # Clear data readouts for the final visual recap, preserving title and subtitles.
         keep=[m for m in self.mobjects if m is self.subtitle or (isinstance(m,Text) and m.get_y()>2.7)]
         self.remove(*[m for m in list(self.mobjects) if m not in keep])
-        chain=VGroup(*[VGroup(tex(t,38,c),jp(label,22,c)).arrange(DOWN,buff=.3) for t,label,c in [
-            ('h(x)','一回の驚き',YELLOW_INFO),('H[x]','平均の情報',BLUE_DATA),
-            (r'\mathrm{KL}','想定のずれ',ORANGE_MODEL),('I[x,y]','共有する情報',PURPLE_KL)]]).arrange(RIGHT,buff=.8).move_to([0,.3,0])
-        self.add(chain)
-        self.beat(LaggedStart(*[pulse(m) for m in chain],lag_ratio=.5))
+        heading=jp('冒頭と同じ4枚：p = (1/2, 1/4, 1/8, 1/8)',24,BLUE_DATA).move_to([0,2.1,0])
+        labels=VGroup(*[tex(c,32,COLORS[i]).move_to([-3+2*i,1.25,0]) for i,c in enumerate('ABCD')])
+        wrong=VGroup(*[tex(c,27,ORANGE_MODEL).move_to([-3+2*i,.3,0])
+                       for i,c in enumerate(Q_CODES)])
+        right=VGroup(*[tex(c,27,GREEN_TRUE).move_to([-3+2*i,-.7,0])
+                       for i,c in enumerate(P_CODES)])
+        wrong_note=jp('最初の予想 q',23,ORANGE_MODEL).move_to([-5.2,.3,0])
+        right_note=jp('本当の確率 p',23,GREEN_TRUE).move_to([-5.2,-.7,0])
+        totals=VGroup(tex(r'2.625\ \mathrm{bit}',31,ORANGE_MODEL),
+                      tex(r'1.75\ \mathrm{bit}',31,GREEN_TRUE)).arrange(RIGHT,buff=1.5).move_to([0,-1.75,0])
+        a,b,c,d = [self.sentence_duration(i) for i in range(4)]
+        self.beat(phases=[
+            ('same four cards',a,lambda:AnimationGroup(FadeIn(heading),FadeIn(labels))),
+            ('opening code and cost',b,lambda:AnimationGroup(FadeIn(wrong_note),FadeIn(wrong),FadeIn(totals[0]))),
+            ('true code and cost',c,lambda:AnimationGroup(FadeIn(right_note),FadeIn(right),FadeIn(totals[1]))),
+            ('learn probabilities',d,lambda:pulse(right,color=GREEN_TRUE)),
+        ])
