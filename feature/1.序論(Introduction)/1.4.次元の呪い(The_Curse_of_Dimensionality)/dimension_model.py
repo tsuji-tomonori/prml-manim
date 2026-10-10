@@ -37,6 +37,30 @@ def class_data():
     return np.clip(pts,.025,.975), np.repeat(np.arange(3),30)
 
 
+def class_neighborhood_masks():
+    """Same 90 observations and query, with eight independent nuisance inputs.
+
+    The first two coordinates use the visible box [.2,.6) x [.4,.8).
+    Each added coordinate uses a width-.4 interval [.3,.7) about query .5.
+    The added measurements are independent of the class labels by construction.
+    """
+    points, labels = class_data()
+    extra = np.random.default_rng(1402).uniform(0, 1, (len(points), 8))
+    visible = np.all((points >= [.2, .4]) & (points < [.6, .8]), axis=1)
+    masks = []
+    for dimension in range(2, 11):
+        nearby = visible & np.all((extra[:, :dimension-2] >= .3)
+                                & (extra[:, :dimension-2] < .7), axis=1)
+        masks.append(nearby)
+    return np.asarray(masks)
+
+
+def class_neighborhood_counts():
+    _, labels = class_data()
+    return np.asarray([np.bincount(labels[mask], minlength=3)
+                       for mask in class_neighborhood_masks()])
+
+
 GAUSSIAN_POINTS=np.random.default_rng(1406).normal(size=(600,2))
 GAUSSIAN_RADII=np.linalg.norm(GAUSSIAN_POINTS,axis=1)
 

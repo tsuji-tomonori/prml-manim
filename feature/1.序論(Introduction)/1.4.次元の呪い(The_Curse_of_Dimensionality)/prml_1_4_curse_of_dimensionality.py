@@ -59,7 +59,7 @@ class PRML14CurseOfDimensionality(Scene):
         self.camera.background_color=BG
         self.timeline=[]
         self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
-        for i,method in enumerate([self.classify,self.grid,self.polynomial,self.sphere,self.shells,self.gaussian,self.concentration,self.manifold]):
+        for i,method in enumerate([self.classify,self.grid,self.polynomial,self.sphere,self.shells,self.gaussian,self.concentration,self.manifold,self.return_to_query]):
             self.begin(i)
             method()
             assert self.beat_index==len(self.story['beats']), self.story['id']
@@ -196,7 +196,7 @@ class PRML14CurseOfDimensionality(Scene):
         self.beat(phases=[('sentence 1',self.sentence_duration(0),a),('sentence 2',self.sentence_duration(1),b)])
 
     def classify(self):
-        ax,axes=self.graph_axes([0,1,.25],[0,1,.25],center=(-1.7,0,0),width=5,height=3.8,xlabel='x_6',ylabel='x_7')
+        ax,axes=self.graph_axes([0,1,.25],[0,1,.25],center=(-1.7,0,0),width=5,height=3.8,xlabel='x_1',ylabel='x_2')
         pts,labels=class_data(); colors=[RED,GREEN,BLUE]
         dots=VGroup(*[Dot(ax.c2p(*xy),radius=.045,color=colors[c]) for xy,c in zip(pts,labels)])
         query=Cross(stroke_color=WHITE,stroke_width=3).scale(.07).move_to(ax.c2p(.43,.56))
@@ -214,12 +214,13 @@ class PRML14CurseOfDimensionality(Scene):
         self.two(lambda:Create(cell),lambda:AnimationGroup(FadeIn(count),*[Indicate(d, scale_factor=1) for d,v in zip(dots,inside) if v]))
         answer=jp('予測：種類 A',29,RED).move_to([3.5,-1.45,0])
         self.beat(FadeIn(answer),query.animate.set_color(RED))
-        vec=tex(r'\mathbf{x}=(x_1,x_2,\ldots,x_{12})',34,PURPLE).move_to([0,2.6,0])
+        vec=tex(r'\mathbf{x}=(x_1,x_2,\ldots,x_{10})',34,PURPLE).move_to([0,2.6,0])
         self.remove(note)
-        self.beat(FadeIn(vec))
-        hidden=VGroup(*[Line([2.1+i*.27,-2.2,0],[2.1+i*.27,-.8-.8*(i%3)/2,0],color=PURPLE,stroke_width=5) for i in range(10)])
-        self.remove(answer)
-        self.beat(FadeIn(hidden),Indicate(vec, scale_factor=1))
+        hidden=VGroup(*[Line([2.25+i*.32,-2.15,0],[2.25+i*.32,-1.3-.34*(i%3),0],color=PURPLE,stroke_width=5) for i in range(8)])
+        self.beat(FadeIn(vec),FadeIn(hidden),FadeOut(count),FadeOut(answer))
+        vanished=jp('10座標の近所：0点',28,YELLOW).move_to([3,1.65,0])
+        self.two(lambda:Indicate(hidden,scale_factor=1.12),
+                 lambda:AnimationGroup(FadeIn(vanished),query.animate.set_color(WHITE)))
 
     def grid(self):
         row=VGroup(*[Square(.66,color=BLUE,fill_opacity=.16).move_to([(i-2)*.68,.5,0]) for i in range(5)])
@@ -385,7 +386,7 @@ class PRML14CurseOfDimensionality(Scene):
         self.remove(recap)
         assumption.move_to([3.2,1.25,0])
         center=Dot(ax.c2p(0,0),color=YELLOW,radius=.08)
-        density=jp('一点での密度は中心が最大',25,BLUE).move_to([3.1,.2,0])
+        density=jp('1点での密度は中心が最大',25,BLUE).move_to([3.1,.2,0])
         self.beat(FadeIn(density),Indicate(center,scale_factor=2))
         rad=ValueTracker(.4); unit=np.linalg.norm(ax.c2p(1,0)-ax.c2p(0,0))
         ring=always_redraw(lambda:Annulus(inner_radius=unit*rad.get_value(),outer_radius=unit*(rad.get_value()+.3),color=YELLOW,fill_opacity=.4,stroke_width=0).move_to(ax.c2p(0,0)))
@@ -424,18 +425,15 @@ class PRML14CurseOfDimensionality(Scene):
     def radial_product_aid(self):
         """V02: the same radius samples two separate factors and their product."""
         retained=[m for m in self.mobjects if m is not self.subtitle]
-        frame=RoundedRectangle(width=11,height=5.4,corner_radius=.12,
-                               stroke_color=MUTED,stroke_width=1.2,
-                               fill_color=BG,fill_opacity=1).move_to([0,.05,0])
-        heading=jp('半径ごとの量 = 二つの因子の積',25).move_to([-1.5,2.36,0])
+        heading=jp('半径ごとの量 = 2つの因子の積',25).move_to([-1.5,2.36,0])
         condition=tex(r'D=2,\quad\sigma=1',25).move_to([3.55,2.36,0])
-        note=jp('説明用の例：上二段は定数を省略した因子',20,MUTED).move_to([0,-2.32,0])
+        note=jp('説明用の例：上2段は定数を省略した因子',20,MUTED).move_to([0,-2.32,0])
         r=ValueTracker(.3)
         funcs=[lambda v:np.exp(-v*v/2),lambda v:v,lambda v:v*np.exp(-v*v/2)]
         colors=[AID_INPUT,AID_OPERATION,AID_RESULT]
         labels=['密度の減少','輪の広さの増加','半径の密度']
         formulas=[r'e^{-r^2/2}',r'r',r'p(r)=r e^{-r^2/2}']
-        groups=VGroup(frame,heading,condition,note)
+        groups=VGroup(heading,condition,note)
         axs=[]
         for y,maximum,func,col,label,formula in zip([1.,-.3,-1.6],[1.,3.,.8],funcs,colors,labels,formulas):
             ax=Axes(x_range=[0,3,1],y_range=[0,maximum,maximum],x_length=4.8,y_length=.8,
@@ -531,3 +529,51 @@ class PRML14CurseOfDimensionality(Scene):
         self.beat(theta.animate.set_value(.25))
         target=jp('向きの予測に効く自由度 1',27,YELLOW).move_to([2.5,1.8,0])
         self.beat(ReplacementTransform(vector,target),x.animate.set_value(0),y.animate.set_value(0),theta.animate.set_value(.5))
+
+    def return_to_query(self):
+        """Resolve the opening question with exactly the same observations."""
+        ax,axes=self.graph_axes([0,1,.25],[0,1,.25],center=(-1.7,0,0),width=5,height=3.8,xlabel='x_1',ylabel='x_2')
+        points,labels=class_data()
+        colors=[RED,GREEN,BLUE]
+        dots=VGroup(*[Dot(ax.c2p(*xy),radius=.043,color=colors[label]).set_opacity(.25)
+                      for xy,label in zip(points,labels)])
+        query=Cross(stroke_color=WHITE,stroke_width=3).scale(.07).move_to(ax.c2p(.43,.56))
+        cell=Polygon(ax.c2p(.2,.4),ax.c2p(.6,.4),ax.c2p(.6,.8),ax.c2p(.2,.8),
+                     color=YELLOW,fill_opacity=.04)
+        dimension=ValueTracker(10)
+        masks=class_neighborhood_masks()
+        counts=class_neighborhood_counts()
+        def current_index():
+            return int(np.clip(np.round(dimension.get_value()),2,10))-2
+        nearby=always_redraw(lambda:VGroup(*[
+            Dot(ax.c2p(*xy),radius=.059,color=colors[label])
+            for xy,label,yes in zip(points,labels,masks[current_index()]) if yes]))
+        counter=meter('n=',lambda:int(counts[current_index()].sum()),[3.2,.55,0],YELLOW,0)
+        count_name=jp('近所の点',23,YELLOW).next_to(counter,UP,buff=.18)
+        d_label=meter('D=',lambda:current_index()+2,[3.1,1.65,0],PURPLE,0)
+        slider=self.slider(dimension,2,10,[3.1,-1.05,0],width=3.8,ticks=[2,6,10])
+        self.add(axes,dots,cell,nearby,query,counter,count_name,d_label,slider)
+        self.beat(Indicate(query,scale_factor=1.5),Indicate(counter,scale_factor=1))
+        note=jp('追加8座標は色と無関係',24,PURPLE).move_to([2.9,2.5,0])
+        self.beat(FadeIn(note),Indicate(slider,scale_factor=1))
+        self.two(lambda:AnimationGroup(FadeOut(note),dimension.animate.set_value(2)),
+                 lambda:Indicate(counter,scale_factor=1.18))
+        breakdown=jp('A: 22点   B: 12点   C: 0点',25,YELLOW).move_to([2.7,-.15,0])
+        answer=jp('予測：種類 A',28,RED).move_to([2.8,-1.85,0])
+        self.two(lambda:FadeIn(breakdown),
+                 lambda:AnimationGroup(FadeIn(answer),query.animate.set_color(RED)))
+        insight=jp('答えに効く座標を使う',25,GREEN).move_to([2.85,2.5,0])
+        next_question=jp('次は、予測から決定へ',23,MUTED).move_to([2.85,-2.45,0])
+        self.two(lambda:FadeIn(insight),lambda:FadeIn(next_question))
+
+
+class PRML14StoryPreview(PRML14CurseOfDimensionality):
+    """Review the opening and the return to the same observation."""
+    def construct(self):
+        self.camera.background_color=BG
+        self.timeline=[]
+        self.manifest={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
+        for index,method in [(0,self.classify),(8,self.return_to_query)]:
+            self.begin(index)
+            method()
+            assert self.beat_index==len(self.story['beats']),self.story['id']
