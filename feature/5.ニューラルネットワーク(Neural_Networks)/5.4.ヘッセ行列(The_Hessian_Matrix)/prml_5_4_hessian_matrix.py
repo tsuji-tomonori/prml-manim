@@ -63,6 +63,32 @@ class PRML54HessianMatrix(NarratedScene):
         ax.x_axis.remove(ax.x_axis.numbers);ax.y_axis.remove(ax.y_axis.numbers)
         return ax
 
+    def error_axes(self):
+        # Both ranges are negative: Axes puts the zero crossing at the top right.
+        # Keep its coordinate conversion and draw the visible axes at the lower left.
+        ax=Axes(x_range=(-8,-1,1),y_range=(-10,0,2),x_length=8.2,y_length=3.1,
+                tips=False,axis_config=dict(include_numbers=False)).move_to([-.5,-.15,0])
+        ax.set_opacity(0)
+        bottom_left=ax.c2p(-8,-10)
+        bottom_right=ax.c2p(-1,-10)
+        top_left=ax.c2p(-8,0)
+        x_line=Line(bottom_left,bottom_right,color=MUTED,stroke_width=1.5)
+        y_line=Line(bottom_left,top_left,color=MUTED,stroke_width=1.5)
+        visible=VGroup(x_line,y_line)
+        for value in range(-8,0):
+            point=ax.c2p(value,-10)
+            visible.add(Line(point+UP*.06,point+DOWN*.06,color=MUTED,stroke_width=1.5),
+                        tex(str(value),19,MUTED).next_to(point,DOWN,buff=.13))
+        for value in range(-10,1,2):
+            point=ax.c2p(-8,value)
+            visible.add(Line(point+LEFT*.06,point+RIGHT*.06,color=MUTED,stroke_width=1.5),
+                        tex(str(value),19,MUTED).next_to(point,LEFT,buff=.13))
+        x_label=tex(r'\log_{10}\epsilon',25).next_to(x_line,RIGHT,buff=.16)
+        y_label=VGroup(tex(r'\log_{10}|',25),jp('誤差',23),tex('|',25)).arrange(RIGHT,buff=.02)
+        y_label.next_to(y_line,UP,buff=.13).align_to(y_line,LEFT)
+        self.add(ax,visible,x_label,y_label)
+        return ax
+
     def question(self):
         k=ValueTracker(OPENING_K);s=ValueTracker(0)
         ax=self.plot_axes(x=(-1.3,.6,.5),y=(0,3,1),width=8,height=3.4,labels=('s','E'))
@@ -117,7 +143,9 @@ class PRML54HessianMatrix(NarratedScene):
         self.add(other,cross,number(r'\lambda=',lam.get_value,(4,.2,0),RED))
         self.equation(r'g=0:\quad E-E_0=\tfrac12\lambda s^2')
         self.beat(actions=[lambda:lam.animate.set_value(-1),lambda:Indicate(other,color=BLUE)])
-        self.equation(r'g=0,\ \lambda_i>0\ \forall i\Rightarrow\text{local minimum}',size=30)
+        minimum=self.equation(r'g=0,\ \lambda_i>0\ \forall i\Rightarrow',size=30)
+        minimum.add(jp('局所最小',27).next_to(minimum,RIGHT,buff=.18))
+        minimum.move_to([0,2.48,0])
         self.beat(actions=[lambda:lam.animate.set_value(1),lambda:self.reveal_equation(r'H\in\mathbb{R}^{W\times W}:\quad W^2',size=36)])
 
     def diagonal(self):
@@ -136,7 +164,9 @@ class PRML54HessianMatrix(NarratedScene):
         labels=VGroup(tex(r'q_j=\partial^2E_n/\partial a_j^2',25),tex(r'\delta_k=\partial E_n/\partial a_k',25)).arrange(DOWN,buff=.25).move_to([3,-1.4,0])
         self.add(labels)
         self.beat(actions=[lambda:c.animate.set_value(0),lambda:Indicate(labels,color=YELLOW)])
-        self.equation(r'\text{recursive diagonal approximation}: O(W)\qquad (5.81)',size=28)
+        approximation=self.equation(r'O(W)\qquad (5.81)',size=28)
+        approximation.add(jp('対角の再帰近似：',25).next_to(approximation,LEFT,buff=.16))
+        approximation.move_to([0,2.48,0])
         self.beat(actions=[lambda:c.animate.set_value(2),lambda:c.animate.set_value(0)])
 
     def outer(self):
@@ -197,7 +227,7 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:Create(dots),lambda:Indicate(dots,color=YELLOW)])
         self.beat(actions=[lambda:eps.animate.set_value(.04),lambda:eps.animate.set_value(.015)])
         self.body_clear()
-        ax=self.plot_axes(x=(-8,-1,1),y=(-10,0,2),width=8.2,height=3.1,labels=(r'\log_{10}\epsilon',r'\log_{10}|\mathrm{error}|'))
+        ax=self.error_axes()
         powers=np.linspace(-8,-1,100)
         errors=np.array([max(abs(finite_hessian(WEIGHTS,10**p)[0,1]-net()['H'][0,1]),1e-11) for p in powers])
         points=np.column_stack([powers,np.log10(errors)])
@@ -235,7 +265,8 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:Indicate(network[0],color=YELLOW,scale_factor=1),lambda:Indicate(VGroup(mat[0][1],mat[0][2]),color=YELLOW)])
         self.equation(r'H=bb^{\mathsf T}+r\nabla^2 y,\quad b=\nabla y')
         self.beat(actions=[lambda:u.animate.set_value(.2),lambda:u.animate.set_value(1.1)])
-        self.equation(r'\text{bias}: x_0=z_0=1,\qquad H\ \text{full}:O(W^2)',size=30)
+        bias=self.equation(r'x_0=z_0=1,\qquad H:O(W^2)',size=30)
+        bias.add(jp('バイアス入力・全行列',21).next_to(bias,DOWN,buff=.08))
         self.beat(actions=[lambda:u.animate.set_value(.7),lambda:Indicate(mat,color=GREEN)])
 
     def product(self):
@@ -275,7 +306,11 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:angle.animate.set_value(PI),lambda:angle.animate.set_value(2*PI+.7)])
 
     def cost_plot(self,cubic=False):
-        ax=self.plot_axes(x=(1,10,3),y=(0,3 if cubic else 2,1),width=7.6,height=3,labels=('W',r'\log_{10}(\mathrm{cost})'))
+        ax=self.plot_axes(x=(1,10,3),y=(0,3 if cubic else 2,1),width=7.6,height=3,labels=('W',''))
+        self.remove(ax.axis_labels[1])
+        cost_label=VGroup(tex(r'\log_{10}(',25),jp('計算量',23),tex(')',25)).arrange(RIGHT,buff=.02)
+        cost_label.move_to(ax.get_corner(UL)+UP*.33+RIGHT*.35)
+        self.add(cost_label)
         powers=[3,2] if cubic else [2,1]
         lines=VGroup(*[curve(ax,lambda w,p=p:p*np.log10(w),color=c) for p,c in zip(powers,[RED,BLUE])])
         t=ValueTracker(2);dots=always_redraw(lambda:VGroup(*[Dot(ax.c2p(t.get_value(),p*np.log10(t.get_value())),color=c) for p,c in zip(powers,[RED,BLUE])]))
@@ -291,7 +326,9 @@ class PRML54HessianMatrix(NarratedScene):
             vec=VGroup(*[Square(size*.85,color=YELLOW,fill_opacity=.4).move_to([3,.2+(i-(n-1)/2)*size,0]) for i in range(n)])
             return VGroup(full,vec)
         grid=always_redraw(cells);self.add(grid,number('W=',count.get_value,(0,-2.2,0),places=0))
-        self.equation(r'H:W^2\ \text{entries}',r'\qquad Hv:W\ \text{entries}')
+        entries=self.equation(r'H:W^2',r'\qquad Hv:W')
+        entries.add(jp('成分数：',24).next_to(entries,LEFT,buff=.2))
+        entries.move_to([0,2.48,0])
         self.beat(actions=[lambda:count.animate.set_value(8),lambda:Indicate(grid,color=YELLOW)])
         self.body_clear();self.cost_plot()
         self.equation(r'H:O(W^2),\qquad Hv:O(W)')
