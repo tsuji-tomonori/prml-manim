@@ -51,6 +51,20 @@ def main():
     wrong=jacobian(cw,cx)@cw
     correction_difference=float(np.max(abs(wrong-activation)));assert correction_difference>.1
     mean=output(w,GRID);vv=variance(w,cov,GRID)
+    # The opening guess and final answer use the identical unobserved input.
+    probe_x=2.35
+    assert probe_x>X[:,0].max()
+    probe_mean=float(output(w,[probe_x])[0])
+    probe_weight_variance=float(variance(w,cov,[probe_x])[0])
+    probe_noise_variance=1/BETA
+    probe_sd=float(np.sqrt(probe_weight_variance+probe_noise_variance))
+    probe_interval=[probe_mean-2*probe_sd,probe_mean+2*probe_sd]
+    assert round(probe_mean,3)==.636
+    assert round(probe_weight_variance,4)==.0477
+    assert round(probe_noise_variance,4)==.0156
+    assert round(probe_sd,3)==.252
+    assert [round(v,3) for v in probe_interval]==[.133,1.140]
+    assert 2*probe_sd>.1
     xx=np.linspace(-2,2,25);yy=np.linspace(-2,2,23);gx,gy=np.meshgrid(xx,yy)
     segments=contours(xx,yy,gx+2*gy,.3)
     contour_error=float(max(np.max(abs(seg[:,0]+2*seg[:,1]-.3)) for seg in segments))
@@ -70,6 +84,9 @@ def main():
         sigmoid_integral=actual,sigmoid_quadrature_difference=abs(actual-independent),sigmoid_kappa=float(expit(2*kappa(9))),
         sigmoid_kappa_error=float(abs(expit(2*kappa(9))-actual)),erratum_5190_difference=correction_difference,
         regression_variance_at_x=dict(zip(map(str,x),pred.tolist())),
+        opening_probe=dict(x=probe_x,mean=probe_mean,weight_variance=probe_weight_variance,
+                           noise_variance=probe_noise_variance,sd=probe_sd,
+                           two_sd_interval=probe_interval,opening_half_width=.1),
         band_min=float((mean-2*np.sqrt(vv+1/BETA)).min()),band_max=float((mean+2*np.sqrt(vv+1/BETA)).max()),
         alpha_updates=d['history_alpha'].tolist(),beta_updates=d['history_beta'].tolist(),gamma_updates=d['history_gamma'].tolist())
     (ROOT/'numerical_validation.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

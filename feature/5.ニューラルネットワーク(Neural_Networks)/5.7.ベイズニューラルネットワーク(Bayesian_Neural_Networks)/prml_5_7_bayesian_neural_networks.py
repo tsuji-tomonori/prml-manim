@@ -15,6 +15,11 @@ NOISE=ManimColor('#FFB45B'); MAP=ManimColor('#FF6B77'); GOLD=ManimColor('#FFE079
 D=np.load(Path(__file__).with_name('model_data.npz'))
 W=D['w']; COV=D['cov']; A=D['A']; EIG,U=np.linalg.eigh(A)
 MEAN=output(W,GRID); VAR=variance(W,COV,GRID)
+PROBE_X=2.35
+PROBE_MEAN=float(output(W,[PROBE_X])[0])
+PROBE_WEIGHT_VAR=float(variance(W,COV,[PROBE_X])[0])
+PROBE_NOISE_VAR=1/BETA
+PROBE_SD=float(np.sqrt(PROBE_WEIGHT_VAR+PROBE_NOISE_VAR))
 
 def line(ax,x,y,color=POST,width=3,opacity=1):
     origin=ax.c2p(0,0)
@@ -98,15 +103,27 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         dots=self.dots(ax);curve=line(ax,GRID,MEAN,MAP)
         self.legend([('観測',DATA),('代表の予測',MAP),('重みの候補',POST)])
         self.beat(FadeIn(dots),Create(curve))
-        x=ValueTracker(0);scan=self.scan(ax,x);self.add(scan)
-        self.beat(x.animate.set_value(2.35))
-        tweak=ValueTracker(0);getter=lambda:W+np.eye(7)[0]*tweak.get_value()
+        x=ValueTracker(0)
+        tweak=ValueTracker(0)
+        getter=lambda:W+np.eye(7)[0]*tweak.get_value()
+        guide=always_redraw(lambda:VGroup(
+            DashedLine(ax.c2p(x.get_value(),-1.95),ax.c2p(x.get_value(),1.95),
+                       color=GOLD,dash_length=.09,stroke_width=1.4),
+            Dot(ax.c2p(x.get_value(),float(output(getter(),[x.get_value()])[0])),color=GOLD,radius=.07)))
+        guess=Line(ax.c2p(PROBE_X,PROBE_MEAN-.1),ax.c2p(PROBE_X,PROBE_MEAN+.1),
+                   color=GOLD,stroke_width=8)
+        guess_label=jp('予想：上下0.1',21,GOLD).move_to([4.5,1.65,0])
+        self.add(guide)
+        self.beat(x.animate.set_value(PROBE_X),FadeIn(guess),FadeIn(guess_label),
+                  self.eq(r'x_*=2.35,\quad y(x_*,w_{\rm MAP})=0.636'))
+        self.remove(guess,guess_label)
         curve.add_updater(lambda m:m.become(line(ax,GRID,output(getter(),GRID),MAP)))
         net=self.network(getter);self.add(net);self.slider(tweak,-.14,.14,r'\Delta w_1',pos=(4.2,-.9,0),width=1.8)
         self.beat(tweak.animate.set_value(.14).set_rate_func(there_and_back))
         samples=VGroup(*[line(ax,GRID,output(w,GRID),POST,1.5,.48) for w in D['samples']])
         self.beat(LaggedStart(*[Create(m) for m in samples],lag_ratio=.12))
-        self.beat(x.animate.set_value(-2.35))
+        x.set_value(-2.35)
+        self.beat(x.animate.set_value(PROBE_X))
         self.curves_recap()
         self.beat(x.animate.set_value(.5),self.eq(r'p(t\mid x,D)=',r'\int p(t\mid x,w)',r'p(w\mid D)\,dw'))
 
@@ -122,7 +139,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(precision.animate.set_value(ALPHA),self.eq(r'p(t\mid x,w,\beta)=',r'\mathcal N(t\mid y(x,w),',r'\beta^{-1})'))
         energies=np.array([BETA*np.sum((output(W+(s-coordinate)*direction,X)-T)**2)/2 for s in grid]);like=np.exp(-energies+energies.min())
         lc=line(ax,grid,like,NOISE)
-        self.beat(Create(lc),self.eq(r'p(D\mid w,\beta)=\prod_n\mathcal N(t_n\mid y(x_n,w),\beta^{-1})'),self.note_anim('他の座標を固定した、重み空間の一本の軸'))
+        self.beat(Create(lc),self.eq(r'p(D\mid w,\beta)=\prod_n\mathcal N(t_n\mid y(x_n,w),\beta^{-1})'),self.note_anim('他の座標を固定した、重み空間の1本の軸'))
         power=ValueTracker(0)
         full=np.linspace(-12,12,2401)
         efull=np.array([BETA*np.sum((output(W+(s-coordinate)*direction,X)-T)**2)/2 for s in full])
@@ -158,7 +175,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(angle.animate.set_value(.55),self.note_anim('曲がり方が大きい方向 → 幅が狭い',GOLD))
         self.beat(angle.animate.set_value(0),self.note_anim('曲がり方が小さい方向 → 幅が広い',POST))
         self.beat(Indicate(quad,scale_factor=1),self.eq(r'A=',r'\alpha I',r'+\beta H',r',\quad H=\nabla\nabla\frac12\sum_n(y_n-t_n)^2'))
-        self.beat(self.eq(r'q(w\mid D)=',r'\mathcal N(w\mid w_{\rm MAP},A^{-1})'),self.note_anim('正定値の A が必要。一つの山の近似',PRIOR),angle.animate.set_value(.25))
+        self.beat(self.eq(r'q(w\mid D)=',r'\mathcal N(w\mid w_{\rm MAP},A^{-1})'),self.note_anim('正定値の A が必要。1つの山の近似',PRIOR),angle.animate.set_value(.25))
 
     def project(self):
         ax=self.axes(y=(-1.4,1.4,1),center=(-1.15,.2,0),width=8,height=3.35)
@@ -179,7 +196,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(x.animate.set_value(2.3))
         self.beat(x.animate.set_value(0),self.eq(r'\operatorname{Var}_q[y_{\rm lin}]=',r'g^TA^{-1}g'))
         self.projection_aid()
-        self.beat(theta.animate.set_value(4*PI),self.note_anim('① 重みの分布をガウス化　② 出力を重みについて線形化'))
+        self.beat(theta.animate.set_value(4*PI),self.note_anim('1. 重みの分布をガウス化　2. 出力を重みについて線形化'))
 
     def two_variances(self):
         self.add(jp('復習: 3.3 予測分散',18).move_to([0,2.96,0]))
@@ -213,7 +230,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         like=gaussian(1.2,grid,.35**2)
         prior=always_redraw(lambda:line(ax,grid,gaussian(grid,0,sd.get_value()**2),PRIOR))
         lc=line(ax,grid,like,NOISE);self.add(prior,lc)
-        self.beat(self.eq(r'p(D\mid\alpha,\beta)=',r'\int p(D\mid w,\beta)p(w\mid\alpha)\,dw'),self.note_anim('積分を見るための一変数の説明例'))
+        self.beat(self.eq(r'p(D\mid\alpha,\beta)=',r'\int p(D\mid w,\beta)p(w\mid\alpha)\,dw'),self.note_anim('積分を見るための1変数の説明例'))
         prod=lambda:like*gaussian(grid,0,sd.get_value()**2)
         product=always_redraw(lambda:line(ax,grid,prod(),POST))
         def area():
@@ -327,14 +344,52 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         self.beat(scale.animate.set_value(1),self.note_anim('同じ MAP を固定し、共分散を0倍から1倍へ'))
         self.beat(Indicate(contours,scale_factor=1),self.eq(r'D\ \longrightarrow\ p(w\mid D)\ \longrightarrow\ p(t\mid x,D)'),self.note_anim('代表値とともに、不確かさを予測へ渡す',POST))
 
+        # Resolve the opening question with the same model, input and numeric values.
+        self.clear();self.formula=None;self.note=None
+        self.add(jp('最初の問いへ：右端をどこまで信じる？',34).move_to([0,3.35,0]))
+        ax=self.axes(center=(-1.2,.2,0),width=8,height=3.5)
+        dots=self.dots(ax);curve=line(ax,GRID,MEAN,MAP)
+        guide=DashedLine(ax.c2p(PROBE_X,-1.95),ax.c2p(PROBE_X,1.95),
+                         color=GOLD,dash_length=.09,stroke_width=1.4)
+        guess=Line(ax.c2p(PROBE_X,PROBE_MEAN-.1),ax.c2p(PROBE_X,PROBE_MEAN+.1),
+                   color=GOLD,stroke_width=8)
+        label=jp('最初の予想：上下0.1',21,GOLD).move_to([4.5,1.65,0])
+        quick=lambda t:smooth(min(1.,4*t))
+        self.beat(phases=[
+            ('冒頭と同じ右端を再表示',self.sentence_duration(0),lambda:AnimationGroup(
+                FadeIn(dots,rate_func=quick),Create(curve,rate_func=quick),
+                FadeIn(guide,rate_func=quick),FadeIn(guess,rate_func=quick),
+                FadeIn(label,rate_func=quick),
+                self.eq(r'x_*=2.35,\quad y(x_*,w_{\rm MAP})=0.636'))),
+            ('狭い予想を強調',self.sentence_duration(1),lambda:Indicate(guess,scale_factor=1.35))])
+        weight_band=band(ax,MEAN,np.sqrt(VAR),POST)
+        components=VGroup(
+            jp(f'重みの分散  {PROBE_WEIGHT_VAR:.4f}',20,POST).move_to([4.5,.65,0]),
+            jp(f'観測ノイズ  {PROBE_NOISE_VAR:.4f}',20,NOISE).move_to([4.5,.1,0]))
+        self.beat(phases=[
+            ('分散の2成分を表示',self.sentence_duration(0),lambda:AnimationGroup(
+                FadeIn(weight_band,rate_func=quick),FadeIn(components,rate_func=quick),
+                self.eq(r'\sigma^2(2.35)=',r'0.047663',r'+0.015625',r'=0.063288'))),
+            ('平方根で標準偏差へ',self.sentence_duration(1),lambda:
+                self.eq(r'\sigma(2.35)=\sqrt{0.063288}\simeq0.252'))])
+        total_band=band(ax,MEAN,np.sqrt(VAR+PROBE_NOISE_VAR),DATA)
+        full_range=Line(ax.c2p(PROBE_X,PROBE_MEAN-2*PROBE_SD),
+                        ax.c2p(PROBE_X,PROBE_MEAN+2*PROBE_SD),color=GOLD,stroke_width=8)
+        answer=jp('約95%：0.133〜1.140',22,GOLD).move_to([4.5,-.8,0])
+        self.beat(phases=[
+            ('約95%の範囲を表示',self.sentence_duration(0),lambda:AnimationGroup(
+                ReplacementTransform(weight_band,total_band,rate_func=quick),
+                Transform(guess,full_range,rate_func=quick),
+                FadeIn(answer,rate_func=quick),
+                self.eq(r'0.6364\pm 2(0.2516)\simeq[0.133,\,1.140]'))),
+            ('最初の予想と比べる',self.sentence_duration(1),lambda:Indicate(guess,scale_factor=1.12))])
+
     def body_card(self, label):
         """Suspend the body without changing its trackers or formula references."""
         saved=[m for m in self.mobjects if m is not self.subtitle]
         self.clear();self.subtitle=None
         self.add(jp(self.story['title'],34).move_to([0,3.35,0]),
-                 RoundedRectangle(width=10.6,height=4.8,corner_radius=.12,
-                                  color='#FFFF00',stroke_width=1.2),
-                 jp(label,23).move_to([-4.95,2.08,0],aligned_edge=LEFT))
+                 jp(label,23).move_to([-5.8,2.18,0],aligned_edge=LEFT))
         return saved
 
     def restore_body(self, saved):
@@ -417,7 +472,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
                  jp('説明用の2重み。雲は固定。幅は標準偏差。',19,MUTED).move_to([0,-2.04,0]))
         self.card_phases(
             ('感度1から2で標準偏差2から4へ',lambda:scale.animate.set_value(2)),
-            ('標準偏差を二乗して分散4から16へ',lambda:Write(var)))
+            ('標準偏差を二乗して分散4から16へ',lambda:FadeIn(var,rate_func=lambda t:smooth(min(1.,6*t)))))
         self.restore_body(saved)
 
     def effective_recap(self):
@@ -433,7 +488,7 @@ class PRML57BayesianNeuralNetworks(NarratedScene):
         mapping=VGroup(jp('本編の寄与の棒',19),*[Dot(color=c,radius=.05) for c in colors],
                        tex(r'\to',23),Dot(color=POST)).arrange(RIGHT,buff=.14).move_to([0,-1.67,0])
         self.add(bs,count,tex(r'q_i=\frac{\lambda_i}{\alpha+\lambda_i},\qquad\gamma=\sum_i q_i',28,GOLD).move_to([0,1.48,0]),
-                 jp('説明用の4方向：事前が強いほど0、データが強いほど1',19,MUTED).move_to([0,-1.27,0]),
+                 jp('事前が強い→0、データが強い→1',18,MUTED).move_to([3.5,-.35,0]),
                  jp('今回の更新式は、固有値の変化を無視した近似',20).move_to([0,-2.07,0]))
         self.card_phases(
             ('事前の強さを増やして寄与を縮める',lambda:a.animate.set_value(10)),
