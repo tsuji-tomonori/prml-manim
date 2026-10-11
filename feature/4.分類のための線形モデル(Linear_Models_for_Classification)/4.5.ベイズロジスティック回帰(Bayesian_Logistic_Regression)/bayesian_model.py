@@ -98,4 +98,13 @@ def predict(x, scale=1):
     return sigmoid(kappa(scale*var)*mu)
 
 
+# The same new input is used for the opening prediction and final decision.
+# log(4) is the logit of 0.8, so the MAP prediction is exactly 80%.
+PROBE_X = float((np.log(4) - MAP[0]) / MAP[1])
+PROBE_MU, PROBE_VAR = (float(value[0]) for value in stats([PROBE_X]))
+PROBE_MAP_P = float(sigmoid(PROBE_MU))
+PROBE_INTEGRAL_P = float(predictive_integral(PROBE_MU, PROBE_VAR))
+PROBE_APPROX_P = float(predict([PROBE_X])[0])
+
+
 SAMPLES = np.random.default_rng(45).multivariate_normal(MAP, COV, 10)

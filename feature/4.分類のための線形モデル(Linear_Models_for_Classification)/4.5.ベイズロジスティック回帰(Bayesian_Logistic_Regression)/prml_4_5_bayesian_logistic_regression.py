@@ -9,6 +9,7 @@ from make_voicevox_narration import MANIFEST
 from bayesian_model import (
     X, T, ALPHA, MAP, COV, SW, SV, SAMPLES, sigmoid, normal, cdf,
     design, scalar_density, scalar_energy, stats, kappa, predictive_integral, predict,
+    PROBE_X, PROBE_MAP_P, PROBE_APPROX_P,
 )
 
 RED = ManimColor('#FF7884')
@@ -103,22 +104,30 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         ax = self.axes()
         u = np.linspace(-1.7, 3, 181)
         dots = self.data(ax)
-        note = self.note('観測：青 = 0、赤 = 1　　曲線：赤いクラスの確率')
-        self.beat(FadeIn(dots))
-        b, w = ValueTracker(-.5), ValueTracker(.65)
+        note = self.note('10点の観測　→　新しい入力の赤いクラスの確率は？')
+        probe = DashedLine(ax.c2p(PROBE_X, 0), ax.c2p(PROBE_X, 1), color=YELLOW)
+        probe_label = tex(r'x\simeq1.819', 23, YELLOW).next_to(ax.c2p(PROBE_X, 0), DOWN, buff=.43)
+        self.beat(FadeIn(dots), Create(probe), FadeIn(probe_label))
+        b, w = ValueTracker(float(MAP[0])), ValueTracker(float(MAP[1]))
         line = always_redraw(lambda: curve(ax, u, sigmoid(b.get_value()+w.get_value()*u), RED))
         f = self.equation(r'p(C_1\mid x,w)=\sigma(', r'w_0', '+', r'w_1x', ')',
                           y=-2.65)
         f[1].set_color(PURPLE); f[3].set_color(YELLOW)
         self.remove(note)
+        red_dot = Dot(ax.c2p(PROBE_X, PROBE_MAP_P), color=RED, radius=.09)
+        red_pct = tex(r'80\%', 33, RED).move_to([2.05, 2.38, 0])
+        self.beat(Create(line), FadeIn(red_dot), FadeIn(red_pct))
+        green_dot = Dot(ax.c2p(PROBE_X, PROBE_APPROX_P), color=GREEN, radius=.09)
+        green_pct = tex(r'76\%', 33, GREEN).move_to([4.15, 2.38, 0])
+        arrow = Arrow(red_pct.get_right()+RIGHT*.12, green_pct.get_left()+LEFT*.12,
+                      buff=0, color=YELLOW, stroke_width=3)
+        self.beat(FadeIn(green_dot), GrowArrow(arrow), FadeIn(green_pct))
+        self.remove(red_dot, green_dot, red_pct, green_pct, arrow, probe, probe_label)
         sigmoid_formula = self.equation(r'\sigma(a)=\frac{1}{1+e^{-a}}', y=2.5, size=28)
-        self.beat(Create(line))
-        self.remove(sigmoid_formula)
-        self.add(note)
         s0 = self.slider(b, -1.2, .6, [-2.7, -2.1, 0], 'w_0', PURPLE)
         s1 = self.slider(w, .3, 2, [2.7, -2.1, 0], 'w_1', YELLOW)
-        self.beat(b.animate.set_value(.4), end_sentence=1)
-        self.beat(w.animate.set_value(1.8), end_sentence=1)
+        self.beat(b.animate.set_value(.4), w.animate.set_value(1.8))
+        self.remove(sigmoid_formula)
         self.regression_recap()
         self.remove(line, s0, s1, f)
         cloud = VGroup(*[curve(ax, u, sigmoid(design(u)@v), GREEN, 1.5, .48) for v in SAMPLES])
@@ -128,10 +137,10 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         vertical = always_redraw(lambda: DashedLine(ax.c2p(probe.get_value(), 0),
                                                     ax.c2p(probe.get_value(), 1), color=YELLOW))
         marker = always_redraw(lambda: Dot(ax.c2p(probe.get_value(),
-                                    float(predictive_integral(*stats([probe.get_value()]))[0])),
+                                    float(predict([probe.get_value()])[0])),
                                     color=YELLOW, radius=.08))
         self.add(vertical, marker)
-        self.beat(probe.animate.set_value(2.7))
+        self.beat(probe.animate.set_value(PROBE_X))
 
     def update_posterior(self):
         ax = self.axes((-2, 4, 1), (0, .85, .2), labels=('w', 'p(w)'))
@@ -246,7 +255,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         out = self.axes((-5, 7, 2), (0, .65, .2), (3.1, .1, 0),
                         4.7, 3.2, ('a', 'p(a)'))
         self.add(contours(ax))
-        x = ValueTracker(.3)
+        x = ValueTracker(PROBE_X)
         slider = self.slider(x, -.8, 2, [0, 2.4, 0], 'x', YELLOW, width=2.7)
         phi = lambda: np.array([1, x.get_value()])
         origin = ax.c2p(*MAP)
@@ -265,12 +274,9 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         density = always_redraw(lambda: curve(out, u, normal(u, *[float(v[0]) for v in stats([x.get_value()])]), GREEN))
         self.remove(slider)
         recap = jp("復習: 2.3 ガウス分布の線形変換", 21).move_to([0, 2.45, 0])
-        # Fixed box avoids invisible space glyphs expanding Text bounds.
-        border = RoundedRectangle(width=5.0, height=.55, corner_radius=.08,
-                                  color="#FFFF00", stroke_width=1.2).move_to([0,2.45,0])
-        self.add(recap, border)
+        self.add(recap)
         self.beat(Create(density))
-        self.remove(recap, border)
+        self.remove(recap)
         self.add(slider)
         self.remove(f)
         f = self.equation(r'\mu_a=w_{\mathrm{MAP}}^{\mathsf T}\phi',
@@ -278,7 +284,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         f[0].set_color(RED); f[1].set_color(GREEN)
         self.beat(x.animate.set_value(1.1), start_sentence=1)
         self.beat(x.animate.set_value(2), start_sentence=1)
-        self.beat(x.animate.set_value(-.8))
+        self.beat(x.animate.set_value(PROBE_X))
 
     def average(self):
         ax = self.axes((-7, 11, 3), (0, 1.05, .5), width=8.8, pos=(-.65, .15, 0),
@@ -370,8 +376,13 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         line = always_redraw(lambda: curve(ax, u, predict(u, scale.get_value()), GREEN))
         self.add(self.data(ax), base, line)
         note = self.note('赤：MAP　　緑：ラプラス近似＋予測積分の近似')
+        note.move_to([0, 2.75, 0])
         f = self.equation(r'p(C_1\mid\phi,\mathbf t)\simeq\sigma(\kappa(\sigma_a^2)\mu_a)')
-        self.beat(scale.animate.set_value(1), start_sentence=1)
+        probe = DashedLine(ax.c2p(PROBE_X, 0), ax.c2p(PROBE_X, 1), color=YELLOW)
+        probe_label = tex(r'x\simeq1.819', 23, YELLOW).next_to(ax.c2p(PROBE_X, 0), DOWN, buff=.23)
+        comparison = tex(r'80\%\;\longrightarrow\;76\%', 28, GREEN).move_to([-3.25, 2.2, 0])
+        self.beat(scale.animate.set_value(1), Create(probe), FadeIn(probe_label),
+                  FadeIn(comparison), start_sentence=1)
         boundary = -MAP[0]/MAP[1]
         horizontal = DashedLine(ax.c2p(-1.7,.5),ax.c2p(3,.5),color=MUTED)
         vertical = DashedLine(ax.c2p(boundary,0),ax.c2p(boundary,1),color=YELLOW)
@@ -391,7 +402,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
             ax.c2p(3, threshold.get_value()), RIGHT, buff=.15))
         self.add(horizontal, points, threshold_label)
         self.beat(threshold.animate.set_value(.8), end_sentence=1)
-        self.remove(horizontal, points, threshold_label)
+        self.remove(horizontal, points, threshold_label, comparison)
         self.beat(scale.animate.set_value(.05), Indicate(vertical, color=YELLOW))
         self.remove(f)
         f = self.equation(r'w_{\mathrm{MAP}},S_N', r'\longrightarrow',
@@ -400,7 +411,9 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         f[0].set_color(PURPLE); f[2].set_color(YELLOW); f[4].set_color(GREEN)
         self.beat(scale.animate.set_value(1), Circumscribe(f, color=GREEN))
         cloud = VGroup(*[curve(ax, u, sigmoid(design(u)@v), GREEN, 1.2, .23) for v in SAMPLES])
-        self.beat(Create(cloud), ShowPassingFlash(line.copy().clear_updaters().set_stroke(GREEN, 5), time_width=.35))
+        self.add(comparison)
+        self.beat(Create(cloud), Circumscribe(comparison, color=GREEN),
+                  ShowPassingFlash(line.copy().clear_updaters().set_stroke(GREEN, 5), time_width=.35))
 
 
     def body_card(self, label):
@@ -408,9 +421,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         saved = [m for m in self.mobjects if m is not self.subtitle]
         self.clear()
         self.add(*[m for m in saved if m.get_center()[1] > 3])
-        frame = RoundedRectangle(width=10.4, height=4.45, corner_radius=.12,
-                                 color='#FFFF00', stroke_width=1.2).move_to([0, .1, 0])
-        self.add(frame, jp(label, 23).move_to([-4.85, 2.02, 0], aligned_edge=LEFT))
+        self.add(jp(label, 23).move_to([-4.85, 2.02, 0], aligned_edge=LEFT))
         return saved
 
     def restore_body(self, saved):
@@ -457,7 +468,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         bell = always_redraw(lambda:curve(right,xx,normal(xx,0,1/a.get_value()),red))
         width = always_redraw(lambda:Line(right.c2p(-1/np.sqrt(a.get_value()),.12),
                                          right.c2p(1/np.sqrt(a.get_value()),.12),color=gold,stroke_width=4))
-        self.add(jp('説明用の一変数：谷底の近く、曲率は正',19,MUTED).move_to([0,1.45,0]),
+        self.add(jp('説明用の1変数：谷底の近く、曲率は正',19,MUTED).move_to([0,1.45,0]),
                  tex(r'h(z)\simeq\tfrac12Az^2',26,red).move_to([-2.7,-1.65,0]),
                  tex(r'\mathrm{Var}[z]=A^{-1}',26,red).move_to([2.6,-1.65,0]))
         mapping = tex(r'A>0\quad\longrightarrow\quad H>0',25,gold).move_to([0,2.6,0])
@@ -471,7 +482,7 @@ class PRML45BayesianLogisticRegression(NarratedScene):
         self.restore_body(saved)
 
     def precision_aid(self):
-        saved = self.body_card('補足: 観測一つが加える精度')
+        saved = self.body_card('補足: 観測1つが加える精度')
         blue, yellow, green, purple = '#58C4DD', '#FFFF00', '#83C167', '#9A72AC'
         self.add(jp('説明用の例：特徴 (1, 2)、予測確率 0.5',20,MUTED).move_to([0,1.45,0]))
         column = Matrix([['1'],['2']],v_buff=.65).scale(.65).set_color(blue)
