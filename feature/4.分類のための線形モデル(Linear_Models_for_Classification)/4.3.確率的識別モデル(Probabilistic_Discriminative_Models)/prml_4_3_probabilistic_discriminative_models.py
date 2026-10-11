@@ -94,9 +94,12 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(alpha.animate.set_value(0),Transform(stage,ax))
         self.remove(recap)
         self.add(oldnames)
-        coincident=VGroup(Dot(ax.c2p(.25,.2),radius=.13,color=RED_CLASS),Dot(ax.c2p(.25,.2),radius=.075,color=BLUE_CLASS))
+        coincident_center=ax.c2p(.23,.23)
+        coincident=VGroup(Dot(coincident_center,radius=.12,color=RED_CLASS),
+                          Dot(coincident_center,radius=.07,color=BLUE_CLASS))
+        highlight=Circle(radius=.19,color=WHITE,stroke_width=2).move_to(coincident_center)
         self.add(coincident)
-        self.beat(Indicate(coincident,color=WHITE,scale_factor=1.7))
+        self.beat(Create(highlight))
         self.equation(r'\phi=(1,x_1^2,x_2^2)^T',r'\qquad w=(1,-1,-1)^T')
         self.beat(Indicate(edge.copy(),color=YELLOW_ACC,scale_factor=1.05))
 
@@ -145,7 +148,8 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.add(loss_num);self.equation(r'y=\sigma(w_1x)',r'\qquad w_1\uparrow')
         self.beat(k.animate.set_value(5))
         self.beat(k.animate.set_value(20))
-        self.equation(r'\|w\|\to\infty',r'\qquad E\to0',r'\quad\text{(separable)}')
+        formula=self.equation(r'\|w\|\to\infty',r'\qquad E\to0')
+        formula.add(jp('（完全分離）',24).next_to(formula,RIGHT,buff=.22))
         self.beat(boundary.animate.set_value(.12))
         self.remove(loss_num,slider)
         lam=ValueTracker(.015)
@@ -260,7 +264,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(a.animate.set_value(0))
         scale=ValueTracker(1)
         logistic=always_redraw(lambda:curve(ax,lambda x:sigmoid(scale.get_value()*x),color=YELLOW_ACC))
-        self.add(logistic);self.equation(r'\Phi(a)\quad\text{vs.}\quad\sigma(1.7a)',size=34)
+        self.add(logistic);self.equation(r'\Phi(a)\approx\sigma(1.7a)',size=34)
         self.beat(scale.animate.set_value(1.7))
 
     def outliers(self):
@@ -272,7 +276,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.add(curve(ax,logloss,color=YELLOW_ACC),dot,note('記録ラベル t=1　／　点数 a<0：赤に不利'))
         self.equation(r'E_n=-\ln P(t=1|a)',size=36)
         self.beat(distance.animate.set_value(3))
-        self.add(curve(ax,probitloss,color=PURPLE_ACC),note('黄：logistic（1.7倍）　紫：probit',at=(0,1.7,0)))
+        self.add(curve(ax,probitloss,color=PURPLE_ACC),note('黄：ロジスティック（1.7倍）　紫：プロビット',at=(0,1.7,0)))
         self.beat(distance.animate.set_value(5))
         self.remove(*[m for m in self.mobjects if m is not self.formula and m is not self.subtitle and m.get_center()[1]<2.2])
         ax=self.plot_axes(x=(-6,6,3),labels=('a','P(t_{obs}=1|a)'))
