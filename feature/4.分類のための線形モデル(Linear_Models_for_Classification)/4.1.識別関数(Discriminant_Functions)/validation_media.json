@@ -8,26 +8,26 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "576.398700"
+        "duration": "613.798700"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "576.426667"
+        "duration": "613.824000"
       }
     ],
     "format": {
-      "duration": "576.427000",
-      "size": "13481785"
+      "duration": "613.824000",
+      "size": "14293416"
     }
   },
-  "stream_duration_difference": 0.02796699999998964,
+  "stream_duration_difference": 0.025299999999901956,
   "long_silence_count": 0,
   "mean_volume": -26.3,
-  "max_volume": -6.1,
-  "max_scene_wav_drift": 3.183231456205249e-11,
-  "max_cue_wav_drift": 2.347633198951371e-11,
-  "sha256": "b60972ade2097180b19ae4ccae0cc4d48d26aaa95939ad61e16552a858fb81c0",
+  "max_volume": -6.4,
+  "max_scene_wav_drift": 3.61808361049043e-11,
+  "max_cue_wav_drift": 2.7831958959723124e-11,
+  "sha256": "2551d3c80fc447468daef371baed40fea0d9f5724fded4c295761f4e8a8a4726",
   "full_listening": false
 }

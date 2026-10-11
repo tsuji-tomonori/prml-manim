@@ -75,6 +75,26 @@ class PRML41DiscriminantFunctions(NarratedScene):
         m=MathTex(*parts,font_size=size).move_to(pos);return m
 
     def geometry(self):
+        title=self.mobjects[0]
+        self.hint('正しく分けた橙の点を動かすと？')
+        teaser_ax=self.axes(xr=(-2.6,2.4,1),yr=(-4.2,1.8,1),width=3.5,height=4.2,center=(-2.6,.1,0))
+        teaser_amount=ValueTracker(0)
+        teaser_W=lambda:least_squares(ls_data(teaser_amount.get_value()))
+        teaser_dots=always_redraw(lambda:cloud(teaser_ax,ls_data(teaser_amount.get_value())))
+        teaser_line=always_redraw(lambda:boundary(teaser_ax,teaser_W()[:,0]-teaser_W()[:,1]))
+        teaser_probe=Dot(teaser_ax.c2p(0,0),color=WHITE,radius=.085)
+        teaser_ring=always_redraw(lambda:Circle(radius=.17,
+            color=COLORS[int(np.argmax(scores(np.array([0,0]),teaser_W())))]).move_to(teaser_probe))
+        self.add(teaser_dots,teaser_line,teaser_probe,teaser_ring,
+                 jp('白い点 (0, 0)',24).move_to([3.45,1.8,0]),
+                 readout('y_1=',lambda:scores(np.array([0,0]),teaser_W())[0,0],[3.45,.8,0],BLUE_CLS,3),
+                 readout('y_2=',lambda:scores(np.array([0,0]),teaser_W())[0,1],[3.45,0,0],ORANGE_CLS,3))
+        self.beat(phases=[
+            ('predict white point',self.sentence_duration(0),lambda:Flash(teaser_probe,color=YELLOW_W)),
+            ('move correctly classified orange points',self.sentence_duration(1),
+             lambda:teaser_amount.animate.set_value(1)),
+        ])
+        self.remove(*[m for m in self.mobjects if m is not self.subtitle and m is not title])
         self.hint('青：クラス1　橙：クラス2　白：調べる入力')
         ax=self.axes();dots=cloud(ax,BASE)
         theta=ValueTracker(.45);bias=ValueTracker(0);px=ValueTracker(.6)
@@ -125,7 +145,7 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.beat(ReplacementTransform(eq,new),r.animate.set_value(.9))
 
     def multiclass(self):
-        self.hint('一つの座標上で、二値の判定から最大スコアへ')
+        self.hint('1つの座標上で、二値の判定から最大スコアへ')
         ax=self.axes();q=Dot(ax.c2p(.5,.6),color=WHITE,radius=.085)
         ambiguous=Polygon(*[ax.c2p(*p) for p in [[0,0],[3.1,0],[3.1,2.1],[0,2.1]]],fill_color=YELLOW_W,fill_opacity=.2,stroke_width=0)
         note=VGroup(jp('青：右側なら正',24,BLUE_CLS),jp('橙：上側なら正',24,ORANGE_CLS),tex(r'C_1>C_2>C_3>C_1',28,YELLOW_W),jp('票が 1：1：1',23)).arrange(DOWN,buff=.32).move_to([3.7,.7,0])
@@ -162,7 +182,14 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.beat(Write(f),FadeIn(labels),ShowPassingFlash(line.copy().clear_updaters(),time_width=.5))
         fit=tex(r'W=\widetilde{X}^{\dagger}T',36,YELLOW_W).move_to([3.5,.35,0])
         self.beat(Write(fit),Circumscribe(labels,color=YELLOW_W))
-        self.add(slider(amount,0,1,[3.5,-.5,0],'s',PURPLE_B));self.beat(amount.animate.set_value(1))
+        probe=Dot(ax.c2p(0,0),color=WHITE,radius=.085)
+        ring=always_redraw(lambda:Circle(radius=.17,
+            color=COLORS[int(np.argmax(scores(np.array([0,0]),W())))]).move_to(probe))
+        blue=readout('y_1=',lambda:scores(np.array([0,0]),W())[0,0],[3.5,-1.25,0],BLUE_CLS,3,23)
+        orange=readout('y_2=',lambda:scores(np.array([0,0]),W())[0,1],[3.5,-1.8,0],ORANGE_CLS,3,23)
+        self.add(probe,ring,blue,orange,slider(amount,0,1,[3.5,-.5,0],'s',PURPLE_B))
+        self.beat(amount.animate.set_value(1))
+        self.remove(probe,ring,blue,orange)
         lossax=Axes(x_range=[-.5,2.2,1],y_range=[0,2.6,1],x_length=2.8,y_length=1.4,tips=False,axis_config={'include_ticks':False,'color':MUTED}).move_to([3.5,-1.45,0])
         z=ValueTracker(1);curve=lossax.plot(lambda x:(x-1)**2,color=ORANGE_CLS)
         marker=always_redraw(lambda:Dot(lossax.c2p(z.get_value(),(z.get_value()-1)**2),color=YELLOW_W))
@@ -223,10 +250,8 @@ class PRML41DiscriminantFunctions(NarratedScene):
         saved=[m for m in self.mobjects if m is not self.subtitle]
         header=[m for m in saved if m.get_center()[1]>3]
         self.clear()
-        frame=RoundedRectangle(width=10.4,height=4.45,corner_radius=.12,
-                               color=AID_OPERATION,stroke_width=1.2).move_to([0,.1,0])
         label=jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT)
-        self.add(*header,frame,label)
+        self.add(*header,label)
         return saved
 
     def restore_body(self,saved):
@@ -450,15 +475,20 @@ class PRML41DiscriminantFunctions(NarratedScene):
         self.beat(Create(cut),Write(f2),Circumscribe(target,color=GREEN_CLS))
 
     def summary(self):
-        self.hint('同じ境界でも、学習で動かす理由が違う')
-        ax=self.axes();amount=ValueTracker(0)
-        dots=always_redraw(lambda:cloud(ax,ls_data(.35*amount.get_value())));self.add(dots)
-        W=lambda:least_squares(ls_data(.35*amount.get_value()))
+        self.hint('冒頭の白い点 (0, 0) から、学習基準を振り返る')
+        ax=self.axes(xr=(-2.6,2.4,1),yr=(-4.2,1.8,1),width=3.5,height=4.2,center=(-2.6,.1,0));amount=ValueTracker(0)
+        dots=always_redraw(lambda:cloud(ax,ls_data(amount.get_value())));self.add(dots)
+        W=lambda:least_squares(ls_data(amount.get_value()))
         line=always_redraw(lambda:boundary(ax,W()[:,0]-W()[:,1]));self.add(line)
-        tag=jp('最小二乗：目標の数へ近づける',27,RED_LINE).move_to([2.8,1.6,0])
-        self.add(tag);self.beat(amount.animate.set_value(1))
-        self.remove(line,tag)
-        summary_groups=ls_data(.35)
+        probe=Dot(ax.c2p(0,0),color=WHITE,radius=.085)
+        ring=always_redraw(lambda:Circle(radius=.17,
+            color=COLORS[int(np.argmax(scores(np.array([0,0]),W())))]).move_to(probe))
+        tag=jp('最小二乗：白い点の答えが反転',25,RED_LINE).move_to([3.35,1.8,0])
+        blue=readout('y_1=',lambda:scores(np.array([0,0]),W())[0,0],[3.45,.8,0],BLUE_CLS,3)
+        orange=readout('y_2=',lambda:scores(np.array([0,0]),W())[0,1],[3.45,0,0],ORANGE_CLS,3)
+        self.add(tag,probe,ring,blue,orange);self.beat(amount.animate.set_value(1))
+        self.remove(line,tag,probe,ring,blue,orange)
+        summary_groups=ls_data(1)
         theta=ValueTracker(.7);u=lambda:direction(theta.get_value())
         arrow=always_redraw(lambda:Arrow(ax.c2p(*(-1.5*u())),ax.c2p(*(1.5*u())),buff=0,color=YELLOW_W))
         proj=always_redraw(lambda:VGroup(*[Dot(ax.c2p(*(u()*(p@u()))),color=COLORS[k],radius=.035) for k,g in enumerate(summary_groups) for p in g]))

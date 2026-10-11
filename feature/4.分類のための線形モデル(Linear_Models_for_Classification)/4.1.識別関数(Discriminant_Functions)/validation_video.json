@@ -2,632 +2,819 @@
   "frames": [
     {
       "label": "scene01 beat 1",
-      "time": 5.328,
+      "time": 10.176,
       "path": "frame-000.png"
     },
     {
       "label": "scene01 beat 2",
-      "time": 13.495999999999993,
+      "time": 22.2933333333333,
       "path": "frame-001.png"
     },
     {
       "label": "scene01 beat 3",
-      "time": 22.15466666666663,
+      "time": 31.562666666666598,
       "path": "frame-002.png"
     },
     {
       "label": "scene01 beat 4",
-      "time": 32.18399999999993,
+      "time": 40.221333333333334,
       "path": "frame-003.png"
     },
     {
-      "label": "scene01-04-01 math",
-      "time": 27.32533333333327,
+      "label": "scene01 beat 5",
+      "time": 50.2506666666671,
       "path": "frame-004.png"
     },
     {
-      "label": "scene01 beat 5",
-      "time": 41.277333333333395,
+      "label": "scene01-04-01 math",
+      "time": 45.392000000000436,
       "path": "frame-005.png"
     },
     {
-      "label": "scene01-05-01 math",
-      "time": 37.33600000000006,
+      "label": "scene01 beat 6",
+      "time": 59.34400000000096,
       "path": "frame-006.png"
     },
     {
-      "label": "scene01 beat 6",
-      "time": 49.81066666666715,
+      "label": "scene01-05-01 math",
+      "time": 55.40266666666763,
       "path": "frame-007.png"
     },
     {
-      "label": "scene02 beat 1",
-      "time": 58.20000000000091,
+      "label": "scene01 beat 7",
+      "time": 69.46133333333472,
       "path": "frame-008.png"
     },
     {
-      "label": "scene02 beat 2",
-      "time": 66.72533333333466,
+      "label": "scene02 beat 1",
+      "time": 78.46666666666768,
       "path": "frame-009.png"
     },
     {
-      "label": "scene02 beat 3",
-      "time": 75.18133333333454,
+      "label": "scene02 beat 2",
+      "time": 86.99200000000053,
       "path": "frame-010.png"
     },
     {
-      "label": "scene02 beat 4",
-      "time": 83.82133333333405,
+      "label": "scene02 beat 3",
+      "time": 95.44800000000005,
       "path": "frame-011.png"
     },
     {
-      "label": "scene02-04-02 math",
-      "time": 83.32533333333404,
+      "label": "scene02 beat 4",
+      "time": 104.08799999999957,
       "path": "frame-012.png"
     },
     {
-      "label": "scene02 beat 5",
-      "time": 93.1306666666669,
+      "label": "scene02-04-02 math",
+      "time": 103.59199999999956,
       "path": "frame-013.png"
     },
     {
-      "label": "scene03 beat 1",
-      "time": 103.67199999999968,
+      "label": "scene02 beat 5",
+      "time": 113.9733333333324,
       "path": "frame-014.png"
     },
     {
-      "label": "scene03 beat 2",
-      "time": 113.35733333333239,
+      "label": "scene03 beat 1",
+      "time": 124.73866666666515,
       "path": "frame-015.png"
     },
     {
-      "label": "scene03 beat 3",
-      "time": 122.79733333333188,
+      "label": "scene03 beat 2",
+      "time": 134.42399999999787,
       "path": "frame-016.png"
     },
     {
-      "label": "scene03 beat 4",
-      "time": 131.51466666666465,
+      "label": "scene03 beat 3",
+      "time": 143.86399999999736,
       "path": "frame-017.png"
     },
     {
-      "label": "scene03 beat 5",
-      "time": 140.2986666666642,
+      "label": "scene03 beat 4",
+      "time": 152.58133333333015,
       "path": "frame-018.png"
     },
     {
-      "label": "scene03 beat 6",
-      "time": 149.42399999999702,
+      "label": "scene03 beat 5",
+      "time": 161.36533333332966,
       "path": "frame-019.png"
     },
     {
-      "label": "scene04 beat 1",
-      "time": 159.4399999999965,
+      "label": "scene03 beat 6",
+      "time": 171.3546666666625,
       "path": "frame-020.png"
     },
     {
-      "label": "scene04 beat 2",
-      "time": 169.48533333332927,
+      "label": "scene04 beat 1",
+      "time": 181.7066666666619,
       "path": "frame-021.png"
     },
     {
-      "label": "scene04 beat 3",
-      "time": 180.13866666666203,
+      "label": "scene04 beat 2",
+      "time": 191.75199999999467,
       "path": "frame-022.png"
     },
     {
-      "label": "scene04 beat 4",
-      "time": 190.25599999999474,
+      "label": "scene04 beat 3",
+      "time": 202.40533333332743,
       "path": "frame-023.png"
     },
     {
-      "label": "scene04 beat 5",
-      "time": 200.1519999999942,
+      "label": "scene04 beat 4",
+      "time": 215.45066666666014,
       "path": "frame-024.png"
     },
     {
-      "label": "scene04 beat 6",
-      "time": 209.74933333332694,
+      "label": "scene04 beat 5",
+      "time": 226.48533333332603,
       "path": "frame-025.png"
     },
     {
-      "label": "scene04 beat 7",
-      "time": 219.26399999999308,
+      "label": "scene04 beat 6",
+      "time": 236.08266666665878,
       "path": "frame-026.png"
     },
     {
-      "label": "scene04 beat 8",
-      "time": 229.18133333332585,
+      "label": "scene04 beat 7",
+      "time": 245.5973333333249,
       "path": "frame-027.png"
     },
     {
-      "label": "scene05 beat 1",
-      "time": 239.39199999999195,
+      "label": "scene04 beat 8",
+      "time": 256.1866666666577,
       "path": "frame-028.png"
     },
     {
-      "label": "scene05 beat 2",
-      "time": 248.36266666665804,
+      "label": "scene05 beat 1",
+      "time": 266.6586666666571,
       "path": "frame-029.png"
     },
     {
-      "label": "scene05 beat 3",
-      "time": 257.59733333332423,
+      "label": "scene05 beat 2",
+      "time": 275.6293333333232,
       "path": "frame-030.png"
     },
     {
-      "label": "scene05 beat 4",
-      "time": 267.75466666665704,
+      "label": "scene05 beat 3",
+      "time": 284.8639999999894,
       "path": "frame-031.png"
     },
     {
-      "label": "scene05 beat 5",
-      "time": 278.53866666665647,
+      "label": "scene05 beat 4",
+      "time": 295.02133333332216,
       "path": "frame-032.png"
     },
     {
-      "label": "scene05-04-02 math",
-      "time": 278.15466666665645,
+      "label": "scene05 beat 5",
+      "time": 305.8053333333216,
       "path": "frame-033.png"
     },
     {
-      "label": "scene05 beat 6",
-      "time": 287.7919999999892,
+      "label": "scene05-04-02 math",
+      "time": 305.4213333333215,
       "path": "frame-034.png"
     },
     {
-      "label": "scene05 beat 7",
-      "time": 293.5119999999887,
+      "label": "scene05 beat 6",
+      "time": 315.0586666666543,
       "path": "frame-035.png"
     },
     {
-      "label": "scene05 beat 8",
-      "time": 302.1439999999884,
+      "label": "scene05 beat 7",
+      "time": 320.7786666666538,
       "path": "frame-036.png"
     },
     {
-      "label": "scene05 beat 9",
-      "time": 309.36799999998783,
+      "label": "scene05 beat 8",
+      "time": 329.4106666666535,
       "path": "frame-037.png"
     },
     {
-      "label": "scene05 beat 10",
-      "time": 317.6426666666542,
+      "label": "scene05 beat 9",
+      "time": 336.63466666665295,
       "path": "frame-038.png"
     },
     {
-      "label": "scene06 beat 1",
-      "time": 326.439999999987,
+      "label": "scene05 beat 10",
+      "time": 345.62933333331927,
       "path": "frame-039.png"
     },
     {
-      "label": "scene06 beat 2",
-      "time": 337.79466666665314,
+      "label": "scene06 beat 1",
+      "time": 354.80266666665204,
       "path": "frame-040.png"
     },
     {
-      "label": "scene06-02-01 math",
-      "time": 332.4559999999865,
+      "label": "scene06 beat 2",
+      "time": 366.19466666665153,
       "path": "frame-041.png"
     },
     {
-      "label": "scene06 beat 3",
-      "time": 347.8906666666524,
+      "label": "scene06-02-01 math",
+      "time": 360.8559999999849,
       "path": "frame-042.png"
     },
     {
-      "label": "scene06 beat 4",
-      "time": 357.5226666666519,
+      "label": "scene06 beat 3",
+      "time": 376.2906666666508,
       "path": "frame-043.png"
     },
     {
-      "label": "scene06 beat 5",
-      "time": 367.46666666665135,
+      "label": "scene06 beat 4",
+      "time": 385.9226666666503,
       "path": "frame-044.png"
     },
     {
-      "label": "scene07 beat 1",
-      "time": 376.98666666665076,
+      "label": "scene06 beat 5",
+      "time": 397.0186666666498,
       "path": "frame-045.png"
     },
     {
-      "label": "scene07 beat 2",
-      "time": 386.7039999999836,
+      "label": "scene07 beat 1",
+      "time": 406.98666666664906,
       "path": "frame-046.png"
     },
     {
-      "label": "scene07 beat 3",
-      "time": 396.13866666664967,
+      "label": "scene07 beat 2",
+      "time": 416.7999999999819,
       "path": "frame-047.png"
     },
     {
-      "label": "scene07 beat 4",
-      "time": 407.0853333333159,
+      "label": "scene07 beat 3",
+      "time": 426.2719999999813,
       "path": "frame-048.png"
     },
     {
-      "label": "scene07 beat 5",
-      "time": 419.06933333331517,
+      "label": "scene07 beat 4",
+      "time": 437.2186666666475,
       "path": "frame-049.png"
     },
     {
-      "label": "scene07-05-02 math",
-      "time": 418.0346666666485,
+      "label": "scene07 beat 5",
+      "time": 450.9786666666468,
       "path": "frame-050.png"
     },
     {
-      "label": "scene08 beat 1",
-      "time": 429.2346666666478,
+      "label": "scene07-05-01 math",
+      "time": 445.1439999999801,
       "path": "frame-051.png"
     },
     {
-      "label": "scene08 beat 2",
-      "time": 440.3146666666473,
+      "label": "scene08 beat 1",
+      "time": 461.83466666664594,
       "path": "frame-052.png"
     },
     {
-      "label": "scene08-02-02 math",
-      "time": 439.47733333331394,
+      "label": "scene08 beat 2",
+      "time": 472.9146666666455,
       "path": "frame-053.png"
     },
     {
-      "label": "scene08 beat 3",
-      "time": 449.74399999997996,
+      "label": "scene08-02-02 math",
+      "time": 472.07733333331214,
       "path": "frame-054.png"
     },
     {
-      "label": "scene08 beat 4",
-      "time": 458.5173333333128,
+      "label": "scene08 beat 3",
+      "time": 482.3439999999781,
       "path": "frame-055.png"
     },
     {
-      "label": "scene08 beat 5",
-      "time": 468.29599999997896,
+      "label": "scene08 beat 4",
+      "time": 491.11733333331097,
       "path": "frame-056.png"
     },
     {
-      "label": "scene08 beat 6",
-      "time": 478.81333333331173,
+      "label": "scene08 beat 5",
+      "time": 500.8959999999771,
       "path": "frame-057.png"
     },
     {
-      "label": "scene08 beat 7",
-      "time": 488.47199999997775,
+      "label": "scene08 beat 6",
+      "time": 511.4133333333099,
       "path": "frame-058.png"
     },
     {
-      "label": "scene09 beat 1",
-      "time": 497.49866666664394,
+      "label": "scene08 beat 7",
+      "time": 521.071999999978,
       "path": "frame-059.png"
     },
     {
-      "label": "scene09 beat 2",
-      "time": 506.04799999997675,
+      "label": "scene09 beat 1",
+      "time": 530.098666666652,
       "path": "frame-060.png"
     },
     {
-      "label": "scene09 beat 3",
-      "time": 514.6879999999762,
+      "label": "scene09 beat 2",
+      "time": 538.6479999999924,
       "path": "frame-061.png"
     },
     {
-      "label": "scene09 beat 4",
-      "time": 523.5173333333134,
+      "label": "scene09 beat 3",
+      "time": 547.2879999999991,
       "path": "frame-062.png"
     },
     {
-      "label": "scene09 beat 5",
-      "time": 533.4879999999871,
+      "label": "scene09 beat 4",
+      "time": 556.1173333333394,
       "path": "frame-063.png"
     },
     {
-      "label": "scene10 beat 1",
-      "time": 543.5999999999955,
+      "label": "scene09 beat 5",
+      "time": 565.6080000000131,
       "path": "frame-064.png"
     },
     {
-      "label": "scene10 beat 2",
-      "time": 553.6000000000034,
+      "label": "scene10 beat 1",
+      "time": 579.4693333333541,
       "path": "frame-065.png"
     },
     {
-      "label": "scene10 beat 3",
-      "time": 563.2160000000114,
+      "label": "scene10 beat 2",
+      "time": 591.0000000000332,
       "path": "frame-066.png"
     },
     {
-      "label": "scene10 beat 4",
-      "time": 573.4506666666855,
+      "label": "scene10 beat 3",
+      "time": 600.6160000000411,
       "path": "frame-067.png"
     },
     {
-      "label": "scene04 review beat 1 phase 0",
-      "time": 151.8499999999965,
+      "label": "scene10 beat 4",
+      "time": 610.8506666667153,
       "path": "frame-068.png"
     },
     {
-      "label": "scene04 review beat 1 phase 1",
-      "time": 152.2499999999965,
+      "label": "scene01 review beat 1 phase 0",
+      "time": 0,
       "path": "frame-069.png"
     },
     {
-      "label": "scene04 review beat 1 phase 2",
-      "time": 162.13333333332986,
+      "label": "scene01 review beat 1 phase 1",
+      "time": 0.25,
       "path": "frame-070.png"
     },
     {
-      "label": "scene04 review beat 1 phase 3",
-      "time": 162.53333333332984,
+      "label": "scene01 review beat 1 phase 2",
+      "time": 13.933333333333334,
       "path": "frame-071.png"
     },
     {
-      "label": "scene04 review beat 1 phase 4",
-      "time": 152.7333333333298,
+      "label": "scene01 review beat 1 phase 3",
+      "time": 14.333333333333332,
       "path": "frame-072.png"
     },
     {
-      "label": "scene04 review beat 1 phase 5",
-      "time": 155.23333333332965,
+      "label": "scene01 review beat 1 phase 4",
+      "time": 3.73333333333333,
       "path": "frame-073.png"
     },
     {
-      "label": "scene04 review beat 1 phase 6",
-      "time": 157.2999999999962,
+      "label": "scene01 review beat 1 phase 5",
+      "time": 10.599999999999982,
       "path": "frame-074.png"
     },
     {
-      "label": "scene04 review beat 1 phase 7",
-      "time": 158.26666666666281,
+      "label": "scene04 review beat 1 phase 0",
+      "time": 174.1166666666619,
       "path": "frame-075.png"
     },
     {
-      "label": "scene04 review beat 1 phase 8",
-      "time": 160.43333333332936,
+      "label": "scene04 review beat 1 phase 1",
+      "time": 174.5166666666619,
       "path": "frame-076.png"
     },
     {
-      "label": "scene05 review beat 1 phase 0",
-      "time": 231.84999999999195,
+      "label": "scene04 review beat 1 phase 2",
+      "time": 184.39999999999526,
       "path": "frame-077.png"
     },
     {
-      "label": "scene05 review beat 1 phase 1",
-      "time": 232.24999999999196,
+      "label": "scene04 review beat 1 phase 3",
+      "time": 184.79999999999524,
       "path": "frame-078.png"
     },
     {
-      "label": "scene05 review beat 1 phase 2",
-      "time": 242.06666666665865,
+      "label": "scene04 review beat 1 phase 4",
+      "time": 174.9999999999952,
       "path": "frame-079.png"
     },
     {
-      "label": "scene05 review beat 1 phase 3",
-      "time": 242.46666666665863,
+      "label": "scene04 review beat 1 phase 5",
+      "time": 177.49999999999505,
       "path": "frame-080.png"
     },
     {
-      "label": "scene05 review beat 1 phase 4",
-      "time": 233.49999999999187,
+      "label": "scene04 review beat 1 phase 6",
+      "time": 179.5666666666616,
       "path": "frame-081.png"
     },
     {
-      "label": "scene05 review beat 1 phase 5",
-      "time": 235.59999999999175,
+      "label": "scene04 review beat 1 phase 7",
+      "time": 180.53333333332822,
       "path": "frame-082.png"
     },
     {
-      "label": "scene05 review beat 1 phase 6",
-      "time": 236.79999999999168,
+      "label": "scene04 review beat 1 phase 8",
+      "time": 182.69999999999476,
       "path": "frame-083.png"
     },
     {
-      "label": "scene05 review beat 1 phase 7",
-      "time": 238.03333333332495,
+      "label": "scene04 review beat 4 phase 0",
+      "time": 205.31666666666013,
       "path": "frame-084.png"
     },
     {
-      "label": "scene05 review beat 1 phase 8",
-      "time": 240.26666666665815,
+      "label": "scene04 review beat 4 phase 1",
+      "time": 205.71666666666013,
       "path": "frame-085.png"
     },
     {
-      "label": "scene05 review beat 8 phase 0",
-      "time": 294.64999999998844,
+      "label": "scene04 review beat 4 phase 2",
+      "time": 219.13333333332682,
       "path": "frame-086.png"
     },
     {
-      "label": "scene05 review beat 8 phase 1",
-      "time": 295.0499999999884,
+      "label": "scene04 review beat 4 phase 3",
+      "time": 219.5333333333268,
       "path": "frame-087.png"
     },
     {
-      "label": "scene05 review beat 8 phase 2",
-      "time": 304.7999999999884,
+      "label": "scene05 review beat 1 phase 0",
+      "time": 259.1166666666571,
       "path": "frame-088.png"
     },
     {
-      "label": "scene05 review beat 8 phase 3",
-      "time": 305.1999999999884,
+      "label": "scene05 review beat 1 phase 1",
+      "time": 259.5166666666571,
       "path": "frame-089.png"
     },
     {
-      "label": "scene05 review beat 8 phase 4",
-      "time": 296.0333333333217,
+      "label": "scene05 review beat 1 phase 2",
+      "time": 269.33333333332376,
       "path": "frame-090.png"
     },
     {
-      "label": "scene05 review beat 8 phase 5",
-      "time": 298.1666666666549,
+      "label": "scene05 review beat 1 phase 3",
+      "time": 269.73333333332374,
       "path": "frame-091.png"
     },
     {
-      "label": "scene05 review beat 8 phase 6",
-      "time": 299.43333333332146,
+      "label": "scene05 review beat 1 phase 4",
+      "time": 260.766666666657,
       "path": "frame-092.png"
     },
     {
-      "label": "scene05 review beat 8 phase 7",
-      "time": 301.36666666665474,
+      "label": "scene05 review beat 1 phase 5",
+      "time": 262.8666666666569,
       "path": "frame-093.png"
     },
     {
-      "label": "scene05 review beat 8 phase 8",
-      "time": 303.7666666666546,
+      "label": "scene05 review beat 1 phase 6",
+      "time": 264.06666666665683,
       "path": "frame-094.png"
     },
     {
-      "label": "scene05 review beat 7 phase 0",
-      "time": 290.0499999999887,
+      "label": "scene05 review beat 1 phase 7",
+      "time": 265.29999999999006,
       "path": "frame-095.png"
     },
     {
-      "label": "scene05 review beat 7 phase 1",
-      "time": 290.4499999999887,
+      "label": "scene05 review beat 1 phase 8",
+      "time": 267.5333333333233,
       "path": "frame-096.png"
     },
     {
-      "label": "scene05 review beat 7 phase 2",
-      "time": 294.5999999999887,
+      "label": "scene05 review beat 8 phase 0",
+      "time": 321.91666666665355,
       "path": "frame-097.png"
     },
     {
-      "label": "scene05 review beat 7 phase 3",
-      "time": 294.9999999999887,
+      "label": "scene05 review beat 8 phase 1",
+      "time": 322.31666666665353,
       "path": "frame-098.png"
     },
     {
-      "label": "scene05 review beat 9 phase 0",
-      "time": 304.84999999998786,
+      "label": "scene05 review beat 8 phase 2",
+      "time": 332.06666666665353,
       "path": "frame-099.png"
     },
     {
-      "label": "scene05 review beat 9 phase 1",
-      "time": 305.24999999998784,
+      "label": "scene05 review beat 8 phase 3",
+      "time": 332.4666666666535,
       "path": "frame-100.png"
     },
     {
-      "label": "scene05 review beat 9 phase 2",
-      "time": 310.8666666666545,
+      "label": "scene05 review beat 8 phase 4",
+      "time": 323.29999999998677,
       "path": "frame-101.png"
     },
     {
-      "label": "scene05 review beat 9 phase 3",
-      "time": 311.2666666666545,
+      "label": "scene05 review beat 8 phase 5",
+      "time": 325.43333333332,
       "path": "frame-102.png"
     },
     {
-      "label": "scene01 sync 0.05",
-      "time": 25.107199999999935,
+      "label": "scene05 review beat 8 phase 6",
+      "time": 326.69999999998663,
       "path": "frame-103.png"
     },
     {
-      "label": "scene01 sync 0.5",
-      "time": 29.671999999999933,
+      "label": "scene05 review beat 8 phase 7",
+      "time": 328.6333333333198,
       "path": "frame-104.png"
     },
     {
-      "label": "scene01 sync 0.95",
-      "time": 34.23679999999993,
+      "label": "scene05 review beat 8 phase 8",
+      "time": 331.03333333331966,
       "path": "frame-105.png"
     },
     {
-      "label": "scene05 sync 0.05",
-      "time": 282.0117333333225,
+      "label": "scene05 review beat 7 phase 0",
+      "time": 317.3166666666538,
       "path": "frame-106.png"
     },
     {
-      "label": "scene05 sync 0.5",
-      "time": 285.7173333333225,
+      "label": "scene05 review beat 7 phase 1",
+      "time": 317.7166666666538,
       "path": "frame-107.png"
     },
     {
-      "label": "scene05 sync 0.95",
-      "time": 289.4229333333225,
+      "label": "scene05 review beat 7 phase 2",
+      "time": 321.8666666666538,
       "path": "frame-108.png"
     },
     {
-      "label": "scene08 sync 0.05",
-      "time": 447.6666666666466,
+      "label": "scene05 review beat 7 phase 3",
+      "time": 322.2666666666538,
       "path": "frame-109.png"
     },
     {
-      "label": "scene08 sync 0.5",
-      "time": 449.6106666666466,
+      "label": "scene05 review beat 9 phase 0",
+      "time": 332.116666666653,
       "path": "frame-110.png"
     },
     {
-      "label": "scene08 sync 0.95",
-      "time": 451.5546666666466,
+      "label": "scene05 review beat 9 phase 1",
+      "time": 332.51666666665295,
       "path": "frame-111.png"
     },
     {
-      "label": "scene04 sync 0.05",
-      "time": 152.49706666666316,
+      "label": "scene05 review beat 9 phase 2",
+      "time": 338.1333333333196,
       "path": "frame-112.png"
     },
     {
-      "label": "scene04 sync 0.5",
-      "time": 156.9706666666632,
+      "label": "scene05 review beat 9 phase 3",
+      "time": 338.5333333333196,
       "path": "frame-113.png"
     },
     {
-      "label": "scene04 sync 0.95",
-      "time": 161.4442666666632,
+      "label": "scene10 review beat 1 phase 0",
+      "time": 568.1833333333542,
       "path": "frame-114.png"
     },
     {
-      "label": "scene05 sync 0.05",
-      "time": 232.49386666665862,
+      "label": "scene10 review beat 1 phase 1",
+      "time": 568.5833333333542,
       "path": "frame-115.png"
     },
     {
-      "label": "scene05 sync 0.5",
-      "time": 236.9386666666586,
+      "label": "scene10 review beat 1 phase 2",
+      "time": 583.6000000000208,
       "path": "frame-116.png"
     },
     {
-      "label": "scene05 sync 0.95",
-      "time": 241.38346666665862,
+      "label": "scene10 review beat 1 phase 3",
+      "time": 584.0000000000209,
       "path": "frame-117.png"
     },
     {
-      "label": "scene05 sync 0.05",
-      "time": 295.29066666665506,
+      "label": "scene01 sync 0.05",
+      "time": 0.6864,
       "path": "frame-118.png"
     },
     {
-      "label": "scene05 sync 0.5",
-      "time": 299.7066666666551,
+      "label": "scene01 sync 0.5",
+      "time": 6.864,
       "path": "frame-119.png"
     },
     {
-      "label": "scene05 sync 0.95",
-      "time": 304.1226666666551,
+      "label": "scene01 sync 0.95",
+      "time": 13.041599999999999,
       "path": "frame-120.png"
+    },
+    {
+      "label": "scene01 sync 0.05",
+      "time": 43.1738666666671,
+      "path": "frame-121.png"
+    },
+    {
+      "label": "scene01 sync 0.5",
+      "time": 47.73866666666711,
+      "path": "frame-122.png"
+    },
+    {
+      "label": "scene01 sync 0.95",
+      "time": 52.303466666667106,
+      "path": "frame-123.png"
+    },
+    {
+      "label": "scene04 sync 0.05",
+      "time": 206.14239999999347,
+      "path": "frame-124.png"
+    },
+    {
+      "label": "scene04 sync 0.5",
+      "time": 212.22399999999345,
+      "path": "frame-125.png"
+    },
+    {
+      "label": "scene04 sync 0.95",
+      "time": 218.30559999999346,
+      "path": "frame-126.png"
+    },
+    {
+      "label": "scene05 sync 0.05",
+      "time": 309.27839999998764,
+      "path": "frame-127.png"
+    },
+    {
+      "label": "scene05 sync 0.5",
+      "time": 312.98399999998765,
+      "path": "frame-128.png"
+    },
+    {
+      "label": "scene05 sync 0.95",
+      "time": 316.6895999999876,
+      "path": "frame-129.png"
+    },
+    {
+      "label": "scene08 sync 0.05",
+      "time": 480.26666666664477,
+      "path": "frame-130.png"
+    },
+    {
+      "label": "scene08 sync 0.5",
+      "time": 482.2106666666448,
+      "path": "frame-131.png"
+    },
+    {
+      "label": "scene08 sync 0.95",
+      "time": 484.15466666664474,
+      "path": "frame-132.png"
+    },
+    {
+      "label": "scene04 sync 0.05",
+      "time": 174.76373333332856,
+      "path": "frame-133.png"
+    },
+    {
+      "label": "scene04 sync 0.5",
+      "time": 179.2373333333286,
+      "path": "frame-134.png"
+    },
+    {
+      "label": "scene04 sync 0.95",
+      "time": 183.7109333333286,
+      "path": "frame-135.png"
+    },
+    {
+      "label": "scene05 sync 0.05",
+      "time": 259.7605333333238,
+      "path": "frame-136.png"
+    },
+    {
+      "label": "scene05 sync 0.5",
+      "time": 264.2053333333238,
+      "path": "frame-137.png"
+    },
+    {
+      "label": "scene05 sync 0.95",
+      "time": 268.65013333332377,
+      "path": "frame-138.png"
+    },
+    {
+      "label": "scene05 sync 0.05",
+      "time": 322.5573333333202,
+      "path": "frame-139.png"
+    },
+    {
+      "label": "scene05 sync 0.5",
+      "time": 326.97333333332017,
+      "path": "frame-140.png"
+    },
+    {
+      "label": "scene05 sync 0.95",
+      "time": 331.3893333333202,
+      "path": "frame-141.png"
+    },
+    {
+      "label": "scene10 sync 0.05",
+      "time": 569.0869333333542,
+      "path": "frame-142.png"
+    },
+    {
+      "label": "scene10 sync 0.5",
+      "time": 575.8693333333542,
+      "path": "frame-143.png"
+    },
+    {
+      "label": "scene10 sync 0.95",
+      "time": 582.6517333333542,
+      "path": "frame-144.png"
     }
   ],
   "sync": [
     {
       "scene": "scene01",
-      "beat": 4,
-      "action_start": 24.599999999999934,
-      "action_end": 34.74399999999993,
+      "beat": 1,
+      "action_start": 0.0,
+      "action_end": 13.728,
       "speech_onsets": [
-        24.68925,
-        30.12425
+        0.08979166666666667,
+        7.565416666666667
+      ],
+      "cues": [
+        {
+          "id": "scene01-hook-01",
+          "display": "白い点は今、橙の仲間です。正しく分けられた橙の点を遠ざけても、答えは同じでしょうか。",
+          "start": 0.0,
+          "end": 7.477333333333333
+        },
+        {
+          "id": "scene01-hook-02",
+          "display": "点を下へ動かすと、境界が傾き、白い点は青に変わりました。なぜでしょう。",
+          "start": 7.477333333333333,
+          "end": 13.728
+        }
+      ],
+      "actions": [
+        {
+          "name": "predict white point",
+          "start": 0.0,
+          "end": 7.46666666666666,
+          "voiced_samples": 120676,
+          "first_voice": 0.08979166666666667,
+          "last_voice": 7.361958333333333
+        },
+        {
+          "name": "move correctly classified orange points",
+          "start": 7.46666666666666,
+          "end": 13.733333333333304,
+          "voiced_samples": 90925,
+          "first_voice": 7.565416666666667,
+          "last_voice": 13.595125
+        }
+      ]
+    },
+    {
+      "scene": "scene01",
+      "beat": 5,
+      "action_start": 42.666666666667105,
+      "action_end": 52.81066666666711,
+      "speech_onsets": [
+        42.75566666666667,
+        48.191291666666665
       ],
       "cues": [
         {
           "id": "scene01-04-01",
           "display": "黄色の矢印 $w$ を回すと、境界も一緒に回転します。",
-          "start": 24.599999999999934,
-          "end": 30.0506666666666
+          "start": 42.666666666667105,
+          "end": 48.117333333333775
         },
         {
           "id": "scene01-04-02",
           "display": "矢印はいつも境界に垂直で、スコアが増える方向を向きます。",
-          "start": 30.0506666666666,
-          "end": 34.74399999999993
+          "start": 48.117333333333775,
+          "end": 52.81066666666711
+        }
+      ],
+      "actions": []
+    },
+    {
+      "scene": "scene04",
+      "beat": 4,
+      "action_start": 205.46666666666013,
+      "action_end": 218.9813333333268,
+      "speech_onsets": [
+        205.56487499999525,
+        212.55229166666192
+      ],
+      "cues": [
+        {
+          "id": "scene04-03-01",
+          "display": "冒頭の橙の点を、正しく分けられていた側へ遠ざけます。白い点の予想を覚えていますか。",
+          "start": 205.46666666666013,
+          "end": 212.46399999999346
+        },
+        {
+          "id": "scene04-03-02",
+          "display": "点を動かすたびに学習し直すと、境界が傾き、白い点の答えが青に変わります。",
+          "start": 212.46399999999346,
+          "end": 218.9813333333268
         }
       ],
       "actions": []
@@ -635,24 +822,24 @@
     {
       "scene": "scene05",
       "beat": 6,
-      "action_start": 281.59999999998917,
-      "action_end": 289.83466666665583,
+      "action_start": 308.8666666666543,
+      "action_end": 317.10133333332095,
       "speech_onsets": [
-        281.6959583333253,
-        286.09029166665863
+        308.9634583333238,
+        313.35687499999045
       ],
       "cues": [
         {
           "id": "scene05-05-01",
           "display": "比が大きくなる方向へ回すと、影の重なりが減っていきます。",
-          "start": 281.59999999998917,
-          "end": 285.9946666666558
+          "start": 308.8666666666543,
+          "end": 313.261333333321
         },
         {
           "id": "scene05-05-02",
           "display": "ここでのばらつきは、平均との差の二乗を足した量です。",
-          "start": 285.9946666666558,
-          "end": 289.83466666665583
+          "start": 313.261333333321,
+          "end": 317.10133333332095
         }
       ],
       "actions": []
@@ -660,24 +847,24 @@
     {
       "scene": "scene08",
       "beat": 3,
-      "action_start": 447.4506666666466,
-      "action_end": 451.7706666666466,
+      "action_start": 480.05066666664476,
+      "action_end": 484.37066666664475,
       "speech_onsets": [
-        443.69166666664785,
-        447.54679166664783
+        476.291041666646,
+        480.1467499999793
       ],
       "cues": [
         {
           "id": "scene08-03-01",
           "display": "黄色で囲んだ青い点は、いま橙の側にあります。",
-          "start": 443.59999999997996,
-          "end": 447.4506666666466
+          "start": 476.1999999999781,
+          "end": 480.05066666664476
         },
         {
           "id": "scene08-03-02",
           "display": "この点の特徴ベクトルを重みに足して、境界を動かします。",
-          "start": 447.4506666666466,
-          "end": 451.7706666666466
+          "start": 480.05066666664476,
+          "end": 484.37066666664475
         }
       ],
       "actions": []
@@ -685,259 +872,284 @@
     {
       "scene": "scene04",
       "beat": 1,
-      "action_start": 151.9999999999965,
-      "action_end": 161.94133333332985,
+      "action_start": 174.2666666666619,
+      "action_end": 184.20799999999525,
       "speech_onsets": [
-        152.04874999999652,
-        157.07804166666318
+        174.31558333332856,
+        179.34524999999525
       ],
       "cues": [
         {
           "id": "scene04-recap-01",
           "display": "3.1の最小二乗は、予測を目標の数へ近づけました。",
-          "start": 151.9999999999965,
-          "end": 156.98133333332984
+          "start": 174.2666666666619,
+          "end": 179.24799999999524
         },
         {
           "id": "scene04-recap-02",
           "display": "今回はクラスを表す数に合わせ、分類に使えるかを確かめます。",
-          "start": 156.98133333332984,
-          "end": 161.94133333332985
+          "start": 179.24799999999524,
+          "end": 184.20799999999525
         }
       ],
       "actions": [
         {
           "name": "R3.1 rows weights predictions",
-          "start": 151.9999999999965,
-          "end": 153.4666666666631,
-          "voiced_samples": 25242,
-          "first_voice": 152.04874999999652,
-          "last_voice": 153.4666249999965
+          "start": 174.2666666666619,
+          "end": 175.7333333333285,
+          "voiced_samples": 25362,
+          "first_voice": 174.31558333332856,
+          "last_voice": 175.7332916666619
         },
         {
           "name": "R3.1 prediction toward target",
-          "start": 153.4666666666631,
-          "end": 156.99999999999622,
-          "voiced_samples": 54530,
-          "first_voice": 153.46666666666317,
-          "last_voice": 156.8551249999965
+          "start": 175.7333333333285,
+          "end": 179.26666666666162,
+          "voiced_samples": 54336,
+          "first_voice": 175.73333333332857,
+          "last_voice": 179.12079166666192
         },
         {
           "name": "R3.1 replace regression example",
-          "start": 156.99999999999622,
-          "end": 157.5999999999962,
-          "voiced_samples": 9781,
-          "first_voice": 157.07804166666318,
-          "last_voice": 157.5997499999965
+          "start": 179.26666666666162,
+          "end": 179.8666666666616,
+          "voiced_samples": 9871,
+          "first_voice": 179.34524999999525,
+          "last_voice": 179.86645833332858
         },
         {
           "name": "R3.1 class target columns",
-          "start": 157.5999999999962,
-          "end": 158.93333333332944,
-          "voiced_samples": 24348,
-          "first_voice": 157.60033333332984,
-          "last_voice": 158.93329166666317
+          "start": 179.8666666666616,
+          "end": 181.19999999999484,
+          "voiced_samples": 24213,
+          "first_voice": 179.8669166666619,
+          "last_voice": 181.19995833332857
         },
         {
           "name": "R3.1 class coding",
-          "start": 158.93333333332944,
-          "end": 161.93333333332927,
-          "voiced_samples": 45927,
-          "first_voice": 158.93333333332984,
-          "last_voice": 161.8352499999965
+          "start": 181.19999999999484,
+          "end": 184.19999999999467,
+          "voiced_samples": 45737,
+          "first_voice": 181.19999999999524,
+          "last_voice": 184.09983333332858
         }
       ]
     },
     {
       "scene": "scene05",
       "beat": 1,
-      "action_start": 231.99999999999196,
-      "action_end": 241.87733333332528,
+      "action_start": 259.2666666666571,
+      "action_end": 269.14399999999046,
       "speech_onsets": [
-        232.06991666665863,
-        236.26666666665864
+        259.33674999999045,
+        263.53333333332375
       ],
       "cues": [
         {
           "id": "scene05-recap-01",
           "display": "2.3では、点の広がりは方向によって違いました。",
-          "start": 231.99999999999196,
-          "end": 236.17066666665863
+          "start": 259.2666666666571,
+          "end": 263.43733333332375
         },
         {
           "id": "scene05-recap-02",
-          "display": "ここでは、二つの集団を一本の軸へ写し、離れ方と広がりを比べます。",
-          "start": 236.17066666665863,
-          "end": 241.87733333332528
+          "display": "ここでは、2つの集団を1本の軸へ写し、離れ方と広がりを比べます。",
+          "start": 263.43733333332375,
+          "end": 269.14399999999046
         }
       ],
       "actions": [
         {
           "name": "R2.3 directional widths",
-          "start": 231.99999999999196,
-          "end": 234.9999999999918,
-          "voiced_samples": 50966,
-          "first_voice": 232.06991666665863,
-          "last_voice": 234.99995833332528
+          "start": 259.2666666666571,
+          "end": 262.26666666665693,
+          "voiced_samples": 51008,
+          "first_voice": 259.33674999999045,
+          "last_voice": 262.2666249999904
         },
         {
           "name": "R2.3 principal axes",
-          "start": 234.9999999999918,
-          "end": 236.19999999999172,
-          "voiced_samples": 17206,
-          "first_voice": 234.99999999999196,
-          "last_voice": 236.0584583333253
+          "start": 262.26666666665693,
+          "end": 263.46666666665686,
+          "voiced_samples": 17230,
+          "first_voice": 262.2666666666571,
+          "last_voice": 263.3216666666571
         },
         {
           "name": "R2.3 bridge to two classes",
-          "start": 236.19999999999172,
-          "end": 237.39999999999165,
-          "voiced_samples": 13428,
-          "first_voice": 236.26666666665864,
-          "last_voice": 237.3999583333253
+          "start": 263.46666666665686,
+          "end": 264.6666666666568,
+          "voiced_samples": 13411,
+          "first_voice": 263.53333333332375,
+          "last_voice": 264.66662499999046
         },
         {
           "name": "R2.3 two class clouds",
-          "start": 237.39999999999165,
-          "end": 238.66666666665824,
-          "voiced_samples": 25257,
-          "first_voice": 237.39999999999196,
-          "last_voice": 238.66662499999197
+          "start": 264.6666666666568,
+          "end": 265.9333333333234,
+          "voiced_samples": 24649,
+          "first_voice": 264.6666666666571,
+          "last_voice": 265.9332916666571
         },
         {
           "name": "R2.3 projection to one axis",
-          "start": 238.66666666665824,
-          "end": 241.86666666665806,
-          "voiced_samples": 48576,
-          "first_voice": 238.6666666666586,
-          "last_voice": 241.76545833332528
+          "start": 265.9333333333234,
+          "end": 269.1333333333232,
+          "voiced_samples": 48742,
+          "first_voice": 265.9333333333238,
+          "last_voice": 269.03212499999046
         }
       ]
     },
     {
       "scene": "scene05",
       "beat": 8,
-      "action_start": 294.7999999999884,
-      "action_end": 304.61333333332175,
+      "action_start": 322.06666666665353,
+      "action_end": 331.87999999998686,
       "speech_onsets": [
-        294.87199999999194,
-        299.117499999992,
-        303.05262499999196
+        322.13612499999044,
+        326.3847916666571,
+        330.31937499999043
       ],
       "cues": [
         {
           "id": "scene05-aid-01",
           "display": "ずれの成分を縦横に掛けた表を、各点について足します。",
-          "start": 294.7999999999884,
-          "end": 299.04533333332176
+          "start": 322.06666666665353,
+          "end": 326.3119999999869
         },
         {
           "id": "scene05-aid-02",
           "display": "横方向なら、この左上が二乗偏差の合計です。",
-          "start": 299.04533333332176,
-          "end": 302.95999999998844
+          "start": 326.3119999999869,
+          "end": 330.2266666666535
         },
         {
           "id": "scene05-aid-03",
           "display": "点の数では割りません。",
-          "start": 302.95999999998844,
-          "end": 304.61333333332175
+          "start": 330.2266666666535,
+          "end": 331.87999999998686
         }
       ],
       "actions": [
         {
           "name": "V08d multiply four cells",
-          "start": 294.7999999999884,
-          "end": 297.26666666665494,
-          "voiced_samples": 41186,
-          "first_voice": 294.87199999999194,
-          "last_voice": 297.1012083333253
+          "start": 322.06666666665353,
+          "end": 324.53333333332006,
+          "voiced_samples": 41305,
+          "first_voice": 322.13612499999044,
+          "last_voice": 324.3677083333238
         },
         {
           "name": "V08d sum centered residuals",
-          "start": 297.26666666665494,
-          "end": 299.06666666665484,
-          "voiced_samples": 24648,
-          "first_voice": 297.4186666666586,
-          "last_voice": 298.9356666666586
+          "start": 324.53333333332006,
+          "end": 326.33333333331996,
+          "voiced_samples": 24582,
+          "first_voice": 324.68545833332377,
+          "last_voice": 326.20233333332374
         },
         {
           "name": "V08d select horizontal scatter",
-          "start": 299.06666666665484,
-          "end": 299.79999999998813,
-          "voiced_samples": 11126,
-          "first_voice": 299.117499999992,
-          "last_voice": 299.79991666665865
+          "start": 326.33333333331996,
+          "end": 327.06666666665325,
+          "voiced_samples": 11024,
+          "first_voice": 326.3847916666571,
+          "last_voice": 327.06662499999044
         },
         {
           "name": "V08d horizontal sum of squares",
-          "start": 299.79999999998813,
-          "end": 302.9333333333213,
-          "voiced_samples": 55273,
-          "first_voice": 299.79999999999194,
-          "last_voice": 302.8749999999919
+          "start": 327.06666666665325,
+          "end": 330.1999999999864,
+          "voiced_samples": 54733,
+          "first_voice": 327.0666666666571,
+          "last_voice": 330.1416666666571
         },
         {
           "name": "V08d no division by count",
-          "start": 302.9333333333213,
-          "end": 304.59999999998786,
-          "voiced_samples": 29525,
-          "first_voice": 303.05262499999196,
-          "last_voice": 304.4913333333253
+          "start": 330.1999999999864,
+          "end": 331.866666666653,
+          "voiced_samples": 29262,
+          "first_voice": 330.31937499999043,
+          "last_voice": 331.7586666666571
         }
       ]
+    },
+    {
+      "scene": "scene10",
+      "beat": 1,
+      "action_start": 568.3333333333542,
+      "action_end": 583.4053333333542,
+      "speech_onsets": [
+        568.4315416666875,
+        574.9728750000208
+      ],
+      "cues": [
+        {
+          "id": "scene10-01-01",
+          "display": "冒頭と同じ点に戻りましょう。白い点は初め、橙のスコアが青より大きい点でした。",
+          "start": 568.3333333333542,
+          "end": 574.8720000000209
+        },
+        {
+          "id": "scene10-01-02",
+          "display": "正しく分けた橙の点を遠ざけると、最小二乗は数のずれを減らすため境界を動かし、白い点を青へ変えます。",
+          "start": 574.8720000000209,
+          "end": 583.4053333333542
+        }
+      ],
+      "actions": []
     }
   ],
   "scenes": [
     {
       "id": "scene01",
       "start": 0.0,
-      "duration": 52.20000000000091
+      "duration": 72.46666666666768
     },
     {
       "id": "scene02",
-      "start": 52.20000000000091,
-      "duration": 43.59999999999877
+      "start": 72.46666666666768,
+      "duration": 44.399999999997476
     },
     {
       "id": "scene03",
-      "start": 95.79999999999968,
-      "duration": 56.19999999999682
+      "start": 116.86666666666515,
+      "duration": 57.39999999999675
     },
     {
       "id": "scene04",
-      "start": 151.9999999999965,
-      "duration": 79.99999999999545
+      "start": 174.2666666666619,
+      "duration": 84.9999999999952
     },
     {
       "id": "scene05",
-      "start": 231.99999999999196,
-      "duration": 88.19999999999501
+      "start": 259.2666666666571,
+      "duration": 89.19999999999493
     },
     {
       "id": "scene06",
-      "start": 320.19999999998697,
-      "duration": 50.06666666666382
+      "start": 348.46666666665203,
+      "duration": 51.799999999997056
     },
     {
       "id": "scene07",
-      "start": 370.2666666666508,
-      "duration": 52.19999999999703
+      "start": 400.2666666666491,
+      "duration": 54.799999999996885
     },
     {
       "id": "scene08",
-      "start": 422.4666666666478,
-      "duration": 68.5999999999961
+      "start": 455.066666666646,
+      "duration": 68.60000000000599
     },
     {
       "id": "scene09",
-      "start": 491.0666666666439,
-      "duration": 45.333333333351504
+      "start": 523.666666666652,
+      "duration": 44.66666666670221
     },
     {
       "id": "scene10",
-      "start": 536.3999999999954,
-      "duration": 40.00000000003183
+      "start": 568.3333333333542,
+      "duration": 45.46666666670285
     }
   ]
 }

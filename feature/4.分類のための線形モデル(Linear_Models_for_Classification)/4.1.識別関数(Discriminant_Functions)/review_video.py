@@ -21,13 +21,13 @@ def main():
             for c in b['cues']:
                 if '$' in c['display']:frames.append({'label':c['id']+' math','time':(c['start']+c['end'])/2})
     # Include every phase of each new card and its neighbouring original shots.
-    for si,bi in [(3,0),(4,0),(4,7),(4,6),(4,8)]:
+    for si,bi in [(0,0),(3,0),(3,3),(4,0),(4,7),(4,6),(4,8),(9,0)]:
         scene=timeline[si];b=scene['beats'][bi]
-        times=[b['start']-.15,b['start']+.25,b['end']-.2,b['end']+.2]
+        times=[max(0,b['start']-.15),b['start']+.25,b['end']-.2,b['end']+.2]
         times += [(a['start']+a['end'])/2 for a in b.get('actions',[]) if a['name']!='breath']
         for j,t in enumerate(times):
             frames.append({'label':f"{scene['id']} review beat {bi+1} phase {j}",'time':t})
-    for si,bi in [(0,3),(4,5),(7,2),(3,0),(4,0),(4,7)]:
+    for si,bi in [(0,0),(0,4),(3,3),(4,5),(7,2),(3,0),(4,0),(4,7),(9,0)]:
         s=timeline[si];b=s['beats'][bi];e=manifest[s['id']]
         with wave.open(str(ROOT/'assets/voicevox'/f"{s['id']}.wav")) as wav:
             rate=wav.getframerate();pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype='<i2').astype(float)/32768

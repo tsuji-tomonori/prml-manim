@@ -36,6 +36,15 @@ def run():
     vals=scores(np.array([[-2.2,-2.5],[2.2,-2.5]]),W)
     assert vals.min()<0 and vals.max()>1
     results['least_squares_score_range']=[float(vals.min()),float(vals.max())]
+    # The opening, scene 4, and ending use the identical white point and data states.
+    white=np.array([0.,0.])
+    opening=scores(white,least_squares(ls_data(0)))[0]
+    ending=scores(white,least_squares(ls_data(1)))[0]
+    assert np.argmax(opening)==1 and np.argmax(ending)==0
+    assert np.allclose(opening,[.4919048,.5080952],atol=1e-7)
+    assert np.allclose(ending,[.51180412,.48819588],atol=1e-7)
+    assert np.all(augment(ls_data(1)[1][-3:])@c<0)
+    results['white_point_scores']={'initial':opening.tolist(),'moved':ending.tolist()}
     pred=np.argmax(scores(np.vstack(BANDS),BAND_W),axis=1)
     assert not np.any(pred==1)
     results['middle_class_selected']=int(np.sum(pred==1))
