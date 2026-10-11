@@ -26,18 +26,20 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
 
     def probability(self):
         ax=self.plot_axes(labels=('x','p(C_1|x)'))
-        k=ValueTracker(1.2); b=ValueTracker(0); q=ValueTracker(-2.4)
+        k=ValueTracker(float(HISTORY[-1][1])); b=ValueTracker(float(HISTORY[-1][0])); q=ValueTracker(HOLDOUT_X)
         pred=lambda x:sigmoid(k.get_value()*x+b.get_value())
-        dots=VGroup(*[Dot(ax.c2p(x,t),radius=.065,color=RED_CLASS if t else BLUE_CLASS) for x,t in zip(X,T)])
+        dots=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=RED_CLASS if t else BLUE_CLASS) for x,t in zip(X,T)])
         probe=always_redraw(lambda:Dot(ax.c2p(q.get_value(),.5),radius=.1,color=WHITE))
-        self.add(dots,probe,note('赤：クラス1　　青：クラス2　　白：未知の入力'))
-        self.beat(q.animate.set_value(.1))
+        self.add(dots,probe,note('赤・青：学習した12点　　白：新しい入力'))
+        self.beat(Indicate(probe,color=WHITE,scale_factor=1.6))
         self.remove(probe)
         graph=always_redraw(lambda:curve(ax,pred))
         probe=always_redraw(lambda:Dot(ax.c2p(q.get_value(),pred(q.get_value())),radius=.1,color=WHITE))
         guide=always_redraw(lambda:DashedLine(ax.c2p(q.get_value(),0),probe.get_center(),color=MUTED))
-        self.add(graph,probe,guide,number('p=',lambda:pred(q.get_value()),[5.35,.6,0],YELLOW_ACC))
-        self.beat(q.animate.set_value(2.4))
+        observation=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_T),radius=.07,color=RED_CLASS)
+        self.add(graph,probe,guide,observation,number('p=',lambda:pred(q.get_value()),[5.35,.6,0],YELLOW_ACC))
+        self.beat(Indicate(observation,color=RED_CLASS,scale_factor=1.1),
+                  Transform(self.title,jp('赤なのに、62.1%？',32).move_to([0,3.35,0])))
         self.equation(r'a=w_0+w_1x',r'\qquad \sigma(a)=\frac{1}{1+e^{-a}}')
         self.beat(q.animate.set_value(-1.8))
         sliders=VGroup(knob('w_1=',k,.5,4,at=(-2,-2.5,0)),knob('w_0=',b,-2,2,at=(-2,-2.5,0)))
@@ -304,12 +306,19 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         self.beat(Indicate(cancel,scale_factor=1.08))
         self.equation(r'\nabla E=',r'\frac1s',r'\sum_n(y_n-t_n)\phi_n',size=38);self.formula[1].set_color(PURPLE_ACC)
         self.beat(Indicate(self.formula[1],scale_factor=1.15,color=PURPLE_ACC))
-        self.remove(mean,natural,arrows,cancel,*[m for m in self.mobjects if isinstance(m,Text) and m.get_center()[1]<0])
-        ax=self.plot_axes(labels=('x','y'),height=3.1)
-        shift=ValueTracker(-1)
-        g=always_redraw(lambda:curve(ax,lambda x:sigmoid(1.5*x+shift.get_value())))
-        self.add(g,note('特徴 → スコア → 確率 → ラベルへの損失'))
-        self.beat(shift.animate.set_value(.5))
+        self.remove(*[m for m in self.mobjects if m is not self.title and m is not self.subtitle])
+        ax=self.plot_axes(labels=('x','p(C_1|x)'),height=3.1)
+        fitted=lambda x:sigmoid(HISTORY[-1][0]+HISTORY[-1][1]*x)
+        training=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=RED_CLASS if t else BLUE_CLASS)
+                          for x,t in zip(X,T)])
+        prediction=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_P),radius=.1,color=YELLOW_ACC)
+        observation=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_T),radius=.07,color=RED_CLASS)
+        guide=DashedLine(prediction.get_center(),observation.get_center(),color=YELLOW_ACC)
+        self.add(training,curve(ax,fitted),guide,prediction,observation,
+                 number('p=',lambda:HOLDOUT_P,[5.25,.55,0],YELLOW_ACC),
+                 note('12点で学習　／　新しい赤の1点で確認'))
+        self.equation(r'x=0.4',r'\qquad p(C_1|x)=0.621\ldots',size=36)
+        self.beat(Indicate(prediction,color=YELLOW_ACC,scale_factor=1.5))
 
     def cost_recap(self):
         saved,frame,heading=self.body_card('復習: 1.6 負の対数のコスト')
@@ -323,7 +332,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         symbol=tex(r'\theta',27,yellow).next_to(ax.x_axis,RIGHT)
         formula=tex(r'\bar L=-\ln\theta',32,orange).move_to([-1.8,-1.65,0])
         self.add(ax,graph,dot,symbol,formula,
-                 jp('説明用の例：観測は 1 が一つ',21).move_to([0,1.45,0]),
+                 jp('説明用の例：観測値1の点は1つ',21).move_to([0,1.45,0]),
                  number('p=',theta.get_value,[3.45,.6,0],yellow),
                  number(r'-\ln p=',lambda:-np.log(theta.get_value()),[3.45,-.1,0],orange))
         bridge=VGroup(Dot([-0.95,0,0],color=blue),Arrow([-.6,0,0],[.6,0,0],buff=0,color=WHITE),Dot([.95,0,0],color=RED_CLASS)).move_to([3.3,-.95,0])
@@ -340,8 +349,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
     def chain_aid(self):
         saved,frame,heading=self.body_card('補足: 小さな変化を、倍率でつなぐ')
         self.add(jp('説明用の例：t = 1',20,MUTED).move_to([3.8,1.5,0]))
-        boxes=VGroup(*[VGroup(RoundedRectangle(width=1.9,height=.85,corner_radius=.08,color=c),
-                     tex(label,34,c)).move_to([x,.4,0]) for x,label,c in
+        boxes=VGroup(*[tex(label,34,c).move_to([x,.4,0]) for x,label,c in
                      [(-3.7,'a=0',AID_INPUT),(0,'y=0.5',AID_OPERATION),(3.7,r'E=-\ln y',AID_RESULT)]])
         arrows=VGroup(Arrow([-2.7,.4,0],[-1,.4,0],buff=.07,color=AID_OPERATION),
                       Arrow([1,.4,0],[2.7,.4,0],buff=.07,color=AID_OPERATION))
@@ -425,11 +433,11 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         arrow=Arrow(ax.c2p(0,.16),ax.c2p(-.5,.16),buff=0,color=AID_COMPARE)
         step=tex(r'\Delta w=-\frac{g}{H}=-\frac24=-0.5',30,AID_RESULT).move_to([2.75,-.8,0])
         self.add(ax,actual,point,tex('w',24).next_to(ax.x_axis,RIGHT),
-                 jp('説明用の一変数・曲率 H > 0',20,MUTED).move_to([0,1.45,0]),
+                 jp('説明用の1変数・曲率 H > 0',20,MUTED).move_to([0,1.45,0]),
                  jp('青：元の誤差',21,AID_INPUT).move_to([3.15,.85,0]),
                  jp('黄：局所近似',21,AID_OPERATION).move_to([3.15,.35,0]))
         vals=tex(r'g=2,\quad H=4',30,AID_OPERATION).move_to([2.8,-.2,0])
-        note=jp('近似した谷底へ一歩 → 計算し直す',22).move_to([0,-1.9,0])
+        note=jp('近似した谷底へ1歩 → 計算し直す',22).move_to([0,-1.9,0])
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('V11b local quadratic approximation',a*.65,lambda:Create(local)),

@@ -1,16 +1,10 @@
 {
-  "baseline_commit": "276bec1",
   "chain_derivative": -0.49999999999772443,
   "chain_delta_y": 0.009998666879965423,
   "chain_delta_E": -0.01980001333191128,
   "newton_gradient": 1.9999999999964488,
   "newton_curvature": 3.999999220738459,
-  "newton_step": -0.5,
-  "unchanged_sentences_byte_identical": 99,
-  "changed_existing_sentences": [
-    "scene02-04-02",
-    "scene04-04-02"
-  ],
+  "newton_step": -0.5000000974068238,
   "cards": [
     {
       "id": "scene03-recap-cost-01",
@@ -38,7 +32,6 @@
       "note": "復習 R：2.4の自然パラメータのつまみと緑の平均曲線を、活性化とリンクへ"
     }
   ],
-  "baseline_wav_seconds": 504.4,
-  "new_wav_seconds": 563.2,
-  "increase_percent": 11.657414750198258
+  "held_out_probability": 0.6211488496014299,
+  "wav_seconds": 578.6
 }

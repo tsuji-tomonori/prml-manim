@@ -33,6 +33,11 @@ def main():
     result['irls_weighted_ls_error']=max(errors)
     result['irls_losses']=[loss(w) for w in HISTORY]
     result['irls_final_weights']=HISTORY[-1].tolist()
+    assert not np.any(np.isclose(X,HOLDOUT_X)) and HOLDOUT_T==1
+    assert abs(HOLDOUT_P-.6211488496014299)<1e-12
+    result['held_out_example']={'x':HOLDOUT_X,'observed_class':HOLDOUT_T,
+                                'training_weights':HISTORY[-1].tolist(),
+                                'predicted_red_probability':HOLDOUT_P}
     result['hessian_min_eigenvalue']=float(np.linalg.eigvalsh(derivatives(HISTORY[-1])[1]).min())
     assert np.all((RING**2).sum(axis=1)[RING_T==1]<1)
     assert np.all((RING**2).sum(axis=1)[RING_T==0]>1)
@@ -65,6 +70,11 @@ def main():
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES) and all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     assert {p.stem for p in (ROOT/'assets/voicevox').glob('*.wav')}=={s['id'] for s in SCENES}
+    reading=json.loads((ROOT/'reading_check.json').read_text())
+    expected=[s for c in SCENES for b in c['beats'] for s in b['segments']]
+    assert [(s['id'],s['display'],s['speech']) for s in reading['sentences']]==[
+        (s['id'],s['display'],s['speech']) for s in expected]
+    result['reading_audit_sentences']=len(expected)
     display='\n'.join(s['display'] for c in SCENES for b in c['beats'] for s in b['segments'])
     assert not re.search('エックス|ラムダ|ミュー|シグマ|ファイ|ダブリュー|イプシロン|アイアールエルエス',display)
     (ROOT/'media/display_check.txt').write_text(display+'\n')

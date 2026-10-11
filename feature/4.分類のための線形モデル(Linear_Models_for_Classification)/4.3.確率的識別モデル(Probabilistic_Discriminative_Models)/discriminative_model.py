@@ -40,6 +40,11 @@ def fit(targets=T, lam=0., steps=7):
 
 HISTORY=fit()
 
+# The same held-out observation anchors the opening and closing of the story.
+HOLDOUT_X = .4
+HOLDOUT_T = 1
+HOLDOUT_P = float(sigmoid(HISTORY[-1] @ np.array([1., HOLDOUT_X])))
+
 def interpolated_weight(step):
     i=min(int(step),len(HISTORY)-2)
     return HISTORY[i]+(step-i)*(HISTORY[i+1]-HISTORY[i])

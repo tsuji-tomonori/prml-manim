@@ -39,10 +39,9 @@ class NarratedScene(Scene):
     def body_card(self, label):
         saved = [m for m in self.mobjects if m is not self.title and m is not self.subtitle]
         self.remove(*saved)
-        frame = RoundedRectangle(width=11.5, height=4.9, corner_radius=.12,
-                                 stroke_color='#FFFF00', stroke_width=1).move_to([0,0,0])
+        frame = VGroup()
         heading = jp(label, 25).move_to([-5.35,2.05,0], aligned_edge=LEFT)
-        self.add(frame, heading)
+        self.add(heading)
         return saved, frame, heading
 
     def restore_body(self, saved):
@@ -57,9 +56,7 @@ class NarratedScene(Scene):
         # Measure at the origin before positioning: shifted empty SVG parents
         # can enlarge Cairo's family bounds in this Manim version.
         text=jp(label,21)
-        box=Rectangle(width=text.width+.24,height=text.height+.20,
-                      color='#FFFF00',stroke_width=1)
-        return VGroup(box,text).move_to([6.05,1.9,0],aligned_edge=RIGHT)
+        return text.move_to([6.05,1.9,0],aligned_edge=RIGHT)
 
     def beat(self,*animations,actions=None,phases=None):
         beat=self.story['beats'][self.bi]
