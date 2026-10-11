@@ -30,11 +30,24 @@ def main():
     streams={s['codec_type']:s for s in probe['streams']}
     gap=abs(float(streams['video']['duration'])-float(streams['audio']['duration']));assert gap<1/15
     frames=[];sync=[];reviews=[];max_gap=0.;cue_count=0
+    moving_beats={
+        'scene01': {1,2,4},
+        'scene02': {5,6},
+        'scene03': {1,2,3},
+        'scene05': {3,6},
+        'scene06': {4,5},
+        'scene08': {4,5},
+        'scene09': {1,2,3,5,8},
+    }
     for si,(s,e) in enumerate(zip(timeline,manifest)):
         max_gap=max(max_gap,abs(s['end']-s['start']-e['duration']))
         assert abs(s['end']-s['start']-e['duration'])<1/15
         for bi,b in enumerate(s['beats']):
             frames.append(dict(label=f"{s['id']}-beat{bi+1:02}",time=b['start']+.7*(b['end']-b['start'])))
+            if bi+1 in moving_beats.get(s['id'],set()):
+                for q in [.15,.5,.85]:
+                    frames.append(dict(label=f"{s['id']}-beat{bi+1:02}-move{q}",
+                                       time=b['start']+q*(b['end']-b['start'])))
             for c in b['cues']:
                 cue_count+=1
                 expected=next(x for x in e['subtitle_cues'] if x['id']==c['id'])

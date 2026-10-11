@@ -5,7 +5,8 @@ import numpy as np
 from manim import *
 from scene_support import *
 from network_model import (sigmoid, softmax, bump, network, targets, fitted_weights,
-                           class_hidden, class_score, decision_boundary, X)
+                           class_hidden, class_score, decision_boundary, X,
+                           STORY_X, STORY_Y, story_one_unit)
 
 C1=BLUE_CLASS
 C2=PURPLE_ACC
@@ -59,16 +60,21 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         return g
 
     def ingredients(self):
-        ax=self.plot_axes(x=(-1,1,.5),y=(-1,1.5,.5),height=3.15,center=(-.7,-.2,0))
+        ax=self.plot_axes(x=(-1,1,.5),y=(-.25,2.25,.5),height=3.15,center=(-.7,-.2,0))
         c=ValueTracker(.18); v=ValueTracker(.35)
-        pts=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.05) for x,y in zip(X[::2],bump(X[::2],.43)+.025*np.sin(37*X[::2]))])
-        question=jp('材料の形も、変えられる？',29).move_to([0,2.48,0])
+        pts=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.095) for x,y in zip(STORY_X,STORY_Y)])
+        single=curve(ax,story_one_unit,color=YELLOW_ACC)
+        miss=Line(ax.c2p(1,STORY_Y[-1]),ax.c2p(1,story_one_unit(1)),color=YELLOW_ACC,stroke_width=4)
+        question=jp('中央だけ高い3点。1本のS字で通せる？',29).move_to([0,2.48,0])
         self.add(question)
-        self.legend([('観測',C1),('材料１',C1),('材料２',C2),('予測',OUT)])
-        self.beat(LaggedStart(*[FadeIn(d) for d in pts],lag_ratio=.04))
+        self.legend([('3点',C1),('1ユニット',YELLOW_ACC),('2ユニット',OUT)])
+        values=tex(r't(-1)=t(1)=0.034,\quad t(0)=1.084',22,C1).move_to([3.7,1.45,0])
+        hint=jp('左と中央に合わせた1本',22,YELLOW_ACC).move_to([1.9,-2.35,0])
+        self.add(values,hint)
+        self.beat(actions=[lambda:FadeIn(pts),lambda:AnimationGroup(Create(single),Create(miss))])
         h1=always_redraw(lambda:curve(ax,lambda x:np.tanh(3*(x+c.get_value())),color=C1).set_stroke(width=2))
         h2=always_redraw(lambda:curve(ax,lambda x:np.tanh(3*(x-c.get_value())),color=C2).set_stroke(width=2))
-        self.beat(Create(h1),Create(h2))
+        self.beat(Create(h1),Create(h2),FadeOut(single),FadeOut(miss),FadeOut(hint))
         total=always_redraw(lambda:curve(ax,lambda x:bump(x,c.get_value(),v.get_value()),color=OUT))
         self.add(total,knob('v=',v,0,1,color=OUT))
         self.basis_recap()
@@ -112,11 +118,13 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
     def combine(self):
         ax=self.plot_axes(x=(-1,1,.5),y=(-1.3,1.3,1),height=3.15,center=(-.6,-.15,0))
         x=ValueTracker(-.8)
+        story_pts=VGroup(*[Dot(ax.c2p(px,py),color=C1,radius=.08)
+                            for px,py in zip(STORY_X,STORY_Y)])
         h=lambda u:np.tanh(3*(np.asarray(u)[...,None]+np.array([.4,-.4])))
         g1=curve(ax,lambda u:h(u)[:,0],color=C1)
         g2=curve(ax,lambda u:h(u)[:,1],color=C2)
         self.equation(r'z_1=\tanh(3x+1.2),\quad z_2=\tanh(3x-1.2)')
-        self.beat(Create(g1),Create(g2))
+        self.beat(Create(g1),Create(g2),FadeIn(story_pts))
         eq=self.equation('y=',r'0.65z_1',r'-0.65z_2'); eq[1].set_color(C1); eq[2].set_color(C2)
         g=curve(ax,lambda u:bump(u),color=OUT)
         self.beat(Transform(g1,curve(ax,lambda u:.65*h(u)[:,0],color=C1)),Transform(g2,curve(ax,lambda u:-.65*h(u)[:,1],color=C2)),Create(g))
@@ -148,7 +156,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.add(compact)
         self.beat(actions=[lambda:pulse(e1,color=C1),lambda:pulse(e2,color=OUT)])
         self.remove(compact)
-        self.add(note('重みの層を数える：第１層 → 第２層'))
+        self.add(note('重みの層を数える：第1層 → 第2層'))
         self.beat(actions=[lambda:pulse(VGroup(ins,*hs,out),color=C2),lambda:LaggedStart(pulse(e1,color=C1),pulse(e2,color=OUT),lag_ratio=.5)])
 
     def nonlinear(self):
@@ -182,8 +190,9 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.equation('y=a'); self.add(g,dot,number('a=',a.get_value,[5,.7,0],YELLOW_ACC),number('y=',lambda:fn(a.get_value()),[5,0,0],OUT))
         self.beat(a.animate.set_value(2))
         self.output_recap()
-        self.equation(r'y=\sigma(a)=\frac{1}{1+\exp(-a)}\qquad(5.5),(5.6)')
+        self.equation(r'a\longrightarrow y=\sigma(a)=\frac{1}{1+\exp(-a)}\qquad(5.5),(5.6)')
         self.beat(actions=[lambda:t.animate.set_value(1),lambda:a.animate.set_value(-2)])
+        self.equation(r'y=\sigma(a)=\frac{1}{1+\exp(-a)}\qquad(5.5),(5.6)')
         self.remove(ax,axis_names)
         ax=self.plot_axes(x=(-3,3,1),y=(0,1,.5),height=3.2,center=(-.8,-.15,0),labels=('a','y'))
         dot.update(0)
@@ -280,7 +289,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.add(tex('t=H(x)',29,YELLOW_ACC).move_to([5,.8,0]))
         self.beat(sharp.animate.set_value(18))
         err=Line(ax.c2p(0,.5),ax.c2p(0,1),color=YELLOW_ACC,stroke_width=6)
-        self.add(tex(r'|y(0)-t(0)|=0.5',25,YELLOW_ACC).move_to([4.65,-.1,0]))
+        self.add(tex(r'|y(0)-t(0)|=0.5',25,YELLOW_ACC).move_to([4.65,-1.45,0]))
         self.beat(pulse(err,color=YELLOW_ACC),pulse(g,color=OUT))
         self.remove(*[m for m in self.mobjects if m not in [self.formula,self.subtitle] and m.get_center()[1]<2])
         self.equation(r'\sup_{x\in[a,b]}|y(x)-f(x)|<\varepsilon')
@@ -292,6 +301,8 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
 
     def symmetry(self):
         ax=self.plot_axes(x=(-1,1,.5),y=(-1.4,1.4,1),height=2.4,center=(-.7,.35,0))
+        story_pts=VGroup(*[Dot(ax.c2p(px,py),color=C1,radius=.07)
+                            for px,py in zip(STORY_X,STORY_Y)])
         ins=ValueTracker(1); outs=ValueTracker(1)
         h1=lambda x:np.tanh(ins.get_value()*(3*x+1.2))
         contribution=lambda x:.65*outs.get_value()*h1(x)
@@ -301,7 +312,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         total=always_redraw(lambda:curve(ax,y,color=OUT))
         ghost=curve(ax,bump,color=MUTED).set_stroke(width=5,opacity=.35)
         self.equation(r'y=0.65\tanh(3x+1.2)-0.65\tanh(3x-1.2)')
-        self.add(ghost,one,two,total,number(r's_{\rm in}=',ins.get_value,[5,.75,0],C1,places=2),number(r's_{\rm out}=',outs.get_value,[5,0,0],C2,places=2))
+        self.add(ghost,one,two,total,story_pts,number(r's_{\rm in}=',ins.get_value,[5,.75,0],C1,places=2),number(r's_{\rm out}=',outs.get_value,[5,0,0],C2,places=2))
         self.beat(Create(total))
         self.equation(r'\tanh(-a)=-\tanh(a)')
         self.beat(ins.animate.set_value(-1))
@@ -310,8 +321,8 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.add(note('灰色の元の曲線と、赤い曲線が一致',color=YELLOW_ACC))
         self.beat(pulse(total,color=YELLOW_ACC))
         # Swap complete labeled summands; the actual output is permutation invariant.
-        left=VGroup(tex(r'(-0.65)\tanh(-3x-1.2)',26,C1),jp('ユニット１',20,C1)).arrange(DOWN,buff=.15).move_to([-3,-2.1,0])
-        right=VGroup(tex(r'(-0.65)\tanh(3x-1.2)',26,C2),jp('ユニット２',20,C2)).arrange(DOWN,buff=.15).move_to([3,-2.1,0])
+        left=VGroup(tex(r'(-0.65)\tanh(-3x-1.2)',26,C1),jp('ユニット1',20,C1)).arrange(DOWN,buff=.15).move_to([-3,-2.1,0])
+        right=VGroup(tex(r'(-0.65)\tanh(3x-1.2)',26,C2),jp('ユニット2',20,C2)).arrange(DOWN,buff=.15).move_to([3,-2.1,0])
         for m in list(self.mobjects):
             if isinstance(m,Text) and m.get_center()[1]<-2: self.remove(m)
         self.add(left,right)
@@ -325,9 +336,19 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         self.equation(r'2^M M!\qquad M=2:\quad 2^2\cdot2!=8')
         self.beat(pulse(self.formula,color=YELLOW_ACC))
         self.symmetry_aid()
-        self.remove(left,right)
-        self.equation(r'\mathbf x\ \xrightarrow{\ W^{(1)},\,h\ }\ \mathbf z\ \xrightarrow{\ W^{(2)},\,f\ }\ \mathbf y')
-        self.beat(pulse(one,color=C1),pulse(two,color=C2))
+        self.clear()
+        self.formula=None
+        self.subtitle=None
+        self.add(jp('同じ3点へ戻る',32).move_to([0,3.35,0]))
+        final_ax=self.plot_axes(x=(-1,1,.5),y=(-.25,2.25,.5),height=3.15,center=(-.7,-.2,0))
+        final_pts=VGroup(*[Dot(final_ax.c2p(x,y),color=C1,radius=.095)
+                            for x,y in zip(STORY_X,STORY_Y)])
+        final_curve=curve(final_ax,bump,color=OUT)
+        formula=tex(r'y=0.65[\tanh(3x+1.2)-\tanh(3x-1.2)]',28,OUT).move_to([0,2.48,0])
+        values=tex(r'y(-1)=y(1)=0.034,\quad y(0)=1.084',24,C1).move_to([3.6,.85,0])
+        self.add(values)
+        self.beat(actions=[lambda:AnimationGroup(FadeIn(final_pts),Create(final_curve)),
+                           lambda:FadeIn(formula)])
 
 
     def body_card(self, label):
@@ -335,9 +356,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         saved = [m for m in self.mobjects if m is not self.subtitle]
         self.clear()
         self.add(*[m for m in saved if m.get_center()[1] > 3])
-        frame = RoundedRectangle(width=10.4, height=4.5, corner_radius=.12,
-                                 color='#FFFF00', stroke_width=1.2).move_to([0, .1, 0])
-        self.add(frame, jp(label, 23).move_to([-4.85, 2.03, 0], aligned_edge=LEFT))
+        self.add(jp(label, 23).move_to([-4.85, 2.03, 0], aligned_edge=LEFT))
         return saved
 
     def restore_body(self, saved):

@@ -6,6 +6,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent
 X = np.linspace(-1, 1, 41)
 GRID = np.linspace(-1, 1, 401)
+STORY_X = np.array([-1., 0., 1.])
 
 
 def sigmoid(x):
@@ -30,6 +31,15 @@ def network(x, weights):
 def bump(x, center=.4, amplitude=.65):
     x = np.asarray(x)
     return amplitude * (np.tanh(3*(x+center))-np.tanh(3*(x-center)))
+
+
+def story_one_unit(x):
+    """A monotone candidate through the left and middle story points."""
+    amplitude = (STORY_Y[1] - STORY_Y[0]) / np.tanh(3)
+    return STORY_Y[1] + amplitude * np.tanh(3 * np.asarray(x))
+
+
+STORY_Y = bump(STORY_X)
 
 
 def targets(index, x):
