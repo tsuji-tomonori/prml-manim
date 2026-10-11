@@ -37,9 +37,9 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         probe=always_redraw(lambda:Dot(ax.c2p(q.get_value(),pred(q.get_value())),radius=.1,color=WHITE))
         guide=always_redraw(lambda:DashedLine(ax.c2p(q.get_value(),0),probe.get_center(),color=MUTED))
         observation=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_T),radius=.07,color=RED_CLASS)
-        self.add(graph,probe,guide,observation,number('p=',lambda:pred(q.get_value()),[5.35,.6,0],YELLOW_ACC))
-        self.beat(Indicate(observation,color=RED_CLASS,scale_factor=1.1),
-                  Transform(self.title,jp('赤なのに、62.1%？',32).move_to([0,3.35,0])))
+        self.add(graph,probe,guide,observation,number('p=',lambda:pred(q.get_value()),[5.35,.6,0],YELLOW_ACC,places=3))
+        self.title.become(jp('赤なのに、62.1%？',32).move_to([0,3.35,0]))
+        self.beat(Indicate(observation,color=RED_CLASS,scale_factor=1.1))
         self.equation(r'a=w_0+w_1x',r'\qquad \sigma(a)=\frac{1}{1+e^{-a}}')
         self.beat(q.animate.set_value(-1.8))
         sliders=VGroup(knob('w_1=',k,.5,4,at=(-2,-2.5,0)),knob('w_0=',b,-2,2,at=(-2,-2.5,0)))
@@ -315,7 +315,7 @@ class PRML43ProbabilisticDiscriminativeModels(NarratedScene):
         observation=Dot(ax.c2p(HOLDOUT_X,HOLDOUT_T),radius=.07,color=RED_CLASS)
         guide=DashedLine(prediction.get_center(),observation.get_center(),color=YELLOW_ACC)
         self.add(training,curve(ax,fitted),guide,prediction,observation,
-                 number('p=',lambda:HOLDOUT_P,[5.25,.55,0],YELLOW_ACC),
+                 number('p=',lambda:HOLDOUT_P,[5.25,.55,0],YELLOW_ACC,places=3),
                  note('12点で学習　／　新しい赤の1点で確認'))
         self.equation(r'x=0.4',r'\qquad p(C_1|x)=0.621\ldots',size=36)
         self.beat(Indicate(prediction,color=YELLOW_ACC,scale_factor=1.5))
