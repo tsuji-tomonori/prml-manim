@@ -16,6 +16,7 @@ GREEN=ManimColor('#77D49A')
 RED=ManimColor('#FF6B77')
 MUTED=ManimColor('#A8B2C5')
 COLORS=[BLUE,GREEN,PURPLE]
+FRACTION_FORMULA_Y=-2.28
 
 def curve(ax,xs,ys,color=BLUE,width=3):
     return VMobject().set_points_as_corners([ax.c2p(float(x),float(y)) for x,y in zip(xs,ys)]).set_stroke(color,width)
@@ -244,7 +245,7 @@ class PRML34BayesianModelComparison(Scene):
         self.remove(shade,rects,*rects,dot,v)
         z=bm.uniform_evidence(4)
         posterior=graph(ax,lambda w:product(w)/z,-2,2,GREEN)
-        f2=self.formula(r'p(w\mid D,M_i)=',r'\frac{p(D\mid w,M_i)p(w\mid M_i)}{p(D\mid M_i)}',colors=[GREEN,GOLD],size=31)
+        f2=self.formula(r'p(w\mid D,M_i)=',r'\frac{p(D\mid w,M_i)p(w\mid M_i)}{p(D\mid M_i)}',colors=[GREEN,GOLD],y=FRACTION_FORMULA_Y,size=31)
         posterior_legend=self.legend([('尤度',BLUE),('事前',PURPLE),('事後',GREEN)])
         self.beat(Transform(p,posterior),ReplacementTransform(f,f2),l.animate.set_stroke(opacity=.2),
                   ReplacementTransform(legend,posterior_legend))
@@ -276,7 +277,7 @@ class PRML34BayesianModelComparison(Scene):
         self.remove(new)
         self.add(new2)
         self.beat(Transform(b,bars(bm.posterior())))
-        odds=self.formula(r'\frac{p(M_2\mid D)}{p(M_3\mid D)}=',r'\frac{p(M_2)}{p(M_3)}',r'\frac{p(D\mid M_2)}{p(D\mid M_3)}',colors=[GREEN,PURPLE,GOLD],size=30)
+        odds=self.formula(r'\frac{p(M_2\mid D)}{p(M_3\mid D)}=',r'\frac{p(M_2)}{p(M_3)}',r'\frac{p(D\mid M_2)}{p(D\mid M_3)}',colors=[GREEN,PURPLE,GOLD],y=FRACTION_FORMULA_Y,size=30)
         self.beat(ReplacementTransform(f,odds),pulse(evidence[1:]))
         self.remove(b)
         preference=ValueTracker(1/3)
@@ -311,9 +312,9 @@ class PRML34BayesianModelComparison(Scene):
         width_label=tex(r'\Delta w_{\rm posterior}',26,GREEN).move_to([-2,.5,0])
         pointer=Arrow(width_label.get_right(),rect.get_top(),color=GREEN,buff=.15,stroke_width=2,tip_length=.15)
         self.beat(Create(rect),FadeIn(label),FadeIn(width_label),Create(pointer))
-        f=self.formula(r'p(D)\approx',r'p(D\mid w_{\rm MAP})',r'\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],size=31)
+        f=self.formula(r'p(D)\approx',r'p(D\mid w_{\rm MAP})',r'\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],y=FRACTION_FORMULA_Y,size=31)
         self.beat(Write(f),pulse(rect))
-        f2=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+\ln\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],size=30)
+        f2=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+\ln\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],y=FRACTION_FORMULA_Y,size=30)
         self.beat(ReplacementTransform(f,f2))
         # Same probability budget, now in two parameter directions.
         self.remove(*visual,visual,rect,label,width_label,pointer)
@@ -325,7 +326,7 @@ class PRML34BayesianModelComparison(Scene):
         ratio=tex(r'\frac12\times\frac12=\frac14',37,GREEN).move_to([2.4,.25,0])
         self.add(square,strip)
         self.beat(Transform(strip,small),Write(ratio))
-        f3=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+M\ln\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],size=29)
+        f3=self.formula(r'\ln p(D)\approx',r'\ln p(D\mid w_{\rm MAP})',r'+M\ln\frac{\Delta w_{\rm posterior}}{\Delta w_{\rm prior}}',colors=[GOLD,BLUE,PURPLE],y=FRACTION_FORMULA_Y,size=29)
         note=jp('M：係数の個数   ／   同じ幅比 r の近似',24).move_to([0,2.2,0])
         self.beat(ReplacementTransform(f2,f3),FadeIn(note),pulse(strip))
 
@@ -424,7 +425,7 @@ class PRML34BayesianModelComparison(Scene):
         self.add(ax,labels,ticks0,tex('k',26).next_to(ax.x_axis,RIGHT,buff=.15))
         self.beat(FadeIn(bars))
         self.beat(pulse(bars[:3],RED))
-        f=self.formula(r'\ell(k)=\ln\frac{p(k\mid M_1)}{p(k\mid M_2)}',size=31)
+        f=self.formula(r'\ell(k)=\ln\frac{p(k\mid M_1)}{p(k\mid M_2)}',y=FRACTION_FORMULA_Y,size=31)
         self.beat(Write(f),pulse(bars[4:],GREEN))
         weighted_ax=self.ax([-.65,6.5,1],[-.2,.8,.2],width=8.4,height=3.2)
         weighted_ax.x_axis.numbers.set_opacity(0)
@@ -438,7 +439,7 @@ class PRML34BayesianModelComparison(Scene):
         self.add(weighted_label,weighted_formula)
         self.beat(Transform(bars,weighted),Transform(ax,weighted_ax),FadeIn(ticks1),FadeIn(average))
         self.kl_recap()
-        kl=self.formula(r'\int',r'p(D\mid M_1)',r'\ln\frac{p(D\mid M_1)}{p(D\mid M_2)}',r'\,dD=D_{\rm KL}(p_1\Vert p_2)\geq0',colors=[WHITE,BLUE,GOLD,GREEN],size=28)
+        kl=self.formula(r'\int',r'p(D\mid M_1)',r'\ln\frac{p(D\mid M_1)}{p(D\mid M_2)}',r'\,dD=D_{\rm KL}(p_1\Vert p_2)\geq0',colors=[WHITE,BLUE,GOLD,GREEN],y=FRACTION_FORMULA_Y,size=28)
         self.beat(ReplacementTransform(weighted_formula,kl),pulse(average))
         note=jp('真の分布が候補に含まれるときの、対数比の平均',24).move_to([0,2.25,0])
         self.remove(labels,weighted_label)
@@ -459,7 +460,8 @@ class PRML34BayesianModelComparison(Scene):
         z=readout('p(D)=',lambda:bm.uniform_evidence(width.get_value()),[2.5,1.5,0],GOLD)
         self.add(z)
         self.beat(width.animate.set_value(40))
-        f=self.formula(r'\int p(w)\,dw=1',r'\quad\Longrightarrow\quad p(D)\ \mathrm{defined}',colors=[PURPLE,GOLD],size=30)
+        f=VGroup(self.formula(r'\int p(w)\,dw=1',r'\quad\Longrightarrow\quad p(D)',colors=[PURPLE,GOLD],size=30),
+                 jp('を定義できる',24,GOLD)).arrange(RIGHT,buff=.15).move_to([0,-2.48,0])
         self.beat(Write(f))
         self.remove(ax,c,point,z)
         for mob in list(self.mobjects):
@@ -493,7 +495,8 @@ class PRML34BayesianModelComparison(Scene):
         returned=VGroup(ax,dots,fitted,degree_label,best,averaged)
         next_title=jp('次の問い：事前とノイズの強さは？  3.5',25,GOLD).move_to([0,2.25,0])
         a,b=[self.sentence_duration(i) for i in range(2)]
-        self.beat(phases=[('return to the same twelve points',a*.48,lambda:FadeIn(returned)),
+        self.add(returned)
+        self.beat(phases=[('return to the same twelve points',a*.48,lambda:Wait()),
                           ('compare the same degrees',a*.52,lambda:degree.animate.set_value(2)),
                           ('question for section 3.5',b,lambda:FadeIn(next_title))])
 
