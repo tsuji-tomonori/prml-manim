@@ -11,6 +11,14 @@ def main():
     fd=(regression_error(REG_W+eps)-regression_error(REG_W-eps))/(2*eps)
     assert abs(fd)<1e-8
     assert np.isclose(VARIANCE,np.mean((prediction(X,REG_W)-T)**2))
+    story_start_error=regression_error(STORY_START_W)
+    story_final_error=regression_error(REG_W)
+    story_start_point=story_point_residual(STORY_START_W)
+    story_final_point=story_point_residual(REG_W)
+    assert len(X)==13 and np.isclose(X[STORY_POINT_INDEX],.5333333333333332)
+    assert story_final_error<story_start_error and story_final_point>story_start_point
+    assert abs(story_start_error-.072)<.0005 and abs(story_final_error-.013)<.0005
+    assert abs(story_start_point-.005)<.0005 and abs(story_final_point-.091)<.0005
     errors=[]
     for a in np.linspace(-4,4,23):
         for t in (0,1):
@@ -52,7 +60,11 @@ def main():
     assert len(entries)==len(SCENES) and all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     actual={p.stem for p in Path('assets/voicevox').glob('*.wav')}
     assert actual=={s['id'] for s in SCENES}
-    result=dict(check_groups=7,regression_optimum=REG_W,noise_variance_ml=VARIANCE,
+    result=dict(check_groups=8,regression_optimum=REG_W,noise_variance_ml=VARIANCE,
+                story=dict(point_index=STORY_POINT_INDEX,input=float(X[STORY_POINT_INDEX]),
+                           start_weight=STORY_START_W,end_weight=REG_W,
+                           start_point_abs_residual=story_start_point,end_point_abs_residual=story_final_point,
+                           start_total_error=story_start_error,end_total_error=story_final_error),
                 binary_gradient_max_error=max(errors),stationary_points=STATIONARY.tolist(),
                 hessian_eigenvalues=eig.tolist(),descent=results,batch_final=float(b[-1]),
                 online_final=float(o[-1]),scalar_optimum=float(TARGETS.mean()),

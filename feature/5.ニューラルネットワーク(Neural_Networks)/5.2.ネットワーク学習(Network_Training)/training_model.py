@@ -6,6 +6,10 @@ def prediction(x,w): return w*np.tanh(1.8*x)-.35*np.tanh(3*(x-.5))
 def regression_error(w): return .5*np.sum((prediction(X,w)-T)**2)
 REG_W=float(np.linalg.lstsq(np.tanh(1.8*X)[:,None],T+.35*np.tanh(3*(X-.5)),rcond=None)[0][0])
 VARIANCE=float(2*regression_error(REG_W)/len(X))
+STORY_START_W=.7
+STORY_POINT_INDEX=8
+def story_point_residual(w):
+    return abs(float(prediction(X[STORY_POINT_INDEX],w)-T[STORY_POINT_INDEX]))
 def sigmoid(a): return 1/(1+np.exp(-np.asarray(a)))
 def softmax(a):
     a=np.asarray(a); z=np.exp(a-np.max(a)); return z/z.sum()

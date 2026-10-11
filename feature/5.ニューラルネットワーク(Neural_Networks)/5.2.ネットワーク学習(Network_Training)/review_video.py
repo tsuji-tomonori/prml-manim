@@ -19,6 +19,15 @@ def main():
         for i,b in enumerate(s['beats']):
             if not args.recap or i==len(s["beats"])//2:
                 frames.append(dict(id=f"{s['id']}-beat{i+1}",time=(b['start']+b['end'])/2,kind='beat'))
+            # Check moving and emphasized objects while the corresponding words
+            # are spoken, including the replay of the opening data at the end.
+            if (s['id']=='scene01' or s['id']=='scene10' and i>=5
+                    or s['id']=='scene09' and i in (1,2,3,4)
+                    or s['id']=='scene04' and i in (2,3,4)):
+                for phase,alpha in [('early',.12),('middle',.5),('late',.88)]:
+                    frames.append(dict(id=f"{s['id']}-beat{i+1}-{phase}",
+                                       time=b['start']+alpha*(b['end']-b['start']),kind='motion'))
+                frames.append(dict(id=f"{s['id']}-beat{i+1}-after",time=b['end']+.1,kind='motion-after'))
             if any("-recap-" in c["id"] or "-aid-" in c["id"] for c in b["cues"]):
                 for phase,t in [("before",b["start"]-.2),("after",b["end"]+.2)]:
                     frames.append(dict(id=b["cues"][0]["id"]+"-"+phase,time=t,kind="context"))
@@ -35,8 +44,14 @@ def main():
             b=s['beats'][2]
             for phase,alpha in [('early',.1),('late',.9)]:
                 frames.append(dict(id=s['id']+'-'+phase,time=b['start']+alpha*(b['end']-b['start']),kind='sync'))
+    # A final "after" sample can otherwise fall beyond the last video frame.
+    last_frame_time=timeline[-1]['end']-.2
     for f in frames:
-        subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(OUT/(f['id']+'.png'))],check=True)
+        f['time']=min(max(f['time'],0),last_frame_time)
+        frame_path=OUT/(f['id']+'.png')
+        subprocess.run(['ffmpeg','-v','error','-y','-ss',str(f['time']),'-i',str(VIDEO),'-frames:v','1',str(frame_path)],check=True)
+        if not frame_path.exists():
+            raise RuntimeError(f"No frame at {f['time']:.3f}s for {f['id']}")
     (OUT/'frames.json').write_text(json.dumps(frames,ensure_ascii=False,indent=2)+'\n')
     # Original-resolution panels: do not lose subtitle readability to thumbnails.
     for i in range(0,len(frames),4):
