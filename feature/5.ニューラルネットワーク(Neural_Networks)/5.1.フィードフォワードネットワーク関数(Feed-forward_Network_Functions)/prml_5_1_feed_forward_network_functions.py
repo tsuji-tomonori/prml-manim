@@ -60,13 +60,11 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         return g
 
     def ingredients(self):
-        ax=self.plot_axes(x=(-1,1,.5),y=(-.25,2.25,.5),height=3.15,center=(-.7,-.2,0))
+        ax=self.plot_axes(x=(-1,1,.5),y=(-1.25,2.25,.5),height=3.15,center=(-.7,-.2,0))
         c=ValueTracker(.18); v=ValueTracker(.35)
         pts=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.095) for x,y in zip(STORY_X,STORY_Y)])
         single=curve(ax,story_one_unit,color=YELLOW_ACC)
         miss=Line(ax.c2p(1,STORY_Y[-1]),ax.c2p(1,story_one_unit(1)),color=YELLOW_ACC,stroke_width=4)
-        question=jp('中央だけ高い3点。1本のS字で通せる？',29).move_to([0,2.48,0])
-        self.add(question)
         self.legend([('3点',C1),('1ユニット',YELLOW_ACC),('2ユニット',OUT)])
         values=tex(r't(-1)=t(1)=0.034,\quad t(0)=1.084',22,C1).move_to([3.7,1.45,0])
         hint=jp('左と中央に合わせた1本',22,YELLOW_ACC).move_to([1.9,-2.35,0])
@@ -84,7 +82,6 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
             if isinstance(m,VGroup) and len(m)==3 and any(isinstance(z,NumberLine) for z in m): self.remove(m)
         self.add(knob('c=',c,0,.65,color=C2))
         self.beat(c.animate.set_value(.43),v.animate.set_value(.65))
-        self.remove(question)
         self.equation(r'y(x,\mathbf w)=f\bigl(\sum_j{\color[HTML]{FF7687}w_j}{\color[HTML]{C5A1FF}\phi_j(x;\theta_j)}\bigr)',tex_template=COLOR_TEMPLATE)
         self.beat(c.animate.set_value(.30))
         self.beat(c.animate.set_value(.43))
@@ -204,7 +201,7 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         bars=always_redraw(lambda:VGroup(*[Rectangle(width=1.35,height=max(.01,2.5*p),fill_color=c,fill_opacity=.8,stroke_width=0).move_to([-3.2+i*3.2,-1.65+1.25*p,0]) for i,(p,c) in enumerate(zip(probs(),[RED_CLASS,BLUE_CLASS,GREEN_CLASS]))]))
         labels=VGroup(*[tex('C_'+str(i+1),25,c).move_to([-3.2+i*3.2,-1.98,0]) for i,c in enumerate([RED_CLASS,BLUE_CLASS,GREEN_CLASS])])
         numbers=VGroup(*[number('y_'+str(i+1)+'=',lambda i=i:probs()[i],[-3.2+i*3.2,1.3,0],c) for i,c in enumerate([RED_CLASS,BLUE_CLASS,GREEN_CLASS])])
-        self.equation(r'y_k=\sigma(a_k)\qquad\sum_k y_k\ \text{need not equal}\ 1')
+        self.equation(r'y_k=\sigma(a_k)\qquad\sum_k y_k\not\equiv 1')
         self.add(labels,numbers,number(r'\sum_k y_k=',lambda:probs().sum(),[0,-2.55,0],YELLOW_ACC))
         self.beat(FadeIn(bars),scores[0].animate.set_value(2.2))
         self.equation(r'y_k=\frac{e^{a_k}}{\sum_l e^{a_l}},\qquad\sum_k y_k=1\quad(4.62)')

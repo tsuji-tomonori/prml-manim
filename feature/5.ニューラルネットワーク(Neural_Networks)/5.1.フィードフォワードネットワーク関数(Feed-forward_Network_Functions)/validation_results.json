@@ -1,5 +1,5 @@
 {
-  "video_sha256": "1a025497b5917950ca3597b529550df3d2f75a1dcfa59fe6e0c66a90e39fa52d",
+  "video_sha256": "d48ec4e8bb386d87309dd412d6363ce655532a67eecba371ad81f2f8a56552c9",
   "probe": {
     "programs": [],
     "streams": [
@@ -985,7 +985,7 @@
       ]
     }
   ],
-  "visual_review": "163 frames extracted. Representative contact sheets across all 9 scenes and enlarged opening, axes, scene05 transition, scene08 error, scene09 return inspected; no visible overlaps in inspected frames. Not every frame inspected.",
+  "visual_review": "163 frames extracted. Opening contact sheets 00-02, enlarged opening/materials/formula crops, and one representative frame from each of 9 scenes inspected; no visible duplicate heading, out-of-axis tanh curve, English explanatory text, or new overlap in inspected frames. Not every frame inspected.",
   "full_listening": false,
   "full_decode": "ffmpeg -v error -xerror: passed on final MP4"
 }
