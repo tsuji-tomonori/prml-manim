@@ -45,6 +45,13 @@ def network(getter,scale=1,center=(0,0,0),deltas=False):
     return group,edges,layers
 
 class PRML53ErrorBackpropagation(NarratedScene):
+    def mixed_equation(self,*parts,layout=RIGHT,center=(0,2.48,0),buff=.15):
+        if self.formula is not None: self.remove(*self.formula.get_family())
+        self.formula=VGroup(*parts).arrange(layout,buff=buff).move_to(center)
+        if self.formula.width>12.5: self.formula.scale_to_fit_width(12.5)
+        self.add(self.formula)
+        return self.formula
+
     def construct(self):
         self.camera.background_color=BG
         self.entries={e['id']:e for e in json.loads(MANIFEST.read_text())['scenes']}
@@ -91,7 +98,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.equation(r'y_k=\sum_{j=0}^{M}w^{(2)}_{kj}z_j')
         self.beat(actions=[lambda:pulse(edges[1],BLUE_CLASS),lambda:Circumscribe(layers[2])])
         self.beat(actions=[lambda:u.animate.set_value(-.7),lambda:u.animate.set_value(.6)])
-        self.equation(r'x_0=z_0=1,\qquad a_j,\ z_j\ \longrightarrow\ \mathrm{save}')
+        self.mixed_equation(tex(r'x_0=z_0=1,\qquad a_j,\ z_j\ \longrightarrow',31),jp('保存',25))
         self.beat(actions=[lambda:Indicate(self.formula),lambda:LaggedStart(*[Circumscribe(l) for l in layers],lag_ratio=.3)])
 
     def chain(self):
@@ -121,7 +128,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.equation(r'\frac{\partial E_n}{\partial w_{ji}}=',r'\delta_j',r'z_i',size=40)
         self.formula[1].set_color(RED_CLASS);self.formula[2].set_color(BLUE_CLASS)
         self.beat(actions=[lambda:x.animate.set_value(.8),lambda:Indicate(local[0])])
-        self.equation(r'\delta_j\ \mathrm{fixed}:\quad z_i\mapsto-z_i\Rightarrow\delta_jz_i\mapsto-\delta_jz_i')
+        self.mixed_equation(jp('感度を固定：',25),tex(r'z_i\mapsto-z_i\Rightarrow\delta_jz_i\mapsto-\delta_jz_i',31))
         # Hold downstream sensitivity fixed to isolate the multiplication's sign.
         for m in [groups,paths,local,slider]:self.remove(*m.get_family())
         axis=NumberLine(x_range=[-1,1,.5],length=8,include_numbers=True,font_size=22).move_to([0,.3,0])
@@ -131,7 +138,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
 
     def output_delta(self):
         u=ValueTracker(.1);t=.7
-        ax=self.plot_axes(x=(-.6,2,.5),y=(0,.9,.3),width=8.5,height=3.4,labels=('y_k','E_n'))
+        ax=self.plot_axes(x=(-.6,2,.5),y=(0,.9,.3),width=7.2,height=3.4,
+                          center=(-1.5,-.15,0),labels=('y_k','E_n'))
         graph=curve(ax,lambda y:.5*(y-t)**2,color=BLUE_CLASS)
         dot=always_redraw(lambda:Dot(ax.c2p(u.get_value(),.5*(u.get_value()-t)**2),color=YELLOW_ACC))
         tan=always_redraw(lambda:tangent(ax,u.get_value(),.5*(u.get_value()-t)**2,u.get_value()-t,half=.23))
@@ -144,9 +152,12 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.equation(r'\delta_k=\frac{\partial E_n}{\partial a_k}=\frac12\cdot2(y_k-t_k)=y_k-t_k')
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(t)])
         self.cancellation_recap()
-        self.add(note('図：線形出力＋二乗和誤差',at=(3.5,1.85,0)))
-        self.equation(r'\sigma+\mathrm{binary\ CE}\quad;\quad\mathrm{softmax}+\mathrm{multiclass\ CE}\quad\Rightarrow\delta_k=y_k-t_k',size=27)
-        glossary=VGroup(jp('σ：1つの確率',19),jp('softmax：確率の和が1',19),jp('CE：確率予測の誤差',19)).arrange(DOWN,buff=.2).move_to([5,-.5,0])
+        self.add(note('図：線形出力＋二乗和誤差',at=(4.5,1.85,0)))
+        self.mixed_equation(
+            jp('σ＋二値交差エントロピー ／ softmax＋多クラス交差エントロピー',25),
+            tex(r'\Rightarrow\delta_k=y_k-t_k',31),layout=DOWN,center=(0,2.2,0),buff=.12)
+        glossary=VGroup(jp('σ：1つの確率',19),jp('softmax：確率の和が1',19),
+                        jp('交差エントロピー：確率予測の誤差',18)).arrange(DOWN,buff=.2,aligned_edge=LEFT).move_to([4.5,-.45,0])
         self.add(glossary)
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(1.1)])
         self.equation(r'\delta_k=\sum_l\frac{\partial E_n}{\partial y_l}\frac{\partial y_l}{\partial a_k}',size=37)
@@ -250,7 +261,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.add(move,read)
         self.beat(actions=[lambda:u.animate.set_value(.1),lambda:Circumscribe(read)])
         self.remove(*[m for m in self.mobjects if m is not self.formula and m is not self.subtitle and m.get_center()[1]<3])
-        self.equation(r'\mathrm{forward}\quad\rightarrow\quad\mathrm{backward}\quad\rightarrow\quad\delta_jz_i')
+        self.mixed_equation(jp('前向き計算',25),tex(r'\longrightarrow',29),
+                            jp('逆伝播',25),tex(r'\longrightarrow\delta_jz_i',29))
         net,edges,layers=network(lambda:forward());self.add(net)
         rev=VGroup(*[Line(p.get_end(),p.get_start()) for group in edges[::-1] for p in group])
         self.beat(actions=[lambda:Succession(pulse(VGroup(*edges),BLUE_CLASS),pulse(rev)),lambda:Circumscribe(layers[1])])
@@ -275,7 +287,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         dots=always_redraw(lambda:VGroup(Dot(ax.c2p(u.get_value(),u.get_value()),color=BLUE_CLASS),Dot(ax.c2p(u.get_value(),np.log10(2)+2*u.get_value()),color=RED_CLASS)))
         self.add(jp('復習: 1.1 対数の目盛り',20).move_to([4.3,2.03,0]))
         self.add(bp,cd,dots,note('計算量の模型：青 C = W ／ 赤 C = 2W²（両軸は常用対数）'))
-        self.equation(r'\mathrm{backprop}:O(W)\qquad\mathrm{central\ difference}:O(W^2)',size=31)
+        self.mixed_equation(jp('逆伝播：',25),tex(r'O(W)',31),
+                            jp('中心差分：',25),tex(r'O(W^2)',31),buff=.25)
         self.beat(u.animate.set_value(2))
         self.beat(u.animate.set_value(3))
         self.beat(actions=[lambda:Indicate(bp),lambda:u.animate.set_value(1.5)])
@@ -291,7 +304,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         dot=always_redraw(lambda:Dot(ax.c2p(*f(u.get_value())),color=BLUE_CLASS,radius=.085))
         pred=always_redraw(lambda:Dot(ax.c2p(*(y0+u.get_value()*(J@direction))),color=YELLOW_ACC,radius=.065))
         self.add(path,dot,knob('s=',u,0,1.2,at=(-1,-2.5,0)))
-        self.equation(r'\mathbf x=\mathbf x_0+s(1,-0.5)^T,\quad\mathbf w\ \mathrm{fixed}')
+        self.mixed_equation(tex(r'\mathbf x=\mathbf x_0+s(1,-0.5)^T,\quad\mathbf w',31),jp('は固定',25))
         self.beat(actions=[lambda:u.animate.set_value(.15),lambda:u.animate.set_value(0)])
         self.equation(r'J_{ki}=\frac{\partial y_k}{\partial x_i}',size=39)
         matrix=Matrix([[f'{v:.3f}' for v in row] for row in J],h_buff=1.8,v_buff=.75).scale(.52).move_to([4.8,1.25,0])
@@ -313,7 +326,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
             tex(r'\mathrm{sigmoid}:\quad\frac{\partial y_k}{\partial a_j}=\delta_{kj}\sigma^{\prime}(a_j)',34,BLUE_CLASS),
             tex(r'\mathrm{softmax}:\quad\frac{\partial y_k}{\partial a_j}=\delta_{kj}y_k-y_ky_j',34,RED_CLASS),
             tex(r'\delta_{kj}=1\ (k=j),\quad0\ (k\ne j)',28,MUTED)).arrange(DOWN,buff=.6).move_to([0,-.1,0])
-        self.equation(r'\text{output seeds}\quad\longrightarrow\quad J_{k,:}')
+        self.mixed_equation(jp('出力の開始値',25),tex(r'\longrightarrow J_{k,:}',31))
         self.add(seeds)
         self.beat(actions=[lambda:Indicate(seeds[0]),lambda:Indicate(seeds[1])])
         self.remove(seeds)
