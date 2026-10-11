@@ -1,4 +1,21 @@
 {
+  "opening_example": {
+    "x": 0.4,
+    "red_prior": 0.8,
+    "densities": [
+      0.11053015421416525,
+      0.32757208103875246
+    ],
+    "support": [
+      0.08842412337133221,
+      0.06551441620775048
+    ],
+    "posterior": [
+      0.5744118634171281,
+      0.4255881365828719
+    ],
+    "equal_prior_red": 0.25229306157352943
+  },
   "gaussian_sigmoid_max_error": 6.661338147750939e-16,
   "softmax_common_term_error": 4.996003610813204e-16,
   "covariance_states_checked": 21,
@@ -65,5 +82,5 @@
   ],
   "audio_scenes": 9,
   "sentences": 134,
-  "wav_duration": 788.0
+  "wav_duration": 762.8666666666667
 }

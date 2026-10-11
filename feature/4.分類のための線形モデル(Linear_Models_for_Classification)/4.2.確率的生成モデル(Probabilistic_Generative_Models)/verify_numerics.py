@@ -9,6 +9,14 @@ from narration_content import SCENES
 from make_voicevox_narration import MANIFEST, valid_entry
 
 out={}
+density,support,opening=opening_evidence()
+assert density[1]>density[0]
+assert support[0]>support[1]
+assert np.isclose(opening[0],.5744118634171281,atol=1e-12)
+assert np.isclose(opening_evidence(.5)[2][0],.25229306157352943,atol=1e-12)
+assert np.isclose(posterior([.2,-.45],priors=[.5,.5])[0],.2685337083883154)
+assert np.isclose(posterior([.2,-.45],priors=[.8,.2])[0],.5948904321020163)
+out['opening_example']=dict(x=OPENING_X,red_prior=OPENING_PRIOR,densities=density.tolist(),support=support.tolist(),posterior=opening.tolist(),equal_prior_red=float(opening_evidence(.5)[2][0]))
 rng=np.random.default_rng(73);x=rng.normal(size=(1000,2))
 w,b=linear_params()
 p=posterior(x)[:,0]
@@ -85,4 +93,4 @@ readings=json.loads(Path('reading_check.json').read_text())['sentences']
 assert [(r['id'],r['display'],r['speech']) for r in readings]==[(c['id'],c['display'],c['speech']) for c in segments]
 out['audio_scenes']=len(entries);out['sentences']=len(segments);out['wav_duration']=sum(e['duration'] for e in entries)
 Path('numerical_results.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
-print(json.dumps(out,ensure_ascii=False,indent=2));print('PASS: 8 groups of independent numerical / data checks')
+print(json.dumps(out,ensure_ascii=False,indent=2));print('PASS: 9 groups of independent numerical / data checks')

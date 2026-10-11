@@ -24,6 +24,17 @@ def normal1(x, mean, sd=.9):
     return np.exp(-.5*((np.asarray(x)-mean)/sd)**2) / (sd*np.sqrt(2*np.pi))
 
 
+OPENING_X = 0.4
+OPENING_PRIOR = 0.8
+
+
+def opening_evidence(prior=OPENING_PRIOR):
+    """The same independently computed 1D observation in scene 1 and scene 9."""
+    densities = np.array([normal1(OPENING_X, -1.1), normal1(OPENING_X, 1.1)])
+    support = densities * np.array([prior, 1-prior])
+    return densities, support, support / support.sum()
+
+
 def log_gaussian(x, mean, cov):
     d = np.asarray(x)-mean
     return -.5*(len(mean)*np.log(2*np.pi)+np.linalg.slogdet(cov)[1]+np.einsum('...i,ij,...j->...', d, np.linalg.inv(cov), d))
