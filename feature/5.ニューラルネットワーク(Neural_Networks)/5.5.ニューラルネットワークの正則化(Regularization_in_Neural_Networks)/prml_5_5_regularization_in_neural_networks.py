@@ -107,23 +107,33 @@ class PRML55RegularizationInNeuralNetworks(Scene):
             record['actions'].append(dict(name=b['visual_note'],start=start,end=float(self.time)))
         record['end']=float(self.time);self.timeline[-1]['beats'].append(record);self.beat_index+=1
 
-    def regression(self,getter):
+    def regression(self,getter,show_truth=True):
         ax,group=axes();self.add(group)
         data=VGroup(*[Dot(ax.c2p(x,t),radius=.055,color=BLUE_DATA) for x,t in zip(model.X,model.T)])
         truth=curve(ax,model.GRID,np.sin(2*np.pi*model.GRID),GREEN_TRUE).set_stroke(opacity=.35)
         pred=always_redraw(lambda:curve(ax,model.GRID,model.predict(getter(),model.GRID)))
-        self.add(truth,data,pred)
+        if show_truth:self.add(truth)
+        self.add(data,pred)
         return ax,group,data,pred
 
     def question(self):
-        w=model.fit(1);ax,group,data,pred=self.regression(lambda:w)
-        m_count=ValueTracker(1);self.add(readout('M=',m_count.get_value,[4.6,1.0,0],YELLOW_TERM,0))
-        self.remove(pred);self.label('青：訓練データ　緑：生成関数（答え合わせ用）　赤：予測')
-        self.beat(lambda:LaggedStart(*[Indicate(d,color=BLUE_DATA) for d in data],lag_ratio=.15),lambda:Create(pred))
-        pred.clear_updaters();self.remove(pred);pred=curve(ax,model.GRID,model.predict(w,model.GRID));self.add(pred)
+        w=model.fit(10);ax,group,data,pred=self.regression(lambda:w,show_truth=False)
+        m_count=ValueTracker(10);self.add(readout('M=',m_count.get_value,[4.6,1.0,0],YELLOW_TERM,0))
+        self.remove(pred)
+        pred=curve(ax,model.GRID,model.predict(w,model.GRID))
+        x,observed=model.XV[model.STORY_VALIDATION_INDEX],model.TV[model.STORY_VALIDATION_INDEX]
+        predicted=float(model.predict(w,x))
+        held_out=Dot(ax.c2p(x,observed),radius=.10,color=ORANGE_VAL)
+        guess=Dot(ax.c2p(x,predicted),radius=.075,color=RED_MODEL)
+        gap=Line(guess.get_center(),held_out.get_center(),color=YELLOW_TERM,stroke_width=3)
+        self.equation(r'x_*=0.658')
+        self.label('青：訓練10点　赤：予測　橙：学習に使わない検証点')
+        self.beat(lambda:AnimationGroup(Create(pred),LaggedStart(*[Indicate(d,color=BLUE_DATA,scale_factor=1.15) for d in data],lag_ratio=.1)),
+                  lambda:AnimationGroup(FadeIn(held_out),FadeIn(guess),Create(gap)))
+        self.remove(held_out,guess,gap)
         self.equation(r'y(x)=\sum_{j=1}^{M}v_j\tanh(a_jx+b_j)+c')
         self.label('同じ座標系で比較：隠れユニット数 1 → 3 → 10')
-        self.beat(lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(3),model.GRID))),UpdateFromAlphaFunc(m_count,lambda m,a:m.set_value(3))),lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(10),model.GRID))),UpdateFromAlphaFunc(m_count,lambda m,a:m.set_value(10))))
+        self.beat(lambda:Succession(AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(1),model.GRID))),m_count.animate.set_value(1)),AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(model.fit(3),model.GRID))),m_count.animate.set_value(3))),lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(w,model.GRID))),m_count.animate.set_value(10)))
         validation=VGroup(*[Dot(ax.c2p(x,t),radius=.025,color=ORANGE_VAL) for x,t in zip(model.XV,model.TV)])
         self.beat(lambda:Create(validation),lambda:Indicate(pred,color=ORANGE_VAL,scale_factor=1))
         self.label('M = 10 を固定。初期値だけを変更')
@@ -132,7 +142,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.roles_recap()
         residual=VGroup(*[Line(ax.c2p(x,t),ax.c2p(x,float(model.predict(model.fit(10),x))),color=ORANGE_VAL,stroke_width=2) for x,t in zip(model.XV[::4],model.TV[::4])])
         self.beat(lambda:Create(residual),lambda:Indicate(validation,color=ORANGE_VAL,scale_factor=1))
-        self.label('正則化：予測に必要な自由度を選ぶ',PURPLE_REG)
+        self.label('次の手がかり：10ユニットのまま動きを抑える',PURPLE_REG)
         self.equation(r'\widetilde E(\mathbf w)=E(\mathbf w)+\frac{\lambda}{2}\|\mathbf w\|^2')
         self.beat(lambda:FadeOut(residual),lambda:Indicate(self.formula,color=PURPLE_REG))
 
@@ -235,15 +245,15 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         ax,g=axes((-1,1,1),(0,1,.5),center=(0,.1,0),width=8,height=3.2,xlabel=r'\xi',ylabel='y')
         response=ValueTracker(.38);u=np.linspace(-1,1,121)
         graph=always_redraw(lambda:curve(ax,u,.5+response.get_value()*np.sin(2*u)))
-        self.add(g,graph);self.label('二つ目：変換量に対する出力の変化を小さくする',PURPLE_REG)
+        self.add(g,graph);self.label('2つ目：変換量に対する出力の変化を小さくする',PURPLE_REG)
         self.beat(lambda:response.animate.set_value(.2),lambda:response.animate.set_value(.015))
         self.remove(g,graph);digit=pixels(model.DIGIT,.3,(-3,.1,0));self.add(digit)
         total=tex(r'\sum_i x_i='+str(int(model.DIGIT.sum())),40,GREEN_TRUE).move_to([2.4,.1,0]);self.add(total)
         shuffled=model.DIGIT.ravel()[np.random.default_rng(5).permutation(model.DIGIT.size)].reshape(model.DIGIT.shape)
-        self.label('三つ目：総画素値は位置に依存しないが、形の情報を失う')
+        self.label('3つ目：総画素値は位置に依存しないが、形の情報を失う')
         self.beat(lambda:digit.animate.shift(RIGHT*.5),lambda:Transform(digit,pixels(shuffled,.3,(-2.5,.1,0))))
         patch=Square(.9,color=YELLOW_TERM).move_to([-2.5,.1,0]);self.add(patch)
-        self.label('四つ目：同じ局所検出器を各位置で使う構造')
+        self.label('4つ目：同じ局所検出器を各位置で使う構造')
         self.beat(lambda:patch.animate.shift(UP*.6),lambda:patch.animate.shift(DOWN*1.2))
 
     def tangent(self):
@@ -372,9 +382,28 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.label('自作の二次データ誤差 + Ω を共同最適化。分散の崩壊は別途注意')
         self.beat(lambda:step.animate.set_value(50),lambda:step.animate.set_value(100))
         graphs.clear_updaters();dots.clear_updaters()
-        self.label('重みの大きさ → 学習時刻 → 変換への感度 → 重みのまとまり',GREEN_TRUE)
-        self.equation(r'\widetilde E=E+\lambda\Omega',30)
-        self.beat(lambda:Indicate(dots,color=YELLOW_TERM,scale_factor=1),lambda:Indicate(graphs,color=GREEN_TRUE,scale_factor=1))
+        self.remove(g,graphs,dots)
+        x,observed=model.XV[model.STORY_VALIDATION_INDEX],model.TV[model.STORY_VALIDATION_INDEX]
+        weak=model.fit(10);selected=model.ridge_weights(-3)
+        ax,group,data,pred=self.regression(lambda:weak,show_truth=False)
+        pred.clear_updaters();self.remove(pred)
+        pred=curve(ax,model.GRID,model.predict(weak,model.GRID));self.add(pred)
+        held_out=Dot(ax.c2p(x,observed),radius=.10,color=ORANGE_VAL)
+        guess=Dot(ax.c2p(x,float(model.predict(weak,x))),radius=.075,color=RED_MODEL)
+        gap=Line(guess.get_center(),held_out.get_center(),color=YELLOW_TERM,stroke_width=3)
+        self.add(held_out,guess,gap)
+        progress=ValueTracker(0)
+        weak_error=abs(float(model.predict(weak,x))-observed)
+        selected_error=abs(float(model.predict(selected,x))-observed)
+        self.add(tex('M=10',26,YELLOW_TERM).move_to([4.7,1.75,0]))
+        self.add(readout(r'|e|=',lambda:weak_error+(selected_error-weak_error)*progress.get_value(),[4.7,1.0,0],YELLOW_TERM))
+        self.equation(r'x=0.658,\quad t=-0.960')
+        self.label('冒頭と同じ検証点。まだテスト性能の報告ではない',GREEN_TRUE)
+        self.beat(lambda:AnimationGroup(Indicate(held_out,color=ORANGE_VAL,scale_factor=1.3),Indicate(gap,color=YELLOW_TERM,scale_factor=1.05)),
+                  lambda:AnimationGroup(Transform(pred,curve(ax,model.GRID,model.predict(selected,model.GRID))),
+                    guess.animate.move_to(ax.c2p(x,float(model.predict(selected,x)))),
+                    Transform(gap,Line(ax.c2p(x,float(model.predict(selected,x))),held_out.get_center(),color=YELLOW_TERM,stroke_width=3)),
+                    progress.animate.set_value(1)))
 
     def reference_tag(self, text):
         tag=jp(text,19).move_to([-6.2,2.99,0],aligned_edge=LEFT)
@@ -385,10 +414,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         """Keep title/caption band; restore the frozen body after the spoken beat."""
         state=([m for m in self.mobjects if m is not self.caption],self.formula,self.note)
         self.clear();self.caption=None
-        self.add(self.title,self.separator,
-                 RoundedRectangle(width=10.4,height=4.6,corner_radius=.12,
-                                  color='#FFFF00',stroke_width=1.2).move_to([0,.1,0]),
-                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+        self.add(self.title,self.separator,jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
         return state
 
     def restore_body(self,state):
@@ -436,7 +462,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         self.restore_body(state)
 
     def convolution_aid(self):
-        state=self.body_card('補足: 一つの窓から、一つの応答へ')
+        state=self.body_card('補足: 1つの窓から、1つの応答へ')
         blue,yellow,green,purple='#58C4DD','#FFFF00','#83C167','#9A72AC'
         # This is the actual window under the main scene's scan=44 (r=5,c=4).
         patch=model.IMAGE[5:8,4:7];products=(patch*model.KERNEL).ravel();total=float(products.sum())
@@ -448,7 +474,7 @@ class PRML55RegularizationInNeuralNetworks(Scene):
         inputs=matrix(patch,-3.65,blue);weights=matrix(model.KERNEL,-1.15,purple)
         self.add(inputs,weights,jp('画素',22,blue).move_to([-3.65,1.52,0]),
                  jp('重み',22,purple).move_to([-1.15,1.52,0]),
-                 jp('九個の積',22,yellow).move_to([2.5,1.52,0]),
+                 jp('9個の積',22,yellow).move_to([2.5,1.52,0]),
                  tex(r'\times',32,yellow).move_to([-2.4,.35,0]))
         bars=VGroup()
         for j,v in enumerate(products):
