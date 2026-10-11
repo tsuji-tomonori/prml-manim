@@ -92,11 +92,11 @@ def number(label,fn,at,color=WHITE,places=2,size=25):
     return g
 
 
-def knob(label,tracker,lo,hi,at=(-.5,-2.5,0),color=YELLOW_ACC):
+def knob(label,tracker,lo,hi,at=(-.5,-2.5,0),color=YELLOW_ACC,places=2):
     line=NumberLine(x_range=[lo,hi,(hi-lo)/4],length=4,include_numbers=False,color=MUTED)
     line.move_to(at)
     dot=Dot(radius=.085,color=color).add_updater(lambda m:m.move_to(line.n2p(tracker.get_value())))
-    n=number(label,tracker.get_value,np.array(at)+RIGHT*3.5,color)
+    n=number(label,tracker.get_value,np.array(at)+RIGHT*3.5,color,places=places)
     return VGroup(line,dot,n)
 
 
