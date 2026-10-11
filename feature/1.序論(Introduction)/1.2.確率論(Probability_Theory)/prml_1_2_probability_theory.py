@@ -244,10 +244,17 @@ class PRML12ProbabilityTheory(NarratedScene):
             box=RoundedRectangle(width=3.1,height=1.8,corner_radius=.13,color=c).move_to([x,.5,0]); boxes.add(box)
             dots=VGroup(*[Circle(.14,color=GREEN if k<n else ORANGE,fill_opacity=1).move_to([x-.9+k*.45,.5,0]) for k in range(4 if n==1 else 5)])
             fruits.add(dots)
+        def reveal_red():
+            self.remove(fruit)
+            self.add(boxes[0],fruits[0])
+            return Wait()
+        def reveal_blue():
+            self.add(boxes[1],fruits[1])
+            return Wait()
         a,b = [self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
-            ('red box and fruit count',a,lambda:AnimationGroup(FadeOut(fruit),FadeIn(boxes[0]),FadeIn(fruits[0]))),
-            ('blue box and fruit count',b,lambda:AnimationGroup(FadeIn(boxes[1]),FadeIn(fruits[1]))),
+            ('red box and fruit count',a,reveal_red),
+            ('blue box and fruit count',b,reveal_blue),
         ])
         q=ValueTracker(.5)
         s=self.slider(q,.1,.9,[0,-1.3,0],'p(B=r)',RED,4)
@@ -256,7 +263,7 @@ class PRML12ProbabilityTheory(NarratedScene):
         labels=VGroup(tex('B=r',28,RED).move_to([-2.6,1.9,0]),tex('B=b',28,BLUE).move_to([2.6,1.9,0]))
         self.beat(FadeIn(labels),self.formula(r'B\in\{r,b\},\qquad F\in\{a,o\}'))
         oranges=VGroup(*[d for g in fruits for d in g if d.get_color()==ORANGE])
-        self.beat(Indicate(oranges,scale_factor=1.15),self.formula(r'p(B=r)=0.30\quad\longrightarrow\quad p(B=r\mid F=o)\simeq0.616',size=30))
+        self.beat(AnimationGroup(*[Indicate(d,scale_factor=1.15) for d in oranges]),self.formula(r'p(B=r)=0.30\quad\longrightarrow\quad p(B=r\mid F=o)\simeq0.616',size=30))
 
     def mosaic(self,q=.3,ar=.75,ab=.2):
         w,h=7,2.65; left=-3.5; bottom=-1
@@ -507,8 +514,17 @@ class PRML12ProbabilityTheory(NarratedScene):
                        jp('青: 28/73',22,BLUE).move_to([blue.get_center()[0],-1.15,0]))
         bridge = jp('箱の和  →  係数の積分',23,GREEN).move_to([0,-1.65,0])
         a,b,c = [self.sentence_duration(i) for i in range(3)]
+        def reveal_posterior():
+            self.add(label,red,blue,names)
+            return Wait()
+        def reveal_next_orange():
+            self.add(orange_red,orange_blue)
+            return self.formula(r'p(o_{\rm next}\mid o)=\frac{45}{73}\cdot\frac34+\frac{28}{73}\cdot\frac15\simeq0.5390',size=28)
+        def connect_prediction():
+            self.add(bridge)
+            return AnimationGroup(Indicate(orange_red,scale_factor=1),Indicate(orange_blue,scale_factor=1))
         self.beat(phases=[
-            ('return to same box and posterior',a,lambda:AnimationGroup(FadeIn(label),FadeIn(red),FadeIn(blue),FadeIn(names))),
-            ('predict next orange from posterior',b,lambda:AnimationGroup(FadeIn(orange_red),FadeIn(orange_blue),self.formula(r'p(o_{\rm next}\mid o)=\frac{45}{73}\cdot\frac34+\frac{28}{73}\cdot\frac15\simeq0.5390',size=28))),
-            ('sum over boxes becomes integration',c,lambda:AnimationGroup(FadeIn(bridge),Indicate(VGroup(orange_red,orange_blue),scale_factor=1.02))),
+            ('return to same box and posterior',a,reveal_posterior),
+            ('predict next orange from posterior',b,reveal_next_orange),
+            ('sum over boxes becomes integration',c,connect_prediction),
         ])
