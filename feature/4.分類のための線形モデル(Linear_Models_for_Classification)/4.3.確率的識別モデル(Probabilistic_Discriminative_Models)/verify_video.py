@@ -36,7 +36,9 @@ def main():
             assert cue['id']==expected['id'] and cue['display']==expected['display']
             err=abs(cue['start']-scene['start']-expected['start']);max_clock_error=max(max_clock_error,err)
         for i,beat in enumerate(scene['beats']):
-            frames.append(dict(id=f"{scene['id']}-beat{i+1:02}",time=beat['start']+.68*(beat['end']-beat['start']),kind='beat'))
+            for fraction in [.15, .50, .85]:
+                frames.append(dict(id=f"{scene['id']}-beat{i+1:02}-{int(fraction*100):02}",
+                                   time=beat['start']+fraction*(beat['end']-beat['start']),kind='beat'))
             for cue in beat['cues']:
                 if '$' in cue['display']:
                     frames.append(dict(id=cue['id']+'-math',time=(cue['start']+cue['end'])/2,kind='math',display=cue['display']))
