@@ -8,642 +8,1204 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "563.199344"
+        "duration": "578.599344"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "563.221333"
+        "duration": "578.624000"
       }
     ],
     "format": {
-      "duration": "563.222000"
+      "duration": "578.624000"
     }
   },
   "silence_intervals": 0,
   "volume": [
-    "[Parsed_volumedetect_0 @ 0x5f102ecabc40] mean_volume: -26.6 dB",
-    "[Parsed_volumedetect_0 @ 0x5f102ecabc40] max_volume: -5.8 dB"
+    "[Parsed_volumedetect_0 @ 0x591bc2fc9b00] mean_volume: -26.6 dB",
+    "[Parsed_volumedetect_0 @ 0x591bc2fc9b00] max_volume: -6.1 dB"
   ],
   "frames": [
     {
-      "id": "scene01-beat01",
-      "time": 5.757333333333333,
+      "id": "scene01-beat01-15",
+      "time": 1.66,
       "kind": "beat"
     },
     {
-      "id": "scene01-beat02",
-      "time": 14.450666666666658,
+      "id": "scene01-beat01-50",
+      "time": 5.533333333333333,
       "kind": "beat"
     },
     {
-      "id": "scene01-beat03",
-      "time": 24.157333333333295,
+      "id": "scene01-beat01-85",
+      "time": 9.406666666666666,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-01-02-math",
+      "time": 5.525333333333333,
+      "kind": "math",
+      "display": "新しい点 $x=0.4$ は、赤だと思いますか。"
+    },
+    {
+      "id": "scene01-beat02-15",
+      "time": 12.656666666666647,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat02-50",
+      "time": 16.366666666666646,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat02-85",
+      "time": 20.076666666666647,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat03-15",
+      "time": 23.18666666666661,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat03-50",
+      "time": 26.733333333333277,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat03-85",
+      "time": 30.279999999999944,
       "kind": "beat"
     },
     {
       "id": "scene01-03-01-math",
-      "time": 19.72,
+      "time": 24.12,
       "kind": "math",
       "display": "入力から計算する点数を、スコア $a$ と呼びます。"
     },
     {
-      "id": "scene01-beat04",
-      "time": 33.24799999999992,
+      "id": "scene01-beat04-15",
+      "time": 33.08999999999991,
       "kind": "beat"
     },
     {
-      "id": "scene01-beat05",
-      "time": 43.66133333333344,
+      "id": "scene01-beat04-50",
+      "time": 36.09999999999991,
       "kind": "beat"
     },
     {
-      "id": "scene01-beat06",
-      "time": 54.202666666667334,
+      "id": "scene01-beat04-85",
+      "time": 39.10999999999991,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat05-15",
+      "time": 42.10000000000033,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat05-50",
+      "time": 46.06666666666699,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat05-85",
+      "time": 50.03333333333366,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat06-15",
+      "time": 53.263333333334224,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat06-50",
+      "time": 56.833333333334224,
+      "kind": "beat"
+    },
+    {
+      "id": "scene01-beat06-85",
+      "time": 60.40333333333422,
       "kind": "beat"
     },
     {
       "id": "scene01-06-01-math",
-      "time": 49.81066666666666,
+      "time": 54.27733333333333,
       "kind": "math",
       "display": "特徴を $\\phi$、調整する重みを $w$ と書きます。"
     },
     {
       "id": "scene01-sync-0.15",
-      "time": 28.689999999999923,
+      "time": 33.08999999999991,
       "kind": "sync"
     },
     {
       "id": "scene01-sync-0.85",
-      "time": 34.70999999999992,
+      "time": 39.10999999999991,
       "kind": "sync"
     },
     {
-      "id": "scene02-beat01",
-      "time": 63.72266666666784,
+      "id": "scene02-beat01-15",
+      "time": 63.55333333333473,
       "kind": "beat"
     },
     {
-      "id": "scene02-beat02",
-      "time": 73.24000000000134,
+      "id": "scene02-beat01-50",
+      "time": 67.33333333333474,
       "kind": "beat"
     },
     {
-      "id": "scene02-beat03",
-      "time": 82.49866666666746,
+      "id": "scene02-beat01-85",
+      "time": 71.11333333333472,
       "kind": "beat"
     },
     {
-      "id": "scene02-beat04",
-      "time": 92.29066666666695,
+      "id": "scene02-beat02-15",
+      "time": 74.18333333333433,
       "kind": "beat"
     },
     {
-      "id": "scene02-beat05",
-      "time": 103.33066666666637,
+      "id": "scene02-beat02-50",
+      "time": 77.56666666666766,
       "kind": "beat"
     },
     {
-      "id": "scene02-beat06",
-      "time": 114.34399999999904,
+      "id": "scene02-beat02-85",
+      "time": 80.950000000001,
       "kind": "beat"
     },
     {
-      "id": "scene02-06-01-math",
-      "time": 109.96000000000117,
+      "id": "scene02-beat03-15",
+      "time": 83.76000000000045,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat03-50",
+      "time": 86.93333333333378,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat03-85",
+      "time": 90.10666666666711,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat04-15",
+      "time": 92.9866666666666,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat04-50",
+      "time": 96.53333333333327,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat04-85",
+      "time": 100.07999999999994,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat05-15",
+      "time": 103.30999999999935,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat05-50",
+      "time": 107.29999999999936,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat05-85",
+      "time": 111.28999999999937,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat06-15",
+      "time": 115.00999999999871,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat06-50",
+      "time": 119.69999999999871,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-beat06-85",
+      "time": 124.38999999999871,
+      "kind": "beat"
+    },
+    {
+      "id": "scene02-06-02-math",
+      "time": 119.72000000000139,
       "kind": "math",
-      "display": "常に一を返す基底 $\\phi_0=1$ も加えておきます。"
+      "display": "常に1を返す基底 $\\phi_0=1$ の重みは切片です。"
     },
     {
-      "id": "scene03-beat01",
-      "time": 124.23733333333178,
+      "id": "scene03-beat01-15",
+      "time": 127.80999999999794,
       "kind": "beat"
     },
     {
-      "id": "scene03-beat02",
-      "time": 134.06666666666456,
+      "id": "scene03-beat01-50",
+      "time": 131.09999999999795,
       "kind": "beat"
     },
     {
-      "id": "scene03-beat03",
-      "time": 143.34133333333068,
+      "id": "scene03-beat01-85",
+      "time": 134.38999999999794,
       "kind": "beat"
     },
     {
-      "id": "scene03-beat04",
-      "time": 153.4986666666635,
+      "id": "scene03-beat02-15",
+      "time": 137.29999999999742,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat02-50",
+      "time": 140.79999999999742,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat02-85",
+      "time": 144.29999999999742,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat03-15",
+      "time": 147.13999999999686,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat03-50",
+      "time": 150.26666666666353,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat03-85",
+      "time": 153.3933333333302,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat04-15",
+      "time": 156.34333333332967,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat04-50",
+      "time": 160.09999999999633,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat04-85",
+      "time": 163.85666666666302,
       "kind": "beat"
     },
     {
       "id": "scene03-03-01-math",
-      "time": 148.68533333333176,
+      "time": 157.2186666666646,
       "kind": "math",
-      "display": "目標 $t$ は、赤なら一、青ならゼロです。"
+      "display": "目標 $t$ は、赤なら1、青なら0です。"
     },
     {
-      "id": "scene03-beat05",
-      "time": 163.68799999999624,
+      "id": "scene03-beat05-15",
+      "time": 167.26666666666242,
       "kind": "beat"
     },
     {
-      "id": "scene03-beat06",
-      "time": 174.709333333329,
+      "id": "scene03-beat05-50",
+      "time": 171.4666666666624,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat05-85",
+      "time": 175.6666666666624,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat06-15",
+      "time": 179.1966666666617,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat06-50",
+      "time": 183.2333333333284,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat06-85",
+      "time": 187.26999999999506,
       "kind": "beat"
     },
     {
       "id": "scene03-05-02-math",
-      "time": 174.76533333333177,
+      "time": 185.36533333333128,
       "kind": "math",
       "display": "微分すると、各点の寄与は $(y-t)\\phi$ という簡単な形です。"
     },
     {
-      "id": "scene03-beat07",
-      "time": 184.83733333332833,
+      "id": "scene03-beat07-15",
+      "time": 190.4199999999944,
       "kind": "beat"
     },
     {
-      "id": "scene03-beat08",
-      "time": 196.1173333333278,
+      "id": "scene03-beat07-50",
+      "time": 193.73333333332772,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat07-85",
+      "time": 197.04666666666108,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat08-15",
+      "time": 200.28666666666052,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat08-50",
+      "time": 204.5333333333272,
+      "kind": "beat"
+    },
+    {
+      "id": "scene03-beat08-85",
+      "time": 208.77999999999386,
       "kind": "beat"
     },
     {
       "id": "scene03-aid-chain-02-math",
-      "time": 194.0853333333318,
+      "time": 204.6853333333313,
       "kind": "math",
       "display": "ここでは $1/4$ と $-2$ を掛けて $-1/2$。"
     },
     {
       "id": "scene03-aid-chain-03-math",
-      "time": 197.9306666666651,
+      "time": 208.53066666666462,
       "kind": "math",
       "display": "これが、予測と目標の差 $y-t$ です。"
     },
     {
-      "id": "scene04-beat01",
-      "time": 206.84533333332712,
+      "id": "scene04-beat01-15",
+      "time": 212.05999999999318,
       "kind": "beat"
     },
     {
-      "id": "scene04-beat02",
-      "time": 217.22933333332654,
+      "id": "scene04-beat01-50",
+      "time": 215.46666666665982,
       "kind": "beat"
     },
     {
-      "id": "scene04-beat03",
-      "time": 227.30933333332595,
+      "id": "scene04-beat01-85",
+      "time": 218.87333333332649,
       "kind": "beat"
     },
     {
-      "id": "scene04-beat04",
-      "time": 237.31199999999205,
+      "id": "scene04-beat02-15",
+      "time": 221.91333333332597,
       "kind": "beat"
     },
     {
-      "id": "scene04-beat05",
-      "time": 247.69599999999147,
+      "id": "scene04-beat02-50",
+      "time": 225.59999999999263,
       "kind": "beat"
     },
     {
-      "id": "scene05-beat01",
-      "time": 257.6853333333242,
+      "id": "scene04-beat02-85",
+      "time": 229.28666666665927,
       "kind": "beat"
     },
     {
-      "id": "scene05-beat02",
-      "time": 267.7359999999903,
+      "id": "scene04-beat03-15",
+      "time": 232.34666666665868,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat03-50",
+      "time": 235.79999999999202,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat03-85",
+      "time": 239.25333333332537,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat04-15",
+      "time": 242.24333333332478,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat04-50",
+      "time": 245.76666666665812,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat04-85",
+      "time": 249.28999999999147,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat05-15",
+      "time": 252.48999999999089,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat05-50",
+      "time": 256.43333333332424,
+      "kind": "beat"
+    },
+    {
+      "id": "scene04-beat05-85",
+      "time": 260.37666666665757,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat01-15",
+      "time": 263.50666666665694,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat01-50",
+      "time": 266.86666666665695,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat01-85",
+      "time": 270.22666666665697,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat02-15",
+      "time": 273.19666666665637,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat02-50",
+      "time": 276.7666666666564,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat02-85",
+      "time": 280.3366666666564,
       "kind": "beat"
     },
     {
       "id": "scene05-02-01-math",
-      "time": 263.00799999999083,
+      "time": 273.87466666665694,
       "kind": "math",
       "display": "その行き先を、有効目標 $z$ と呼びます。"
     },
     {
-      "id": "scene05-beat03",
-      "time": 281.56266666665647,
+      "id": "scene05-beat03-15",
+      "time": 284.1966666666558,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat03-50",
+      "time": 289.6333333333225,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat03-85",
+      "time": 295.0699999999892,
       "kind": "beat"
     },
     {
       "id": "scene05-recap-irls-01-math",
-      "time": 273.19199999999086,
+      "time": 284.05866666665696,
       "kind": "math",
       "display": "2.1のベルヌーイの分散は $y(1-y)$ でした。"
     },
     {
-      "id": "scene05-beat04",
-      "time": 294.33066666665553,
+      "id": "scene05-beat04-15",
+      "time": 299.11999999998824,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat04-50",
+      "time": 303.1333333333216,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat04-85",
+      "time": 307.14666666665494,
       "kind": "beat"
     },
     {
       "id": "scene05-03-01-math",
-      "time": 289.8399999999909,
+      "time": 300.70666666665693,
       "kind": "math",
       "display": "接線の傾きは $y(1-y)$ で、ベルヌーイ分布の分散でもあります。"
     },
     {
-      "id": "scene05-beat05",
-      "time": 305.75199999998824,
+      "id": "scene05-beat05-15",
+      "time": 310.57666666665426,
       "kind": "beat"
     },
     {
-      "id": "scene05-beat06",
-      "time": 316.4719999999876,
+      "id": "scene05-beat05-50",
+      "time": 314.56666666665427,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat05-85",
+      "time": 318.5566666666543,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat06-15",
+      "time": 321.82666666665364,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat06-50",
+      "time": 325.4666666666536,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat06-85",
+      "time": 329.1066666666536,
       "kind": "beat"
     },
     {
       "id": "scene05-05-01-math",
-      "time": 312.1253333333242,
+      "time": 322.9919999999903,
       "kind": "math",
       "display": "この反復再重み付き最小二乗法を、$\\mathrm{IRLS}$ と呼びます。"
     },
     {
-      "id": "scene05-beat07",
-      "time": 326.96266666665366,
+      "id": "scene05-beat07-15",
+      "time": 332.246666666653,
       "kind": "beat"
     },
     {
-      "id": "scene05-beat08",
-      "time": 338.4026666666531,
+      "id": "scene05-beat07-50",
+      "time": 335.93333333331975,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat07-85",
+      "time": 339.6199999999864,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat08-15",
+      "time": 342.9799999999858,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat08-50",
+      "time": 347.1333333333191,
+      "kind": "beat"
+    },
+    {
+      "id": "scene05-beat08-85",
+      "time": 351.2866666666524,
       "kind": "beat"
     },
     {
       "id": "scene05-sync-0.15",
-      "time": 299.7099999999882,
+      "time": 310.57666666665426,
       "kind": "sync"
     },
     {
       "id": "scene05-sync-0.85",
-      "time": 307.68999999998823,
+      "time": 318.5566666666543,
       "kind": "sync"
     },
     {
-      "id": "scene06-beat01",
-      "time": 348.1839999999857,
+      "id": "scene06-beat01-15",
+      "time": 354.45666666665176,
       "kind": "beat"
     },
     {
-      "id": "scene06-beat02",
-      "time": 357.4373333333185,
+      "id": "scene06-beat01-50",
+      "time": 357.6999999999851,
       "kind": "beat"
     },
     {
-      "id": "scene06-beat03",
-      "time": 367.4479999999847,
+      "id": "scene06-beat01-85",
+      "time": 360.94333333331844,
       "kind": "beat"
     },
     {
-      "id": "scene06-beat04",
-      "time": 377.57866666665075,
+      "id": "scene06-beat02-15",
+      "time": 363.7533333333179,
       "kind": "beat"
     },
     {
-      "id": "scene06-beat05",
-      "time": 388.5066666666502,
+      "id": "scene06-beat02-50",
+      "time": 367.06666666665126,
       "kind": "beat"
     },
     {
-      "id": "scene07-beat01",
-      "time": 398.1173333333162,
+      "id": "scene06-beat02-85",
+      "time": 370.37999999998453,
       "kind": "beat"
     },
     {
-      "id": "scene07-beat02",
-      "time": 407.098666666649,
+      "id": "scene06-beat03-15",
+      "time": 373.33999999998406,
       "kind": "beat"
     },
     {
-      "id": "scene07-beat03",
-      "time": 416.3466666666485,
+      "id": "scene06-beat03-50",
+      "time": 376.93333333331736,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat03-85",
+      "time": 380.52666666665067,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat04-15",
+      "time": 383.5966666666501,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat04-50",
+      "time": 387.16666666665014,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat04-85",
+      "time": 390.73666666665014,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat05-15",
+      "time": 393.96666666664953,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat05-50",
+      "time": 397.9333333333162,
+      "kind": "beat"
+    },
+    {
+      "id": "scene06-beat05-85",
+      "time": 401.89999999998287,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat01-15",
+      "time": 405.01999999998225,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat01-50",
+      "time": 408.3333333333155,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat01-85",
+      "time": 411.64666666664885,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat02-15",
+      "time": 414.4266666666484,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat02-50",
+      "time": 417.5999999999817,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat02-85",
+      "time": 420.773333333315,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat03-15",
+      "time": 423.5333333333145,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat03-50",
+      "time": 426.7999999999812,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat03-85",
+      "time": 430.06666666664785,
       "kind": "beat"
     },
     {
       "id": "scene07-03-01-math",
-      "time": 412.3733333333162,
+      "time": 424.5066666666489,
       "kind": "math",
       "display": "点数 $a$ を右へ動かすと、面積が増えていきます。"
     },
     {
-      "id": "scene07-beat04",
-      "time": 425.4079999999813,
+      "id": "scene07-beat04-15",
+      "time": 432.8066666666473,
       "kind": "beat"
     },
     {
-      "id": "scene07-beat05",
-      "time": 434.8853333333142,
+      "id": "scene07-beat04-50",
+      "time": 435.93333333331395,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat04-85",
+      "time": 439.0599999999807,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat05-15",
+      "time": 441.8599999999801,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat05-50",
+      "time": 445.2666666666468,
+      "kind": "beat"
+    },
+    {
+      "id": "scene07-beat05-85",
+      "time": 448.6733333333135,
       "kind": "beat"
     },
     {
       "id": "scene07-sync-0.15",
-      "time": 411.39999999998184,
+      "time": 423.5333333333145,
       "kind": "sync"
     },
     {
       "id": "scene07-sync-0.85",
-      "time": 417.9333333333152,
+      "time": 430.06666666664785,
       "kind": "sync"
     },
     {
-      "id": "scene08-beat01",
-      "time": 444.1199999999803,
+      "id": "scene08-beat01-15",
+      "time": 451.5733333333129,
       "kind": "beat"
     },
     {
-      "id": "scene08-beat02",
-      "time": 453.7093333333131,
+      "id": "scene08-beat01-50",
+      "time": 454.93333333331293,
       "kind": "beat"
     },
     {
-      "id": "scene08-beat03",
-      "time": 464.0746666666459,
+      "id": "scene08-beat01-85",
+      "time": 458.29333333331294,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat02-15",
+      "time": 461.2133333333124,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat02-50",
+      "time": 464.6666666666457,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat02-85",
+      "time": 468.11999999997903,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat03-15",
+      "time": 471.18999999997845,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat03-50",
+      "time": 474.8999999999785,
+      "kind": "beat"
+    },
+    {
+      "id": "scene08-beat03-85",
+      "time": 478.6099999999785,
       "kind": "beat"
     },
     {
       "id": "scene08-03-01-math",
-      "time": 459.5386666666469,
+      "time": 472.2719999999796,
       "kind": "math",
       "display": "そこで、ラベルが確率 $\\epsilon$ で反転すると仮定します。"
     },
     {
-      "id": "scene08-beat04",
-      "time": 474.6746666666453,
+      "id": "scene08-beat04-15",
+      "time": 481.7899999999779,
       "kind": "beat"
     },
     {
-      "id": "scene08-beat05",
-      "time": 485.9546666666447,
+      "id": "scene08-beat04-50",
+      "time": 485.4999999999779,
       "kind": "beat"
     },
     {
-      "id": "scene09-beat01",
-      "time": 496.8293333333107,
+      "id": "scene08-beat04-85",
+      "time": 489.20999999997787,
       "kind": "beat"
     },
     {
-      "id": "scene09-beat02",
-      "time": 507.2266666666434,
+      "id": "scene08-beat05-15",
+      "time": 492.5399999999773,
       "kind": "beat"
     },
     {
-      "id": "scene09-beat03",
-      "time": 517.6506666666428,
+      "id": "scene08-beat05-50",
+      "time": 496.5999999999773,
       "kind": "beat"
     },
     {
-      "id": "scene09-beat04",
-      "time": 527.7999999999831,
+      "id": "scene08-beat05-85",
+      "time": 500.6599999999773,
       "kind": "beat"
     },
     {
-      "id": "scene09-beat05",
-      "time": 538.2986666666578,
+      "id": "scene09-beat01-15",
+      "time": 503.81999999997663,
       "kind": "beat"
     },
     {
-      "id": "scene09-beat06",
-      "time": 547.9893333333331,
+      "id": "scene09-beat01-50",
+      "time": 507.1333333333099,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat01-85",
+      "time": 510.44666666664324,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat02-15",
+      "time": 513.4166666666428,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat02-50",
+      "time": 517.0333333333094,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat02-85",
+      "time": 520.6499999999761,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat03-15",
+      "time": 523.7699999999842,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat03-50",
+      "time": 527.4333333333175,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat03-85",
+      "time": 531.0966666666508,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat04-15",
+      "time": 534.1666666666591,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat04-50",
+      "time": 537.6666666666591,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat04-85",
+      "time": 541.1666666666591,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat05-15",
+      "time": 544.2766666666671,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat05-50",
+      "time": 548.0333333333338,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat05-85",
+      "time": 551.7900000000004,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat06-15",
+      "time": 554.780000000009,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat06-50",
+      "time": 558.000000000009,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat06-85",
+      "time": 561.220000000009,
       "kind": "beat"
     },
     {
       "id": "scene09-05-01-math",
-      "time": 544.186666666644,
+      "time": 555.85333333331,
       "kind": "math",
       "display": "一般の式には、分布の尺度 $s$ の逆数が残ります。"
     },
     {
-      "id": "scene09-beat07",
-      "time": 559.2746666666736,
+      "id": "scene09-beat07-15",
+      "time": 565.0000000000163,
       "kind": "beat"
     },
     {
+      "id": "scene09-beat07-50",
+      "time": 570.6000000000163,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-beat07-85",
+      "time": 576.2000000000163,
+      "kind": "beat"
+    },
+    {
+      "id": "scene09-06-01-math",
+      "time": 565.1386666666433,
+      "kind": "math",
+      "display": "最初の点 $x=0.4$ に戻ります。"
+    },
+    {
       "id": "scene02-04-01-before",
-      "time": 85.20000000000027,
+      "time": 91.2666666666666,
       "kind": "review-context"
     },
     {
       "id": "scene02-04-01-after",
-      "time": 95.73333333333362,
+      "time": 101.79999999999994,
       "kind": "review-context"
     },
     {
       "id": "scene02-04-01-sentence1-0.15",
-      "time": 85.95200000000118,
+      "time": 92.01866666666807,
       "kind": "review-sentence"
     },
     {
       "id": "scene02-04-01-sentence1-0.85",
-      "time": 88.52800000000117,
+      "time": 94.59466666666806,
       "kind": "review-sentence"
     },
     {
       "id": "scene02-04-01-sentence2-0.15",
-      "time": 89.98560000000117,
+      "time": 96.05226666666806,
       "kind": "review-sentence"
     },
     {
       "id": "scene02-04-01-sentence2-0.85",
-      "time": 94.21173333333451,
+      "time": 100.2784000000014,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-recap-cost-01-before",
-      "time": 127.06666666666456,
+      "time": 135.59999999999744,
       "kind": "review-context"
     },
     {
       "id": "scene03-recap-cost-01-after",
-      "time": 137.46666666666454,
+      "time": 145.9999999999974,
       "kind": "review-context"
     },
     {
       "id": "scene03-recap-cost-01-sentence1-0.15",
-      "time": 128.1770666666651,
+      "time": 136.71039999999795,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-recap-cost-01-sentence1-0.85",
-      "time": 132.4255999999984,
+      "time": 140.95893333333126,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-recap-cost-01-sentence2-0.15",
-      "time": 133.83359999999843,
+      "time": 142.36693333333127,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-recap-cost-01-sentence2-0.85",
-      "time": 136.15573333333177,
+      "time": 144.68906666666462,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-aid-chain-01-before",
-      "time": 187.66666666666114,
+      "time": 198.26666666666054,
       "kind": "review-context"
     },
     {
       "id": "scene03-aid-chain-01-after",
-      "time": 200.19999999999445,
+      "time": 210.79999999999384,
       "kind": "review-context"
     },
     {
       "id": "scene03-aid-chain-01-sentence1-0.15",
-      "time": 188.47786666666508,
+      "time": 199.0778666666646,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-aid-chain-01-sentence1-0.85",
-      "time": 191.3301333333318,
+      "time": 201.9301333333313,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-aid-chain-01-sentence2-0.15",
-      "time": 192.5845333333318,
+      "time": 203.1845333333313,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-aid-chain-01-sentence2-0.85",
-      "time": 195.58613333333176,
+      "time": 206.18613333333127,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-aid-chain-01-sentence3-0.15",
-      "time": 196.73973333333177,
+      "time": 207.33973333333128,
       "kind": "review-sentence"
     },
     {
       "id": "scene03-aid-chain-01-sentence3-0.85",
-      "time": 199.1215999999984,
+      "time": 209.72159999999792,
       "kind": "review-sentence"
     },
     {
       "id": "scene04-04-01-before",
-      "time": 230.26666666665872,
+      "time": 240.5333333333248,
       "kind": "review-context"
     },
     {
       "id": "scene04-04-01-after",
-      "time": 240.73333333332536,
+      "time": 250.99999999999145,
       "kind": "review-context"
     },
     {
       "id": "scene04-04-01-sentence1-0.15",
-      "time": 231.18826666666044,
+      "time": 241.4549333333265,
       "kind": "review-sentence"
     },
     {
       "id": "scene04-04-01-sentence1-0.85",
-      "time": 234.5557333333271,
+      "time": 244.82239999999317,
       "kind": "review-sentence"
     },
     {
       "id": "scene04-04-01-sentence2-0.15",
-      "time": 236.00373333332712,
+      "time": 246.27039999999317,
       "kind": "review-sentence"
     },
     {
       "id": "scene04-04-01-sentence2-0.85",
-      "time": 239.39359999999377,
+      "time": 249.66026666665982,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-recap-irls-01-before",
-      "time": 270.7999999999898,
+      "time": 281.66666666665583,
       "kind": "review-context"
     },
     {
       "id": "scene05-recap-irls-01-after",
-      "time": 286.7333333333231,
+      "time": 297.59999999998917,
       "kind": "review-context"
     },
     {
       "id": "scene05-recap-irls-01-sentence1-0.15",
-      "time": 271.65759999999085,
+      "time": 282.52426666665696,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-recap-irls-01-sentence1-0.85",
-      "time": 274.72639999999086,
+      "time": 285.59306666665697,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-recap-irls-01-sentence2-0.15",
-      "time": 276.0111999999909,
+      "time": 286.877866666657,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-recap-irls-01-sentence2-0.85",
-      "time": 278.9381333333242,
+      "time": 289.8047999999903,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-recap-irls-01-sentence3-0.15",
-      "time": 280.54933333332417,
+      "time": 291.4159999999903,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-recap-irls-01-sentence3-0.85",
-      "time": 285.1413333333242,
+      "time": 296.0079999999903,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-aid-newton-01-before",
-      "time": 319.599999999987,
+      "time": 330.46666666665305,
       "kind": "review-context"
     },
     {
       "id": "scene05-aid-newton-01-after",
-      "time": 330.53333333332034,
+      "time": 341.3999999999864,
       "kind": "review-context"
     },
     {
       "id": "scene05-aid-newton-01-sentence1-0.15",
-      "time": 320.66399999999084,
+      "time": 331.53066666665694,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-aid-newton-01-sentence1-0.85",
-      "time": 324.6959999999909,
+      "time": 335.562666666657,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-aid-newton-01-sentence2-0.15",
-      "time": 326.21919999999085,
+      "time": 337.08586666665695,
       "kind": "review-sentence"
     },
     {
       "id": "scene05-aid-newton-01-sentence2-0.85",
-      "time": 329.29546666665755,
+      "time": 340.1621333333236,
       "kind": "review-sentence"
     },
     {
       "id": "scene09-recap-link-01-before",
-      "time": 499.99999999997675,
+      "time": 511.66666666664275,
       "kind": "review-context"
     },
     {
       "id": "scene09-recap-link-01-after",
-      "time": 510.73333333331004,
+      "time": 522.3999999999761,
       "kind": "review-context"
     },
     {
       "id": "scene09-recap-link-01-sentence1-0.15",
-      "time": 500.9039999999774,
+      "time": 512.5706666666433,
       "kind": "review-sentence"
     },
     {
       "id": "scene09-recap-link-01-sentence1-0.85",
-      "time": 504.1893333333107,
+      "time": 515.8559999999766,
       "kind": "review-sentence"
     },
     {
       "id": "scene09-recap-link-01-sentence2-0.15",
-      "time": 505.6805333333107,
+      "time": 517.3471999999766,
       "kind": "review-sentence"
     },
     {
       "id": "scene09-recap-link-01-sentence2-0.85",
-      "time": 509.3541333333107,
+      "time": 521.0207999999766,
       "kind": "review-sentence"
     }
   ],
@@ -652,17 +1214,17 @@
       "scene": "scene01",
       "note": "傾きと位置のつまみ",
       "sentence": "scene01-04-01",
-      "pcm_onset": 27.49625,
+      "pcm_onset": 31.89625,
       "actions": [
         {
           "sentence": "scene01-04-01",
-          "start": 27.399999999999924,
-          "end": 31.86666666666659
+          "start": 31.79999999999991,
+          "end": 36.26666666666657
         },
         {
           "sentence": "scene01-04-02",
-          "start": 31.86666666666659,
-          "end": 35.99999999999992
+          "start": 36.26666666666657,
+          "end": 40.399999999999906
         }
       ]
     },
@@ -670,12 +1232,12 @@
       "scene": "scene05",
       "note": "IRLSの実反復を進める",
       "sentence": "scene05-04-01",
-      "pcm_onset": 298.07512499999086,
+      "pcm_onset": 308.94179166665697,
       "actions": [
         {
           "sentence": "beat",
-          "start": 297.99999999998823,
-          "end": 309.3999999999882
+          "start": 308.8666666666543,
+          "end": 320.26666666665426
         }
       ]
     },
@@ -683,34 +1245,34 @@
       "scene": "scene07",
       "note": "面積とCDFの点を連動",
       "sentence": "scene07-03-01",
-      "pcm_onset": 410.0977916666495,
+      "pcm_onset": 422.2311249999822,
       "actions": [
         {
           "sentence": "beat",
-          "start": 409.99999999998187,
-          "end": 419.3333333333152
+          "start": 422.1333333333145,
+          "end": 431.4666666666478
         }
       ]
     }
   ],
-  "max_caption_clock_error": 4.973799150320701e-14,
+  "max_caption_clock_error": 5.684341886080802e-14,
   "review_sync": [
     {
       "id": "scene03-recap-cost-01",
       "actions": [
         {
           "name": "R1.6 lower correct probability",
-          "start": 127.26666666666456,
-          "end": 133.33333333333124,
-          "pcm_first_active": 127.31508333333177,
-          "pcm_last_active": 133.22045833333178
+          "start": 135.79999999999742,
+          "end": 141.8666666666641,
+          "pcm_first_active": 135.8484166666646,
+          "pcm_last_active": 141.7537916666646
         },
         {
           "name": "R1.6 transfer cost to classification",
-          "start": 133.33333333333124,
-          "end": 136.66666666666455,
-          "pcm_first_active": 133.3987916666651,
-          "pcm_last_active": 136.55183333333176
+          "start": 141.8666666666641,
+          "end": 145.19999999999743,
+          "pcm_first_active": 141.93212499999794,
+          "pcm_last_active": 145.0851666666646
         }
       ],
       "cues": [
@@ -719,16 +1281,16 @@
           "id": "scene03-recap-cost-01",
           "display": "1.6では、正解に低い確率を付けるほど、負の対数のコストが増えました。",
           "speech": "一章六節では、正解に低い確率を付けるほど、ふの対数のコストが増えました。",
-          "start": 127.2666666666651,
-          "end": 133.33599999999842
+          "start": 135.79999999999794,
+          "end": 141.86933333333127
         },
         {
           "beat_index": 1,
           "id": "scene03-recap-cost-02",
           "display": "同じ考え方を、クラスの予測へ使います。",
           "speech": "同じ考え方を、クラスの予測へ使います。",
-          "start": 133.33599999999842,
-          "end": 136.65333333333177
+          "start": 141.86933333333127,
+          "end": 145.18666666666462
         }
       ]
     },
@@ -737,38 +1299,38 @@
       "actions": [
         {
           "name": "V14a small input change",
-          "start": 187.86666666666113,
-          "end": 188.86666666666113,
-          "pcm_first_active": 187.9570416666651,
-          "pcm_last_active": 188.86662499999844
+          "start": 198.46666666666053,
+          "end": 199.46666666666053,
+          "pcm_first_active": 198.55704166666462,
+          "pcm_last_active": 199.46662499999795
         },
         {
           "name": "V14a propagate to probability",
-          "start": 188.86666666666113,
-          "end": 190.3333333333278,
-          "pcm_first_active": 188.86666666666508,
-          "pcm_last_active": 190.3332916666651
+          "start": 199.46666666666053,
+          "end": 200.9333333333272,
+          "pcm_first_active": 199.4666666666646,
+          "pcm_last_active": 200.93329166666462
         },
         {
           "name": "V14a propagate to error",
-          "start": 190.3333333333278,
-          "end": 191.9333333333278,
-          "pcm_first_active": 190.33333333333178,
-          "pcm_last_active": 191.8570833333318
+          "start": 200.9333333333272,
+          "end": 202.5333333333272,
+          "pcm_first_active": 200.9333333333313,
+          "pcm_last_active": 202.4570833333313
         },
         {
           "name": "V14a multiply local derivatives",
-          "start": 191.9333333333278,
-          "end": 196.19999999999447,
-          "pcm_first_active": 192.03758333333178,
-          "pcm_last_active": 196.09433333333175
+          "start": 202.5333333333272,
+          "end": 206.79999999999387,
+          "pcm_first_active": 202.6375833333313,
+          "pcm_last_active": 206.69433333333126
         },
         {
           "name": "V14a identify prediction minus target",
-          "start": 196.19999999999447,
-          "end": 199.59999999999445,
-          "pcm_first_active": 196.3360416666651,
-          "pcm_last_active": 199.53349999999844
+          "start": 206.79999999999387,
+          "end": 210.19999999999385,
+          "pcm_first_active": 206.9360416666646,
+          "pcm_last_active": 210.13349999999795
         }
       ],
       "cues": [
@@ -777,24 +1339,24 @@
           "id": "scene03-aid-chain-01",
           "display": "小さな変化は、各段階の倍率を掛けて伝わります。",
           "speech": "小さな変化は、各段階の倍率を掛けて伝わります。",
-          "start": 187.86666666666508,
-          "end": 191.94133333333178
+          "start": 198.4666666666646,
+          "end": 202.5413333333313
         },
         {
           "beat_index": 7,
           "id": "scene03-aid-chain-02",
           "display": "ここでは $1/4$ と $-2$ を掛けて $-1/2$。",
           "speech": "ここではよんぶんのいちとマイナス二を掛けて、マイナスにぶんのいち。",
-          "start": 191.94133333333178,
-          "end": 196.22933333333177
+          "start": 202.5413333333313,
+          "end": 206.82933333333128
         },
         {
           "beat_index": 7,
           "id": "scene03-aid-chain-03",
           "display": "これが、予測と目標の差 $y-t$ です。",
           "speech": "これが、予測と目標の差、ワイ引くティーです。",
-          "start": 196.22933333333177,
-          "end": 199.6319999999984
+          "start": 206.82933333333128,
+          "end": 210.23199999999792
         }
       ]
     },
@@ -803,31 +1365,31 @@
       "actions": [
         {
           "name": "R2.1 Bernoulli variance",
-          "start": 270.99999999998977,
-          "end": 275.39999999998975,
-          "pcm_first_active": 271.0702083333242,
-          "pcm_last_active": 275.2697499999909
+          "start": 281.8666666666558,
+          "end": 286.2666666666558,
+          "pcm_first_active": 281.93687499999027,
+          "pcm_last_active": 286.13641666665694
         },
         {
           "name": "R3.1 residual squared areas",
-          "start": 275.39999999998975,
-          "end": 279.5333333333231,
-          "pcm_first_active": 275.44374999999087,
-          "pcm_last_active": 279.4497499999909
+          "start": 286.2666666666558,
+          "end": 290.3999999999892,
+          "pcm_first_active": 286.3104166666569,
+          "pcm_last_active": 290.31641666665695
         },
         {
           "name": "R3.1 effective targets and variance weights",
-          "start": 279.5333333333231,
-          "end": 284.1333333333231,
-          "pcm_first_active": 279.6632916666575,
-          "pcm_last_active": 284.13329166665756
+          "start": 290.3999999999892,
+          "end": 294.99999999998914,
+          "pcm_first_active": 290.52995833332363,
+          "pcm_last_active": 294.9999583333236
         },
         {
           "name": "R3.1 recompute on next iteration",
-          "start": 284.1333333333231,
-          "end": 286.1333333333231,
-          "pcm_first_active": 284.13333333332423,
-          "pcm_last_active": 286.0419999999909
+          "start": 294.99999999998914,
+          "end": 296.99999999998914,
+          "pcm_first_active": 294.9999999999903,
+          "pcm_last_active": 296.9086666666569
         }
       ],
       "cues": [
@@ -836,24 +1398,24 @@
           "id": "scene05-recap-irls-01",
           "display": "2.1のベルヌーイの分散は $y(1-y)$ でした。",
           "speech": "二章一節のベルヌーイの分散は、ワイかける一引くワイでした。",
-          "start": 270.99999999999085,
-          "end": 275.38399999999086
+          "start": 281.86666666665695,
+          "end": 286.25066666665697
         },
         {
           "beat_index": 2,
           "id": "scene05-recap-irls-02",
           "display": "3.1では、点と予測のずれを二乗して足しました。",
           "speech": "三章一節では、点と予測のずれを二乗して足しました。",
-          "start": 275.38399999999086,
-          "end": 279.5653333333242
+          "start": 286.25066666665697,
+          "end": 290.4319999999903
         },
         {
           "beat_index": 2,
           "id": "scene05-recap-irls-03",
           "display": "今回は有効目標へのずれに、分散の重みを掛け、計算し直しながら繰り返します。",
           "speech": "今回は有効目標へのずれに、分散の重みを掛け、計算し直しながら繰り返します。",
-          "start": 279.5653333333242,
-          "end": 286.1253333333242
+          "start": 290.4319999999903,
+          "end": 296.9919999999903
         }
       ]
     },
@@ -862,24 +1424,24 @@
       "actions": [
         {
           "name": "V11b local quadratic approximation",
-          "start": 319.799999999987,
-          "end": 323.53333333332034,
-          "pcm_first_active": 319.8717083333242,
-          "pcm_last_active": 323.4310833333242
+          "start": 330.66666666665304,
+          "end": 334.3999999999864,
+          "pcm_first_active": 330.73837499999024,
+          "pcm_last_active": 334.2977499999903
         },
         {
           "name": "V11b show approximating minimum",
-          "start": 323.53333333332034,
-          "end": 325.53333333332034,
-          "pcm_first_active": 323.86924999999087,
-          "pcm_last_active": 325.4669583333242
+          "start": 334.3999999999864,
+          "end": 336.3999999999864,
+          "pcm_first_active": 334.735916666657,
+          "pcm_last_active": 336.33362499999026
         },
         {
           "name": "V11b gradient divided by curvature",
-          "start": 325.53333333332034,
-          "end": 329.9333333333203,
-          "pcm_first_active": 325.6183333333242,
-          "pcm_last_active": 329.8449999999909
+          "start": 336.3999999999864,
+          "end": 340.79999999998637,
+          "pcm_first_active": 336.4849999999903,
+          "pcm_last_active": 340.7116666666569
         }
       ],
       "cues": [
@@ -888,16 +1450,16 @@
           "id": "scene05-aid-newton-01",
           "display": "ニュートン法は、近くの誤差を放物線で近似し、その谷底へ進みます。",
           "speech": "ニュートン法は、近くの誤差を放物線で近似し、その谷底へ進みます。",
-          "start": 319.79999999999086,
-          "end": 325.55999999999085
+          "start": 330.66666666665697,
+          "end": 336.42666666665696
         },
         {
           "beat_index": 6,
           "id": "scene05-aid-newton-02",
-          "display": "一変数なら、傾きを曲率で割った分だけ逆へ動きます。",
+          "display": "1変数なら、傾きを曲率で割った分だけ逆へ動きます。",
           "speech": "いちへんすうなら、傾きを曲率で割った分だけ逆へ動きます。",
-          "start": 325.55999999999085,
-          "end": 329.95466666665754
+          "start": 336.42666666665696,
+          "end": 340.8213333333236
         }
       ]
     },
@@ -906,24 +1468,24 @@
       "actions": [
         {
           "name": "R2.4 natural parameter controls mean",
-          "start": 500.19999999997674,
-          "end": 504.8666666666434,
-          "pcm_first_active": 500.26933333331067,
-          "pcm_last_active": 504.777666666644
+          "start": 511.86666666664274,
+          "end": 516.5333333333094,
+          "pcm_first_active": 511.9359999999766,
+          "pcm_last_active": 516.4443333333099
         },
         {
           "name": "R2.4 forward and inverse mapping",
-          "start": 504.8666666666434,
-          "end": 508.33333333331007,
-          "pcm_first_active": 504.9915833333107,
-          "pcm_last_active": 508.333291666644
+          "start": 516.5333333333094,
+          "end": 519.9999999999761,
+          "pcm_first_active": 516.6582499999766,
+          "pcm_last_active": 519.9999583333099
         },
         {
           "name": "R2.4 link to current variables",
-          "start": 508.33333333331007,
-          "end": 510.1333333333101,
-          "pcm_first_active": 508.3333333333107,
-          "pcm_last_active": 510.056416666644
+          "start": 519.9999999999761,
+          "end": 521.7999999999761,
+          "pcm_first_active": 519.9999999999766,
+          "pcm_last_active": 521.72308333331
         }
       ],
       "cues": [
@@ -932,58 +1494,37 @@
           "id": "scene09-recap-link-01",
           "display": "2.4では、自然パラメータと分布の平均を結び付けました。",
           "speech": "二章四節では、自然パラメータと分布の平均を結び付けました。",
-          "start": 500.19999999997736,
-          "end": 504.8933333333107
+          "start": 511.86666666664325,
+          "end": 516.5599999999766
         },
         {
           "beat_index": 1,
           "id": "scene09-recap-link-02",
           "display": "この対応を出力関数に使うと、勾配の共通した形が現れます。",
           "speech": "この対応を出力関数に使うと、勾配の共通した形が現れます。",
-          "start": 504.8933333333107,
-          "end": 510.1413333333107
+          "start": 516.5599999999766,
+          "end": 521.8079999999766
         }
       ]
     }
   ],
-  "mp4_sha256": "ab708517e24f138e727ee52821312e4032de6b7d8078f1e816d771ec19269bb1",
+  "mp4_sha256": "f4935730398ab27e37a060cd6171ca124b02752cdb0f24b586ee35f58f216b2b",
   "visual_review": {
-    "initial_frames_reviewed": 121,
-    "final_frames_extracted": 121,
-    "identical_frames": 98,
-    "rechecked_frames": 23,
-    "changed_frames": [
-      "scene02-04-01-sentence1-0.15.png",
-      "scene02-04-01-sentence1-0.85.png",
-      "scene02-04-01-sentence2-0.15.png",
-      "scene02-04-01-sentence2-0.85.png",
-      "scene02-beat04.png",
-      "scene03-aid-chain-01-sentence1-0.85.png",
-      "scene03-aid-chain-01-sentence2-0.15.png",
-      "scene03-aid-chain-01-sentence2-0.85.png",
-      "scene03-aid-chain-01-sentence3-0.15.png",
-      "scene03-aid-chain-01-sentence3-0.85.png",
-      "scene03-aid-chain-02-math.png",
-      "scene03-aid-chain-03-math.png",
-      "scene03-beat08.png",
-      "scene04-04-01-sentence1-0.15.png",
-      "scene04-04-01-sentence1-0.85.png",
-      "scene04-04-01-sentence2-0.15.png",
-      "scene04-04-01-sentence2-0.85.png",
-      "scene04-beat04.png",
-      "scene05-beat03.png",
-      "scene05-recap-irls-01-sentence2-0.15.png",
-      "scene05-recap-irls-01-sentence2-0.85.png",
-      "scene05-recap-irls-01-sentence3-0.15.png",
-      "scene05-recap-irls-01-sentence3-0.85.png"
+    "first_pass_contact_sheets_viewed": 39,
+    "intermediate_changed_contact_sheets_viewed": 12,
+    "final_changed_contact_sheets_viewed": 6,
+    "final_representative_frames": 233,
+    "final_contact_sheets": 39,
+    "pixel_identical_to_intermediate": 243,
+    "changed_from_intermediate": 29,
+    "zoomed_final_frames": [
+      "scene01-beat02-50",
+      "scene09-beat07-50",
+      "scene05-aid-newton-01-sentence2-0.85",
+      "scene07-beat03-50"
     ],
-    "scope": "全9シーン・全55beat・追加5カードの全字幕と前後・参照ラベル2か所",
-    "full_listening": false,
-    "fixes": [
-      "参照ラベル枠を原点で測定",
-      "連鎖律とIRLSの式を短く切り替え",
-      "3.3ラベルを散布図から離す"
-    ]
+    "finding": "代表フレームで装飾枠、ラベル重なり、字幕・式の読みにくさを認めず。冒頭の見出しを結果の拍で切替え、同じ保留点と0.621を結末で確認。",
+    "scope": "各beatの15/50/85%、数式字幕、補足・復習の直前・途中・直後。全フレームの人手検査ではない。"
   },
   "full_listening": false
 }
