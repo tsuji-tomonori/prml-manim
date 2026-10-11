@@ -14,6 +14,15 @@ from make_voicevox_narration import MANIFEST, OUTPUT_DIR, valid_entry
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--captions',action='store_true');args=parser.parse_args()
     results={}
+    np.testing.assert_allclose(STORY_Y, [0.034283829848622334,
+                                          1.083750989115802,
+                                          0.034283829848622334], atol=1e-15)
+    assert story_one_unit(STORY_X[0]) < story_one_unit(STORY_X[1]) < story_one_unit(STORY_X[2])
+    np.testing.assert_allclose(story_one_unit(STORY_X[:2]),STORY_Y[:2],atol=1e-15)
+    assert abs(story_one_unit(1)-STORY_Y[-1]) > 2.09
+    results['story']={'x':STORY_X.tolist(),'target':STORY_Y.tolist(),
+                      'one_unit':story_one_unit(STORY_X).tolist(),
+                      'two_unit':bump(STORY_X).tolist()}
     w=np.array([3,3,1,1.2,-1.2,0,.65,-.65,0,0.])
     np.testing.assert_allclose(network(GRID,w),bump(GRID),atol=1e-15)
     results['bump_network_error']=float(np.max(abs(network(GRID,w)-bump(GRID))))
