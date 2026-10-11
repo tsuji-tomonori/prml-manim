@@ -18,26 +18,30 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.save_timeline()
 
     def question(self):
-        self.legend(('元の分布',BLUE),('ガウス近似',RED))
-        ax=self.axes(y=(0,.9,.3),ylabel='p(z)')
-        curve=self.curve(ax,pdf)
+        self.legend(('元の山',BLUE),('頂上からの近似',RED))
+        ax=self.axes(y=(0,1,.25),ylabel='f(z)')
+        curve=self.curve(ax,f)
         self.beat(Create(curve))
         t=ValueTracker(-1.2)
-        dot=always_redraw(lambda:Dot(ax.c2p(t.get_value(),pdf(t.get_value())),color=GOLD))
+        dot=always_redraw(lambda:Dot(ax.c2p(t.get_value(),f(t.get_value())),color=GOLD))
         self.add(dot)
-        self.beat(t.animate.set_value(2.1))
+        local_curve=self.curve(ax,local,RED)
+        self.beat(t.animate.set_value(2.1),Succession(Wait(2),Create(local_curve)))
         self.beat(self.equation(r'p(z\mid D)',r'\propto',r'p(D\mid z)',r'p(z)',colors={0:BLUE,2:GOLD,3:PURPLE}),t.animate.set_value(Z0))
         self.beat(self.equation(r'f(z)=',r'e^{-z^2/(2\cdot1.1^2)}',r'\frac{1}{1+e^{-(4z+0.8)}}',colors={1:PURPLE,2:GOLD}),t.animate.set_value(1.6))
         scan=ValueTracker(-1.99)
-        area=always_redraw(lambda:self.area(ax,pdf,hi=scan.get_value()))
+        area=always_redraw(lambda:VGroup(self.area(ax,f,BLUE,hi=scan.get_value()),
+                                        self.area(ax,local,RED,hi=scan.get_value())))
         self.add(area)
-        self.beat(scan.animate.set_value(3),self.equation(r'p(z)=\frac{f(z)}{Z}',r',\quad Z=\int f(z)\,dz',colors={0:BLUE,1:GOLD}))
-        focus=Circle(radius=.5,color=GOLD).move_to(ax.c2p(Z0,pdf(Z0)))
-        self.beat(Create(focus),t.animate.set_value(Z0))
+        self.number('Z=',lambda:Z,[-3,2.18,0],BLUE)
+        self.beat(scan.animate.set_value(3),self.equation(r'Z=\int f(z)\,dz',colors={0:BLUE}))
+        self.number(r'Z_{\rm L}=',lambda:ZL,[3,2.18,0],RED)
+        focus=Circle(radius=.5,color=GOLD).move_to(ax.c2p(Z0,f(Z0)))
+        self.beat(Create(focus),t.animate.set_value(Z0),
+                  self.equation(r'Z_{\rm L}=f(z_0)\sqrt{2\pi/A}',colors={0:RED}))
         self.gaussian_recap()
-        q=self.curve(ax,gaussian,RED)
-        self.beat(Create(q),FadeOut(area),FadeOut(focus))
-        self.beat(t.animate.set_value(Z0+.45),self.equation(r'q(z)=\mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
+        self.beat(FadeOut(area),FadeOut(focus),t.animate.set_value(Z0))
+        self.beat(t.animate.set_value(Z0+.45),self.equation(r'f_{\rm local}(z)=f(z_0)e^{-A(z-z_0)^2/2}',colors={0:RED}))
 
     def mode_and_log(self):
         self.legend(('関数と対数',BLUE),('頂上・接線',GOLD),('二次近似',RED))
@@ -168,10 +172,13 @@ class PRML44LaplaceApproximation(NarratedScene):
             return group
         bars=always_redraw(rectangles);self.add(bars)
         self.beat(self.equation(r'Z=\int f(z)\,dz',colors={0:PURPLE}))
-        self.number(r'\mathrm{area}=',lambda:h.get_value()*sigma.get_value()*np.sqrt(2*np.pi),[2.8,2.2,0],PURPLE)
+        area_counter=self.number(r'\mathrm{area}=',lambda:h.get_value()*sigma.get_value()*np.sqrt(2*np.pi),[2.8,2.2,0],PURPLE)
         self.slider(sigma,.2,1,r'\sigma',GOLD)
         self.beat(sigma.animate.set_value(.25))
-        self.beat(h.animate.set_value(1.4),sigma.animate.set_value(.85))
+        self.remove(area_counter)
+        self.beat(Succession(Wait(1.2),
+                             AnimationGroup(h.animate.set_value(1.4),sigma.animate.set_value(.85),run_time=2),
+                             FadeIn(area_counter,run_time=.8)))
         self.beat(self.equation(r'Z_{\rm L}=',r'f(z_0)',r'\sqrt{2\pi/A}',colors={0:PURPLE,1:RED,2:GOLD}),sigma.animate.set_value(.7))
         self.beat(sigma.animate.set_value(.9),self.equation(r'|A|=\prod_{i=1}^{M}\lambda_i',r',\quad \prod_i\lambda_i^{-1/2}=|A|^{-1/2}',colors={1:GOLD},size=30))
         self.determinant_aid()
@@ -190,11 +197,14 @@ class PRML44LaplaceApproximation(NarratedScene):
         product=always_redraw(lambda:self.area(ax,lambda z:likelihood(z)/prior.get_value(),PURPLE,lo=-prior.get_value()/2,hi=prior.get_value()/2))
         self.add(pr,product)
         self.beat(self.equation(r'p(D)=\int',r'p(D\mid\theta)',r'p(\theta)',r'\,d\theta',colors={1:GOLD,2:BLUE}))
-        self.number('p(D)=',lambda:evidence(width.get_value(),prior.get_value()),[3,2.15,0],PURPLE)
+        evidence_counter=self.number('p(D)=',lambda:evidence(width.get_value(),prior.get_value()),[3,2.15,0],PURPLE)
         mapdot=always_redraw(lambda:Dot(ax.c2p(0,1/prior.get_value()),color=PURPLE))
         self.add(mapdot)
         self.beat(self.equation(r'\theta_{\rm MAP}=\arg\max_\theta p(D\mid\theta)p(\theta)',colors={0:PURPLE}))
-        self.beat(width.animate.set_value(.3))
+        self.remove(evidence_counter)
+        self.beat(Succession(Wait(1.2),width.animate.set_value(.3)))
+        evidence_counter[1].set_value(evidence(.3,5))
+        self.add(evidence_counter)
         self.beat(prior.animate.set_value(8))
         self.beat(self.equation(r'\ln p(D)\simeq',r'\ln p(D\mid\theta_{\rm MAP})',r'+\ln p(\theta_{\rm MAP})',r'+\frac M2\ln(2\pi)',r'-\frac12\ln|A|',colors={1:GOLD,2:BLUE,3:PURPLE,4:PURPLE},size=26),width.animate.set_value(.6))
         bracket=Brace(VGroup(*self.formula[2:]),UP,color=PURPLE,buff=.12)
@@ -225,11 +235,11 @@ class PRML44LaplaceApproximation(NarratedScene):
             return out
         bar=always_redraw(bars);self.add(bar)
         self.slider(n,20,200,'N',GOLD,y=-1.75)
-        self.number('N=',n.get_value,[4.5,1.2,0])
+        self.number('N=',n.get_value,[4.5,1.2,0],decimals=0)
         self.number('M=2:',lambda:np.log(n.get_value()),[4.5,.4,0],BLUE)
         self.number('M=5:',lambda:2.5*np.log(n.get_value()),[4.5,-.4,0],RED)
         self.beat(self.equation(r'\frac12\ln|A|\simeq\frac M2\ln N+\frac12\ln|H|',size=30))
-        self.beat(n.animate.set_value(200))
+        self.beat(Succession(Wait(1.2),n.animate.set_value(200)))
         self.beat(n.animate.set_value(100))
         self.beat(self.equation(r'S=\ln p(D\mid\theta_{\rm MAP})-\frac M2\ln N',colors={0:GREEN},size=30),n.animate.set_value(200))
         self.beat(self.equation(r'\mathrm{BIC}=-2\ln p(D\mid\hat\theta_{\rm ML})+M\ln N',colors={0:GREEN},size=29),n.animate.set_value(100))
@@ -249,10 +259,11 @@ class PRML44LaplaceApproximation(NarratedScene):
         self.beat(mu.animate.set_value(m),prec.animate.set_value(a),self.equation(r'z_0:\ -1.5\ \longrightarrow\ 1.6',colors={0:RED}))
         self.remove(pc,qc)
         skew=self.curve(ax,pdf);q=self.curve(ax,gaussian,RED)
-        self.beat(Create(skew),Create(q),self.equation(r'p(z)\ne q(z)',colors={0:GOLD}))
+        self.add(skew,q)
+        self.beat(Succession(Wait(1),Flash(ax.c2p(2,pdf(2)),color=BLUE,flash_radius=.35),Wait(2)),
+                  self.equation(r'p(z)\ne q(z)',colors={0:GOLD}))
         # Reference label runs inside the existing beat; no extra narration.
         recap=VGroup(jp("復習: 1.2 密度の変換",22))
-        recap.add(SurroundingRectangle(recap[0],color="#FFFF00",buff=.12,stroke_width=1.5))
         recap.move_to([-2.8,2.2,0]);self.add(recap)
         # Positive-variable mapping is shown explicitly with its Jacobian.
         self.beat(self.equation(r'u=\ln\tau',r',\quad p_\tau(\tau)=\frac{p_u(\ln\tau)}{\tau}\quad(\tau>0)',colors={0:GOLD,1:PURPLE},size=29),FadeOut(skew),FadeOut(q))
@@ -272,11 +283,21 @@ class PRML44LaplaceApproximation(NarratedScene):
             return concentrated(Z0+x/s)/s
         pc=always_redraw(lambda:self.curve(ax,standardized));qc=self.curve(ax,lambda z:gaussian(z,0,1),RED)
         self.add(pc,qc)
-        self.number('n=',power.get_value,[3.2,2.15,0],GOLD)
+        self.number('n=',power.get_value,[3.2,2.15,0],GOLD,decimals=0)
         self.add(jp('幅をそろえて形を比較',20,GOLD).move_to([-1.8,2.15,0]))
         self.beat(power.animate.set_value(12),self.equation(r'p_n(z)\propto f(z)^n',r',\quad\mathrm{standardized}',colors={0:BLUE},size=30))
-        self.beat(power.animate.set_value(20),self.equation(r'z_0\ \longrightarrow\ A\ \longrightarrow\ \mathcal N(z\mid z_0,A^{-1})',colors={0:RED}))
-        self.beat(power.animate.set_value(30),self.equation(r'p(w\mid D)\approx\mathcal N(w\mid w_{\rm MAP},S_N)',colors={0:PURPLE}))
+        self.remove(ax,pc,qc)
+        for obj in list(self.mobjects):
+            if obj not in (self.mobjects[0],self.formula,self.caption):
+                self.remove(obj)
+        ax=self.axes(x=(-2,3,1),y=(0,1,.25),ylabel='f(z)')
+        curves=VGroup(self.curve(ax,f),self.curve(ax,local,RED))
+        areas=VGroup(self.area(ax,f,BLUE),self.area(ax,local,RED))
+        nums=VGroup(tex(f'Z={Z:.3f}',27,BLUE),tex(f'Z_{{\\rm L}}={ZL:.3f}',27,RED)).arrange(RIGHT,buff=.65).move_to([0,2.28,0])
+        self.add(curves,nums)
+        self.beat(FadeIn(areas),self.equation(r'Z_{\rm L}/Z-1\simeq-3.7\%',colors={0:GOLD}))
+        self.beat(self.equation(r'p(w\mid D)\approx\mathcal N(w\mid w_{\rm MAP},S_N)',colors={0:PURPLE}),
+                  Circumscribe(nums,color=GOLD))
 
     def gaussian_recap(self):
         saved=self.body_card('復習: 2.3 ガウス分布')
@@ -338,7 +359,7 @@ class PRML44LaplaceApproximation(NarratedScene):
 
     def determinant_aid(self):
         saved=self.body_card('補足: 行列式から、幅の積へ')
-        self.add(jp('説明用の二方向：主軸に沿って測る',21,MUTED).move_to([0,1.4,0]))
+        self.add(jp('説明用の2方向：主軸に沿って測る',21,MUTED).move_to([0,1.4,0]))
         a=ValueTracker(1)
         square=Square(side_length=2,color=MUTED,stroke_width=1.5).move_to([-2.7,-.1,0])
         rect=always_redraw(lambda:Rectangle(width=2/np.sqrt(a.get_value()),height=2,
