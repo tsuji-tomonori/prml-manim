@@ -50,6 +50,13 @@ def main():
     end1=robot(a,-2*a)[1];end2=robot(-a,2*a)[1];meanend=robot(0,0)[1]
     assert np.allclose(end1,[1.2,0]) and np.allclose(end1,end2)
     result['averaged_arm_target_error']=float(np.linalg.norm(meanend-end1))
+    assert np.isclose(result['averaged_arm_target_error'],.8)
+    arm_grid=np.linspace(-2,2,4001)
+    arm_density=density(arm_grid,np.array([.5,.5]),np.array([a,-a]),np.array([.13,.13]))
+    assert len(find_peaks(arm_density)[0])==2
+    assert np.isclose(trapezoid(arm_density,arm_grid),1,atol=1e-12)
+    result['robot_story']={'target_distance':1.2,'average_arm_distance':float(np.linalg.norm(meanend)),
+                           'angle_magnitude_radians':float(a),'illustrative_angle_modes':2}
     p=np.array([.65,.35]);m=np.array([.04,.96]);s=np.array([.22,.055]);mode=grid[np.argmax(density(grid,p,m,s))]
     result['mode_counterexample']={'largest_weight_center':float(m[np.argmax(p)]),'numeric_mode':float(mode)}
     assert abs(mode-m[np.argmax(p)])>.8

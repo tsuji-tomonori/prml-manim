@@ -41,8 +41,9 @@ def main():
             if b.get('phases'):
                 # Every added scene: before/after, and early/late in every sentence.
                 key=b['cues'][0]['id'].rsplit('-',1)[0]
-                image_rows.extend([dict(name=key+'-before',time=b['start']-.2),
-                                   dict(name=key+'-after',time=b['end']+.2)])
+                video_end=float(next(s['duration'] for s in streams['streams'] if s['codec_type']=='video'))
+                image_rows.extend([dict(name=key+'-before',time=max(0,b['start']-.2)),
+                                   dict(name=key+'-after',time=min(b['end']+.2,video_end-.15))])
                 with wave.open(str(ROOT/entry['path'])) as wav:
                     rate=wav.getframerate()
                     pcm=np.frombuffer(wav.readframes(wav.getnframes()),dtype='<i2').astype(float)/32768
@@ -84,6 +85,12 @@ def main():
         sync.append(rec)
         for fraction in [.15,.85]:
             image_rows.append(dict(name=f"{scene['id']}-sync-{fraction}",time=beat['action_start']+fraction*(beat['action_end']-beat['action_start'])))
+    # The story's prediction, reveal and return need more than end-of-beat stills.
+    for scene_index,beat_index in [(0,3),(6,2),(7,1),(8,0),(8,5)]:
+        beat=tl[scene_index]['beats'][beat_index]
+        for fraction in [.12,.45,.78,.97]:
+            image_rows.append(dict(name=f"{tl[scene_index]['id']}-story-{beat_index+1:02}-{fraction}",
+                                   time=beat['start']+fraction*(beat['end']-beat['start'])))
     def extract(row):
         path=args.output/(row['name']+'.png')
         run(['ffmpeg','-v','error','-y','-ss',str(row['time']),'-i',str(VIDEO),'-frames:v','1',str(path)])

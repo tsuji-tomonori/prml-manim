@@ -1,5 +1,5 @@
 {
-  "video_sha256": "be72f954bbee188cd182d17aca69a21793372be2e149cefb32f02a55e2e959c4",
+  "video_sha256": "e2ea8110de1af8fa7fecb017361ba390dc70eb8b8689a677fa21685a721b840c",
   "probe": {
     "programs": [],
     "streams": [
@@ -9,573 +9,1081 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "587.599344"
+        "duration": "537.866344"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "587.626667"
+        "duration": "537.898667"
       }
     ],
     "format": {
-      "duration": "587.627000"
+      "duration": "537.899000"
     }
   },
   "long_silences": 0,
-  "mean_volume_db": -26.6,
-  "peak_volume_db": -5.9,
-  "timeline_max_error": 4.226308192301076e-11,
+  "mean_volume_db": -26.5,
+  "peak_volume_db": -6.0,
+  "timeline_max_error": 1.050182163453428e-11,
   "sync": [
     {
       "scene": "scene02",
       "visual": "軸を交換する",
-      "action_start": 64.13333333333482,
-      "action_end": 71.65333333333481,
-      "pcm_onset": 64.23116666666776
+      "action_start": 63.66666666666815,
+      "action_end": 71.46400000000148,
+      "pcm_onset": 63.76429166666769
     },
     {
       "scene": "scene03",
       "visual": "中心を動かす",
-      "action_start": 131.333333333331,
-      "action_end": 140.15466666666435,
-      "pcm_onset": 131.43141666666497
+      "action_start": 127.39999999999789,
+      "action_end": 134.55733333333123,
+      "pcm_onset": 127.49099999999852
     },
     {
       "scene": "scene07",
       "visual": "中央の断面",
-      "action_start": 423.9333333333144,
-      "action_end": 432.40266666664775,
-      "pcm_onset": 424.00279166664876
+      "action_start": 391.6666666666496,
+      "action_end": 399.45333333331627,
+      "pcm_onset": 391.76129166665055
     }
   ],
   "recap_phases": [
     {
+      "id": "scene01-02-01",
+      "start": 9.399999999999986,
+      "end": 13.250666666666653,
+      "pcm_onset": 9.487583333333333,
+      "pcm_end": 13.135041666666666
+    },
+    {
+      "id": "scene01-02-02",
+      "start": 13.250666666666653,
+      "end": 16.90933333333332,
+      "pcm_onset": 13.313375,
+      "pcm_end": 16.814708333333332
+    },
+    {
+      "id": "scene01-04-01",
+      "start": 25.666666666666597,
+      "end": 30.77599999999993,
+      "pcm_onset": 25.763375,
+      "pcm_end": 30.65041666666667
+    },
+    {
+      "id": "scene01-04-02",
+      "start": 30.77599999999993,
+      "end": 35.394666666666595,
+      "pcm_onset": 30.8385,
+      "pcm_end": 35.279375
+    },
+    {
+      "id": "scene02-02-01",
+      "start": 63.66666666666815,
+      "end": 67.48533333333481,
+      "pcm_onset": 63.76429166666769,
+      "pcm_end": 67.42183333333435
+    },
+    {
+      "id": "scene02-02-02",
+      "start": 67.48533333333481,
+      "end": 71.46400000000148,
+      "pcm_onset": 67.56858333333436,
+      "pcm_end": 71.35575000000102
+    },
+    {
+      "id": "scene02-03-01",
+      "start": 71.86666666666771,
+      "end": 75.36533333333438,
+      "pcm_onset": 71.92850000000102,
+      "pcm_end": 75.23841666666769
+    },
+    {
+      "id": "scene02-03-02",
+      "start": 75.36533333333438,
+      "end": 79.05600000000103,
+      "pcm_onset": 75.46020833333435,
+      "pcm_end": 78.94720833333436
+    },
+    {
       "id": "scene02-recap-mean-01",
-      "start": 81.9333333333338,
-      "end": 87.74666666666714,
-      "pcm_onset": 81.98266666666777,
-      "pcm_end": 87.62908333333442
+      "start": 79.46666666666728,
+      "end": 85.28000000000061,
+      "pcm_onset": 79.51566666666768,
+      "pcm_end": 85.16412500000102
     },
     {
       "id": "scene02-recap-mean-02",
-      "start": 87.74666666666714,
-      "end": 91.90666666666714,
-      "pcm_onset": 87.8471250000011,
-      "pcm_end": 91.79933333333443
+      "start": 85.28000000000061,
+      "end": 89.44000000000061,
+      "pcm_onset": 85.38083333333435,
+      "pcm_end": 89.35500000000101
+    },
+    {
+      "id": "scene03-03-01",
+      "start": 134.9333333333308,
+      "end": 138.29333333333082,
+      "pcm_onset": 135.02129166666518,
+      "pcm_end": 138.15929166666518
+    },
+    {
+      "id": "scene03-03-02",
+      "start": 138.29333333333082,
+      "end": 142.29333333333082,
+      "pcm_onset": 138.38408333333186,
+      "pcm_end": 142.2084166666652
     },
     {
       "id": "scene03-recap-mixture-01",
-      "start": 151.53333333332986,
-      "end": 156.50399999999652,
-      "pcm_onset": 151.60270833333163,
-      "pcm_end": 156.38845833333164
+      "start": 142.6666666666637,
+      "end": 147.63733333333036,
+      "pcm_onset": 142.73645833333185,
+      "pcm_end": 147.5216666666652
     },
     {
       "id": "scene03-recap-mixture-02",
-      "start": 156.50399999999652,
-      "end": 161.0586666666632,
-      "pcm_onset": 156.60029166666496,
-      "pcm_end": 160.95133333333163
+      "start": 147.63733333333036,
+      "end": 152.19199999999705,
+      "pcm_onset": 147.7341666666652,
+      "pcm_end": 152.08383333333185
     },
     {
       "id": "scene05-aid-sums-01",
-      "start": 291.9333333333219,
-      "end": 296.39199999998857,
-      "pcm_onset": 292.0214166666574,
-      "pcm_end": 296.28466666665736
+      "start": 273.33333333332297,
+      "end": 277.7919999999896,
+      "pcm_onset": 273.42141666665833,
+      "pcm_end": 277.68466666665836
     },
     {
       "id": "scene05-aid-sums-02",
-      "start": 296.39199999998857,
-      "end": 300.90399999998857,
-      "pcm_onset": 296.4892499999907,
-      "pcm_end": 300.79895833332404
+      "start": 277.7919999999896,
+      "end": 282.3039999999896,
+      "pcm_onset": 277.889333333325,
+      "pcm_end": 282.19445833332503
     },
     {
       "id": "scene05-aid-sums-03",
-      "start": 300.90399999998857,
-      "end": 304.5413333333219,
-      "pcm_onset": 300.96358333332404,
-      "pcm_end": 304.43320833332405
+      "start": 282.3039999999896,
+      "end": 285.941333333323,
+      "pcm_onset": 282.3634999999917,
+      "pcm_end": 285.83279166665835
     },
     {
       "id": "scene06-recap-bayes-01",
-      "start": 344.99999999998556,
-      "end": 350.8453333333189,
-      "pcm_onset": 345.05020833332,
-      "pcm_end": 350.7184166666533
+      "start": 323.26666666665346,
+      "end": 329.1119999999868,
+      "pcm_onset": 323.3163749999878,
+      "pcm_end": 328.9847499999878
     },
     {
       "id": "scene06-recap-bayes-02",
-      "start": 350.8453333333189,
-      "end": 355.91199999998554,
-      "pcm_onset": 350.9421249999866,
-      "pcm_end": 355.7984166666533
+      "start": 329.1119999999868,
+      "end": 334.17866666665344,
+      "pcm_onset": 329.2092083333211,
+      "pcm_end": 334.0689999999878
     },
     {
       "id": "scene06-recap-bayes-03",
-      "start": 355.91199999998554,
-      "end": 359.30399999998554,
-      "pcm_onset": 356.00945833331997,
-      "pcm_end": 359.21399999998664
+      "start": 334.17866666665344,
+      "end": 337.57066666665344,
+      "pcm_onset": 334.2762083333211,
+      "pcm_end": 337.48066666665443
+    },
+    {
+      "id": "scene07-03-01",
+      "start": 391.6666666666496,
+      "end": 395.0266666666496,
+      "pcm_onset": 391.76129166665055,
+      "pcm_end": 394.8956666666506
+    },
+    {
+      "id": "scene07-03-02",
+      "start": 395.0266666666496,
+      "end": 399.45333333331627,
+      "pcm_onset": 395.0964999999839,
+      "pcm_end": 399.33804166665055
+    },
+    {
+      "id": "scene08-02-01",
+      "start": 433.2666666666472,
+      "end": 437.31999999998055,
+      "pcm_onset": 433.34145833331445,
+      "pcm_end": 437.1844999999811
+    },
+    {
+      "id": "scene08-02-02",
+      "start": 437.31999999998055,
+      "end": 441.4586666666472,
+      "pcm_onset": 437.3597083333144,
+      "pcm_end": 441.3679166666478
+    },
+    {
+      "id": "scene09-01-01",
+      "start": 481.2666666666445,
+      "end": 486.64266666664446,
+      "pcm_onset": 481.35145833331114,
+      "pcm_end": 486.55774999997783
+    },
+    {
+      "id": "scene09-01-02",
+      "start": 486.64266666664446,
+      "end": 490.5999999999778,
+      "pcm_onset": 486.7321249999778,
+      "pcm_end": 490.4881666666445
+    },
+    {
+      "id": "scene09-06-01",
+      "start": 527.466666666655,
+      "end": 532.5439999999883,
+      "pcm_onset": 527.5332916666445,
+      "pcm_end": 532.4343333333112
+    },
+    {
+      "id": "scene09-06-02",
+      "start": 532.5439999999883,
+      "end": 537.4613333333217,
+      "pcm_onset": 532.6350416666445,
+      "pcm_end": 537.3384583333111
     }
   ],
   "final_audio_alignment": [
     {
+      "id": "scene01-02-01",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9999563805776354
+    },
+    {
+      "id": "scene01-02-02",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9998355861903543
+    },
+    {
+      "id": "scene01-04-01",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9998863873057093
+    },
+    {
+      "id": "scene01-04-02",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9998436382664153
+    },
+    {
+      "id": "scene02-02-01",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9996836701861009
+    },
+    {
+      "id": "scene02-02-02",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9998088426874168
+    },
+    {
+      "id": "scene02-03-01",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9997660688317943
+    },
+    {
+      "id": "scene02-03-02",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9995814523713342
+    },
+    {
       "id": "scene02-recap-mean-01",
-      "offset_error_seconds": 0.020666666666666667,
-      "correlation": 0.9998041480574051
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9996864368862843
     },
     {
       "id": "scene02-recap-mean-02",
+      "offset_error_seconds": 0.021333333333333343,
+      "correlation": 0.9996247259549293
+    },
+    {
+      "id": "scene03-03-01",
       "offset_error_seconds": 0.020666666666666667,
-      "correlation": 0.9997486954928546
+      "correlation": 0.9998916992066578
+    },
+    {
+      "id": "scene03-03-02",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9998904442289103
     },
     {
       "id": "scene03-recap-mixture-01",
-      "offset_error_seconds": 0.02100000000000002,
-      "correlation": 0.9996876668665295
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9998200590905196
     },
     {
       "id": "scene03-recap-mixture-02",
-      "offset_error_seconds": 0.02100000000000002,
-      "correlation": 0.9997484854393885
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9997371906982708
     },
     {
       "id": "scene05-aid-sums-01",
-      "offset_error_seconds": 0.020333333333333342,
-      "correlation": 0.9998847692212449
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9999209522089701
     },
     {
       "id": "scene05-aid-sums-02",
-      "offset_error_seconds": 0.020333333333333342,
-      "correlation": 0.9998506328539731
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9996987027950844
     },
     {
       "id": "scene05-aid-sums-03",
-      "offset_error_seconds": 0.020333333333333342,
-      "correlation": 0.9997979361203373
+      "offset_error_seconds": 0.02100000000000002,
+      "correlation": 0.9999592903835101
     },
     {
       "id": "scene06-recap-bayes-01",
-      "offset_error_seconds": 0.02100000000000002,
-      "correlation": 0.9997689293135458
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9997664879456062
     },
     {
       "id": "scene06-recap-bayes-02",
-      "offset_error_seconds": 0.02100000000000002,
-      "correlation": 0.9999604398366366
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9999357521762154
     },
     {
       "id": "scene06-recap-bayes-03",
-      "offset_error_seconds": 0.02100000000000002,
-      "correlation": 0.9997795419264677
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9997436529193804
+    },
+    {
+      "id": "scene07-03-01",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9999748247538011
+    },
+    {
+      "id": "scene07-03-02",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9996282313157939
+    },
+    {
+      "id": "scene08-02-01",
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9999653392761687
+    },
+    {
+      "id": "scene08-02-02",
+      "offset_error_seconds": 0.020333333333333342,
+      "correlation": 0.9997460065246253
+    },
+    {
+      "id": "scene09-01-01",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9999464702372857
+    },
+    {
+      "id": "scene09-01-02",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9997739711338096
+    },
+    {
+      "id": "scene09-06-01",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9999070564826494
+    },
+    {
+      "id": "scene09-06-02",
+      "offset_error_seconds": 0.020666666666666667,
+      "correlation": 0.9998912713685262
     }
   ],
   "frames": [
     {
       "name": "scene01-beat01",
-      "time": 6.16
+      "time": 6.58
     },
     {
       "name": "scene01-beat02",
-      "time": 15.099999999999989
+      "time": 14.906666666666652
+    },
+    {
+      "name": "scene01-02-before",
+      "time": 9.199999999999987
+    },
+    {
+      "name": "scene01-02-after",
+      "time": 17.46666666666665
+    },
+    {
+      "name": "scene01-02-01-phase-0.2",
+      "time": 10.17013333333332
+    },
+    {
+      "name": "scene01-02-01-phase-0.8",
+      "time": 12.48053333333332
+    },
+    {
+      "name": "scene01-02-02-phase-0.2",
+      "time": 13.982399999999986
+    },
+    {
+      "name": "scene01-02-02-phase-0.8",
+      "time": 16.177599999999984
     },
     {
       "name": "scene01-beat03",
-      "time": 23.586666666666623
+      "time": 23.14666666666663
     },
     {
       "name": "scene01-beat04",
-      "time": 32.08666666666659
+      "time": 32.75999999999993
+    },
+    {
+      "name": "scene01-04-before",
+      "time": 25.466666666666598
+    },
+    {
+      "name": "scene01-04-after",
+      "time": 35.99999999999993
+    },
+    {
+      "name": "scene01-04-01-phase-0.2",
+      "time": 26.688533333333265
+    },
+    {
+      "name": "scene01-04-01-phase-0.8",
+      "time": 29.754133333333264
+    },
+    {
+      "name": "scene01-04-02-phase-0.2",
+      "time": 31.699733333333263
+    },
+    {
+      "name": "scene01-04-02-phase-0.8",
+      "time": 34.470933333333264
     },
     {
       "name": "scene01-beat05",
-      "time": 41.90000000000004
+      "time": 42.19333333333343
     },
     {
       "name": "scene01-beat06",
-      "time": 52.606666666667216
+      "time": 51.56000000000055
     },
     {
       "name": "scene02-beat01",
-      "time": 61.65333333333443
+      "time": 60.886666666667686
     },
     {
       "name": "scene02-beat02",
-      "time": 69.68666666666815
+      "time": 69.40666666666814
+    },
+    {
+      "name": "scene02-02-before",
+      "time": 63.46666666666815
+    },
+    {
+      "name": "scene02-02-after",
+      "time": 72.06666666666816
+    },
+    {
+      "name": "scene02-02-01-phase-0.2",
+      "time": 64.43040000000148
+    },
+    {
+      "name": "scene02-02-01-phase-0.8",
+      "time": 66.72160000000147
+    },
+    {
+      "name": "scene02-02-02-phase-0.2",
+      "time": 68.28106666666814
+    },
+    {
+      "name": "scene02-02-02-phase-0.8",
+      "time": 70.66826666666815
     },
     {
       "name": "scene02-beat03",
-      "time": 78.97333333333435
+      "time": 77.1866666666677
     },
     {
       "name": "scene02-03-01-math",
-      "time": 74.60533333333436
+      "time": 73.61600000000104
+    },
+    {
+      "name": "scene02-03-before",
+      "time": 71.66666666666771
+    },
+    {
+      "name": "scene02-03-after",
+      "time": 79.66666666666771
+    },
+    {
+      "name": "scene02-03-01-phase-0.2",
+      "time": 72.56640000000104
+    },
+    {
+      "name": "scene02-03-01-phase-0.8",
+      "time": 74.66560000000105
+    },
+    {
+      "name": "scene02-03-02-phase-0.2",
+      "time": 76.10346666666771
+    },
+    {
+      "name": "scene02-03-02-phase-0.8",
+      "time": 78.3178666666677
     },
     {
       "name": "scene02-beat04",
-      "time": 89.16666666666713
+      "time": 86.7000000000006
     },
     {
       "name": "scene02-recap-mean-before",
-      "time": 81.7333333333338
+      "time": 79.26666666666728
     },
     {
       "name": "scene02-recap-mean-after",
-      "time": 92.46666666666714
+      "time": 90.00000000000061
     },
     {
       "name": "scene02-recap-mean-01-phase-0.2",
-      "time": 83.09600000000047
+      "time": 80.62933333333395
     },
     {
       "name": "scene02-recap-mean-01-phase-0.8",
-      "time": 86.58400000000047
+      "time": 84.11733333333395
     },
     {
       "name": "scene02-recap-mean-02-phase-0.2",
-      "time": 88.57866666666713
+      "time": 86.1120000000006
     },
     {
       "name": "scene02-recap-mean-02-phase-0.8",
-      "time": 91.07466666666714
+      "time": 88.60800000000062
     },
     {
       "name": "scene02-beat05",
-      "time": 98.98666666666654
+      "time": 95.86666666666669
     },
     {
       "name": "scene02-beat06",
-      "time": 107.69999999999933
+      "time": 104.90666666666618
     },
     {
       "name": "scene02-beat07",
-      "time": 117.1533333333322
+      "time": 113.68666666666566
     },
     {
       "name": "scene03-beat01",
-      "time": 127.97333333333162
+      "time": 124.05999999999852
     },
     {
       "name": "scene03-beat02",
-      "time": 137.773333333331
+      "time": 132.67333333333121
     },
     {
       "name": "scene03-02-01-math",
-      "time": 133.88799999999767
+      "time": 129.12266666666454
     },
     {
       "name": "scene03-beat03",
-      "time": 148.23333333333048
+      "time": 140.34666666666413
     },
     {
       "name": "scene03-03-01-math",
-      "time": 143.28533333333047
+      "time": 136.61333333333081
+    },
+    {
+      "name": "scene03-03-before",
+      "time": 134.73333333333082
+    },
+    {
+      "name": "scene03-03-after",
+      "time": 142.86666666666412
+    },
+    {
+      "name": "scene03-03-01-phase-0.2",
+      "time": 135.6053333333308
+    },
+    {
+      "name": "scene03-03-01-phase-0.8",
+      "time": 137.62133333333082
+    },
+    {
+      "name": "scene03-03-02-phase-0.2",
+      "time": 139.09333333333083
+    },
+    {
+      "name": "scene03-03-02-phase-0.8",
+      "time": 141.4933333333308
     },
     {
       "name": "scene03-beat04",
-      "time": 158.53333333332984
+      "time": 149.6666666666637
     },
     {
       "name": "scene03-recap-mixture-before",
-      "time": 151.33333333332988
+      "time": 142.4666666666637
     },
     {
       "name": "scene03-recap-mixture-after",
-      "time": 161.73333333332985
+      "time": 152.8666666666637
     },
     {
       "name": "scene03-recap-mixture-01-phase-0.2",
-      "time": 152.5274666666632
+      "time": 143.66079999999704
     },
     {
       "name": "scene03-recap-mixture-01-phase-0.8",
-      "time": 155.50986666666319
+      "time": 146.64319999999702
     },
     {
       "name": "scene03-recap-mixture-02-phase-0.2",
-      "time": 157.41493333332986
+      "time": 148.5482666666637
     },
     {
       "name": "scene03-recap-mixture-02-phase-0.8",
-      "time": 160.14773333332988
+      "time": 151.28106666666372
     },
     {
       "name": "scene03-beat05",
-      "time": 167.31999999999596
+      "time": 158.31333333332978
     },
     {
       "name": "scene03-beat06",
-      "time": 178.0133333333288
+      "time": 166.84666666666266
     },
     {
       "name": "scene03-05-01-math",
-      "time": 172.86133333332884
+      "time": 162.76533333332935
     },
     {
       "name": "scene03-beat07",
-      "time": 189.74666666666147
+      "time": 177.02666666666218
     },
     {
       "name": "scene04-beat01",
-      "time": 199.6599999999941
+      "time": 186.0999999999949
     },
     {
       "name": "scene04-beat02",
-      "time": 209.95999999999364
+      "time": 194.6199999999944
     },
     {
       "name": "scene04-beat03",
-      "time": 220.66666666665967
+      "time": 204.66666666666057
     },
     {
       "name": "scene04-beat04",
-      "time": 231.98666666665906
+      "time": 215.98666666665997
     },
     {
       "name": "scene04-beat05",
-      "time": 241.2533333333251
+      "time": 225.48666666665935
     },
     {
       "name": "scene04-beat06",
-      "time": 250.77999999999128
+      "time": 234.27333333332552
     },
     {
       "name": "scene05-beat01",
-      "time": 259.5399999999907
+      "time": 242.25333333332497
     },
     {
       "name": "scene05-beat02",
-      "time": 268.3933333333236
+      "time": 250.45999999999123
     },
     {
       "name": "scene05-beat03",
-      "time": 278.8333333333231
+      "time": 260.6533333333241
     },
     {
       "name": "scene05-beat04",
-      "time": 288.9933333333225
+      "time": 270.5133333333235
     },
     {
       "name": "scene05-beat05",
-      "time": 301.03333333332193
+      "time": 282.43333333332293
     },
     {
       "name": "scene05-aid-sums-before",
-      "time": 291.7333333333219
+      "time": 273.133333333323
     },
     {
       "name": "scene05-aid-sums-after",
-      "time": 305.1333333333219
+      "time": 286.53333333332296
     },
     {
       "name": "scene05-aid-sums-01-phase-0.2",
-      "time": 292.82506666665523
+      "time": 274.2250666666563
     },
     {
       "name": "scene05-aid-sums-01-phase-0.8",
-      "time": 295.50026666665525
+      "time": 276.9002666666563
     },
     {
       "name": "scene05-aid-sums-02-phase-0.2",
-      "time": 297.29439999998857
+      "time": 278.6943999999896
     },
     {
       "name": "scene05-aid-sums-02-phase-0.8",
-      "time": 300.00159999998857
+      "time": 281.4015999999896
     },
     {
       "name": "scene05-aid-sums-03-phase-0.2",
-      "time": 301.63146666665523
+      "time": 283.0314666666563
     },
     {
       "name": "scene05-aid-sums-03-phase-0.8",
-      "time": 303.81386666665526
+      "time": 285.2138666666563
     },
     {
       "name": "scene05-beat06",
-      "time": 312.07333333332116
+      "time": 292.67999999998887
     },
     {
       "name": "scene05-beat07",
-      "time": 322.8333333333206
+      "time": 302.81999999998834
     },
     {
       "name": "scene06-beat01",
-      "time": 332.19999999998663
+      "time": 312.2533333333211
     },
     {
       "name": "scene06-beat02",
-      "time": 341.9399999999861
+      "time": 320.7666666666539
     },
     {
       "name": "scene06-02-02-math",
-      "time": 341.46133333331943
+      "time": 320.76266666665396
     },
     {
       "name": "scene06-beat03",
-      "time": 355.2666666666522
+      "time": 333.5333333333201
     },
     {
       "name": "scene06-recap-bayes-before",
-      "time": 344.7999999999856
+      "time": 323.0666666666535
     },
     {
       "name": "scene06-recap-bayes-after",
-      "time": 359.86666666665224
+      "time": 338.13333333332014
     },
     {
       "name": "scene06-recap-bayes-01-phase-0.2",
-      "time": 346.1690666666522
+      "time": 324.4357333333201
     },
     {
       "name": "scene06-recap-bayes-01-phase-0.8",
-      "time": 349.6762666666522
+      "time": 327.9429333333201
     },
     {
       "name": "scene06-recap-bayes-02-phase-0.2",
-      "time": 351.8586666666522
+      "time": 330.1253333333201
     },
     {
       "name": "scene06-recap-bayes-02-phase-0.8",
-      "time": 354.8986666666522
+      "time": 333.1653333333201
     },
     {
       "name": "scene06-recap-bayes-03-phase-0.2",
-      "time": 356.59039999998555
+      "time": 334.85706666665345
     },
     {
       "name": "scene06-recap-bayes-03-phase-0.8",
-      "time": 358.6255999999855
+      "time": 336.8922666666534
     },
     {
       "name": "scene06-beat04",
-      "time": 366.99333333331805
+      "time": 344.23333333331925
+    },
+    {
+      "name": "scene06-03-01-math",
+      "time": 339.71466666665265
     },
     {
       "name": "scene06-beat05",
-      "time": 380.4466666666508
+      "time": 352.39333333331876
     },
     {
       "name": "scene06-04-01-definition",
-      "time": 374.45333333331746
+      "time": 348.7466666666521
     },
     {
       "name": "scene06-beat06",
-      "time": 392.65999999998326
+      "time": 362.4333333333183
     },
     {
       "name": "scene06-beat07",
-      "time": 402.8599999999826
+      "time": 371.56666666665103
     },
     {
       "name": "scene07-beat01",
-      "time": 412.4733333333154
+      "time": 380.5066666666505
     },
     {
       "name": "scene07-beat02",
-      "time": 421.3533333333149
+      "time": 389.14666666665
     },
     {
       "name": "scene07-beat03",
-      "time": 430.13999999998106
+      "time": 397.4066666666496
+    },
+    {
+      "name": "scene07-03-before",
+      "time": 391.4666666666496
+    },
+    {
+      "name": "scene07-03-after",
+      "time": 400.06666666664955
+    },
+    {
+      "name": "scene07-03-01-phase-0.2",
+      "time": 392.3386666666496
+    },
+    {
+      "name": "scene07-03-01-phase-0.8",
+      "time": 394.35466666664956
+    },
+    {
+      "name": "scene07-03-02-phase-0.2",
+      "time": 395.9119999999829
+    },
+    {
+      "name": "scene07-03-02-phase-0.8",
+      "time": 398.56799999998293
     },
     {
       "name": "scene07-beat04",
-      "time": 438.6333333333139
+      "time": 404.62666666664904
     },
     {
       "name": "scene07-beat05",
-      "time": 448.3666666666468
+      "time": 412.31333333331537
     },
     {
       "name": "scene07-beat06",
-      "time": 458.5599999999795
+      "time": 420.9399999999815
     },
     {
       "name": "scene08-beat01",
-      "time": 468.4599999999789
+      "time": 430.3666666666478
     },
     {
       "name": "scene08-beat02",
-      "time": 478.7733333333117
+      "time": 439.2866666666472
+    },
+    {
+      "name": "scene08-02-before",
+      "time": 433.0666666666472
+    },
+    {
+      "name": "scene08-02-after",
+      "time": 442.0666666666472
+    },
+    {
+      "name": "scene08-02-01-phase-0.2",
+      "time": 434.0773333333139
+    },
+    {
+      "name": "scene08-02-01-phase-0.8",
+      "time": 436.50933333331386
+    },
+    {
+      "name": "scene08-02-02-phase-0.2",
+      "time": 438.1477333333139
+    },
+    {
+      "name": "scene08-02-02-phase-0.8",
+      "time": 440.63093333331386
     },
     {
       "name": "scene08-beat03",
-      "time": 489.30666666664445
+      "time": 449.4266666666467
     },
     {
       "name": "scene08-beat04",
-      "time": 499.2333333333105
+      "time": 459.3866666666461
     },
     {
       "name": "scene08-beat05",
-      "time": 508.6199999999766
+      "time": 469.1266666666455
     },
     {
       "name": "scene08-beat06",
-      "time": 519.4266666666427
+      "time": 478.50666666664495
     },
     {
       "name": "scene09-beat01",
-      "time": 531.1733333333179
+      "time": 488.0799999999778
+    },
+    {
+      "name": "scene09-01-before",
+      "time": 481.0666666666445
+    },
+    {
+      "name": "scene09-01-after",
+      "time": 491.1999999999778
+    },
+    {
+      "name": "scene09-01-01-phase-0.2",
+      "time": 482.3418666666445
+    },
+    {
+      "name": "scene09-01-01-phase-0.8",
+      "time": 485.56746666664446
+    },
+    {
+      "name": "scene09-01-02-phase-0.2",
+      "time": 487.43413333331114
+    },
+    {
+      "name": "scene09-01-02-phase-0.8",
+      "time": 489.8085333333111
     },
     {
       "name": "scene09-beat02",
-      "time": 542.0599999999941
+      "time": 497.3933333333106
     },
     {
       "name": "scene09-beat03",
-      "time": 551.9666666666691
+      "time": 506.10666666664343
     },
     {
       "name": "scene09-beat04",
-      "time": 562.7066666666768
+      "time": 515.9466666666428
     },
     {
       "name": "scene09-beat05",
-      "time": 572.9733333333523
+      "time": 524.9466666666483
     },
     {
       "name": "scene09-beat06",
-      "time": 584.1000000000269
+      "time": 534.746666666655
+    },
+    {
+      "name": "scene09-06-before",
+      "time": 527.2666666666549
+    },
+    {
+      "name": "scene09-06-after",
+      "time": 537.716344
+    },
+    {
+      "name": "scene09-06-01-phase-0.2",
+      "time": 528.4821333333216
+    },
+    {
+      "name": "scene09-06-01-phase-0.8",
+      "time": 531.5285333333217
+    },
+    {
+      "name": "scene09-06-02-phase-0.2",
+      "time": 533.527466666655
+    },
+    {
+      "name": "scene09-06-02-phase-0.8",
+      "time": 536.477866666655
     },
     {
       "name": "scene02-sync-0.15",
-      "time": 65.26133333333482
+      "time": 64.83626666666815
     },
     {
       "name": "scene02-sync-0.85",
-      "time": 70.52533333333481
+      "time": 70.29440000000147
     },
     {
       "name": "scene03-sync-0.15",
-      "time": 132.65653333333103
+      "time": 128.4735999999979
     },
     {
       "name": "scene03-sync-0.85",
-      "time": 138.83146666666434
+      "time": 133.48373333333123
     },
     {
       "name": "scene07-sync-0.15",
-      "time": 425.2037333333144
+      "time": 392.8346666666496
     },
     {
       "name": "scene07-sync-0.85",
-      "time": 431.13226666664775
+      "time": 398.28533333331626
+    },
+    {
+      "name": "scene01-story-04-0.12",
+      "time": 26.882666666666598
+    },
+    {
+      "name": "scene01-story-04-0.45",
+      "time": 30.226666666666596
+    },
+    {
+      "name": "scene01-story-04-0.78",
+      "time": 33.5706666666666
+    },
+    {
+      "name": "scene01-story-04-0.97",
+      "time": 35.495999999999924
+    },
+    {
+      "name": "scene07-story-03-0.12",
+      "time": 392.65066666664956
+    },
+    {
+      "name": "scene07-story-03-0.45",
+      "time": 395.3566666666496
+    },
+    {
+      "name": "scene07-story-03-0.78",
+      "time": 398.0626666666496
+    },
+    {
+      "name": "scene07-story-03-0.97",
+      "time": 399.6206666666496
+    },
+    {
+      "name": "scene08-story-02-0.12",
+      "time": 434.2986666666472
+    },
+    {
+      "name": "scene08-story-02-0.45",
+      "time": 437.1366666666472
+    },
+    {
+      "name": "scene08-story-02-0.78",
+      "time": 439.97466666664724
+    },
+    {
+      "name": "scene08-story-02-0.97",
+      "time": 441.60866666664725
+    },
+    {
+      "name": "scene09-story-01-0.12",
+      "time": 482.4346666666445
+    },
+    {
+      "name": "scene09-story-01-0.45",
+      "time": 485.6466666666445
+    },
+    {
+      "name": "scene09-story-01-0.78",
+      "time": 488.85866666664447
+    },
+    {
+      "name": "scene09-story-01-0.97",
+      "time": 490.7079999999778
+    },
+    {
+      "name": "scene09-story-06-0.12",
+      "time": 528.714666666655
+    },
+    {
+      "name": "scene09-story-06-0.45",
+      "time": 532.1466666666549
+    },
+    {
+      "name": "scene09-story-06-0.78",
+      "time": 535.578666666655
+    },
+    {
+      "name": "scene09-story-06-0.97",
+      "time": 537.554666666655
     }
   ],
-  "visual_review": "reviewed",
+  "visual_review": "173 representative frames reviewed in 29 sheets; 30 changed frames after final formula transition fix reviewed in 5 comparison sheets, with enlarged checks of axes, labels, captions, and ending.",
   "full_listen": false,
-  "av_duration_difference": 0.027323000000023967,
-  "reviewed_frame_count": 98,
-  "review_scope": "全58 beat、追加4場面の前後、追加10文の20%/80%、全記号字幕、既存3動作のペアを目視。確認画像で重なり・はみ出しなし。全フレーム目視と聴覚確認は未実施。",
-  "reviewed_sync_scenes": [
-    "scene02-recap-mean",
-    "scene03-recap-mixture",
-    "scene05-aid-sums",
-    "scene06-recap-bayes"
-  ]
+  "av_duration_difference": 0.03232300000001942
 }

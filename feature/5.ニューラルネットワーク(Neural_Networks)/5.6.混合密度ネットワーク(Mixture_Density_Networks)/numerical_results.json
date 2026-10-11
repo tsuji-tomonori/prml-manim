@@ -9,6 +9,12 @@
     1
   ],
   "averaged_arm_target_error": 0.8,
+  "robot_story": {
+    "target_distance": 1.2,
+    "average_arm_distance": 2.0,
+    "angle_magnitude_radians": 0.9272952180016123,
+    "illustrative_angle_modes": 2
+  },
   "mode_counterexample": {
     "largest_weight_center": 0.04,
     "numeric_mode": 0.96
@@ -30,6 +36,6 @@
   },
   "audio_scenes": 9,
   "sentences": 118,
-  "caption_max_width": 9.34765625,
-  "caption_max_height": 0.70265625
+  "caption_max_width": 9.318750000000001,
+  "caption_max_height": 0.6979687500000002
 }
