@@ -22,6 +22,18 @@ def main():
             action=b['actions'][0]
             for phase,alpha in [('early',.1),('late',.9)]:
                 frames.append(dict(id=s['id']+'-'+phase,time=action['start']+alpha*(action['end']-action['start']),kind='sync'))
+    # Moving figures, emphasis, and the immediate result are sampled separately.
+    moving={'scene01':[1,2,3], 'scene02':[0,3], 'scene03':[0,1,4],
+            'scene04':[2,3], 'scene05':[3,4], 'scene06':[0,1,3],
+            'scene07':[1,3], 'scene08':[1,4], 'scene09':[0,3,len(timeline[-1]['beats'])-1]}
+    for scene in timeline:
+        for bi in moving.get(scene['id'],[]):
+            beat=scene['beats'][bi]
+            for ai,action in enumerate(beat['actions']):
+                for phase,alpha in [('moving',.4),('result',.95)]:
+                    frames.append(dict(id=f"{scene['id']}-b{bi+1}-a{ai+1}-{phase}",
+                                       time=action['start']+alpha*(action['end']-action['start']),
+                                       kind=phase))
     # Inspect each new sentence at both ends, plus the adjacent main-story frames.
     for scene in timeline:
         for b in scene['beats']:

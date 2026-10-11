@@ -8,110 +8,134 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "571.400000"
+        "duration": "599.066667"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "571.434667"
+        "duration": "599.104000"
       }
     ],
     "format": {
-      "duration": "571.435000"
+      "duration": "599.104000"
     }
   },
-  "stream_difference": 0.034667000000013104,
+  "stream_difference": 0.037332999999989624,
   "silences_over_3s": 0,
   "mean_volume": -26.5,
-  "max_volume": -6.0,
+  "max_volume": -6.1,
   "added_sync": [
     {
       "id": "scene04-recap-cancellation-01",
-      "cue_start": 216.999999999995,
-      "action_start": 216.9999999999928,
-      "action_end": 221.53333333332614,
-      "pcm_onset": 217.07041666666166,
-      "onset_after_action": 0.07041666666884794
+      "cue_start": 220.93333333332822,
+      "action_start": 220.93333333332592,
+      "action_end": 225.46666666665925,
+      "pcm_onset": 221.0037499999949,
+      "onset_after_action": 0.07041666666899005
     },
     {
       "id": "scene04-recap-cancellation-02",
-      "cue_start": 221.55466666666166,
-      "action_start": 221.53333333332614,
-      "action_end": 226.66666666665947,
-      "pcm_onset": 221.649124999995,
-      "onset_after_action": 0.11579166666885499
+      "cue_start": 225.4879999999949,
+      "action_start": 225.46666666665925,
+      "action_end": 230.59999999999258,
+      "pcm_onset": 225.5833749999949,
+      "onset_after_action": 0.11670833333565156
     },
     {
       "id": "scene04-recap-cancellation-03",
-      "cue_start": 226.65333333332833,
-      "action_start": 226.66666666665947,
-      "action_end": 230.93333333332615,
-      "pcm_onset": 226.755874999995,
-      "onset_after_action": 0.08920833333553446
+      "cue_start": 230.58666666666159,
+      "action_start": 230.59999999999258,
+      "action_end": 234.86666666665926,
+      "pcm_onset": 230.6893749999949,
+      "onset_after_action": 0.08937500000232035
     },
     {
       "id": "scene09-aid-columns-01",
-      "cue_start": 500.9999999999779,
-      "action_start": 500.9999999999767,
-      "action_end": 508.39999999997667,
-      "pcm_onset": 501.0830833333112,
+      "cue_start": 504.26666666664437,
+      "action_start": 504.2666666666432,
+      "action_end": 511.66666666664315,
+      "pcm_onset": 504.3497499999777,
       "onset_after_action": 0.08308333333451401
     },
     {
       "id": "scene09-aid-columns-02",
-      "cue_start": 508.3813333333112,
-      "action_start": 508.39999999997667,
-      "action_end": 512.73333333331,
-      "pcm_onset": 508.4682499999779,
-      "onset_after_action": 0.06825000000122827
+      "cue_start": 511.6479999999777,
+      "action_start": 511.66666666664315,
+      "action_end": 515.9999999999765,
+      "pcm_onset": 511.7349166666443,
+      "onset_after_action": 0.06825000000117143
+    },
+    {
+      "id": "scene09-return-01",
+      "cue_start": 573.5999999999776,
+      "action_start": 573.600000000025,
+      "action_end": 584.4666666666917,
+      "pcm_onset": 573.6477499999777,
+      "onset_after_action": 0.04774999995265716
+    },
+    {
+      "id": "scene09-return-02",
+      "cue_start": 584.4479999999777,
+      "action_start": 584.4666666666917,
+      "action_end": 591.600000000025,
+      "pcm_onset": 584.544458333311,
+      "onset_after_action": 0.07779166661930503
+    },
+    {
+      "id": "scene09-return-03",
+      "cue_start": 591.5839999999777,
+      "action_start": 591.600000000025,
+      "action_end": 599.0666666666917,
+      "pcm_onset": 591.6455416666444,
+      "onset_after_action": 0.04554166661932868
     }
   ],
-  "max_scene_clock_error": 4.54036808150704e-11,
+  "max_scene_clock_error": 6.761524673493113e-11,
   "sync": [
     {
       "id": "scene01-02-01",
-      "display": "まず、黄色のつまみを右へ動かしてみます。",
-      "action_start": 10.733333333333315,
-      "action_end": 18.133333333333315,
-      "pcm_onset": 10.810708333333332
+      "display": "右へ大きく動かしてみます。予測はどうなるでしょう。",
+      "action_start": 13.599999999999971,
+      "action_end": 17.333333333333304,
+      "pcm_onset": 13.677
     },
     {
       "id": "scene01-02-02",
-      "display": "予測も誤差も、つながった計算を通じて変わります。",
-      "action_start": 10.733333333333315,
-      "action_end": 18.133333333333315,
-      "pcm_onset": 13.983916666666667
+      "display": "予測は $0.908$。目標の $0.70$ を通り越しました。",
+      "action_start": 17.333333333333304,
+      "action_end": 22.79999999999997,
+      "pcm_onset": 17.394041666666666
     },
     {
       "id": "scene04-03-01",
       "display": "予測を目標より小さくすると、傾きは負になります。",
-      "action_start": 196.66666666666063,
-      "action_end": 200.66666666666063,
-      "pcm_onset": 196.738999999995
+      "action_start": 198.8666666666605,
+      "action_end": 202.8666666666605,
+      "pcm_onset": 198.93941666666157
     },
     {
       "id": "scene04-03-02",
       "display": "今度は予測を少し大きくする方向で、誤差が減ります。",
-      "action_start": 200.66666666666063,
-      "action_end": 205.26666666666063,
-      "pcm_onset": 200.788499999995
+      "action_start": 202.8666666666605,
+      "action_end": 207.4666666666605,
+      "pcm_onset": 202.98916666666156
     },
     {
       "id": "scene09-03-01",
       "display": "基準点からの小さな入力変化に、ヤコビ行列を掛けます。",
-      "action_start": 512.7333333333099,
-      "action_end": 517.33333333331,
-      "pcm_onset": 512.8226249999778
+      "action_start": 515.9999999999792,
+      "action_end": 520.5999999999792,
+      "pcm_onset": 516.088833333311
     },
     {
       "id": "scene09-03-02",
       "display": "黄色がその近似、青がネットワークを実際に計算した結果です。",
-      "action_start": 517.33333333331,
-      "action_end": 522.5333333333099,
-      "pcm_onset": 517.4362083333112
+      "action_start": 520.5999999999792,
+      "action_end": 525.7999999999791,
+      "pcm_onset": 520.7027916666443
     }
   ],
-  "sha256": "b69597284bdfc918f831dc8ab395e10ea381aec39b414756861ca52b446e50cf",
+  "sha256": "89a5da8c5a3ce9efba697f09892753119f8721f3e105241f802896d0e0c4d580",
   "full_listen": false
 }

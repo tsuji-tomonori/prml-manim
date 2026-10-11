@@ -1,257 +1,1264 @@
 {
-  "video_sha256": "b69597284bdfc918f831dc8ab395e10ea381aec39b414756861ca52b446e50cf",
-  "extracted_frames": 83,
-  "reviewed_frames": 33,
-  "math_caption_frames": 8,
-  "original_scenes_reviewed": 9,
-  "added_scenes_reviewed": 2,
-  "added_sentence_early_late_pairs": 5,
-  "preservation": {
-    "unchanged_sentence_pcm": 106,
-    "unchanged_scene_wav_and_manifest": 7,
-    "baseline_video_seconds": 545.733333,
-    "new_manifest_seconds": 571.4
-  },
-  "findings": "追加2場面の前後、全追加文の序盤・終盤、全数式字幕、既存9シーン、対数の参照ラベルを直接目視。確認範囲で未解決の重なり・はみ出しなし。音声聴取・全フレーム目視は未実施。",
+  "video_sha256": "89a5da8c5a3ce9efba697f09892753119f8721f3e105241f802896d0e0c4d580",
+  "extracted_frames": 176,
+  "reviewed_final_contact_sheet_frames": 36,
+  "byte_identical_to_pre_fix_review": 140,
+  "changed_frames_directly_reviewed": 19,
+  "math_caption_frames": 18,
+  "scenes_reviewed": 9,
+  "contact_sheets_pre_fix_reviewed": 44,
+  "contact_sheets_final_reviewed": 9,
+  "findings": "全9シーンの代表176フレームを初回動画の44枚のシートで目視。最終動画では修正影響のある9枚・36フレームを直接再確認し、残る140フレームは最終PNGと初回レビューPNGのバイト一致を確認。変化した19フレームはすべて最終版で目視。枠の不要な装飾、図・ラベル・式・字幕の重なり、軸ラベルと目盛りの衝突は確認範囲で見つからなかった。全フレームの人手目視と全編の通し聴取は未実施。",
   "frames": [
     {
-      "id": "scene01-beat3",
-      "time": 22.966666666666622,
+      "id": "scene01-beat1",
+      "time": 6.8,
       "kind": "beat",
-      "sha256": "cc1504e46128610d1962337329c18a6d27bc1fe46f09d9888502be9390901d6b",
-      "review_method": "direct_final_image"
+      "sha256": "ef7caa9ab97730337f48fcc04c3362e21736771451cb684d42fd6c56f04f676c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-01-01",
+      "time": 3.776,
+      "kind": "math",
+      "display": "目標は $0.70$、予測は $-0.535$。このつまみを右へ回せば、近づくでしょうか。",
+      "sha256": "949c7cf9efb2710c17115b01b652d1b89d6be2b734170c15185aba3dc28e63d2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-01-02",
+      "time": 10.389333333333333,
+      "kind": "math",
+      "display": "黄色のつまみは重み $w$。まず、動かす向きを予想してください。",
+      "sha256": "d91bf932a66c377d10528ac99fb3389d5a1bec02ca98f282f833c591d6c588b6",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-beat2",
+      "time": 18.19999999999997,
+      "kind": "beat",
+      "sha256": "d028435e14c4ee80eca98eb52c5a0bf2627454b08469e59c23d40715932a9b39",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-02-02",
+      "time": 19.866666666666667,
+      "kind": "math",
+      "display": "予測は $0.908$。目標の $0.70$ を通り越しました。",
+      "sha256": "f139d3b704c273da0dc7eaec50b6f363d08e490acef67c32a187c8cd06221200",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene01-beat3",
+      "time": 27.233333333333274,
+      "kind": "beat",
+      "sha256": "d4862dcbdd7054a635fa118178a3753d6690b6aa88b3906a6caf945e1ff5c469",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene01-beat4",
+      "time": 36.13333333333324,
+      "kind": "beat",
+      "sha256": "a875e10c7a902bec628ef1ab5ce37b7f868c6ed8da4e53d9bbd63f7a62b06f65",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene01-beat5",
+      "time": 45.933333333333664,
+      "kind": "beat",
+      "sha256": "27aa3dc61688ae30ec128e3793eef79a89370dbfe7ce51e0b90da74d4c7496cf",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene01-early",
+      "time": 13.973333333333304,
+      "kind": "sync",
+      "sha256": "d5d973ef48fb981f101bd97a4473b188b8e9ccc4da7b044bf3af3606ff89ed0f",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-late",
+      "time": 16.959999999999972,
+      "kind": "sync",
+      "sha256": "5815ed3bd76ecc61b037b81f6eaaa3e2dc61ff49ce9e27dfc3c56b15fc0adaa2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-beat1",
+      "time": 56.76666666666753,
+      "kind": "beat",
+      "sha256": "6e99d65cfc9fdba63fd398055efa9f467ccb82ad95655812abea9440a9114c69",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-beat2",
+      "time": 67.5000000000014,
+      "kind": "beat",
+      "sha256": "31f337ef7959e333b1da4614213c280498cad7fd1930e10cdc94e33ef115415b",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene02-02-02",
-      "time": 65.35733333333398,
+      "time": 69.66400000000087,
       "kind": "math",
       "display": "総入力を $a_j$ と書きます。添字は、どの丸かを示します。",
-      "sha256": "abb4d852a84b69bffaf1c17d3a8ce1116cd0b08313bf18c85db3dc974b0bddf1",
-      "review_method": "direct_final_image"
+      "sha256": "659bba064b9cfd6847b0c63592b2d93d169ddeaa23b0b7c97e5f5b3c62423d29",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene02-beat3",
-      "time": 73.83333333333456,
+      "time": 78.16666666666765,
       "kind": "beat",
-      "sha256": "c3013d1f72a4cea57478af25db839e9964d4bb960d5f244abcb5f7a64df24c22",
-      "review_method": "direct_final_image"
+      "sha256": "9f0c0589269cb7ce9b55f5464d97b1c871d54e778f37f35f42187ee66fa87a47",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-03-02",
+      "time": 80.05066666666752,
+      "kind": "math",
+      "display": "今回は、出力を $-1$ から $1$ へ滑らかに収める、双曲線正接を使います。",
+      "sha256": "6676012e1728ca0c6325def4b268cef098f431db7744b05bf15140aab8048828",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-beat4",
+      "time": 88.56666666666705,
+      "kind": "beat",
+      "sha256": "f4afc1fc4e0d869612386f13e46a587afa7ae7ca7c6dcebdcaffbfd9cec78fad",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-beat5",
+      "time": 99.06666666666648,
+      "kind": "beat",
+      "sha256": "9f7244bacf2e67953924083f3f8e15bcfb5925080f0f470a887846ca9dbcc58c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-beat6",
+      "time": 109.93333333333251,
+      "kind": "beat",
+      "sha256": "ccba0002249d77f688bbbd832e32952700daa4bc74d245b6125392babfb43da6",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-06-01",
+      "time": 107.38400000000087,
+      "kind": "math",
+      "display": "一定のずらし量、バイアスは、いつも $1$ を出す入力からの重みと考えます。",
+      "sha256": "32c574146c669e42b39c4ce7d00e815e2cadc77f7ad01602122d930b626604b1",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-beat1",
+      "time": 119.76666666666524,
+      "kind": "beat",
+      "sha256": "5774ca7696bd4865ed31d97410426d70912f76f7ba67f43fd6258d768abb4850",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-beat2",
+      "time": 129.4333333333314,
+      "kind": "beat",
+      "sha256": "7dab4c40b5218bdcf249fd9dbda42ee38b1dc215845f77ce59b948cb58834141",
+      "review_method": "final_contact_sheet"
     },
     {
       "id": "scene03-beat3",
-      "time": 138.56666666666422,
+      "time": 139.66666666666416,
       "kind": "beat",
-      "sha256": "427cab602263bba2bb408f0bfd2cf60441d7497d92497d1b6ecfdf29960b069c",
-      "review_method": "direct_final_image"
+      "sha256": "f545b84c2fe3bfdc6827b2b8282d365f213526582056178865e28c632cb95647",
+      "review_method": "final_contact_sheet"
     },
     {
       "id": "scene03-03-02",
-      "time": 140.30933333333212,
+      "time": 141.69866666666525,
       "kind": "math",
-      "display": "この感度を $\\delta_j$ と呼び、誤差の総入力に関する微分と定義します。",
-      "sha256": "c2ed667bfe7809011102a11949b2ff8ade2184341602f0bc3830a46d80a49c37",
-      "review_method": "direct_final_image"
+      "display": "そこで下流の影響を、感度 $\\delta_j$ という1個の値にまとめます。",
+      "sha256": "b597227bd47c90be52053ca29a3ad4c1b8e76164e94f4c07af79530e9190c386",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene03-beat4",
+      "time": 150.6666666666636,
+      "kind": "beat",
+      "sha256": "75ff001ef12b01528cee85586f6494c5b2c3346119e396ea41c726bf6af4f58d",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene03-beat5",
+      "time": 163.5666666666629,
+      "kind": "beat",
+      "sha256": "091aee9abc6f2a0494d9af65e5f66b3df65025632eb91166c857ef90cab460c5",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene03-05-02",
-      "time": 164.57866666666547,
+      "time": 165.9439999999986,
       "kind": "math",
-      "display": "式では $\\delta_j z_i$。接続の両端にある情報だけで求まります。",
-      "sha256": "5ce186b9fd07b7b865f241bb83c4a6832ff3fb0f987f6ca02e51384521e6b8fd",
-      "review_method": "direct_final_image"
+      "display": "接続の勾配は $\\delta_j z_i$。感度と手前の値を掛ければよいのです。",
+      "sha256": "f3a40f6d76233057abd62d261d1485ccc0b0754bde0f73a6f3d05281b676da78",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-beat6",
+      "time": 175.33333333332877,
+      "kind": "beat",
+      "sha256": "6899ea603393bff0e3e3e063334059bcffe8e7bfae0a5f48c7f2b8982a998bc9",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-06-02",
+      "time": 177.5039999999986,
+      "kind": "math",
+      "display": "バイアスの入力は $1$ なので、その微分は、感度そのものです。",
+      "sha256": "19e798c8677e5f71e88eab77792ea34af59a14d68c9408d738c306403604ec1d",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-beat1",
+      "time": 185.06666666666158,
+      "kind": "beat",
+      "sha256": "7be333fb1953010ba368f59f670c604b89894e4360a18fb451aa79fb399bd1d2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-beat2",
+      "time": 194.43333333332768,
+      "kind": "beat",
+      "sha256": "c5898e6ea1dee2b1b3db6fa49b502d851914c7ae25da97eb7685d171253bfc44",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene04-beat3",
-      "time": 200.96666666666061,
+      "time": 203.1666666666605,
       "kind": "beat",
       "sha256": "61d3abadcd8e0e37dace2a43925a1348bf399f7bde6b6ef37bffe393815915db",
-      "review_method": "direct_final_image"
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-beat4",
+      "time": 214.19999999999334,
+      "kind": "beat",
+      "sha256": "205efe9525886c3cacef9ea3b2b2e344b461c65f88b10ed3bdf9961b8c354ffe",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-04-01",
+      "time": 209.47733333332826,
+      "kind": "math",
+      "display": "二乗の微分で $2$ が出て、前の $\\frac12$ と打ち消し合います。",
+      "sha256": "a24aba785c3fd5cd2559da1efcefa416c99239feed45ae766da9763a9ac29cd0",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene04-04-02",
-      "time": 212.951999999995,
+      "time": 216.02133333332824,
       "kind": "math",
-      "display": "出力の感度は、予測から目標を引いた $y_k-t_k$ です。",
-      "sha256": "51731d28622d0faf111b22fd59bd69edf6aecb01297b257cfa0cf66448f89ceb",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene04-recap-cancellation-01-before",
-      "time": 216.5999999999928,
-      "kind": "context",
-      "sha256": "3ae347371f78d0e5d1252b9767426da2e7b61dc03f29b914097f1b7e45d46c2b",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene04-recap-cancellation-01-early",
-      "time": 217.683199999995,
-      "kind": "aid-sync",
-      "sha256": "d7825c701edb5f8de14e9d230669654d99fc85731ad4cd4d3f55d7c94f19065a",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene04-recap-cancellation-01-late",
-      "time": 220.87146666666166,
-      "kind": "aid-sync",
-      "sha256": "383f7cbd3e0c67f8cf913a51a61a5a90442e28c8b7fa181d6aa5703c5569f0c4",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene04-recap-cancellation-02-early",
-      "time": 222.31946666666167,
-      "kind": "aid-sync",
-      "sha256": "60fedeb923f4ce61d1d58d61ffb8860cf634e467020719988c553780f00afb34",
-      "review_method": "direct_final_image"
+      "display": "出力の感度は $y_k-t_k$。予測が目標を超えたかどうかで符号が変わります。",
+      "sha256": "a7c2b51a79a2e5b54ed370e690b146e4987b3b2a3ec7851b463dc4f65c41c36c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene04-beat5",
-      "time": 223.96666666665948,
+      "time": 227.8999999999926,
       "kind": "beat",
       "sha256": "0c1f8795642fd100d16ed83c63ce8bc0fb111d6a9dff060a3162b604b9b133db",
-      "review_method": "direct_final_image"
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene04-recap-cancellation-02",
-      "time": 224.10399999999498,
+      "time": 228.03733333332826,
       "kind": "math",
       "display": "微分の共通因子が打ち消し合い、$y-t$ が残ります。",
       "sha256": "acb81b9231dfb8c4d919d9da2a8ada733b983144790ba3db5da6d02a4e8595e9",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene04-recap-cancellation-02-late",
-      "time": 225.88853333332833,
-      "kind": "aid-sync",
-      "sha256": "d8cd5b474513e75bd0b14e7a570eea0b0523e6de9d46b13a5c8b19067557fda6",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene04-recap-cancellation-03-early",
-      "time": 227.24053333332833,
-      "kind": "aid-sync",
-      "sha256": "55b7f0a376f67124583f9e80f557b6597fc2661f6cf524b1bb4951f8e4254155",
-      "review_method": "direct_final_image"
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene04-recap-cancellation-03",
-      "time": 228.61066666666164,
+      "time": 232.54399999999492,
       "kind": "math",
       "display": "これが、出力から戻す感度 $\\delta_k$ です。",
       "sha256": "8f297cf2969024a2d35ab4f128a6ba208aba5c974db632772de8aee1c8aa9a52",
-      "review_method": "direct_final_image"
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
-      "id": "scene04-recap-cancellation-03-late",
-      "time": 229.98079999999499,
-      "kind": "aid-sync",
-      "sha256": "3cd093028aa360604a2aa5fb28b873a87b6a9063e3ace8a651c64ba55eff04cf",
-      "review_method": "direct_final_image"
+      "id": "scene04-beat6",
+      "time": 240.99999999999181,
+      "kind": "beat",
+      "sha256": "a66e4572745571275f32881eb444ceed715bf013910ae4d9c0aa29ffe8d87349",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
-      "id": "scene04-recap-cancellation-01-after",
-      "time": 231.33333333332615,
-      "kind": "context",
-      "sha256": "7fb2a36fd8ed2a4650f68a7db1da2739c618400ffa65aa8db393eae2ef0c2bdc",
-      "review_method": "direct_final_image"
+      "id": "scene04-beat7",
+      "time": 251.86666666665775,
+      "kind": "beat",
+      "sha256": "f5a177050ce1ad282e01f95a17d7f14759697ee6777092a55ec7a2147684ed5f",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-early",
+      "time": 199.2666666666605,
+      "kind": "sync",
+      "sha256": "d21cc3991911297ef0abf89a9fd5f5a08b64ec926817138d232283173fa1dea0",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-late",
+      "time": 202.4666666666605,
+      "kind": "sync",
+      "sha256": "5a217bbd871dfcdd4229545347df08bb299cf2b376848cfeb2dc630a66e862b8",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-beat1",
+      "time": 261.6999999999906,
+      "kind": "beat",
+      "sha256": "9121bf27384309acaa872816302c76548fa43aedfa71da99bd3fc1953e7ee311",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-beat2",
+      "time": 271.83333333332337,
+      "kind": "beat",
+      "sha256": "8864f0de2721950d7fc4793630e5989db0e921550beb592213c991405a394da6",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene05-beat3",
-      "time": 275.39999999998975,
+      "time": 280.79999999998944,
       "kind": "beat",
-      "sha256": "6704f73fe1cabe892e052417fa8ff5e29d27ddbc216626bb91ef5b93a51d89c1",
-      "review_method": "direct_final_image"
+      "sha256": "3687d79af2ffb2280633dc842dbb7dfa64f47ab2cd36f93cbedbb40710189add",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-beat4",
+      "time": 288.6333333333223,
+      "kind": "beat",
+      "sha256": "0486ff2b025b3efa41365b2bdceb40ad5edf4b1032570e06d4775e6ee43f6736",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-beat5",
+      "time": 296.8333333333219,
+      "kind": "beat",
+      "sha256": "fdb23f11ac6c28c9221e5badd32ba82f4f081cf9c594cc9b99bf93700de4bf28",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-beat6",
+      "time": 306.7333333333214,
+      "kind": "beat",
+      "sha256": "d3ab0faf00953197a69965c51c495f6253f219e909ec764e39c685a0f9074706",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-beat1",
+      "time": 317.3999999999874,
+      "kind": "beat",
+      "sha256": "8bfb165d343ac45651a1fd2e37d62cbb4a07bd75400115311c316d874e665b2c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-beat2",
+      "time": 326.69999999998686,
+      "kind": "beat",
+      "sha256": "c8ddba348df3f46f6a96bfd3667c8d9d6cc4b60cb0c01cb2ccb031435209cf92",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene06-beat3",
-      "time": 330.3666666666533,
+      "time": 335.2333333333197,
       "kind": "beat",
-      "sha256": "c397c789fe014ed666af9348246b2830be1ecccdbec7626cee97afd6a2f9b4d4",
-      "review_method": "direct_final_image"
+      "sha256": "b741ef1bf36b54a29c6f57c2cbbd3682ae19b7bbf232f01f79da6d901597cd86",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-beat4",
+      "time": 345.0333333333192,
+      "kind": "beat",
+      "sha256": "0b044c92d28b03b986de295898e8edfd9adea74762277fc3c8b6f0fee225568c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-beat5",
+      "time": 355.6666666666519,
+      "kind": "beat",
+      "sha256": "725e0e3cbfa08fdd689646b82b852f3a0e9b9022b06412ebe99549120987f71e",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-beat6",
+      "time": 366.46666666665135,
+      "kind": "beat",
+      "sha256": "b56be51628269c53bc71679a18b3ae8f9f504e526ab18e7a074358137629954c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-beat1",
+      "time": 376.7666666666507,
+      "kind": "beat",
+      "sha256": "ff6cb994941cae9f5ea64612a06a438affda58bead222fc4b7b96c9686f13c86",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-beat2",
+      "time": 385.8999999999835,
+      "kind": "beat",
+      "sha256": "154bd3cb5898650419873e75bd949e0125933bfea1ac12b27576241e5ccbf898",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene07-beat3",
-      "time": 390.1666666666499,
+      "time": 394.299999999983,
       "kind": "beat",
-      "sha256": "ada922a6244d66c19163b887342c5f19e64a8e3bc7ab31f5862fcc3ea4964c5d",
-      "review_method": "direct_final_image"
+      "sha256": "26dc9a9517889ea053ca6e46df6b2c2fbecbb8babc9a7378675a4e6d42ace3c0",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-beat4",
+      "time": 403.69999999998254,
+      "kind": "beat",
+      "sha256": "542553022c46e510420885f3737bebe8e12314f91294d657a5f22d20d27f5cc9",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-beat5",
+      "time": 414.83333333331524,
+      "kind": "beat",
+      "sha256": "b89c556e54891c964d5f075dc03ec7a4cd1092e885da1919f5479c9c3583c19f",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene08-beat1",
+      "time": 425.5333333333146,
+      "kind": "beat",
+      "sha256": "de3f428cc65495a38353cade467cb92aa75eb569216acdf09be1e4e330be2566",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene08-beat2",
+      "time": 435.43333333331407,
+      "kind": "beat",
+      "sha256": "b37868691add9b1384bcac330a270aaeb22452b267f957d55518e6fb6af851ee",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene08-beat3",
-      "time": 441.6666666666471,
+      "time": 445.7999999999802,
       "kind": "beat",
-      "sha256": "d2d5390f381407df49b0f125c2204d6ccffc4416fe972290cc00a9e16b0fd009",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene08-04-01",
-      "time": 450.4266666666482,
-      "kind": "math",
-      "display": "重みの総数を $W$ とします。一例の前向き計算は、おおむね重み数に比例します。",
-      "sha256": "26724e9ba3671cdfd44f736a0679c5cc306b501e7c2fff3e8f9b018a41a2607d",
-      "review_method": "direct_final_image"
+      "sha256": "2308af718198acb433545409fd0a5f3044b9b652cd9dab7e721a6dd0a26673f3",
+      "review_method": "final_contact_sheet"
     },
     {
       "id": "scene08-beat4",
-      "time": 453.1333333333131,
+      "time": 456.3666666666462,
       "kind": "beat",
-      "sha256": "a6214da3f80cc42a5052678e66ab8d4742bf610b7aedbc85e7e3172e257d621b",
-      "review_method": "direct_final_image"
+      "sha256": "1641875650435df876558527e27fd72a666c0ebdcb32bf82fb6b22743d500077",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene08-04-01",
+      "time": 453.64799999998127,
+      "kind": "math",
+      "display": "重みが $W$ 個なら、すべてを試すのに何回の計算が要るでしょう。",
+      "sha256": "35756dd091daeb7dc7771a402b3b276868be9704375cfeea5ca4058b6c7a0eb5",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene08-beat5",
+      "time": 466.53333333331227,
+      "kind": "beat",
+      "sha256": "c917e27b0149ded101618783c1ed341aab4c17d9f07c20c5627a0229d1ac4bf2",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene08-beat6",
+      "time": 477.666666666645,
+      "kind": "beat",
+      "sha256": "3e4cb69f783d1068ca5b6ab4f1ffc72ec173306fceb882997393ada75707e371",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-beat1",
+      "time": 487.8999999999777,
+      "kind": "beat",
+      "sha256": "68e174d85a6c486c4c0135cf941563ddd4a82529df902f921bcafbeb7f138c2d",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-beat2",
+      "time": 498.1999999999772,
+      "kind": "beat",
+      "sha256": "44f30e1917e78fad2d1bbac1b8ee54c2591982f4c6d7cab4579aec1a85b64810",
+      "review_method": "final_contact_sheet"
     },
     {
       "id": "scene09-02-02",
-      "time": 497.59199999997793,
+      "time": 500.85866666664435,
       "kind": "math",
       "display": "この感度の表が、ヤコビ行列 $J$ です。他の入力は固定して微分します。",
       "sha256": "6756a35ce0abb96a7eb3177857ebd20f374f850495feb619c9fe9980a9339136",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene09-aid-columns-01-before",
-      "time": 500.5999999999767,
-      "kind": "context",
-      "sha256": "a62f33b955d57879bc09f6deb2f8494ae1ec55a1cf3d2d17f6cba272619b654b",
-      "review_method": "direct_final_image"
-    },
-    {
-      "id": "scene09-aid-columns-01-early",
-      "time": 502.10719999997787,
-      "kind": "aid-sync",
-      "sha256": "aec5f9847b42aecfa123e127f12b270614015ffd231f8d3808817c49bf510b5f",
-      "review_method": "direct_final_image"
+      "review_method": "final_contact_sheet"
     },
     {
       "id": "scene09-beat3",
-      "time": 506.86666666664337,
+      "time": 510.1333333333098,
       "kind": "beat",
-      "sha256": "fac6ca7764efb17836752ff1e280a74c11b82c0d8722f8472de2abb828c45447",
-      "review_method": "direct_final_image"
+      "sha256": "8b17da0bdf7cb32871639e3987b41fdaebf9a9fd03996bf7733ec7c014c0d06b",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
-      "id": "scene09-aid-columns-01-late",
-      "time": 507.2741333333112,
-      "kind": "aid-sync",
-      "sha256": "d5c4e5f5d5938dd7b4a900eb4a036817a1dde8983e6c06fa646c8e6f070bce16",
-      "review_method": "direct_final_image"
+      "id": "scene09-beat4",
+      "time": 520.8999999999792,
+      "kind": "beat",
+      "sha256": "28f096b8630ce6c86fcc69f422e2b62254801ea838c5f2324acbd2a29e079bc2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
-      "id": "scene09-aid-columns-02-early",
-      "time": 508.9765333333112,
-      "kind": "aid-sync",
-      "sha256": "eda8f89c30c05cbd8818513232469fcb72f3682ee9713391eb4b2ee468bd0e2f",
-      "review_method": "direct_final_image"
+      "id": "scene09-beat5",
+      "time": 531.1333333333203,
+      "kind": "beat",
+      "sha256": "6d8f7569b58fa5dc087d5a0c9d93cfe76ddba4cc74d712945ccc718f172d8219",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
-      "id": "scene09-aid-columns-02-late",
-      "time": 511.7541333333112,
+      "id": "scene09-beat6",
+      "time": 542.7333333333288,
+      "kind": "beat",
+      "sha256": "bb953d3bd951e5e687f4bfad97458290211fabb9f122dc9a959bdf4cf89101a3",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-beat7",
+      "time": 555.0333333333388,
+      "kind": "beat",
+      "sha256": "738d645a080e4d28143355b907207cf85d8f7b3e1876dc315daf2e6890cc406d",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-beat8",
+      "time": 567.3333333333484,
+      "kind": "beat",
+      "sha256": "ee1a5684afe35c97af47b52b622e217c58f204acd261b5c5b060219dcb68ddb0",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-beat9",
+      "time": 586.3333333333584,
+      "kind": "beat",
+      "sha256": "d8d6e92c39ff32a806d7494a0521f79c5eb8b430e5a655d07fc9e42aa3998fb2",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-return-01",
+      "time": 579.0239999999776,
+      "kind": "math",
+      "display": "最初の $x=0.8,t=0.70,w=-0.6$ に戻ります。予測は $-0.535$、誤差は $0.763$。",
+      "sha256": "c4c7597f6f57af60039fbfec57075fc86ab3f8db2656cb5954eb56468ebb5edd",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-return-02",
+      "time": 588.0159999999777,
+      "kind": "math",
+      "display": "勾配は $-1.030$。学習率 $0.5$ で $w$ を $-0.085$ へ動かします。",
+      "sha256": "d8d10ceb11d6cab693b1d361141c224c85b411bc696f74758c96aa89f404e606",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-return-03",
+      "time": 595.1359999999777,
+      "kind": "math",
+      "display": "同じ入力と目標で、予測は $-0.062$、誤差は $0.290$ に下がりました。",
+      "sha256": "b535f314ca9d53abde95a8cdaa06e5b4d43c217c117b047f30af4563a089acdd",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-early",
+      "time": 516.4599999999792,
+      "kind": "sync",
+      "sha256": "93a0b6173427c7471c2f923c36a3602ec28cf23abd2f8be89126a06a2444e017",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-late",
+      "time": 520.1399999999792,
+      "kind": "sync",
+      "sha256": "28fc6ab4e61a06c1c8218376c0ee3295c57b7ec8e54c4595245c944db293a9de",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene01-b2-a1-moving",
+      "time": 15.093333333333305,
+      "kind": "moving",
+      "sha256": "04ee37596303e203fb524ddd154d4e6a961501925a05c7f7d7df2148f2d5e4bb",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b2-a1-result",
+      "time": 17.146666666666636,
+      "kind": "result",
+      "sha256": "27d9ae471319fc703a21cb6d8f01ef6da94e5bf33cad2c6b4ecc667384e74b29",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b2-a2-moving",
+      "time": 19.51999999999997,
+      "kind": "moving",
+      "sha256": "8e0ed3a62775b80162cafee2eb47e297d50488650dcf75ac7c1c999c0c3743d9",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b2-a2-result",
+      "time": 22.526666666666635,
+      "kind": "result",
+      "sha256": "286cb384279dc35053669d68328c23bf48449dcbe1ec44c94b84c316ec2e5911",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b3-a1-moving",
+      "time": 24.533333333333275,
+      "kind": "moving",
+      "sha256": "a7c23a472cb1e6d778ac84a889e1c5271de028f3c0ce78e1342e455738f164c2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b3-a1-result",
+      "time": 26.916666666666607,
+      "kind": "result",
+      "sha256": "5cc84bfdeb9b41c3767a32a92c0b141e82add273d8bf010dca2e5ed417015a24",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b3-a2-moving",
+      "time": 28.946666666666605,
+      "kind": "moving",
+      "sha256": "2b33b9955345c71dfb3ddf9facf05dba55c77999db047a9ca3a6f00a32c49822",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b3-a2-result",
+      "time": 31.43999999999994,
+      "kind": "result",
+      "sha256": "aec4e156efe80d9d806d9b31c86bbecb63407a3e2fc1d36e46eb138ae6504521",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b4-a1-moving",
+      "time": 33.506666666666575,
+      "kind": "moving",
+      "sha256": "3fc7c4cd97cfc2c26679cba0d300224ff9fd74a7f8048cdd5f40370980c6acc1",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b4-a1-result",
+      "time": 36.03666666666658,
+      "kind": "result",
+      "sha256": "ac2162a20be97ed76759c806f0a3e5fcb4634e977f3abf5075d5413a4644cfd6",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b4-a2-moving",
+      "time": 37.99999999999991,
+      "kind": "moving",
+      "sha256": "4baea795e712371f239caa27cf9a1e98823b8a73ff719426ea16b064386f4232",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene01-b4-a2-result",
+      "time": 40.38333333333324,
+      "kind": "result",
+      "sha256": "071f938df564f12ac7147b5bdcb204b1506e0d635276569170d9bb5e4e4a4d8a",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b1-a1-moving",
+      "time": 53.64000000000087,
+      "kind": "moving",
+      "sha256": "03d37c3d3cc07b94b9a197d274d5f18607d03ed9f3829da2e85feadc146afad2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b1-a1-result",
+      "time": 56.9033333333342,
+      "kind": "result",
+      "sha256": "a9b3502b2cf38efa13514c8fcf49d72a8f5cff83241e3a785fc0a4a24a42ad62",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b1-a2-moving",
+      "time": 59.22666666666753,
+      "kind": "moving",
+      "sha256": "b5ea2c2a66bab32095fe11b3dc9cce161cb3fa162b0fe0d1a15c99faec944b5d",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b1-a2-result",
+      "time": 62.0133333333342,
+      "kind": "result",
+      "sha256": "f43a3cda1524a688e550274f13cbe44c076a4a44ce7721066fef0971ac9e9117",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b4-a1-moving",
+      "time": 85.36000000000038,
+      "kind": "moving",
+      "sha256": "4b2d1d55cc17c9b667bf0ff75b62e65db6b71a446b85d67ae226d68be5afd5fb",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b4-a1-result",
+      "time": 87.78000000000038,
+      "kind": "result",
+      "sha256": "4a9d52c5f70e0172faeacfb5c2ffe90f5554c1698b132bdb469ad0afb83dad67",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b4-a2-moving",
+      "time": 90.21333333333372,
+      "kind": "moving",
+      "sha256": "7ff1db0ecf11bed699db77e040c5c2d4ada3383ed6c4e735eb614ace5be3d914",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene02-b4-a2-result",
+      "time": 93.25666666666704,
+      "kind": "result",
+      "sha256": "5087e22f493153f4bdd5ffd93f9efb8b1077da90a999c84197a61378d09f939b",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b1-a1-moving",
+      "time": 117.02666666666525,
+      "kind": "moving",
+      "sha256": "de9e10c8181ce6d2f6fd0f73c2819938143f5bdb817e283f89061aee2bd8b569",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b1-a1-result",
+      "time": 119.44666666666525,
+      "kind": "result",
+      "sha256": "8b15f4798d4bacc3b899b9161adcff41420126d6e059e2e7379c222363051cad",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b1-a2-moving",
+      "time": 121.50666666666525,
+      "kind": "moving",
+      "sha256": "2ae2f47d551cd347fa5da5fb9ae83bd1cd1bbe38328979d01658f76b5260610c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b1-a2-result",
+      "time": 124.03666666666524,
+      "kind": "result",
+      "sha256": "2949ecf8f4669f7d8c8b685b8fe49d5e8eaf0e31cece10868aa8de496d68468f",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b2-a1-moving",
+      "time": 126.42666666666473,
+      "kind": "moving",
+      "sha256": "544339bef66699f99e8701a02130997d51866aa11bb7674c8d5c101b05f23730",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b2-a1-result",
+      "time": 129.39666666666471,
+      "kind": "result",
+      "sha256": "7dab4c40b5218bdcf249fd9dbda42ee38b1dc215845f77ce59b948cb58834141",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b2-a2-moving",
+      "time": 131.63999999999805,
+      "kind": "moving",
+      "sha256": "5e83e4aad7f8fe40138b37e68b8593d070262b7ec44e4e3c257fd5cc9081cbf0",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b2-a2-result",
+      "time": 134.3533333333314,
+      "kind": "result",
+      "sha256": "3055e5fa874293517a9e471ac2e49affa7ccaa4453876dcc3ca7e7ddef72c4a1",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b5-a1-moving",
+      "time": 158.65333333332958,
+      "kind": "moving",
+      "sha256": "ad3ea4cb70fb2b20b68fbefd1316a6992145d3130e6609a51aad835791190b3d",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b5-a1-result",
+      "time": 161.4766666666629,
+      "kind": "result",
+      "sha256": "690eb1b30520d907c1daf5535cf953d646abcd291a3150e04b9cf1313d408748",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b5-a2-moving",
+      "time": 165.25333333332958,
+      "kind": "moving",
+      "sha256": "a14f806761a8b9f708353abf759240e1b8047374992ffa83a91341785290748a",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene03-b5-a2-result",
+      "time": 170.09333333332958,
+      "kind": "result",
+      "sha256": "a48c34df0b35fc6d7d5080fb361db000b5d5f29b13b3a73fb0501ceb0304bec2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b3-a1-moving",
+      "time": 200.4666666666605,
+      "kind": "moving",
+      "sha256": "8ae0f820561471a7e365e64cc8114617a9c98e41e2d388e7c98c326ed8abb233",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b3-a1-result",
+      "time": 202.66666666666052,
+      "kind": "result",
+      "sha256": "d61c3efa901374024e729d15698a6863423ac8c47fbb7d9ac487ea3be9ed7339",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b3-a2-moving",
+      "time": 204.7066666666605,
+      "kind": "moving",
+      "sha256": "ba808381dac562a178c6062cdd05ea2041e8c88a3162579490b3775baa044c7f",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b3-a2-result",
+      "time": 207.2366666666605,
+      "kind": "result",
+      "sha256": "dfc538333808f58f960c78027df8c0f0e9af0ba65ff1e441438d73bebd98ca96",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b4-a1-moving",
+      "time": 209.06666666666,
+      "kind": "moving",
+      "sha256": "5242fbb626c9bd94845d735daeb1825aef0c3e5ef89377de87bfd33466d1b9da",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b4-a1-result",
+      "time": 211.26666666666003,
+      "kind": "result",
+      "sha256": "f60790ad0a1aedb1525c0321b699dbfcfddbab29532141ce5d89db03971bfc28",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b4-a2-moving",
+      "time": 215.25333333332668,
+      "kind": "moving",
+      "sha256": "7be6ff4d680267f94bb2ac268420e0ab80359b8ef67021188635de456f496e75",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-b4-a2-result",
+      "time": 220.45999999999336,
+      "kind": "result",
+      "sha256": "5dbbad323c4f43f60dd9e3242e99b956b084100dbbd8644c4832cdee04e37a88",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b4-a1-moving",
+      "time": 286.06666666665564,
+      "kind": "moving",
+      "sha256": "33cabdc4eac6b46009bdd8cff97ebe9c967085603daa2604c99e17c570a2b5ed",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b4-a1-result",
+      "time": 287.89999999998895,
+      "kind": "result",
+      "sha256": "eab6a1ac2673af59c7966612f151747fc8888022dcf80cb4c7fff14897c77ff1",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b4-a2-moving",
+      "time": 289.8533333333223,
+      "kind": "moving",
+      "sha256": "d618f33ea77c46eb4b2dd10e98af12f816da29bd1793172346a8eddccd82ae92",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b4-a2-result",
+      "time": 292.309999999989,
+      "kind": "result",
+      "sha256": "ad8bdfc528d64a6489f1e0bc5fb228bd3cc6dec85a0c2f5318d65ef17e60cb09",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b5-a1-moving",
+      "time": 294.3466666666552,
+      "kind": "moving",
+      "sha256": "f59ae219579f1994377a4bdb8bb5d2b1f25b2dda3ef74253902cdaf995514fec",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b5-a1-result",
+      "time": 296.83999999998855,
+      "kind": "result",
+      "sha256": "fdb23f11ac6c28c9221e5badd32ba82f4f081cf9c594cc9b99bf93700de4bf28",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b5-a2-moving",
+      "time": 298.6933333333219,
+      "kind": "moving",
+      "sha256": "bac0735b6c6106f68c38fc2c78989463416130b7ba7554c0b73e6d0bf6cef5cd",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene05-b5-a2-result",
+      "time": 300.9299999999886,
+      "kind": "result",
+      "sha256": "4fed83f1680a20741301f3b8710faeb14e2e7902268aa47d43fe750069cf3b56",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b1-a1-moving",
+      "time": 316.3866666666541,
+      "kind": "moving",
+      "sha256": "7ab7601a83d1fce55c9a4c5d46a09a0393bd03b9d2e839d999d8b0af84e41cf7",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b1-a1-result",
+      "time": 321.9599999999874,
+      "kind": "result",
+      "sha256": "0057393e56cdaa7fe14ed2a9b817fae8a5df2c9f9a7ba14d5ee3d3f9a71625d2",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b2-a1-moving",
+      "time": 325.85333333332017,
+      "kind": "moving",
+      "sha256": "ededeb81262e0353f0ba77effc819eb58613c1ef922f17caea57004aba9f5c49",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b2-a1-result",
+      "time": 330.5099999999868,
+      "kind": "result",
+      "sha256": "a1116991882143955416b44c78e4e56a120bb59d109a27f7d97cceef27161e81",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b4-a1-moving",
+      "time": 341.55999999998585,
+      "kind": "moving",
+      "sha256": "0161e100eb50c1b3ce7f1fa10deeb5bddf11d88b5e0dafe1debd2c4a43614593",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b4-a1-result",
+      "time": 344.34666666665254,
+      "kind": "result",
+      "sha256": "13a747e2d85eca560c4647cb25666b498b39b9fdf87d83638f908617241b5de0",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b4-a2-moving",
+      "time": 346.9733333333192,
+      "kind": "moving",
+      "sha256": "324346ada4df0901220c4d430c2c1116501287ed55e58749baec99622badc5f8",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene06-b4-a2-result",
+      "time": 350.2366666666525,
+      "kind": "result",
+      "sha256": "2b661572a031ed9663028ae25f51ed48dc6141a6afeb7f826730c47c4beb1fdd",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b2-a1-moving",
+      "time": 382.9733333333168,
+      "kind": "moving",
+      "sha256": "c62ece9204a982c4a6e7d636dca365d7ffe55fb087af7d85680e1c9ea13cb06d",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b2-a1-result",
+      "time": 385.13666666665017,
+      "kind": "result",
+      "sha256": "2883ebca7571f1f88cc7f5b7bff945a472679df4639f08e965abdfdbba5ca381",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b2-a2-moving",
+      "time": 387.3599999999835,
+      "kind": "moving",
+      "sha256": "bf72624c9d0cedcdf1322722fdd30b2e03dcd3b5015597536981d9f3e1ed5261",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b2-a2-result",
+      "time": 390.14666666665016,
+      "kind": "result",
+      "sha256": "290309e26628f90e0f9255e6045faf72647e4cb69c7f1caf0f23406c7ffb2c74",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b4-a1-moving",
+      "time": 400.2266666666492,
+      "kind": "moving",
+      "sha256": "d86f25af6cdbadb4c377e80a7c636bf478a2492ec7de9f286d3cf983ef6d14a1",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b4-a1-result",
+      "time": 403.01333333331587,
+      "kind": "result",
+      "sha256": "3567240904db0c5485e2c2e9505e6827491b80e0fd65bca262ad3ac97c523120",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b4-a2-moving",
+      "time": 405.63999999998254,
+      "kind": "moving",
+      "sha256": "ac12c04c94b4faf1ff63ae0e063826b00fb4481acad31e44aaed0429fd6f9e4b",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene07-b4-a2-result",
+      "time": 408.90333333331586,
+      "kind": "result",
+      "sha256": "3cb71ff878d370c1e7d03640dba3ba7eb04c022bb8f7917692003feb8a3c2295",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene08-b2-a1-moving",
+      "time": 434.46666666664737,
+      "kind": "moving",
+      "sha256": "05d0f497450f19cb0b3b290a54ae4ccbff794b053a14013d73c827b3de7074e1",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene08-b2-a1-result",
+      "time": 439.78333333331403,
+      "kind": "result",
+      "sha256": "e707132b9fde3f33e299b9087a66b4471b83424f4ed302dac8495eb90f56a91e",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene08-b5-a1-moving",
+      "time": 465.50666666664563,
+      "kind": "moving",
+      "sha256": "185cf7abbd0010344f9ae46bc8720ec26d8ec7b87e52f7693a385ab22e21f68c",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene08-b5-a1-result",
+      "time": 471.1533333333123,
+      "kind": "result",
+      "sha256": "61e2cd993e9ae314929703cd0beff8921145f6f959051e5219053939f25a542e",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-b1-a1-moving",
+      "time": 485.1866666666443,
+      "kind": "moving",
+      "sha256": "3758a3f57d6a2beff5b9795706623162ad0db0222a14f35c8f769190215a9d37",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b1-a1-result",
+      "time": 487.27666666664436,
+      "kind": "result",
+      "sha256": "70c20f591a91ff5b8f13705a84f2d42cc0e31e713c8d6b028dcc2d42389c7fa1",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b1-a2-moving",
+      "time": 489.33333333331103,
+      "kind": "moving",
+      "sha256": "fe8c36689e4117ad674c8a1af74933baa82225fd0c5b0afc42af17bd11fdf116",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b1-a2-result",
+      "time": 491.89999999997764,
+      "kind": "result",
+      "sha256": "56eed97ef92e64fef18f0f917d41c94597f28e7c57c4d525e284934fedbfee8e",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b4-a1-moving",
+      "time": 517.8399999999792,
+      "kind": "moving",
+      "sha256": "225656a6d0cbf5010c9efe9503ee0a8765121d1d72794071443d165a4a34699c",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b4-a1-result",
+      "time": 520.3699999999792,
+      "kind": "result",
+      "sha256": "8331f2e73e4a4de6cf25cc40e393ae7324db1292e0e4d37b24aa9782d3a7a158",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b4-a2-moving",
+      "time": 522.6799999999791,
+      "kind": "moving",
+      "sha256": "6067c534892a51bad06d39f915a78a2e8e67ba91909b5d026ce21ac8edac197d",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b4-a2-result",
+      "time": 525.5399999999792,
+      "kind": "result",
+      "sha256": "7de28e1765e065623d3eecddc5723ce91c8212a1b3d32c9c98a56011d3b030da",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-b9-a1-moving",
+      "time": 577.9466666666917,
+      "kind": "moving",
+      "sha256": "97e4fc4f29af62665c940e1c8934ff8ba53c5e34c75d27edbefa90ab87483ce1",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-b9-a1-result",
+      "time": 583.9233333333584,
+      "kind": "result",
+      "sha256": "859c6877e15cef0f75ffabcf85de217cd9c883a49614bec19f0e7f97fbc25686",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-b9-a2-moving",
+      "time": 587.3200000000251,
+      "kind": "moving",
+      "sha256": "c1736dc6fb34d46990aff2e2244a2f13cbbd683540e4a59a620c56fdc09e7cea",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-b9-a2-result",
+      "time": 591.2433333333584,
+      "kind": "result",
+      "sha256": "2b101c8830fcc2efb8a3754c77d71a62d6d59817e283da2f86b546443271c4dc",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-b9-a3-moving",
+      "time": 594.5866666666917,
+      "kind": "moving",
+      "sha256": "f8a9cd63d4a3b97761853a87cb0c702c990cc8ae3903824c6669154eb7e0f28f",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene09-b9-a3-result",
+      "time": 598.6933333333584,
+      "kind": "result",
+      "sha256": "45fa0486193d43f83ddfa88342ccface03ecdc74110fff8c5d46743b153e332b",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-before",
+      "time": 220.5333333333259,
+      "kind": "context",
+      "sha256": "432706129722dac4e2e1cb796bc67fc12bdea48c969feba07b3606e60d5f5256",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-after",
+      "time": 235.26666666665926,
+      "kind": "context",
+      "sha256": "09e8c31f4daf88fc8a77b17bd88103b6cd4ab86e5a93028a598043966af125a7",
+      "review_method": "final_contact_sheet"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-early",
+      "time": 221.61653333332822,
       "kind": "aid-sync",
-      "sha256": "6403cc18550e06c1d84aeb80c8e5adae9a473f5685527ce8cb8b6eb903b8f850",
-      "review_method": "direct_final_image"
+      "sha256": "d7825c701edb5f8de14e9d230669654d99fc85731ad4cd4d3f55d7c94f19065a",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-recap-cancellation-01-late",
+      "time": 224.8047999999949,
+      "kind": "aid-sync",
+      "sha256": "383f7cbd3e0c67f8cf913a51a61a5a90442e28c8b7fa181d6aa5703c5569f0c4",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-recap-cancellation-02-early",
+      "time": 226.25279999999492,
+      "kind": "aid-sync",
+      "sha256": "60fedeb923f4ce61d1d58d61ffb8860cf634e467020719988c553780f00afb34",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-recap-cancellation-02-late",
+      "time": 229.82186666666158,
+      "kind": "aid-sync",
+      "sha256": "d8cd5b474513e75bd0b14e7a570eea0b0523e6de9d46b13a5c8b19067557fda6",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-recap-cancellation-03-early",
+      "time": 231.17386666666158,
+      "kind": "aid-sync",
+      "sha256": "55b7f0a376f67124583f9e80f557b6597fc2661f6cf524b1bb4951f8e4254155",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene04-recap-cancellation-03-late",
+      "time": 233.91413333332824,
+      "kind": "aid-sync",
+      "sha256": "3cd093028aa360604a2aa5fb28b873a87b6a9063e3ace8a651c64ba55eff04cf",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-aid-columns-01-before",
+      "time": 503.8666666666432,
+      "kind": "context",
+      "sha256": "a62f33b955d57879bc09f6deb2f8494ae1ec55a1cf3d2d17f6cba272619b654b",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     },
     {
       "id": "scene09-aid-columns-01-after",
-      "time": 513.13333333331,
+      "time": 516.3999999999764,
       "kind": "context",
       "sha256": "255e9d37113a0193aa6e384494726c5c84857f899b87c049ccf617a487cfd759",
-      "review_method": "direct_final_image"
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-aid-columns-01-early",
+      "time": 505.37386666664435,
+      "kind": "aid-sync",
+      "sha256": "38ef8b9fddeb5d554d0afbad53049be63958bb71229bdf8afa0db80073ec2365",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-aid-columns-01-late",
+      "time": 510.5407999999777,
+      "kind": "aid-sync",
+      "sha256": "a746ae1c064f7c9de223067188cca41e28a6b888f205b4165ba8dd8c32d2c068",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-aid-columns-02-early",
+      "time": 512.2431999999777,
+      "kind": "aid-sync",
+      "sha256": "fcbc8875cf16d66972073567105a3da108a3432a201011db5029f69627c14478",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
+    },
+    {
+      "id": "scene09-aid-columns-02-late",
+      "time": 515.0207999999777,
+      "kind": "aid-sync",
+      "sha256": "f08ebd7719fa2d5fb15963500190f65190badf04687bf9bf778ca8a304a51abd",
+      "review_method": "pre_fix_contact_sheet_and_identical_final_png"
     }
   ]
 }
