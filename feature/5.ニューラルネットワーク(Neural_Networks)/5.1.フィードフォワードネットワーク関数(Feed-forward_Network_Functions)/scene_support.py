@@ -70,7 +70,10 @@ class NarratedScene(Scene):
         ax=Axes(x_range=x,y_range=y,x_length=width,y_length=height,tips=False,
                 axis_config=dict(color=MUTED,stroke_width=1.5,include_numbers=True,font_size=19))
         ax.move_to(center)
-        names=VGroup(tex(labels[0],25).next_to(ax.x_axis,RIGHT,buff=.12),tex(labels[1],25).move_to(ax.get_corner(UL)+UP*.15+RIGHT*.35))
+        names=VGroup(
+            tex(labels[0],25).next_to(ax.x_axis,RIGHT,buff=.12),
+            tex(labels[1],25).move_to(ax.y_axis.get_top()+RIGHT*.38+DOWN*.05),
+        )
         self.add(ax,names)
         return ax
 

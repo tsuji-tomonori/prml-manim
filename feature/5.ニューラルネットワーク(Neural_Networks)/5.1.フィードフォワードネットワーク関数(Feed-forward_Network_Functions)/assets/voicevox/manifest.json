@@ -142,7 +142,7 @@
       "title": "1つのユニットは、何を計算する？",
       "status": "generated",
       "path": "assets/voicevox/scene02.wav",
-      "script_sha256": "c848608c80cd7652101eaf4937d88952f2b4c8449c69603d207961e5bf8c72f6",
+      "script_sha256": "aaa8f6ee1301db95c30de4839a764f5d6c07e14e8a9cf0c83517e83216f7dec4",
       "wav_sha256": "878b6e75af4badde474c6772aa0fe989efe7eb79be6dc8a3918ca0115d652bd9",
       "duration": 69.26666666666667,
       "beat_durations": [
@@ -230,7 +230,7 @@
         },
         {
           "beat_index": 4,
-          "display": "今度はバイアスを変えます。出力がゼロになる位置が移動します。",
+          "display": "今度はバイアスを変えます。出力が0になる位置が移動します。",
           "speech": "今度はバイアスを変えます。出力がゼロになる位置が移動します。",
           "id": "scene02-05-01",
           "start": 40.733333333333334,
@@ -283,7 +283,7 @@
       "title": "2つの材料から、山を作る",
       "status": "generated",
       "path": "assets/voicevox/scene03.wav",
-      "script_sha256": "f00cf48c0895c5b2b5452f7a98d7e47d5cb2910db0df7c0e7b939bb32f9802e6",
+      "script_sha256": "bf8f5da4119a0cfd269b5bb6a24f5f8c44528c8009e3cc3db0a34d8e56c31064",
       "wav_sha256": "e1e4f72cdf5ca25a3cdc7eb60b35517ee7534b55d58f7842adcae1fe55ec2127",
       "duration": 71.33333333333333,
       "beat_durations": [
@@ -371,7 +371,7 @@
         },
         {
           "beat_index": 4,
-          "display": "バイアスも、常に一を出す入力からの重みとして描けます。",
+          "display": "バイアスも、常に1を出す入力からの重みとして描けます。",
           "speech": "バイアスも、常に一を出す入力からの重みとして描けます。",
           "id": "scene03-05-01",
           "start": 41.333333333333336,
@@ -547,7 +547,7 @@
       "title": "最後の出力を、何に合わせる？",
       "status": "generated",
       "path": "assets/voicevox/scene05.wav",
-      "script_sha256": "eaad23045e6acc2e71ce1ff286d29256254262934b059d15ad7f38cf7d52b8ee",
+      "script_sha256": "252291346615ccf88337ca6496cc57dc1a65ea22d32bebfe4f702c0bdf23ac83",
       "wav_sha256": "9b3449a0d3be166d75f577f139ced890228799fecacf8656f256b6eec7d8e4da",
       "duration": 75.06666666666666,
       "beat_durations": [
@@ -619,7 +619,7 @@
         },
         {
           "beat_index": 2,
-          "display": "シグモイドは、大きな合計ほど一に近い出力を返します。",
+          "display": "シグモイドは、大きな合計ほど1に近い出力を返します。",
           "speech": "シグモイドは、大きな合計ほど一に近い出力を返します。",
           "id": "scene05-02-02",
           "start": 29.426666666666666,
@@ -627,7 +627,7 @@
         },
         {
           "beat_index": 3,
-          "display": "合計がゼロなら、出力はちょうど半分です。",
+          "display": "合計が0なら、出力はちょうど半分です。",
           "speech": "合計がゼロなら、出力はちょうど半分です。",
           "id": "scene05-03-01",
           "start": 34.2,
@@ -651,7 +651,7 @@
         },
         {
           "beat_index": 4,
-          "display": "この場合、すべての出力を足して一になる必要はありません。",
+          "display": "この場合、すべての出力を足して1になる必要はありません。",
           "speech": "この場合、すべての出力を足して一になる必要はありません。",
           "id": "scene05-04-02",
           "start": 46.49066666666667,
@@ -667,7 +667,7 @@
         },
         {
           "beat_index": 5,
-          "display": "各合計を指数関数に通し、その総和で割るので、出力を足すと一になります。",
+          "display": "各合計を指数関数に通し、その総和で割るので、出力を足すと1になります。",
           "speech": "各合計を指数関数に通し、その総和でわるので、出力を足すと一になります。",
           "id": "scene05-05-02",
           "start": 56.64533333333333,
