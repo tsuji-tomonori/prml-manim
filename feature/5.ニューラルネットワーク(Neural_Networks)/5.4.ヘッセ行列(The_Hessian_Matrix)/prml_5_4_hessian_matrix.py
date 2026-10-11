@@ -64,19 +64,24 @@ class PRML54HessianMatrix(NarratedScene):
         return ax
 
     def question(self):
-        k=ValueTracker(2);s=ValueTracker(0)
+        k=ValueTracker(OPENING_K);s=ValueTracker(0)
         ax=self.plot_axes(x=(-1.3,.6,.5),y=(0,3,1),width=8,height=3.4,labels=('s','E'))
-        fn=lambda x:1+x+.5*k.get_value()*x*x
-        baseline=curve(ax,lambda x:1+x+.5*x*x,color=MUTED)
+        fn=lambda x:opening_error(x,k.get_value())
+        baseline=curve(ax,lambda x:opening_error(x,1),color=MUTED)
         graph=always_redraw(lambda:curve(ax,fn,color=BLUE))
-        dot=always_redraw(lambda:Dot(ax.c2p(s.get_value(),fn(s.get_value())),color=YELLOW))
+        dot=always_redraw(lambda:Dot(ax.c2p(s.get_value(),fn(s.get_value())),
+                                         color=RED if s.get_value()<-.8 and k.get_value()>3.5 else YELLOW))
         tangent=always_redraw(lambda:path(ax,[(x,fn(s.get_value())+(1+k.get_value()*s.get_value())*(x-s.get_value())) for x in [s.get_value()-.18,s.get_value()+.18]],YELLOW))
         control=knob('k=',k,1,4)
-        self.add(baseline,graph,dot,tangent,control)
+        start=Dot(ax.c2p(0,opening_error(0)),radius=.065,color=GREEN)
+        self.add(graph,start,dot,tangent,control,
+                 number('E=',lambda:fn(s.get_value()),(4,.7,0),YELLOW,places=1))
         self.equation(r'E(s)=1+s+\tfrac12ks^2',r'\quad E\prime(0)=1')
-        self.beat(actions=[lambda:Create(baseline),lambda:s.animate.set_value(-1)])
-        s.set_value(0)
-        self.beat(actions=[lambda:k.animate.set_value(4),lambda:s.animate.set_value(-1)])
+        self.beat(actions=[lambda:Indicate(start,color=GREEN),
+                           lambda:Succession(s.animate.set_value(-1),
+                                             Indicate(dot,color=RED,scale_factor=1.15))])
+        self.beat(actions=[lambda:AnimationGroup(Create(baseline),k.animate.set_value(1)),
+                           lambda:k.animate.set_value(OPENING_K)])
         self.equation(r'E\prime(s)=1+ks',r'\qquad E\prime\prime(s)=k')
         self.beat(actions=[lambda:s.animate.set_value(.35),lambda:Indicate(tangent,color=YELLOW)])
         self.body_clear()
@@ -87,7 +92,7 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:Write(grid),lambda:Indicate(grid,color=YELLOW)])
         self.equation(r'H_{ij}=\frac{\partial^2 E}{\partial w_i\partial w_j}',r'\quad (5.78)')
         self.beat(actions=[lambda:Indicate(grid.get_rows()[0],scale_factor=1.04),lambda:Indicate(VGroup(grid.get_entries()[1],grid.get_entries()[2]),color=RED)])
-        uses=VGroup(*[jp(t,25,c) for t,c in [('学習の一歩',BLUE),('再学習',GREEN),('刈り込み',RED),('不確かさ',PURPLE)]]).arrange(RIGHT,buff=.7).move_to([0,-1.7,0])
+        uses=VGroup(*[jp(t,25,c) for t,c in [('学習の1歩',BLUE),('再学習',GREEN),('刈り込み',RED),('不確かさ',PURPLE)]]).arrange(RIGHT,buff=.7).move_to([0,-1.7,0])
         self.beat(actions=[lambda:LaggedStart(*[FadeIn(x,shift=UP*.2) for x in uses[:3]],lag_ratio=.25),lambda:FadeIn(uses[3],shift=UP*.2)])
 
     def directions(self):
@@ -275,7 +280,7 @@ class PRML54HessianMatrix(NarratedScene):
         lines=VGroup(*[curve(ax,lambda w,p=p:p*np.log10(w),color=c) for p,c in zip(powers,[RED,BLUE])])
         t=ValueTracker(2);dots=always_redraw(lambda:VGroup(*[Dot(ax.c2p(t.get_value(),p*np.log10(t.get_value())),color=c) for p,c in zip(powers,[RED,BLUE])]))
         names=VGroup(*[tex(f'O(W^{p})' if p>1 else 'O(W)',26,c) for p,c in zip(powers,[RED,BLUE])]).arrange(DOWN,buff=.4).move_to([5,.2,0])
-        self.add(lines,dots,names,note('一例あたりの計算量：実測時間ではない'))
+        self.add(lines,dots,names,note('1例あたりの計算量：実測時間ではない'))
         self.cost_tracker=t;self.cost_lines=lines
 
     def choose(self):
@@ -297,14 +302,21 @@ class PRML54HessianMatrix(NarratedScene):
         self.beat(actions=[lambda:Indicate(VGroup(mat[0][0],mat[0][2]),color=YELLOW),lambda:AnimationGroup(Transform(v1,tex(r'e_2=\begin{bmatrix}0\\1\end{bmatrix}',36,YELLOW).move_to(v1)),Indicate(VGroup(mat[0][1],mat[0][3]),color=YELLOW))])
         self.equation(r'\mathrm{diag}(H),\quad \sum_n b_nb_n^{\mathsf T},\quad R\{\nabla E\}',size=35)
         self.beat(actions=[lambda:Indicate(VGroup(mat[0][1],mat[0][2]),color=RED),lambda:Indicate(mat,color=GREEN)])
-        self.body_clear();k=ValueTracker(1)
+        self.body_clear();s=ValueTracker(0)
         ax=self.plot_axes(x=(-1.3,.6,.5),y=(0,3,1),width=7.5,height=3.2,labels=('s','E'))
-        graph=always_redraw(lambda:curve(ax,lambda x:1+x+.5*k.get_value()*x*x,color=BLUE))
-        self.add(graph,knob('k=',k,1,4))
-        self.equation(r'E\prime(0)=1,\qquad E\prime\prime(0)=k')
-        self.beat(actions=[lambda:k.animate.set_value(4),lambda:k.animate.set_value(1)])
-        self.equation(r'\text{gradient}\quad\longrightarrow\quad\text{curvature}\quad\longrightarrow\quad Hv',size=34)
-        self.beat(actions=[lambda:k.animate.set_value(4),lambda:k.animate.set_value(2)])
+        graph=curve(ax,lambda x:opening_error(x),color=BLUE)
+        start=Dot(ax.c2p(0,opening_error(0)),radius=.065,color=GREEN)
+        failed=Dot(ax.c2p(-1,opening_error(-1)),radius=.075,color=RED).set_opacity(0)
+        moving=always_redraw(lambda:Dot(ax.c2p(s.get_value(),opening_error(s.get_value())),color=YELLOW))
+        self.add(graph,start,failed,moving,
+                 number('s=',s.get_value,(4,.8,0),YELLOW,places=2),
+                 number('E=',lambda:opening_error(s.get_value()),(4,0,0),YELLOW,places=3))
+        self.equation(r'E(s)=1+s+2s^2,\quad E\prime(0)=1,\quad E\prime\prime(0)=4',size=31)
+        self.beat(actions=[lambda:Indicate(start,color=GREEN),
+                           lambda:Succession(s.animate.set_value(-1),failed.animate.set_opacity(1))])
+        self.equation(r's_*=-\frac{E\prime(0)}{E\prime\prime(0)}=-\frac14=-0.25,\quad E(s_*)=0.875',size=31)
+        self.beat(actions=[lambda:Succession(s.animate.set_value(0),s.animate.set_value(opening_step())),
+                           lambda:Indicate(moving,color=GREEN,scale_factor=1.2)])
 
     def body_card(self, label):
         """Replace the body during a spoken beat; restore its exact state afterward."""
@@ -312,9 +324,7 @@ class PRML54HessianMatrix(NarratedScene):
         formula = self.formula
         self.clear()
         self.add(self.title,
-                 RoundedRectangle(width=10.4, height=4.6, corner_radius=.12,
-                                  color='#FFFF00', stroke_width=1.2).move_to([0,.1,0]),
-                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+                 jp(label,23,YELLOW).move_to([-4.85,2.06,0],aligned_edge=LEFT))
         return saved, formula
 
     def restore_body(self, state):
@@ -370,14 +380,14 @@ class PRML54HessianMatrix(NarratedScene):
                          for old,new,c,d in [('w','u',YELLOW,BLUE),('a','a',BLUE,GREEN),
                                             ('z','z',GREEN,PURPLE),('y','y',BLUE,RED)]]
                          ).arrange(RIGHT,buff=.4).move_to([0,-1.76,0])
-        self.add(boxes,edges,jp('一つの経路に沿って計算',20).move_to([0,1.5,0]))
+        self.add(boxes,edges,jp('1つの経路に沿って計算',20).move_to([0,1.5,0]))
         self.beat(actions=[lambda:Succession(flow(edges,BLUE),flow(edges,RED,reverse=True)),
                            lambda:Succession(FadeIn(factors),AnimationGroup(Write(gradient),flow(edges,RED,reverse=True))),
                            lambda:AnimationGroup(ReplacementTransform(gradient,result),FadeIn(mapping))])
         self.restore_body(state)
 
     def product_rule_aid(self):
-        state = self.body_card('補足: 積の微分は、二本の帯から')
+        state = self.body_card('補足: 積の微分は、2本の帯から')
         blue,yellow,green,purple = '#58C4DD','#FFFF00','#83C167','#9A72AC'
         eps = ValueTracker(.6)
         # Positive v,z and positive increments form an area example, not a

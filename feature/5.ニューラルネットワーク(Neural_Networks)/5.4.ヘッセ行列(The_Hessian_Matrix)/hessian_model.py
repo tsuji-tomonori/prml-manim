@@ -6,6 +6,14 @@ TARGET=.25
 WEIGHTS=np.array([.7,1.2])
 B=np.array([[1.4,.3],[.2,1.3],[1.,-.8]])
 ALPHA=.3
+OPENING_K=4.
+
+def opening_error(s,k=OPENING_K):
+    """The same explanatory quadratic is used in the opening and resolution."""
+    return 1+s+.5*k*np.asarray(s)**2
+
+def opening_step(k=OPENING_K):
+    return -1/k
 
 def net(w=WEIGHTS,x=X,t=TARGET):
     u,v=np.asarray(w); a=u*x; z=np.tanh(a); hp=1-z*z; hpp=-2*z*hp
