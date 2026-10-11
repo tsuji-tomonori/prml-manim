@@ -23,6 +23,11 @@ def main():
     assert ellipse_error<1e-13
     zero=net(t=net()['y']);assert np.max(abs(zero['residual']))==0
     eig=np.linalg.eigvalsh([[3,2],[2,3]]);assert np.allclose(eig,[1,5])
+    step=opening_step()
+    opening_values=[float(opening_error(x)) for x in (0,-1,step)]
+    assert np.allclose(opening_values,[1,2,.875])
+    assert np.isclose((opening_error(1e-5)-opening_error(-1e-5))/2e-5,1)
+    assert np.isclose((opening_error(1e-4)-2*opening_error(0)+opening_error(-1e-4))/1e-8,4)
     entries=json.loads(MANIFEST.read_text())['scenes']; assert len(entries)==len(SCENES)
     assert all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     assert {p.stem for p in (Path(__file__).parent/'assets/voicevox').glob('*.wav')}=={s['id'] for s in SCENES}
@@ -33,6 +38,6 @@ def main():
         q=net(w);prob=1/(1+np.exp(-q['y']));return (prob-y)*q['b']
     lfd=np.column_stack([(logistic_grad(WEIGHTS+1e-5*e)-logistic_grad(WEIGHTS-1e-5*e))/2e-5 for e in np.eye(2)])
     logistic_error=float(np.max(abs(lfd-logistic_H)));assert logistic_error<1e-9
-    result=dict(seed=54,samples=40,max_function_difference_error=max(fd),max_gradient_difference_error=max(gd),max_hvp_error=max(hv),max_inverse_update_error=inverse_error,max_ellipse_level_error=ellipse_error,logistic_hessian_error=logistic_error,eigenvalues=eig.tolist(),example_H=net()['H'].tolist(),example_direction=[.6,.8],example_Hv=hvp(WEIGHTS,[.6,.8])[0].tolist(),scenes=len(entries),sentences=sum(len(b['segments']) for s in SCENES for b in s['beats']),audio_seconds=sum(e['duration'] for e in entries))
+    result=dict(seed=54,samples=40,max_function_difference_error=max(fd),max_gradient_difference_error=max(gd),max_hvp_error=max(hv),max_inverse_update_error=inverse_error,max_ellipse_level_error=ellipse_error,logistic_hessian_error=logistic_error,eigenvalues=eig.tolist(),example_H=net()['H'].tolist(),example_direction=[.6,.8],example_Hv=hvp(WEIGHTS,[.6,.8])[0].tolist(),opening_step=step,opening_errors=opening_values,scenes=len(entries),sentences=sum(len(b['segments']) for s in SCENES for b in s['beats']),audio_seconds=sum(e['duration'] for e in entries))
     Path('numerical_results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

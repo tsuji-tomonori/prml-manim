@@ -11,9 +11,21 @@ def main():
     OUT.mkdir(parents=True,exist_ok=True)
     timeline=json.loads((ROOT/'media/prml54_timeline.json').read_text())
     frames=[]
+    # Check active transitions in every part of the story, including the
+    # opening and the return to the exact same quadratic at the end.
+    focus = {'scene01': (0, 1), 'scene02': (1,), 'scene03': (0,),
+             'scene04': (2,), 'scene05': (2,), 'scene06': (1,),
+             'scene07': (4,), 'scene08': (2, 3), 'scene09': (4, 5)}
     for s in timeline:
         for i,b in enumerate(s['beats']):
             frames.append(dict(id=f"{s['id']}-beat{i+1}",time=(b['start']+b['end'])/2,kind='beat'))
+            if i in focus[s['id']]:
+                for j, action in enumerate(b['actions'], 1):
+                    for phase, alpha in [('early', .25), ('late', .75)]:
+                        frames.append(dict(id=f"{s['id']}-focus-{i+1}-{j}-{phase}",
+                            time=action['start']+alpha*(action['end']-action['start']),kind='focus'))
+                frames.append(dict(id=f"{s['id']}-focus-{i+1}-after",
+                                   time=b['end']-.1,kind='focus'))
             for c in b['cues']:
                 if '$' in c['display']:
                     frames.append(dict(id=c['id'],time=(c['start']+c['end'])/2,kind='math',display=c['display']))
