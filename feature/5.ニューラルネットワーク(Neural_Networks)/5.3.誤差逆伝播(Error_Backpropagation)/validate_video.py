@@ -35,14 +35,14 @@ def main():
                 action=b['actions'][min(ci,len(b['actions'])-1)]
                 sync.append(dict(id=c['id'],display=c['display'],action_start=action['start'],action_end=action['end'],
                                  pcm_onset=s['start']+(start+int(indices[0]))/rate))
-    # Audit every added sentence against actual PCM onset and its own action.
+    # Audit every retained card and the return to the opening example.
     added_sync=[]
     for scene,e in zip(timeline,entries):
         with wave.open(str(ROOT/e['path'])) as wav:
             rate=wav.getframerate();data=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
         for beat in scene['beats']:
             for cue,action in zip(beat['cues'],beat['actions']):
-                if '-recap-' not in cue['id'] and '-aid-' not in cue['id']:continue
+                if not any(tag in cue['id'] for tag in ('-recap-','-aid-','-return-')):continue
                 start=round((cue['start']-scene['start'])*rate);end=round((cue['end']-scene['start'])*rate)
                 audible=np.flatnonzero(np.abs(data[start:end].astype(float))/32768>10**(-45/20))
                 onset=scene['start']+(start+int(audible[0]))/rate
@@ -51,7 +51,7 @@ def main():
                 added_sync.append(dict(id=cue['id'],cue_start=cue['start'],action_start=action['start'],
                                        action_end=action['end'],pcm_onset=onset,
                                        onset_after_action=onset-action['start']))
-    assert len(added_sync)==5
+    assert len(added_sync)==8
     assert max(errors)<1e-6
     display='\n'.join(v['display'] for s in SCENES for b in s['beats'] for v in b['segments'])
     (ROOT/'media/display.txt').write_text(display)

@@ -60,19 +60,19 @@ class PRML53ErrorBackpropagation(NarratedScene):
         ax=self.plot_axes(x=(-1,1.7,.5),y=(0,1.25,.5),width=8,height=3.4,center=(-.7,-.1,0),labels=('w','E_n'))
         graph=curve(ax,lambda u:scalar(u)['E'],color=RED_CLASS)
         dot=always_redraw(lambda:Dot(ax.c2p(w.get_value(),scalar(w.get_value())['E']),color=YELLOW_ACC))
-        read=number('y=',lambda:scalar(w.get_value())['y'],(4.7,.8,0),BLUE_CLASS)
+        read=number('y=',lambda:scalar(w.get_value())['y'],(4.7,.8,0),BLUE_CLASS,places=3)
+        read_e=number('E=',lambda:scalar(w.get_value())['E'],(4.7,-.85,0),RED_CLASS,places=3)
         target=tex('t=0.70',28,GREEN_CLASS).move_to([4.7,0,0])
         k=knob('w=',w,-1,1.7,at=(-1,-2.5,0))
         self.equation(r'y=1.2\tanh(0.8w+0.1)-0.1,\quad E_n=\tfrac12(y-0.7)^2',size=29)
-        self.add(graph,dot,read,target,k)
+        self.add(graph,dot,read,read_e,target,k)
         self.beat(actions=[lambda:Indicate(target),lambda:Indicate(k[0])])
-        self.beat(w.animate.set_value(1.4))
-        self.beat(w.animate.set_value(-.25))
+        self.beat(actions=[lambda:w.animate.set_value(1.4),lambda:Indicate(read)])
+        self.beat(actions=[lambda:w.animate.set_value(-.25),lambda:Indicate(read_e)])
         tan=always_redraw(lambda:tangent(ax,w.get_value(),scalar(w.get_value())['E'],scalar(w.get_value())['g']))
         self.add(tan)
-        self.beat(w.animate.set_value(.6))
+        self.beat(actions=[lambda:w.animate.set_value(.6),lambda:Indicate(tan)])
         self.equation(r'\nabla E\quad\longrightarrow\quad\Delta\mathbf{w}')
-        self.add(note('勾配を計算 → 重みを更新',at=(3.8,-.9,0)))
         self.beat(actions=[lambda:Circumscribe(tan),lambda:w.animate.set_value(.8)])
 
     def forward_pass(self):
@@ -99,7 +99,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         coords=[-5,-2.5,0,2.5,5];names=['w','a','z','y','E_n'];colors=[YELLOW_ACC,BLUE_CLASS,GREEN_CLASS,BLUE_CLASS,RED_CLASS]
         groups=VGroup(); paths=VGroup()
         for j,(p,n,c) in enumerate(zip(coords,names,colors)):
-            box=RoundedRectangle(width=1.6,height=1.3,corner_radius=.15,color=c).move_to([p,.35,0])
+            box=VGroup()  # Color on each label carries the computation stage.
             label=tex(n,30,c).move_to([p,.65,0]);fn=w.get_value if j==0 else lambda n=n:get()['E' if n=='E_n' else n]
             value=DecimalNumber(fn(),num_decimal_places=3,font_size=27).move_to([p,.08,0])
             value.add_updater(lambda m,fn=fn,p=p:m.set_value(fn()).move_to([p,.08,0]))
@@ -115,9 +115,8 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.equation(r'\frac{\partial E_n}{\partial w}=\frac{\partial E_n}{\partial y}\frac{\partial y}{\partial z}\frac{\partial z}{\partial a}\frac{\partial a}{\partial w}',size=35)
         self.beat(actions=[lambda:Indicate(local[0]),lambda:LaggedStart(*[Indicate(m) for m in local],lag_ratio=.3)])
         self.equation(r'\delta_j\equiv\frac{\partial E_n}{\partial a_j}',size=39)
-        brace=Brace(VGroup(*groups[1:]),DOWN,buff=.65,color=RED_CLASS)
-        self.beat(actions=[lambda:Create(brace),lambda:Indicate(self.formula)])
-        self.remove(brace);self.equation(r'\frac{\partial a_j}{\partial w_{ji}}=z_i',size=39)
+        self.beat(actions=[lambda:pulse(paths[1:],RED_CLASS),lambda:Indicate(self.formula)])
+        self.equation(r'\frac{\partial a_j}{\partial w_{ji}}=z_i',size=39)
         self.beat(actions=[lambda:w.animate.set_value(.8),lambda:x.animate.set_value(0)])
         self.equation(r'\frac{\partial E_n}{\partial w_{ji}}=',r'\delta_j',r'z_i',size=40)
         self.formula[1].set_color(RED_CLASS);self.formula[2].set_color(BLUE_CLASS)
@@ -147,7 +146,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.cancellation_recap()
         self.add(note('図：線形出力＋二乗和誤差',at=(3.5,1.85,0)))
         self.equation(r'\sigma+\mathrm{binary\ CE}\quad;\quad\mathrm{softmax}+\mathrm{multiclass\ CE}\quad\Rightarrow\delta_k=y_k-t_k',size=27)
-        glossary=VGroup(jp('σ：一つの確率',19),jp('softmax：確率の和が１',19),jp('CE：確率予測の誤差',19)).arrange(DOWN,buff=.2).move_to([5,-.5,0])
+        glossary=VGroup(jp('σ：1つの確率',19),jp('softmax：確率の和が1',19),jp('CE：確率予測の誤差',19)).arrange(DOWN,buff=.2).move_to([5,-.5,0])
         self.add(glossary)
         self.beat(actions=[lambda:Indicate(self.formula),lambda:u.animate.set_value(1.1)])
         self.equation(r'\delta_k=\sum_l\frac{\partial E_n}{\partial y_l}\frac{\partial y_l}{\partial a_k}',size=37)
@@ -229,7 +228,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         bs=[backward(x,t) for x,t in DATA];vs=[b['g2'][0,1:] for b in bs];g=sum(vs)
         ax=self.plot_axes(x=(-.15,1.05,.3),y=(-.9,.3,.3),width=8.5,height=3.4,labels=('g_1','g_2'))
         arrows=VGroup(*[Arrow(ax.c2p(0,0),ax.c2p(*v),buff=0,color=c) for v,c in zip(vs,[BLUE_CLASS,GREEN_CLASS,PURPLE_ACC])])
-        self.add(arrows,note('二成分の表示：横は出力１←隠れ１、縦は出力１←隠れ２'))
+        self.add(arrows,note('2成分の表示：横は出力1←隠れ1、縦は出力1←隠れ2'))
         self.equation(r'\nabla E_n\quad(n=1,2,3)')
         self.beat(actions=[lambda:Indicate(arrows[0]),lambda:LaggedStart(Indicate(arrows[1]),Indicate(arrows[2]),lag_ratio=.5)])
         targets=[];acc=np.zeros(2)
@@ -274,7 +273,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         ax=self.plot_axes(x=(0,3,1),y=(0,7,1),width=8.5,height=3.4,labels=(r'\log_{10}W',r'\log_{10}C'))
         bp=curve(ax,lambda q:q,color=BLUE_CLASS);cd=curve(ax,lambda q:np.log10(2)+2*q,color=RED_CLASS)
         dots=always_redraw(lambda:VGroup(Dot(ax.c2p(u.get_value(),u.get_value()),color=BLUE_CLASS),Dot(ax.c2p(u.get_value(),np.log10(2)+2*u.get_value()),color=RED_CLASS)))
-        self.add(jp('復習: 1.1 対数の目盛り',20).move_to([0,2.98,0]))
+        self.add(jp('復習: 1.1 対数の目盛り',20).move_to([4.3,2.03,0]))
         self.add(bp,cd,dots,note('計算量の模型：青 C = W ／ 赤 C = 2W²（両軸は常用対数）'))
         self.equation(r'\mathrm{backprop}:O(W)\qquad\mathrm{central\ difference}:O(W^2)',size=31)
         self.beat(u.animate.set_value(2))
@@ -325,6 +324,29 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.equation(r'\frac{\partial E}{\partial w}=\sum_{k,j}\frac{\partial E}{\partial y_k}\frac{\partial y_k}{\partial z_j}\frac{\partial z_j}{\partial w}',size=34)
         self.beat(actions=[lambda:pulse(arrows,BLUE_CLASS),lambda:pulse(VGroup(*[Line(p.get_end(),p.get_start()) for p in arrows[::-1]]))])
 
+        # Return to the exact input, target and weight from the opening scene.
+        initial=scalar(-.6,x=.8,t=.7)
+        next_w=-.6-.5*initial['g']
+        self.clear();self.subtitle=None;self.formula=None
+        self.add(jp('最初の問いに戻る',32).move_to([0,3.35,0]))
+        w=ValueTracker(-.6)
+        ax=self.plot_axes(x=(-1,1.7,.5),y=(0,1.25,.5),width=8,height=3.4,
+                          center=(-.7,-.1,0),labels=('w','E_n'))
+        graph=curve(ax,lambda v:scalar(v,x=.8,t=.7)['E'],color=RED_CLASS)
+        dot=always_redraw(lambda:Dot(ax.c2p(w.get_value(),scalar(w.get_value(),x=.8,t=.7)['E']),
+                                     color=YELLOW_ACC))
+        target=tex('t=0.70',28,GREEN_CLASS).move_to([4.7,.2,0])
+        read_y=number('y=',lambda:scalar(w.get_value(),x=.8,t=.7)['y'],
+                      (4.7,1.05,0),BLUE_CLASS,places=3)
+        read_e=number('E=',lambda:scalar(w.get_value(),x=.8,t=.7)['E'],
+                      (4.7,-.55,0),RED_CLASS,places=3)
+        gradient=tex(fr'\frac{{\partial E}}{{\partial w}}={initial["g"]:.3f}',28,YELLOW_ACC).move_to([4.7,1.85,0])
+        k=knob('w=',w,-1,1.7,at=(-1,-2.5,0),places=3)
+        self.add(graph,dot,target,read_y,read_e,gradient,k)
+        self.equation(r'w_{\rm new}=w-\eta\frac{\partial E}{\partial w},\qquad\eta=0.5',size=32)
+        self.beat(actions=[lambda:Indicate(dot),lambda:w.animate.set_value(next_w),
+                           lambda:Indicate(read_e)])
+
     def body_card(self,label):
         """Replace the body for one PCM-timed beat, preserving the title."""
         saved=[m for m in self.mobjects if m is not self.subtitle]
@@ -369,7 +391,7 @@ class PRML53ErrorBackpropagation(NarratedScene):
         self.restore_body(saved)
 
     def jacobian_columns_aid(self):
-        saved=self.body_card('補足: 一つの入力を動かすと、行列の一列へ')
+        saved=self.body_card('補足: 1つの入力を動かすと、行列の1列へ')
         blue,yellow,green='#58C4DD','#FFFF00','#83C167'
         J=jacobian();y0=forward()['y'];column=[0];eps=ValueTracker(.0005)
         displacement=lambda:np.eye(2)[column[0]]*eps.get_value()

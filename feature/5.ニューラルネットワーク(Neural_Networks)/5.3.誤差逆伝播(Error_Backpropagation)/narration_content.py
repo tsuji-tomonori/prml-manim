@@ -201,6 +201,92 @@ SCENES[8]['beats'].insert(2, review_beat('scene09','aid-columns',15,
     ('第二列も、二つ目の入力だけを動かして調べます。',
      '第二列も、二つ目の入力だけを動かして調べます。')))
 
+# The same scalar experiment opens and closes the story.  Other scenes enlarge
+# one route or use the explicitly identified two-layer example as clues.
+SCENES[0]['title']='右へ回せば、正解に近づく？'
+SCENES[1]['title']='つまみが12個なら、どうする？'
+SCENES[2]['title']='1つの変更は、どう伝わる？'
+SCENES[4]['title']='道が2つに分かれたら？'
+SCENES[7]['title']='12個を1本ずつ試す？'
+STORY_OVERRIDES={
+    'scene01-01-01':('目標は $0.70$、予測は $-0.535$。このつまみを右へ回せば、近づくでしょうか。','目標は0.70、予測はマイナス0.535。このつまみを右へ回せば、近づくでしょうか。'),
+    'scene01-01-02':('黄色のつまみは重み $w$。まず、動かす向きを予想してください。','黄色のつまみは重み、ダブリュー。まず、動かす向きを予想してください。'),
+    'scene01-02-01':('右へ大きく動かしてみます。予測はどうなるでしょう。',None),
+    'scene01-02-02':('予測は $0.908$。目標の $0.70$ を通り越しました。','予測は0.908。目標の0.70を通り越しました。'),
+    'scene01-03-01':('今度は左へ戻します。戻しすぎると、また外れます。',None),
+    'scene01-03-02':('方向だけでは足りません。どのくらい動かせばよいのでしょう。',None),
+    'scene01-04-01':('今いる場所の傾きなら、小さな1歩の効果を教えてくれそうです。',None),
+    'scene01-05-01':('誤差逆伝播は、多くの重みの傾きをまとめて求める手順です。',None),
+    'scene01-05-02':('では、つまみが12個に増えても、1本ずつ試さずに求められるでしょうか。',None),
+    'scene02-01-01':('このネットワークには2個の入力、2個の隠れた計算、2個の出力があります。',None),
+    'scene02-01-02':('バイアスを含めて重みは12個。さっきの試し方では大変です。',None),
+    'scene02-02-01':('まず予測まで値を流し、どの計算が重みを使うか追います。',None),
+    'scene02-06-02':('あとで傾きを求めるには、途中の値を取っておく必要があります。',None),
+    'scene03-01-01':('12個を同時に追う前に、接続を1本だけ拡大しましょう。',None),
+    'scene03-01-02':('重みの小さな変更は、どこを通って誤差へ届くのでしょう。',None),
+    'scene03-02-02':('その倍率を順に掛ければ、遠くの誤差への影響まで分かります。',None),
+    'scene03-03-01':('でも、接続ごとに下流を全部たどるのは繰り返しが多そうです。',None),
+    'scene03-03-02':('そこで下流の影響を、感度 $\\delta_j$ という1個の値にまとめます。','そこで下流の影響を、感度デルタ、ジェーという1個の値にまとめます。'),
+    'scene03-05-02':('接続の勾配は $\\delta_j z_i$。感度と手前の値を掛ければよいのです。','接続の勾配は、デルタ、ジェー、かける、ゼット、アイ。感度と手前の値を掛ければよいのです。'),
+    'scene04-01-01':('下流の感度は、いちばん最後の出力から求められるでしょうか。',None),
+    'scene04-04-02':('出力の感度は $y_k-t_k$。予測が目標を超えたかどうかで符号が変わります。','出力の感度は、ワイ、ケー、ひく、ティー、ケー。予測が目標を超えたかどうかで符号が変わります。'),
+    'scene04-05-01':('この簡単な差は、出力関数と誤差関数の組に依存します。',None),
+    'scene05-01-01':('出力から感度を戻せました。でも、隠れた値から道が2本に分かれたら？',None),
+    'scene05-04-01':('2本の道の寄与は、どちらかを選ぶのでしょうか。',None),
+    'scene05-04-02':('矢印をつなぐと答えが見えます。2本の寄与を足します。',None),
+    'scene05-06-02':('これで出力から隠れ層へ、同じ手順を繰り返せます。',None),
+    'scene06-01-01':('まだ1つ倍率が残っています。隠れた丸自身の傾きです。',None),
+    'scene06-02-01':('端の平らなところでは、感度を戻すとどうなるでしょう。',None),
+    'scene06-02-02':('傾きが小さいので、後ろへ伝わる感度も小さくなります。',None),
+    'scene06-05-02':('これで12個の接続を、1本ずつ試さずに計算できます。',None),
+    'scene07-01-01':('1例ではできました。データが3例なら、どの勾配を使うのでしょう。',None),
+    'scene07-03-01':('誤差を3例で足すなら、勾配の矢印も足します。',None),
+    'scene07-04-01':('合計した勾配と逆向きに1歩。ここで初めて重みを更新します。',None),
+    'scene08-01-01':('それでも、各重みを左右へ動かして測る方が簡単でしょうか。',None),
+    'scene08-04-01':('重みが $W$ 個なら、全てを試すのに何回の計算が要るでしょう。','重みがダブリュー個なら、全てを試すのに何回の計算が要るでしょう。'),
+    'scene08-06-02':('共通の感度を使い回すから、12個でもさらに多くても計算を節約できます。',None),
+    'scene09-01-01':('この逆向きの仕組みは、重みだけに使えるのでしょうか。',None),
+    'scene09-01-02':('今度は重みを固定し、入力だけを少し動かしてみます。',None),
+    'scene09-07-02':('値は前へ、感度は後ろへ。この発見を、最初の重みに戻して確かめましょう。',None),
+}
+for scene in SCENES:
+    for beat in scene['beats']:
+        for segment in beat['segments']:
+            if segment['id'] in STORY_OVERRIDES:
+                display,speech=STORY_OVERRIDES[segment['id']]
+                segment['display']=display
+                segment['speech']=display if speech is None else speech
+
+SCENES[8]['beats'].append(review_beat('scene09','return',24,
+    '冒頭と同じx・t・wへ戻し、勾配に基づく1歩を実測する',
+    (r'最初の $x=0.8,t=0.70,w=-0.6$ に戻ります。予測は $-0.535$、誤差は $0.763$。',
+     '最初のエックス0.8、目標0.70、重みマイナス0.6に戻ります。予測はマイナス0.535、誤差は0.763。'),
+    (r'勾配は $-1.030$。学習率 $0.5$ で $w$ を $-0.085$ へ動かします。',
+     '勾配はマイナス1.030。学習率0.5で重みをマイナス0.085へ動かします。'),
+    (r'同じ入力と目標で、予測は $-0.062$、誤差は $0.290$ に下がりました。',
+     '同じ入力と目標で、予測はマイナス0.062、誤差は0.290に下がりました。')))
+
+# Numeric counts and ordinals use Arabic digits on screen; natural readings
+# stay in speech. Mathematical terms such as 二乗 and 二値 remain unchanged.
+DISPLAY_NUMERALS={'一つ':'1つ','二つ':'2つ','三つ':'3つ','一本':'1本','二本':'2本',
+                  '第一列':'第1列','第二列':'第2列','一行':'1行','一例':'1例',
+                  '二入力':'2入力','二隠れ':'2隠れ','二出力':'2出力',
+                  '二成分':'2成分','一成分':'1成分','二層':'2層','一歩':'1歩',
+                  '一度':'1度','一から':'1から','一枚':'1枚','全て':'すべて'}
+for scene in SCENES:
+    for beat in scene['beats']:
+        for segment in beat['segments']:
+            for old,new in DISPLAY_NUMERALS.items():
+                segment['display']=segment['display'].replace(old,new)
+            display_forms={
+                'scene02-03-02':'今回は、出力を $-1$ から $1$ へ滑らかに収める、双曲線正接を使います。',
+                'scene02-06-01':'一定のずらし量、バイアスは、いつも $1$ を出す入力からの重みと考えます。',
+                'scene03-06-02':'バイアスの入力は $1$ なので、その微分は、感度そのものです。',
+                'scene04-04-01':r'二乗の微分で $2$ が出て、前の $\frac12$ と打ち消し合います。',
+            }
+            if segment['id'] in display_forms:
+                segment['display']=display_forms[segment['id']]
+
 # Speech-only corrections after checking every audio_query mora sequence.
 READING_FIXES = {'二値':'にち', '黄色':'きいろ', '値':'あたい', '二乗和':'にじょうわ',
                  '正になります':'せいになります', '負になります':'ふになります',
@@ -211,7 +297,7 @@ for scene in SCENES:
         for segment in beat['segments']:
             for old,new in READING_FIXES.items():
                 segment['speech']=segment['speech'].replace(old,new)
-SYNTHESIS_SETTINGS={'speedScale':1.08,'intonationScale':.95,'prePhonemeLength':.08,'postPhonemeLength':.12,'volumeScale':1.0}
+SYNTHESIS_SETTINGS={'speedScale':1.08,'intonationScale':1.08,'prePhonemeLength':.08,'postPhonemeLength':.12,'volumeScale':1.0}
 def estimated_duration(beat):
     return max(beat['seconds'],sum(len(s['speech']) for s in beat['segments'])/6+.8)
 def script_hash(scene):

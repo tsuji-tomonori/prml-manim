@@ -47,6 +47,15 @@ def main():
     assert max(batch_errors)<1e-8
     cd_error=[abs(central(.2,e)-scalar(.2)['g']) for e in [.1,.01,.001]]
     assert cd_error[1]<cd_error[0]/90 and cd_error[2]<cd_error[1]/90
+    opening=scalar(-.6,x=.8,t=.7)
+    returned_w=-.6-.5*opening['g']
+    returned=scalar(returned_w,x=.8,t=.7)
+    assert abs(opening['g']-central(-.6,1e-5))<1e-9
+    assert abs(opening['y']-(-.5352489610936614))<1e-12
+    assert abs(opening['E']-.762919997941485)<1e-12
+    assert abs(returned_w-(-.0850830358073047))<1e-12
+    assert abs(returned['E']-.29008791112797083)<1e-12
+    assert returned['E']<opening['E'] and returned['y']<.7
     direction=np.array([1,-.5]);y0=forward()['y'];J=jacobian()
     local_errors={str(s):float(np.linalg.norm(forward(X+s*direction)['y']-y0-s*J@direction)) for s in [.05,.2,1.1]}
     assert local_errors['0.05']<local_errors['0.2']<local_errors['1.1']
@@ -70,10 +79,13 @@ def main():
     entries=json.loads(MANIFEST.read_text())['scenes']
     assert len(entries)==len(SCENES) and all(valid_entry(s,e) for s,e in zip(SCENES,entries))
     segments=[v for s in SCENES for b in s['beats'] for v in b['segments']]
+    reading_rows=json.loads((ROOT/'reading_check.json').read_text())['sentences']
+    assert [(r['id'],r['display'],r['speech']) for r in reading_rows]==[
+        (v['id'],v['display'],v['speech']) for v in segments]
     display='\n'.join(v['display'] for v in segments)
     assert not re.search('エックス|ダブリュー|デルタ|ラムダ|ミュー|シグマ|ゼット|ジェー',display)
     (ROOT/'media').mkdir(exist_ok=True);(ROOT/'media/display.txt').write_text(display)
-    result=dict(max_cancellation_error=max(cancellation),aid_column_errors=column_errors,weight_derivatives=36,max_gradient_error=max(errors),jacobian_derivatives=12,max_jacobian_error=max(jerrors),max_softmax_seed_error=max(seeds),max_batch_error=max(batch_errors),loss_before=before,loss_after=after,central_difference_errors=cd_error,local_linear_errors=local_errors,branch_cancel_target=t2,scenes=len(SCENES),beats=sum(len(s['beats']) for s in SCENES),sentences=len(segments),math_captions=sum('$' in s['display'] for s in segments))
+    result=dict(max_cancellation_error=max(cancellation),aid_column_errors=column_errors,weight_derivatives=36,max_gradient_error=max(errors),jacobian_derivatives=12,max_jacobian_error=max(jerrors),max_softmax_seed_error=max(seeds),max_batch_error=max(batch_errors),loss_before=before,loss_after=after,central_difference_errors=cd_error,opening=dict(w=-.6,y=float(opening['y']),E=opening['E'],gradient=float(opening['g'])),return_to_opening=dict(w=float(returned_w),y=float(returned['y']),E=returned['E']),local_linear_errors=local_errors,branch_cancel_target=t2,scenes=len(SCENES),beats=sum(len(s['beats']) for s in SCENES),sentences=len(segments),math_captions=sum('$' in s['display'] for s in segments))
     if args.captions:
         from video_support import caption_mobject
         captions=[caption_mobject(v['display']) for v in segments]
