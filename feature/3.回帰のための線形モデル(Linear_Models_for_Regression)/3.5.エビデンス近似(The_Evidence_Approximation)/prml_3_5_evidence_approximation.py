@@ -32,7 +32,7 @@ class PRML35EvidenceApproximation(NarratedScene):
         for v in (xticks if xticks is not None else [xr[0],xr[1]]):
             labels.add(tex(f'{v:g}',18,MUTED).move_to(ax.c2p(v,yr[0])+DOWN*.22))
         for v in (yticks if yticks is not None else [yr[0],yr[1]]):
-            labels.add(tex(f'{v:g}',18,MUTED).next_to(ax.c2p(xr[0],v),LEFT,buff=.12))
+            labels.add(tex(f'{v:g}',18,MUTED).next_to(ax.c2p(xr[0],v),LEFT,buff=.25))
         if xlabel:labels.add(tex(xlabel,23).next_to(ax.c2p(xr[1],yr[0]),RIGHT,buff=.2))
         if ylabel:labels.add(tex(ylabel,23).next_to(ax.c2p(xr[0],yr[1]),UP,buff=.16))
         self.add(ax,labels);ax.labels=labels
@@ -40,6 +40,7 @@ class PRML35EvidenceApproximation(NarratedScene):
 
     def regression(self,center=(0,.25,0),width=9,height=3.3,span=1.6):
         ax=self.axes([0,1,.5],[-span,span,1],center,width,height,'x',r't,\ y',xticks=[0,.5,1],yticks=[-1,0,1])
+        ax.labels[-1].next_to(ax.c2p(0,span),LEFT,buff=.16)
         dots=VGroup(*[Dot(ax.c2p(x,t),color=DATA,radius=.055) for x,t in zip(X,T)])
         self.add(dots);return ax,dots
 
@@ -212,8 +213,8 @@ class PRML35EvidenceApproximation(NarratedScene):
         full=self.formula(r'p(t_*|\mathbf t)=\iiint p(t_*|\mathbf w,\beta)p(\mathbf w|\mathbf t,\alpha,\beta)p(\alpha,\beta|\mathbf t)\,d\mathbf w\,d\alpha\,d\beta',pos=(0,-1.9,0),size=27)
         self.beat(Indicate(full,scale_factor=1.015))
         self.remove(ax,ax.labels,mean,*dots.get_family(),*curves.get_family())
-        hax=self.axes([-3,3,1],[0,2.2,1],center=(0,.6,0),width=7,height=2.6,xlabel=r'\ln\alpha\quad(\beta\ {\rm fixed})',ylabel='',xticks=[],yticks=[])
-        note=jp('精度の事後分布：集中の模式図',22,MUTED).move_to([0,2.45,0]);self.add(note)
+        hax=self.axes([-3,3,1],[0,2.2,1],center=(0,.6,0),width=7,height=2.6,xlabel=r'\ln\alpha',ylabel='',xticks=[],yticks=[])
+        note=jp('精度の事後分布：集中の模式図（β固定）',22,MUTED).move_to([0,2.45,0]);self.add(note)
         width=ValueTracker(.9)
         bell=always_redraw(lambda:path(hax,np.linspace(-3,3,241),normal(np.linspace(-3,3,241),0,width.get_value()**2),PRIOR))
         self.add(bell);self.beat(width.animate.set_value(.2))
