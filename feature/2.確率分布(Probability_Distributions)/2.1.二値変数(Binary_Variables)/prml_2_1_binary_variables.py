@@ -301,7 +301,7 @@ class PRML21BinaryVariables(NarratedScene):
         meanline=always_redraw(lambda:DashedLine(ax.c2p(8*mu.get_value(),0),ax.c2p(8*mu.get_value(),.35),color=YELLOW))
         self.add(meanline)
         self.beat(mu.animate.set_value(.5))
-        self.beat(pulse(ax.x_axis),mu.animate.set_value(.625))
+        self.beat(Indicate(ax.x_axis,color=YELLOW,scale_factor=1),mu.animate.set_value(.625))
 
     def prior(self):
         ax=self.ax(yr=(0,4,1),ylabel='尤度')
@@ -408,8 +408,8 @@ class PRML21BinaryVariables(NarratedScene):
         self.add(f)
         self.beat(Create(batch),pulse(counters))
         self.discard(batch)
-        self.beat(Transform(cs,coins(OBS[::-1],2.1,r=.19),rate_func=lambda t:smooth(min(1,4*t))),pulse(g))
-        self.beat(cs.animate.scale(.2).move_to([0,-1.95,0]).set_opacity(0),pulse(counters))
+        self.beat(Transform(cs,coins(OBS[::-1],2.1,r=.19),rate_func=lambda t:smooth(min(1,4*t))),Indicate(g,color=YELLOW,scale_factor=1))
+        self.beat(cs.animate.scale(.2).move_to([0,-1.95,0]).set_opacity(0),Indicate(counters,color=YELLOW,scale_factor=1))
 
     def predict(self):
         ax=self.ax(yr=(0,3.2,1),height=3)
