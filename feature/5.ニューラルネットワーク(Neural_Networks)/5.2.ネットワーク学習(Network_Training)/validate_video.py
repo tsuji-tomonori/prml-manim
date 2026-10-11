@@ -28,7 +28,8 @@ def main():
         with wave.open(str(ROOT/e['path'])) as wav:
             rate=wav.getframerate(); data=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
         for b in s['beats']:
-            if not any('-recap-' in c['id'] or '-aid-' in c['id'] for c in b['cues']):
+            if not any('-recap-' in c['id'] or '-aid-' in c['id'] or
+                       c['id'].startswith('scene10-08-') for c in b['cues']):
                 continue
             for c,a in zip(b['cues'],b['actions']):
                 assert c['id']==a['sentence']

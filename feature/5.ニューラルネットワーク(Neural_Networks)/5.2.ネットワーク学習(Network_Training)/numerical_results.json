@@ -1,7 +1,17 @@
 {
-  "check_groups": 7,
+  "check_groups": 8,
   "regression_optimum": 0.8150810126641046,
   "noise_variance_ml": 0.002034328997895098,
+  "story": {
+    "point_index": 8,
+    "input": 0.5333333333333332,
+    "start_weight": 0.7,
+    "end_weight": 0.8150810126641046,
+    "start_point_abs_residual": 0.005184921055272684,
+    "end_point_abs_residual": 0.09083705665374042,
+    "start_total_error": 0.07181926971571473,
+    "end_total_error": 0.013223138486318136
+  },
   "binary_gradient_max_error": 1.9409696072614224e-11,
   "stationary_points": [
     -1.531376102127529,
@@ -32,8 +42,8 @@
   "batch_final": 0.29999194475172486,
   "online_final": 0.5208715633389208,
   "scalar_optimum": 0.29999999999999993,
-  "audio_seconds": 637.4666666666667,
-  "sentences": 130,
+  "audio_seconds": 612.7333333333333,
+  "sentences": 135,
   "visual_aid_gradient": [
     2.000000000002,
     -1.0000000000065512
