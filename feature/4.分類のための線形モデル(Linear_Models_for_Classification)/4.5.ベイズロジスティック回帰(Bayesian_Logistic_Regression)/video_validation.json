@@ -9,658 +9,958 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "516.333011"
+        "duration": "520.866011"
       },
       {
         "index": 1,
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "516.373333"
+        "duration": "520.896000"
       }
     ],
     "format": {
-      "duration": "516.374000",
-      "size": "11503348"
+      "duration": "520.896000",
+      "size": "11536262"
     }
   },
-  "stream_duration_difference": 0.040321999999946456,
+  "stream_duration_difference": 0.029989000000000487,
   "long_silence_count": 0,
-  "mean_volume_db": -26.6,
-  "max_volume_db": -6.8,
-  "video_sha256": "09b9a78e0410648f898a11321eb8ba2cbcfab146bf32ceec510b2367c065ac48",
+  "mean_volume_db": -26.4,
+  "max_volume_db": -5.5,
+  "video_sha256": "1387ee745614661dc66e256cc142310f09ccfb3428128f40a0c1ed11720ddd81",
   "frames": [
     {
       "id": "scene01-beat1",
-      "time": 5.904,
-      "display": "この少ない観測から、新しい点のクラスをどこまで予測できるでしょう。",
-      "image_sha256": "dabddc86764eeb3a425b5836eab7d77755452514bfcb4c4be7e60cab54cca59e"
+      "time": 7.173333333333334,
+      "display": "新しい入力$x\\simeq1.819$が赤になる確率を、予想してください。",
+      "image_sha256": "09fb21a9e586cb167189f37168b6984ba747ac39d4b93c16ff10a209992865e7"
+    },
+    {
+      "id": "scene01-01-02",
+      "time": 7.173333333333334,
+      "display": "新しい入力$x\\simeq1.819$が赤になる確率を、予想してください。",
+      "image_sha256": "09fb21a9e586cb167189f37168b6984ba747ac39d4b93c16ff10a209992865e7"
     },
     {
       "id": "scene01-beat2",
-      "time": 14.757333333333321,
-      "display": "この曲線は、入力をゼロから一の確率へ変える、シグモイド関数です。",
-      "image_sha256": "dd5164c872203387a4b81ecd0c4c27e934dab754f20b506c93c87899ffb4a1df"
+      "time": 17.581333333333315,
+      "display": "これなら、かなり自信を持って赤と答えられそうです。",
+      "image_sha256": "5fd8cb4efd03bcfd129bef0b9b38a6eddb04538f47ee51022a782b82a8cdff52"
     },
     {
       "id": "scene01-beat3",
-      "time": 23.48533333333329,
-      "display": "重みとは、予測の形を調整する係数のことです。",
-      "image_sha256": "35f0ccadf6d8f46562dabecddd68254ad31e477cc782a2d58ca1f00eec65052e"
-    },
-    {
-      "id": "scene01-03-01",
-      "time": 19.719999999999956,
-      "display": "$w_0$を動かすと、曲線の位置が変わります。",
-      "image_sha256": "a327e63e808d520e57e3fb07b2a81e4a93bf61ac2f3a0fb91ced9ed6b2d47d42"
+      "time": 27.95733333333328,
+      "display": "同じ入力なのに、4ポイント低い。どこで変わったのでしょう。",
+      "image_sha256": "3dbb1980c6bdcf6aa992d07059f3d8a081edca6122926d44b34d8d562ea147e4"
     },
     {
       "id": "scene01-beat4",
-      "time": 32.01599999999993,
-      "display": "横軸の$x$と二つの重みから、曲線全体が決まります。",
-      "image_sha256": "3aded477d7e07a67990f1b8d0ecfa091737c9b997bed28d3c901a375f38d2a1c"
+      "time": 37.26399999999991,
+      "display": "10点だけでは、どの組み合わせに決めるか迷います。",
+      "image_sha256": "4d45c4dba65867ba628bf923f1b3d4200c3b6f7c274a86219a1a3ae2cbfacc93"
     },
     {
       "id": "scene01-04-01",
-      "time": 27.83999999999993,
-      "display": "$w_1$を動かすと、確率の変化が急になります。",
-      "image_sha256": "e29b8c2b88620524e67333aac58567234013ef7da3788365bbd584886f284e93"
-    },
-    {
-      "id": "scene01-04-02",
-      "time": 32.01599999999993,
-      "display": "横軸の$x$と二つの重みから、曲線全体が決まります。",
-      "image_sha256": "3aded477d7e07a67990f1b8d0ecfa091737c9b997bed28d3c901a375f38d2a1c"
+      "time": 33.103999999999914,
+      "display": "$w_0$で曲線の位置、$w_1$で傾きを動かしてみます。",
+      "image_sha256": "3bb7b90162113285ba97cc86b867359aff1768367fc10cf92527fd3251522e97"
     },
     {
       "id": "scene01-beat5",
-      "time": 42.7706666666667,
-      "display": "今回は各候補をシグモイドに通し、クラス確率を平均します。",
-      "image_sha256": "efd64c82a9ddb22c8d0a12c118b1f0a63de2236f4acff0dbf33d5a6b310b8d32"
+      "time": 46.34933333333361,
+      "display": "今回は、その候補ごとにシグモイドを通した確率を平均します。",
+      "image_sha256": "d3852a6c3fd03ff7de78f53fe65b573145aba61e0daf52973aa46beae9f74144"
     },
     {
       "id": "scene01-beat6",
-      "time": 52.042666666667245,
-      "display": "一本だけ選ぶと、この候補の広がりが見えなくなります。",
-      "image_sha256": "f12d68f5d1bf4bf34b419ba5dbeca31786033a230be12a857a9759844113afdb"
+      "time": 54.65866666666743,
+      "display": "1本に決めると、この迷いが予測から消えてしまいます。",
+      "image_sha256": "85cdac505e6461f677f0ec57da744152a43dbca88b6224ee5340cf2c74e3c910"
     },
     {
       "id": "scene01-beat7",
-      "time": 61.68000000000102,
-      "display": "そして、候補ごとの予測を平均して、新しい点の確率を求めます。",
-      "image_sha256": "c9e5736c1511ef356d253245a8c5b4dde23607b1a6869f7f22f20719dac207d5"
+      "time": 63.51733333333448,
+      "display": "まず必要なのは、どの重みをどれだけ信じるかです。",
+      "image_sha256": "ff078df912e524601416f2f840be659d4173dbb95e9ce63dd694477d32027e92"
     },
     {
       "id": "scene02-beat1",
-      "time": 70.75733333333477,
-      "display": "横軸の$w$は傾きで、縦軸はその確率密度です。",
-      "image_sha256": "b8ac626a4dd0a6e949085c28a1c9fdf4aa8ed776642485f7b4dc2293bb4f6278"
+      "time": 72.62666666666806,
+      "display": "ここだけ切片を0に固定し、傾き$w$の分布を見ます。",
+      "image_sha256": "94a81569e6a0c9850941c94a7dc3c31dba34958da26d2c88d03b8c148abf09b3"
     },
     {
       "id": "scene02-01-02",
-      "time": 70.75733333333477,
-      "display": "横軸の$w$は傾きで、縦軸はその確率密度です。",
-      "image_sha256": "b8ac626a4dd0a6e949085c28a1c9fdf4aa8ed776642485f7b4dc2293bb4f6278"
+      "time": 72.62666666666806,
+      "display": "ここだけ切片を0に固定し、傾き$w$の分布を見ます。",
+      "image_sha256": "94a81569e6a0c9850941c94a7dc3c31dba34958da26d2c88d03b8c148abf09b3"
     },
     {
       "id": "scene02-beat2",
-      "time": 79.49866666666763,
-      "display": "ここでは、ゼロを中心とするガウス分布を置き、大きすぎる重みを控えめにします。",
-      "image_sha256": "25b3c5043200d9d1a3689b10cb37a6addfa9cd8702dd05ae9958791854efb01d"
+      "time": 81.43200000000085,
+      "display": "ここでは、0を中心とするガウス分布を置き、大きすぎる重みを控えめにします。",
+      "image_sha256": "b4991d0c8f1a9d6be1914344dda5dd84395946aaa96e7a7c2f27d5b998115443"
     },
     {
       "id": "scene02-beat3",
-      "time": 88.99466666666709,
+      "time": 90.92800000000031,
       "display": "各候補の説明しやすさを、尤度と呼びます。",
-      "image_sha256": "06d0ce52a333bb0e6089f5e3ce2f9a2f915a89b17452f2da45131cd907b475ef"
+      "image_sha256": "b584e6c749bddfd27b1eb6f729bbc64d3a89043ef1162c506e973ae2e34e3958"
     },
     {
       "id": "scene02-beat4",
-      "time": 97.40266666666662,
+      "time": 99.33599999999984,
       "display": "観測を受け取った後の重みの分布が、事後分布です。",
-      "image_sha256": "428cf0ed05be1e2c7303f666e6d391df232040da9a3e4b8e215857c93b63d3d0"
+      "image_sha256": "cb492367b3bc7cb7c468fb19c0138cbe8edbc3b4992392b75c6c1f1e730f16dc"
     },
     {
       "id": "scene02-beat5",
-      "time": 105.95199999999946,
-      "display": "対数を取ると、掛け算が足し算になり、二つの寄与を分けて見られます。",
-      "image_sha256": "7761e140b118640c6bb68e5e143d1922992357422be5140f93bd091be3fb2f32"
+      "time": 107.88533333333268,
+      "display": "対数を取ると、掛け算が足し算になり、2つの寄与を分けて見られます。",
+      "image_sha256": "eeb8d42036d5dad4b755e4c4a74135a65fcfa053954674a2d70f377883d71b48"
     },
     {
       "id": "scene02-beat6",
-      "time": 116.5706666666656,
-      "display": "図は数値積分で描けますが、多数の重みを持つ場合には近似が必要になります。",
-      "image_sha256": "79d79dd079777d39f81648ca90a82c21b4a076308fa439293dc6104a0d0ce5c6"
+      "time": 118.28533333333216,
+      "display": "重みが2個以上になっても運べるよう、山を近似しましょう。",
+      "image_sha256": "59d352adaec0ff8458a5dcecfca3c1c4f3c3b89e5ecf8c1f7bd48513e939ee62"
     },
     {
       "id": "scene03-beat1",
-      "time": 126.66133333333164,
-      "display": "いまは最小値を引き、谷底の高さをゼロにそろえています。",
-      "image_sha256": "1ba73e5643c2331e7caa34786427f36c160925a364c98732997467b9e9cc929d"
+      "time": 128.19999999999828,
+      "display": "負の対数を取ると山は谷に変わります。最小値を引き、谷底を0にします。",
+      "image_sha256": "942dac80fc996c7b352ca0be7b6780ef6db2bad2993a1e9d1bfa90e1300a2f0f"
     },
     {
       "id": "scene03-beat2",
-      "time": 136.63466666666446,
+      "time": 139.16799999999765,
       "display": "この求め方を、最大事後確率推定、略してマップ推定と呼びます。",
-      "image_sha256": "a6f831b0d5875763274a098737e79bb7bccba1a8034ee7b88ff141faca252ded"
+      "image_sha256": "afc38431ddabcbee4ffa99ee9f3d43beec094f064d2dff42e565b63cda597e64"
     },
     {
       "id": "scene03-02-01",
-      "time": 131.50933333333114,
+      "time": 134.04266666666433,
       "display": "谷底に着いた重みが、事後分布を最大にする$w_{\\mathrm{MAP}}$です。",
-      "image_sha256": "18fd3f1be37ed8c8b9e4d6ee20685cb593d64f11808ad0760fc4b688047210f1"
+      "image_sha256": "92cda78a7564ae279cb2620664a25d0bb65b9bc48cbe4aeb5a0169182aa815e8"
     },
     {
       "id": "scene03-beat3",
-      "time": 147.51466666666386,
+      "time": 150.04799999999705,
       "display": "曲率が正なら、その逆数がガウス分布の分散です。今回は曲率を$H$と書きます。",
-      "image_sha256": "9621c52d252e76cbab5083adba925ae9ed71aeedc25b0e991d5a8738b971199b"
+      "image_sha256": "42f9a0986dca004a166380390d12d808abd25db75b7a7344ad5e36a842bf3475"
     },
     {
       "id": "scene03-recap-02",
-      "time": 147.51466666666386,
+      "time": 150.04799999999705,
       "display": "曲率が正なら、その逆数がガウス分布の分散です。今回は曲率を$H$と書きます。",
-      "image_sha256": "9621c52d252e76cbab5083adba925ae9ed71aeedc25b0e991d5a8738b971199b"
+      "image_sha256": "42f9a0986dca004a166380390d12d808abd25db75b7a7344ad5e36a842bf3475"
     },
     {
       "id": "scene03-beat4",
-      "time": 158.17599999999655,
+      "time": 160.70933333332974,
       "display": "この局所的な二次近似から、ガウス分布を作るのがラプラス近似です。",
-      "image_sha256": "07d235f57737c05cec1e562909bca1fd33a53f7b49787e8d3ac7b7742b624389"
+      "image_sha256": "ed3144b09863cdd416de586e5e146ad5978c59776609a1c2805953e80b6dd0e5"
     },
     {
       "id": "scene03-beat5",
-      "time": 166.04533333332932,
+      "time": 168.5786666666625,
       "display": "谷が急なら重みの許容範囲は狭く、なだらかなら広くなります。",
-      "image_sha256": "ed9d1627f7b2e7aaaa86bb7cb2f7c3ca2a2d78f1d1d81b9d5f50696c2aefe17c"
+      "image_sha256": "dbf2c6c1edac958850f1849f2b5af1f89e1e6ffe8c24ac30315cc8d7a54b6f00"
     },
     {
       "id": "scene03-beat6",
-      "time": 176.38399999999552,
+      "time": 178.9173333333287,
       "display": "中心と局所的な曲がり方を合わせても、裾の形までは一致しません。",
-      "image_sha256": "8f3629b62f7c5d84fd1cf397498a348823d5b82b03e79a9191d4f09ec6ee4e9e"
+      "image_sha256": "eb0d9b303a413dcc5b20e6859ca2b32570b5a95a14559bf233ee574eb42ada7b"
     },
     {
       "id": "scene03-beat7",
-      "time": 187.38399999999496,
-      "display": "分散は曲率の逆数です。これが、予測へ持ち運ぶ不確かさになります。",
-      "image_sha256": "2052954343eb394a7c4ff6143d03b7575312d58ebd84fd87a2194a3cafc71985"
+      "time": 188.93066666666147,
+      "display": "この中心と幅を、元の2個の重みへ広げます。",
+      "image_sha256": "537be7ce0aad1cdc37e50c2f4c8a902ce4d94c135f0d1b7f79b0d8a5e125071e"
     },
     {
       "id": "scene03-06-01",
-      "time": 181.96533333332826,
+      "time": 184.49866666666145,
       "display": "近似分布$q(w)$の平均には、マップ推定の重みを使います。",
-      "image_sha256": "5bc0b14c8a5b6b21612bf713dce9f29fbb27742731c2a5bbafc01e223d50fcb7"
+      "image_sha256": "e4e4fcc8e8ec54c5e1b4e897ccbfeaa67b5d9497eee7502463f781ca25be1bec"
     },
     {
       "id": "scene04-beat1",
-      "time": 198.22666666666098,
-      "display": "横軸が$w_0$、縦軸が$w_1$で、一つの点が一本の予測曲線に対応します。",
-      "image_sha256": "c81bebd6a54cd283b1391cd39355629cf299d3ed71b3aadc53bef5589da2401f"
+      "time": 199.01866666666092,
+      "display": "横軸が$w_0$、縦軸が$w_1$。1点が1本の予測曲線になります。",
+      "image_sha256": "f4fa88645b7d36f8fbae0c4939ff13f7489972469d1b09992e1593691c43f0b0"
     },
     {
       "id": "scene04-01-02",
-      "time": 198.22666666666098,
-      "display": "横軸が$w_0$、縦軸が$w_1$で、一つの点が一本の予測曲線に対応します。",
-      "image_sha256": "c81bebd6a54cd283b1391cd39355629cf299d3ed71b3aadc53bef5589da2401f"
+      "time": 199.01866666666092,
+      "display": "横軸が$w_0$、縦軸が$w_1$。1点が1本の予測曲線になります。",
+      "image_sha256": "f4fa88645b7d36f8fbae0c4939ff13f7489972469d1b09992e1593691c43f0b0"
     },
     {
       "id": "scene04-beat2",
-      "time": 210.013333333327,
+      "time": 210.67999999999364,
       "display": "これから見せる楕円は、入力の点の散らばりではなく、重みの候補の広がりです。",
-      "image_sha256": "38942012f56ccad76bbed6466c00ba29acae5285f37949507993779f7d5f00d7"
+      "image_sha256": "bd0831dfd5c754a1894c6e26b72f25499b500b33a66377247f32e20c10675c76"
     },
     {
       "id": "scene04-beat3",
-      "time": 219.71999999999304,
-      "display": "楕円の中心は、二つの重みについて計算したマップ推定の位置です。",
-      "image_sha256": "1786ffacb6a5557686a3f3e72c43a1b50f95183d9fb20d79dabd0142306baeb0"
+      "time": 220.38666666665966,
+      "display": "楕円の中心は、2つの重みについて計算したマップ推定の位置です。",
+      "image_sha256": "3c265923503eb8ae9ed779f34069bd48c23be4e829265a068d5fe4a09608749c"
     },
     {
       "id": "scene04-beat4",
-      "time": 231.0479999999925,
+      "time": 231.71466666665913,
       "display": "方向ごとの広がりと重み同士の関係をまとめたものが、共分散行列です。",
-      "image_sha256": "810c8b07d1b6ea1d538c15bf52d9d2444cbf70a5fbe0cb2cdfd3030b16f66b6d"
+      "image_sha256": "c91f9f09606f6e731ad50a691f0cd870a695985c60703a2b71bac5454c15774d"
     },
     {
       "id": "scene04-beat5",
-      "time": 240.7626666666585,
+      "time": 241.42933333332513,
       "display": "事前分布の曲率に、それぞれの観測が与える曲率を足したものです。",
-      "image_sha256": "04c2789c2e593de9787d73be5a820a79948989e398da06a7c8c274b58362426b"
+      "image_sha256": "bd4cbecb1c35f6904543c216b17ba322fc7991f42ca566f1c3232e8681cc9f82"
     },
     {
       "id": "scene04-beat6",
-      "time": 253.10666666665793,
+      "time": 253.77333333332456,
       "display": "事前の精度に足し、最後に逆行列で共分散へ戻します。",
-      "image_sha256": "b0c0666300cd49e1c25b02671ed839d4939c7e1dadc80ca44e71ca3db7693fd9"
+      "image_sha256": "20020897fabeb06c438178c56596724943602ab7319697f8a196bb780e870058"
     },
     {
       "id": "scene04-beat7",
-      "time": 266.4799999999906,
-      "display": "この行列の逆を取ると、楕円の広がりを決める共分散が得られます。",
-      "image_sha256": "b5377546d5c08278096de350f4f15f3c8942f56f45efb806ad6de65459b82807"
+      "time": 267.05066666665726,
+      "display": "この楕円の広がりを、冒頭の入力だけに必要な幅へ写しましょう。",
+      "image_sha256": "70bc5ad1864ac782f4eac80bde163e7f4e9c7e0b95cc34e410bce92a536f12b7"
     },
     {
       "id": "scene04-06-01",
-      "time": 259.8879999999906,
+      "time": 260.5546666666572,
       "display": "各観測の係数は$y_n(1-y_n)$で、予測確率が半分のとき最大です。",
-      "image_sha256": "c17e454aa25fdbf125f96c4e62182d432e61dd0086cb3ab7ed03181bf9dbf099"
+      "image_sha256": "e976eca9bfd14057d432c464e0ae94df254b475b51ce7cb53ec716eba1f92367"
     },
     {
       "id": "scene05-beat1",
-      "time": 278.7733333333232,
-      "display": "この例で特徴ベクトルと呼ぶものは、一と入力を並べた二つの数です。",
-      "image_sha256": "bf315a533dbe09b3ed935fe27dfba33aad0abeae7cf525a54ffa8ea33b65e7c6"
+      "time": 278.8826666666565,
+      "display": "この例の特徴ベクトルは、1と入力を並べた2個の数です。",
+      "image_sha256": "bcb01bcbcdcc9ffb761d1824c628da12a6a520670c532a964b95e466731bf224"
     },
     {
       "id": "scene05-01-01",
-      "time": 272.83733333332316,
-      "display": "新しい入力を一つ固定すると、必要な量は$a=w^{\\mathsf T}\\phi$だけです。",
-      "image_sha256": "c4556c2fdafed054bab5cbef835f522d797f43fa7b8e0787eefa0aad8497a482"
+      "time": 273.27733333332316,
+      "display": "冒頭の入力に効くのは、$a=w^{\\mathsf T}\\phi$という1個の値です。",
+      "image_sha256": "ed241f3b410c20c32e50bd28a9e8271bb493b09d1b2ea9913b783c751f9ca91a"
     },
     {
       "id": "scene05-beat2",
-      "time": 288.1013333333225,
+      "time": 287.9013333333225,
       "display": "シグモイドへ入れるこの数を、ロジットと呼びます。",
-      "image_sha256": "be5abc6d2d6c3c910c7cd5f1d2a9f5f0b830dca9a73c5da5107b394923032980"
+      "image_sha256": "f9ef40974b169f434b38fc4c7ccd4977bbb8a5fffe4dfd7021b24acc6cdc0161"
     },
     {
       "id": "scene05-beat3",
-      "time": 297.61066666665533,
+      "time": 297.41066666665535,
       "display": "重みの数が多くても、予測に使う積分は一次元へ減らせます。",
-      "image_sha256": "3cc950d71757fd25daf484788b6c8ae5c289cfec027f371da4974e5540b98ab7"
+      "image_sha256": "63d1817435a1a4904cd8948a1bdc47cd85d5b100abcf97a5164d71eaf9a8306b"
     },
     {
       "id": "scene05-beat4",
-      "time": 307.93066666665476,
+      "time": 307.73066666665477,
       "display": "入力を動かすと、射影する向きが変わり、山の中心も移動します。",
-      "image_sha256": "3d8cee6c8216a21390ef74175ee65e7893d2382b2337e7b010fef02e6e1f7e8d"
+      "image_sha256": "97091ed9e5c2055dc73e3e442c7a16f2dd42cb93a1c40f9f489cffd6ff3d34a5"
     },
     {
       "id": "scene05-04-01",
-      "time": 302.83733333332145,
+      "time": 302.6373333333214,
       "display": "ロジットの平均$\\mu_a$は、マップ推定の重みで計算したロジットです。",
-      "image_sha256": "f25ee06e3f2f802629b46112e98d7775c03593d54e47a9f783b0a669f9142355"
+      "image_sha256": "354adc14281fa2da6d65be353c0728550f36d3ed535cb1afd0c7cf2283d04d50"
     },
     {
       "id": "scene05-beat5",
-      "time": 319.5706666666541,
+      "time": 319.3706666666542,
       "display": "楕円の長い方向が強く効く入力では、写した山も広がります。",
-      "image_sha256": "775d01b1f62bb0f4cd6bfcb326b5b3fdb06b9086e21d5654d9e04e2f7d268133"
+      "image_sha256": "3e6a697faaadded0de0c613e22c7e9ba32c957a6ae24c02645d7d222f04ff5cd"
     },
     {
       "id": "scene05-05-01",
-      "time": 314.06666666665416,
+      "time": 313.86666666665417,
       "display": "ロジットの分散$\\sigma_a^2$は、特徴ベクトルと共分散行列から計算します。",
-      "image_sha256": "d4cbe2a8a49acc2d8143285ed9573b195ede5514872340d7d494e5e25086508c"
+      "image_sha256": "9894d6b29b14e5566ff18901c3605a0f5f5c6cf208d4e030b30ccadc8c94dd0d"
     },
     {
       "id": "scene05-beat6",
-      "time": 328.7253333333202,
-      "display": "いまの式を使えば、入力と学習した共分散の両方を反映できます。",
-      "image_sha256": "c9394b52e43d3dc4d7077af216a2e9609ad28073dc53afc8b721e90283c18376"
+      "time": 329.3466666666535,
+      "display": "次は、この幅が80%の予測をどう動かすかを調べます。",
+      "image_sha256": "6fd7da0f8bec904d061d071f95a7d0d0fa6fccc21f197b720707c3ec87a16a3e"
     },
     {
       "id": "scene06-beat1",
-      "time": 338.354666666653,
-      "display": "これで、中心の位置と不確かさの効果を分けて見ることができます。",
-      "image_sha256": "916e827c03bc3107b7231f912330f811fac89491b557e1e625695a86fddc6da1"
+      "time": 339.2853333333196,
+      "display": "冒頭の入力へ戻す前に、平均する順番を確かめましょう。",
+      "image_sha256": "55a97423389acb7e0722889aa7c679eb590dcb909bd2c1500013afa1921ee497"
     },
     {
       "id": "scene06-beat2",
-      "time": 347.09066666665245,
-      "display": "これは、重みを一つに固定したときの予測です。",
-      "image_sha256": "8fb4283fb9276128a5eb20b8922c885b70329023703f47c24aac2977bd85f0b3"
+      "time": 347.5866666666524,
+      "display": "でも、幅のある山の候補は同じ確率を出すでしょうか。",
+      "image_sha256": "5a791ea01e57fd2474c3642c7df35ca7d9af9faa96c65613dafc9b534f3b564b"
     },
     {
       "id": "scene06-beat3",
-      "time": 357.5679999999853,
+      "time": 358.30133333331867,
       "display": "黄色の面積を全部足したものが、分布全体で平均した予測確率です。",
-      "image_sha256": "1b96e55ea1a8a62cd09ae9ae110851363fcd3aa995c2a3f354d8e974d0e72160"
+      "image_sha256": "b24a6c80f7e82386c1d8a2f054768b9116f45d270ceaa10060230829e798272a"
     },
     {
       "id": "scene06-beat4",
-      "time": 367.51199999998465,
+      "time": 368.24533333331794,
       "display": "この例では、緑の平均確率が、赤い点より半分に近づきます。",
-      "image_sha256": "ae9b749bbfc610dba4cb916a25bb38ad42167eb88425cb8a0c45177d9acb1eed"
+      "image_sha256": "f54ad04e0b2951a60fc044cb2a4144e58b7efea88e5469fe42a5471cee86e9b7"
     },
     {
       "id": "scene06-beat5",
-      "time": 378.6879999999841,
+      "time": 379.4213333333174,
       "display": "平均した数を曲げることと、曲げた数を平均することは、一般には違います。",
-      "image_sha256": "762033d1e0c00ca137c30b0520961c554495acadf662a4df43847fbeb99077f7"
+      "image_sha256": "f2e61625e4517ec30aa3ff1cd2f140ea24103e63227d72e2b670614fd988283b"
     },
     {
       "id": "scene06-beat6",
-      "time": 389.7226666666501,
-      "display": "緑の数値は数値積分で求めました。次は、この積分を簡単な式で近似します。",
-      "image_sha256": "d7e8be1b69fe102a9cf878e612f0e66c5eb1cf8cce4c8484804d265bdc0d7dc0"
+      "time": 390.09333333331676,
+      "display": "積分で差は計算できます。冒頭の入力にも使える近似式を作りましょう。",
+      "image_sha256": "b982ad4b0b220882a4ce5bc71e21b9967c7e9f5985b96e6361761c818848db1f"
     },
     {
       "id": "scene07-beat1",
-      "time": 399.88533333331617,
-      "display": "横軸を調整すると、赤いシグモイドと、とてもよく似た形になります。",
-      "image_sha256": "afdfa2606f14a034bb677541d43451e9314cdc3fc19e17d6d5b810054b00487a"
+      "time": 400.0986666666495,
+      "display": "青い累積正規分布を横に調整すると、赤いシグモイドと似た形になります。",
+      "image_sha256": "520f8cd60f9ffbe11e9a468ae96b480b46c6612bbcd3ff2d1174293128042db3"
     },
     {
       "id": "scene07-beat2",
-      "time": 412.39466666664896,
+      "time": 412.79466666664894,
       "display": "形が似ているので、扱いやすい青い関数を計算の橋渡しに使います。",
-      "image_sha256": "c37eeb43dd5931b7fa5ff6e9ba0318936c5f0a968fe0620da0c56928e55b5e11"
+      "image_sha256": "017d523a4c25d59d18ee3be5d001d8cdbe72f472acf84e5ee1aa13d074fddbe3"
     },
     {
       "id": "scene07-02-01",
-      "time": 406.3146666666489,
+      "time": 406.7146666666489,
       "display": "原点での傾きを合わせると、調整係数は$\\lambda=\\sqrt{\\pi/8}$です。",
-      "image_sha256": "aea3d2befdbdc4413c4843061f4a0f809b0e921abe723f744d41eb88bc75a010"
+      "image_sha256": "8681bc3def00675ac01063dd63ecfbb84bd6d07b6ecde846572a904f3dd67134"
     },
     {
       "id": "scene07-beat3",
-      "time": 422.54933333331485,
+      "time": 422.9493333333148,
       "display": "画面の等式は、この置き換えた関数について厳密に成り立ちます。",
-      "image_sha256": "55ae1a7a62382ac23f5513e0ebc6138401089ab33d73f5dad7cc9962cddb3982"
+      "image_sha256": "5f5054ca9d2e624b4d45bc851723f8939ba046065dc52994456fb07a52e98cd2"
     },
     {
       "id": "scene07-beat4",
-      "time": 432.34933333331435,
+      "time": 432.7493333333143,
       "display": "平均ロジットを少し縮めてから、シグモイドへ入れるだけです。",
-      "image_sha256": "b629edb66913f0a0a3b3d7ee2f35a951dd27ad5db29bafb27c4262354806c746"
+      "image_sha256": "8517e3fd71c39bec685edd242225a62de125f118775bf1558ec47b21fb9bb2d4"
     },
     {
       "id": "scene07-beat5",
-      "time": 441.1706666666471,
+      "time": 441.57066666664707,
       "display": "平均を固定すると、出力確率は半分へ近づきます。",
-      "image_sha256": "39b5177e0ed823bb288bf51bea2ba9617b2b0318e2653263743a6d2ce4132ce7"
+      "image_sha256": "8ceb884bcf385d648fd2e31ea9d9af41a5311186201ae6e8b452d47381fc7fa0"
     },
     {
       "id": "scene07-05-01",
-      "time": 436.95199999998044,
+      "time": 437.3519999999804,
       "display": "縮める係数$\\kappa$は、分散が大きいほど小さくなります。",
-      "image_sha256": "93bd7f341ba4816ff23383a66fff9917efba15a9d492286bec5881b72ce35b2c"
+      "image_sha256": "298a6d43d8d37cf9757868aa4888e60355816528a4adead9a8f8ba40aca10e1b"
     },
     {
       "id": "scene07-beat6",
-      "time": 451.2826666666466,
-      "display": "よく近づきますが完全には一致しません。事後分布と積分の二段階で近似しています。",
-      "image_sha256": "70e4a173939b83eb277ce3dad1577ecbb2a8b7240337da9a5d6085b92aae14d0"
+      "time": 450.9573333333133,
+      "display": "近似のずれを確認できました。いよいよ冒頭の入力へ戻します。",
+      "image_sha256": "193a56618ae1a9f0e0e3a91d8659f2f6996743aae2ba0805fb1bae1e7d1db4d6"
     },
     {
       "id": "scene08-beat1",
-      "time": 462.2159999999793,
-      "display": "重みの広がりを反映すると、同じ座標の上で緑の曲線へ変わります。",
-      "image_sha256": "b7cba93ce587f4d55ab7d6aec737ae1254bbf3cf26a03eb189e15d7992d28463"
+      "time": 461.8959999999794,
+      "display": "赤のMAP予測80%は、重みの広がりを入れると緑の約76%に変わります。",
+      "image_sha256": "ba0239b421d5952876faac6f84f635c8f1602d8bd06d228c0e5946fa60e35ce0"
+    },
+    {
+      "id": "scene08-01-01",
+      "time": 456.00799999997935,
+      "display": "最初と同じ10点、同じ入力$x\\simeq1.819$です。",
+      "image_sha256": "6f9cd40bdc1cf145a698e4f165a4e1d12e042810c1da9004414d6b4458b11f94"
     },
     {
       "id": "scene08-beat2",
-      "time": 472.0106666666454,
+      "time": 472.61066666664533,
       "display": "縮める係数は正なので、この境界はマップ推定と一致します。",
-      "image_sha256": "582bfaa1a8316d080b5b932bad68d08f719e762583176031a6eacfb3a6d8ccff"
+      "image_sha256": "f3201fd82a82f2e4135f4df4a23ae60fd7af569237584a1a341185477924bbf4"
     },
     {
       "id": "scene08-02-01",
-      "time": 467.4239999999787,
-      "display": "確率が$0.5$になる場所は、平均ロジットがゼロの場所です。",
-      "image_sha256": "7145b0d865ead4dd5d7fb4178537ad3b0c47abe0926bce93ff2cdc316dad8865"
+      "time": 468.0239999999787,
+      "display": "確率が$0.5$になる場所は、平均ロジットが0の場所です。",
+      "image_sha256": "bf2007f90414a89355d76cc1a9f1a451435f00b70f94254d285e24e0ac675432"
     },
     {
       "id": "scene08-beat3",
-      "time": 482.22666666664486,
-      "display": "高い確信が必要な判断では、予測確率の違いが結果に影響します。",
-      "image_sha256": "19bebc300822cac01eda1a7dc7583ca832b49b222634bdf2cc9ef4ac25b9fbde"
-    },
-    {
-      "id": "scene08-03-01",
-      "time": 477.1226666666448,
-      "display": "ところが、判断の基準を$0.8$にすると、交点が変わります。",
-      "image_sha256": "46d1d170068367261034824feb0d54e9b27ff00c26431890e5dc74c581bb2762"
+      "time": 483.4026666666448,
+      "display": "同じ10点でも、重みの迷いを入れると判断が変わります。",
+      "image_sha256": "805707106fc6421aa1f90cd10579b95b4bd7495f3a1c14e2a4c850aff716cb6d"
     },
     {
       "id": "scene08-beat4",
-      "time": 492.2026666666443,
+      "time": 492.7359999999776,
       "display": "クラスの結果の不確かさと、重みの推定の不確かさを分けて考えましょう。",
-      "image_sha256": "18b6aa3466c1e70d34f8868faebe41faf95df5d03e83771bdddf0eaed852a10e"
+      "image_sha256": "ec51763bc9fd74e25db13b129648aab3ccffc6ec0e5faee93fa32efcaa0f2e81"
     },
     {
       "id": "scene08-beat5",
-      "time": 503.4453333333104,
+      "time": 503.9786666666437,
       "display": "次に、新しい入力へ射影し、候補ごとのクラス確率を平均します。",
-      "image_sha256": "7aed9145548020c1fc35a7a98fb8428f406e6d00d167821003ccd6e22682d1a5"
+      "image_sha256": "49c3d5000ea2a65d9736fa01cfe7d7f6e4ac0fdaa2a58e5785c86f1b16ab378c"
     },
     {
       "id": "scene08-beat6",
-      "time": 513.434666666643,
-      "display": "その広がりを予測に持ち込むことが、ベイズロジスティック回帰の要点です。",
-      "image_sha256": "1d8dc2dabe284e9c653a93f05ee6a4c994e090006ce8f1e697bb66a0dcb8da04"
+      "time": 517.930666666643,
+      "display": "境界の位置だけでは見えない重みの迷いを、予測確率へ引き継げました。",
+      "image_sha256": "83b953685fa1db2a485486f447acddfd0bf6100951aeb5e27e730d02182b6682"
     },
     {
       "id": "scene01-recap-01-before",
-      "time": 34.400000000000034,
+      "time": 39.20000000000027,
       "display": "transition",
-      "image_sha256": "99d976ee5cb00476621e8fe1e68c7d8b4fbee08873ba3bcd3ff7b4abf5aa4b6d"
+      "image_sha256": "130650ee1f18c984a9d368954181bb134127cf8ebefe1f13a9ed4846cac80158"
     },
     {
       "id": "scene01-recap-01-after",
-      "time": 45.80000000000004,
+      "time": 49.33333333333361,
       "display": "transition",
-      "image_sha256": "8076fc8df0a0405683d358e84d24e7f1554f5650524544f61313820c8959049a"
+      "image_sha256": "e915fd9f75412675599b80b6bd9ceb29950652f53e1f921d04677b40e2a2cde6"
     },
     {
       "id": "scene01-recap-01-early",
-      "time": 35.288640000000036,
-      "display": "3.3では、重みの候補ごとに予測し、その結果を平均しました。",
-      "image_sha256": "7c746266d3323b33ef100618739176100d16b519071d4c3a2a79eee9b74cf9f7"
+      "time": 39.94912000000028,
+      "display": "3.3では、重みの候補ごとに予測してから平均しました。",
+      "image_sha256": "832ed05c4662d7fca59452f9d80ecc28fc810809372c966d82b0fd8b82515b66"
     },
     {
       "id": "scene01-recap-01-late",
-      "time": 39.650026666666705,
-      "display": "3.3では、重みの候補ごとに予測し、その結果を平均しました。",
-      "image_sha256": "fb8604cd609357f90b190513010e6b897edb11bdc2550c37bd60fd65fc414658"
+      "time": 43.426880000000274,
+      "display": "3.3では、重みの候補ごとに予測してから平均しました。",
+      "image_sha256": "2370a30475a4a5cb98376b8e95e0c21b3280e9a44de908bc7ce475469757762f"
     },
     {
       "id": "scene01-recap-02-early",
-      "time": 40.922346666666705,
-      "display": "今回は各候補をシグモイドに通し、クラス確率を平均します。",
-      "image_sha256": "6514c22387581d3e10404881ee2e05539a431e194a7b72ab205ae7b28f091c66"
+      "time": 44.54560000000028,
+      "display": "今回は、その候補ごとにシグモイドを通した確率を平均します。",
+      "image_sha256": "25ebd7d3a6716cf4bf857498df9e89ab56c03b0602a6543e5ede6bc7c40386a0"
     },
     {
       "id": "scene01-recap-02-late",
-      "time": 44.6189866666667,
-      "display": "今回は各候補をシグモイドに通し、クラス確率を平均します。",
-      "image_sha256": "5a769e2c3c24a7869bf2d39b0ea1c0503eee5d8207973aaf3fc3c1a1a087dafc"
+      "time": 48.153066666666945,
+      "display": "今回は、その候補ごとにシグモイドを通した確率を平均します。",
+      "image_sha256": "b75af9f3706c934272d72dafbe64e6fca1e300912d6bd087fe9ec437e7622c38"
     },
     {
       "id": "scene03-recap-01-before",
-      "time": 139.66666666666387,
+      "time": 142.19999999999706,
       "display": "transition",
-      "image_sha256": "afad757af34b4e32e2ad44f2e96290d5952d44f418dcb2c98bc25013df0185bb"
+      "image_sha256": "ebc6fe47ec5c32a22a15fe0999c965c553479a15ab1b1367aababb12e1c40874"
     },
     {
       "id": "scene03-recap-01-after",
-      "time": 151.3999999999972,
+      "time": 153.93333333333038,
       "display": "transition",
-      "image_sha256": "e2931562275c89bd5492c7db90ffbb94c4856e9f0a7d85568f361483b3aa61c8"
+      "image_sha256": "4a642a8293e0ab99031a229d1c9928fe68fde4962f866231034fd91bd217fb2d"
     },
     {
       "id": "scene03-recap-01-early",
-      "time": 140.39018666666385,
+      "time": 142.92351999999704,
       "display": "4.4では、谷底の近くを放物線で合わせました。",
-      "image_sha256": "6748bed2d4ff583e7aebff692f9a229ae2e19cc60fbdc1ff3882b325c87b278e"
+      "image_sha256": "0f5aa57734e128ab62a65f3af7da6ffd8accc7906885bb0a59c6cdf1ad5a7eaa"
     },
     {
       "id": "scene03-recap-01-late",
-      "time": 143.70581333333052,
+      "time": 146.23914666666374,
       "display": "4.4では、谷底の近くを放物線で合わせました。",
-      "image_sha256": "a70bb501cb15f7b67b2d78aad8499b6b9d818b24af4af34b00f8a5aba3e49b26"
+      "image_sha256": "27ad44e23af340fb21d692a414eaea84685ef74aea4638672c7306946fe78514"
     },
     {
       "id": "scene03-recap-02-early",
-      "time": 145.0178133333305,
+      "time": 147.55114666666373,
       "display": "曲率が正なら、その逆数がガウス分布の分散です。今回は曲率を$H$と書きます。",
-      "image_sha256": "fbef75f448a62ab0a4fc8eacfb9b0c17f78f4f504a529e051dc2cfcffc7a22e3"
+      "image_sha256": "946173808a3b719210dc67cbd40165dade6c6005c7c5fb44efeec3ec84ccd675"
     },
     {
       "id": "scene03-recap-02-late",
-      "time": 150.0115199999972,
+      "time": 152.5448533333304,
       "display": "曲率が正なら、その逆数がガウス分布の分散です。今回は曲率を$H$と書きます。",
-      "image_sha256": "2e7e21d29ab8473d4475d12a2792ad63bcafab317390d65acb0dd8310a47473e"
+      "image_sha256": "9c6d4a5821ea0b44c7b341fe2f34c650f7510a2707365147a30d7fadad58610f"
     },
     {
       "id": "scene04-aid-01-before",
-      "time": 243.5999999999913,
+      "time": 244.26666666665793,
       "display": "transition",
-      "image_sha256": "cce7a41ebca7309a306e26b3f99cbc0f15d86e9065d767a26b34464ca4257e59"
+      "image_sha256": "1a3059b5b951856dd482c1cd414ff4f856ede34ba596d7e2f42dba80a0c92b80"
     },
     {
       "id": "scene04-aid-01-after",
-      "time": 256.06666666665797,
+      "time": 256.7333333333246,
       "display": "transition",
-      "image_sha256": "3c95af6ac3ae4f73d27d338f8cce460c1ee111c7fdfdbfd803b3ff484e610571"
+      "image_sha256": "a2b685c405d7ac3ba0118a5f6a2a6d07247cd21dfa8c9f9248393dfc2763ce5d"
     },
     {
       "id": "scene04-aid-01-early",
-      "time": 244.22367999999128,
-      "display": "特徴を縦横に掛けて、四つの積を並べます。",
-      "image_sha256": "ee6089cc6768aa46a83d4b225c0f08349101e5973e25c422ef86c2bce30a0005"
+      "time": 244.8903466666579,
+      "display": "特徴を縦横に掛けて、4つの積を並べます。",
+      "image_sha256": "2f242f9985171ab963d8836a3fc148f2613d3e9cd696cbd45c37c09445274600"
     },
     {
       "id": "scene04-aid-01-late",
-      "time": 246.90698666665796,
-      "display": "特徴を縦横に掛けて、四つの積を並べます。",
-      "image_sha256": "652de8327cdf31ab9a1d0b0cf751840297364537ea336535eabfaf7536ca0420"
+      "time": 247.5736533333246,
+      "display": "特徴を縦横に掛けて、4つの積を並べます。",
+      "image_sha256": "d7ff78edd1cf62e95f5d0752956a244906f7965ffaab4ba1d15646cbcd3f31fd"
     },
     {
       "id": "scene04-aid-02-early",
-      "time": 247.73898666665795,
+      "time": 248.40565333332458,
       "display": "観測ごとの係数を、表の全体に掛けます。",
-      "image_sha256": "451b19e41b77c424ae0c37c4f5c45cccb87b5ba8366c85894e15d27460827ad1"
+      "image_sha256": "24c3f9db93ebfc10ed3761c45b8666632888d9fae0b0071fd797b210feb68e3d"
     },
     {
       "id": "scene04-aid-02-late",
-      "time": 250.32501333332462,
+      "time": 250.99167999999125,
       "display": "観測ごとの係数を、表の全体に掛けます。",
-      "image_sha256": "e826092561db74460d39fe127f56412c6912e31504dc33ac628ff3f9a21b973c"
+      "image_sha256": "0991e15ef31ef022f29524cdf1b581dc62163e2bc25444b37022acd10559972e"
     },
     {
       "id": "scene04-aid-03-early",
-      "time": 251.30293333332463,
+      "time": 251.96959999999126,
       "display": "事前の精度に足し、最後に逆行列で共分散へ戻します。",
-      "image_sha256": "b8f20dadaaca6977aa0548431edca05f8249c9908d377a8a1a867cdceb81d267"
+      "image_sha256": "82a5e5869eacbb4d542799fb46609c7392bd71585d5d5052bf9f5394d6828f96"
     },
     {
       "id": "scene04-aid-03-late",
-      "time": 254.91039999999126,
+      "time": 255.57706666665788,
       "display": "事前の精度に足し、最後に逆行列で共分散へ戻します。",
-      "image_sha256": "9cb4bf49137d181b48548f109bb8de04f0cb7d07d85ab21606e8e7053a57951a"
+      "image_sha256": "cd8887360bd9a99eff02bdeb95e6a487d4e29681bc0e6622a7a7779dfc9f45f2"
     },
     {
       "id": "scene05-03-01-before",
-      "time": 289.933333333322,
+      "time": 289.73333333332204,
       "display": "transition",
-      "image_sha256": "490b949ffb6c7ae3ccedd5a8498e5268de2d0322bd50ef360ce32693479f49d0"
+      "image_sha256": "0f8dba2c580ecf2e41c97e7abed586a384e0e9c9a37f7c43262455a453ae934d"
     },
     {
       "id": "scene05-03-01-after",
-      "time": 300.59999999998865,
+      "time": 300.39999999998867,
       "display": "transition",
-      "image_sha256": "4dea66a8d7fb3724f8832f7fda4a5641ca1faad2fe190863003be88642f1f783"
+      "image_sha256": "9be9d7c725a028f197b75e4d278f5a7691f1d16dc337e0e80b948a28f2cb40b8"
     },
     {
       "id": "scene05-03-01-early",
-      "time": 290.745173333322,
+      "time": 290.545173333322,
       "display": "2.3で見たように、ガウス分布を線形に写してもガウスになります。",
-      "image_sha256": "927cdc0d4abd129bb6551243fae2e64a1d71a23406fda48c02b63aabd656aaff"
+      "image_sha256": "5c830cc4a3185d151df6b98478477fc1889812688547bf6cf6564f17660c5221"
     },
     {
       "id": "scene05-03-01-late",
-      "time": 294.6201599999887,
+      "time": 294.4201599999887,
       "display": "2.3で見たように、ガウス分布を線形に写してもガウスになります。",
-      "image_sha256": "e6b0944b97b98bc9c3552ecae8d20b6ce34be525c66ef721bc8ecbee75f84563"
+      "image_sha256": "07e0c179122660fc47ab32f5b979e1558d8ed564fa08052a0011b631fdd0f593"
     },
     {
       "id": "scene05-03-02-early",
-      "time": 295.80287999998865,
+      "time": 295.60287999998866,
       "display": "重みの数が多くても、予測に使う積分は一次元へ減らせます。",
-      "image_sha256": "c88ef0d5311c7a17727dc9b24770d5ac8c5d02f0ad59b9ace30e8eae3d80db77"
+      "image_sha256": "4f004a7b2af702415f12f37168d7a460c3a451ca13828e14fbd8e7baa8642aa9"
     },
     {
       "id": "scene05-03-02-late",
-      "time": 299.418453333322,
+      "time": 299.21845333332203,
       "display": "重みの数が多くても、予測に使う積分は一次元へ減らせます。",
-      "image_sha256": "583885801d8051b7fe7737e1fc2868bd0889a10e96aab3ac31727d5d494e4a7c"
+      "image_sha256": "a608c5f02ac248747648079fb1426ab76ddcccf27e092dd0bdb61ce77eb67608"
+    },
+    {
+      "id": "scene01-beat1-moving-early",
+      "time": 2.0224,
+      "display": "青の0と赤の1、合わせて10点の観測があります。新しい入力$x\\simeq1.819$が赤になる確率を、予想してください。",
+      "image_sha256": "745a0a43d368708818acd7b187248ef3277421bda82a6edb854163ac88985b15"
+    },
+    {
+      "id": "scene01-beat1-moving-late",
+      "time": 8.0896,
+      "display": "青の0と赤の1、合わせて10点の観測があります。新しい入力$x\\simeq1.819$が赤になる確率を、予想してください。",
+      "image_sha256": "c89ebc707f495df25cdbd78e8a66175d261e6dd8e60839aab22058fee4c05123"
+    },
+    {
+      "id": "scene01-beat1-after",
+      "time": 10.192,
+      "display": "青の0と赤の1、合わせて10点の観測があります。新しい入力$x\\simeq1.819$が赤になる確率を、予想してください。",
+      "image_sha256": "729a41f01e73801c9ea57a318390b99683d2c04806d1aa2cd08d6729cf6f3e18"
+    },
+    {
+      "id": "scene01-beat2-moving-early",
+      "time": 12.241599999999982,
+      "display": "10点に合わせた赤い曲線は、この入力を80%と予測します。これなら、かなり自信を持って赤と答えられそうです。",
+      "image_sha256": "de8b67d67ab0408e873e4966cc4140175ebada347676540f600a41a5e1de29ea"
+    },
+    {
+      "id": "scene01-beat2-moving-late",
+      "time": 17.566399999999984,
+      "display": "10点に合わせた赤い曲線は、この入力を80%と予測します。これなら、かなり自信を持って赤と答えられそうです。",
+      "image_sha256": "5fd8cb4efd03bcfd129bef0b9b38a6eddb04538f47ee51022a782b82a8cdff52"
+    },
+    {
+      "id": "scene01-beat2-after",
+      "time": 19.421333333333315,
+      "display": "10点に合わせた赤い曲線は、この入力を80%と予測します。これなら、かなり自信を持って赤と答えられそうです。",
+      "image_sha256": "afb9f8a82dba44e06364dd5e0dfe6411e52d5278b6f23e8e24035eafaf94d578"
+    },
+    {
+      "id": "scene01-beat3-moving-early",
+      "time": 21.847466666666616,
+      "display": "ところが、重みの候補も考えると、予測は約76%になります。同じ入力なのに、4ポイント低い。どこで変わったのでしょう。",
+      "image_sha256": "ce21213b4e555be610bf29a80c787ae1f072d15504ac8759e660cf5b75bcf8f4"
+    },
+    {
+      "id": "scene01-beat3-moving-late",
+      "time": 28.189866666666617,
+      "display": "ところが、重みの候補も考えると、予測は約76%になります。同じ入力なのに、4ポイント低い。どこで変わったのでしょう。",
+      "image_sha256": "f25e5180fbba599f64391f91f41916a12143a72b0fa5426f6e7b1ee35b9f8d2f"
+    },
+    {
+      "id": "scene01-beat3-after",
+      "time": 30.383999999999947,
+      "display": "ところが、重みの候補も考えると、予測は約76%になります。同じ入力なのに、4ポイント低い。どこで変わったのでしょう。",
+      "image_sha256": "14146583d21c088d4db4b5d9c84968b80c099e565ea0fc05187a3d5b91f20ea3"
+    },
+    {
+      "id": "scene01-beat4-moving-early",
+      "time": 32.33066666666658,
+      "display": "$w_0$で曲線の位置、$w_1$で傾きを動かしてみます。10点だけでは、どの組み合わせに決めるか迷います。",
+      "image_sha256": "01a7488c63b16ce59774b879a387fc6568817945a5d9469daf05eb5733bf1365"
+    },
+    {
+      "id": "scene01-beat4-moving-late",
+      "time": 37.32266666666658,
+      "display": "$w_0$で曲線の位置、$w_1$で傾きを動かしてみます。10点だけでは、どの組み合わせに決めるか迷います。",
+      "image_sha256": "b8858daba3e2585399f8e4fa557b1d1c653565ab04ad1425ede179de246a1edc"
+    },
+    {
+      "id": "scene01-beat4-after",
+      "time": 39.06666666666658,
+      "display": "$w_0$で曲線の位置、$w_1$で傾きを動かしてみます。10点だけでは、どの組み合わせに決めるか迷います。",
+      "image_sha256": "b7366f64df312335469f39af68104acd368ed20106dea3eba59b4e6c47568500"
+    },
+    {
+      "id": "scene01-beat6-moving-early",
+      "time": 50.63520000000076,
+      "display": "ほら、まだもっともらしい曲線が何本もあります。1本に決めると、この迷いが予測から消えてしまいます。",
+      "image_sha256": "a4df261b20ffcccec8308e09122c51e255cad4f80bc466bff777d1932783b771"
+    },
+    {
+      "id": "scene01-beat6-moving-late",
+      "time": 55.14080000000076,
+      "display": "ほら、まだもっともらしい曲線が何本もあります。1本に決めると、この迷いが予測から消えてしまいます。",
+      "image_sha256": "a2d21f9657683252551da9d812f62e481f60a1f208655f412458881be10a7376"
+    },
+    {
+      "id": "scene01-beat6-after",
+      "time": 56.72266666666742,
+      "display": "ほら、まだもっともらしい曲線が何本もあります。1本に決めると、この迷いが予測から消えてしまいます。",
+      "image_sha256": "d43050b94889e1c6fe9bcb66fcfded75070e67e1baae09dc738802b8e73eccfc"
+    },
+    {
+      "id": "scene01-beat7-moving-early",
+      "time": 58.66186666666782,
+      "display": "黄色の線を先ほどの入力へ戻し、候補の予測を集めます。まず必要なのは、どの重みをどれだけ信じるかです。",
+      "image_sha256": "fca21fdc841feaf30908da91ac90b69f305d173e8628d562fd753673c0b4804b"
+    },
+    {
+      "id": "scene01-beat7-moving-late",
+      "time": 63.64746666666781,
+      "display": "黄色の線を先ほどの入力へ戻し、候補の予測を集めます。まず必要なのは、どの重みをどれだけ信じるかです。",
+      "image_sha256": "fdb6b4eec7473b354fd56ec45aa16b43bcc876790b30b6f9d7703df689c12159"
+    },
+    {
+      "id": "scene01-beat7-after",
+      "time": 65.38933333333448,
+      "display": "黄色の線を先ほどの入力へ戻し、候補の予測を集めます。まず必要なのは、どの重みをどれだけ信じるかです。",
+      "image_sha256": "770da0860c91d300cd45387959b84c0271761c7b31da70ca4f8028e4c47731e6"
+    },
+    {
+      "id": "scene05-beat4-moving-early",
+      "time": 306.1370666666548,
+      "display": "ロジットの平均$\\mu_a$は、マップ推定の重みで計算したロジットです。入力を動かすと、射影する向きが変わり、山の中心も移動します。",
+      "image_sha256": "71ec31fb9a14a877749315d5b9d5502a66f7b99cdf354353d532d67085051ad5"
+    },
+    {
+      "id": "scene05-beat4-moving-late",
+      "time": 309.32426666665475,
+      "display": "ロジットの平均$\\mu_a$は、マップ推定の重みで計算したロジットです。入力を動かすと、射影する向きが変わり、山の中心も移動します。",
+      "image_sha256": "3867c7aa73758f7f49bd4a13d4e80b4c6be3afc22cdfe13950b140ad7b54ac13"
+    },
+    {
+      "id": "scene05-beat4-after",
+      "time": 310.46666666665476,
+      "display": "ロジットの平均$\\mu_a$は、マップ推定の重みで計算したロジットです。入力を動かすと、射影する向きが変わり、山の中心も移動します。",
+      "image_sha256": "09bff33bfd93cbf79dbd444c03d4bf3be78cd686f51f026eacf71d41e72667a4"
+    },
+    {
+      "id": "scene05-beat5-moving-early",
+      "time": 317.9082666666542,
+      "display": "ロジットの分散$\\sigma_a^2$は、特徴ベクトルと共分散行列から計算します。楕円の長い方向が強く効く入力では、写した山も広がります。",
+      "image_sha256": "b197088d0e4430f0b183ea2ff42815be1d17b4d91331d1a501af2025a21dcab8"
+    },
+    {
+      "id": "scene05-beat5-moving-late",
+      "time": 320.83306666665413,
+      "display": "ロジットの分散$\\sigma_a^2$は、特徴ベクトルと共分散行列から計算します。楕円の長い方向が強く効く入力では、写した山も広がります。",
+      "image_sha256": "c312081ec7686c299a105be830e442333b9dab886be125c7bd665846397fee77"
+    },
+    {
+      "id": "scene05-beat5-after",
+      "time": 321.88799999998747,
+      "display": "ロジットの分散$\\sigma_a^2$は、特徴ベクトルと共分散行列から計算します。楕円の長い方向が強く効く入力では、写した山も広がります。",
+      "image_sha256": "80d537ee0fb414b2f16143e1c0b0b17d8da7cbf7f175b8a2d4ed40430e5176e9"
+    },
+    {
+      "id": "scene05-beat6-moving-early",
+      "time": 324.11359999998683,
+      "display": "冒頭の入力まで動かすと、この山の中心と幅が決まります。次は、この幅が80%の予測をどう動かすかを調べます。",
+      "image_sha256": "4436dd2eacf4ca67c36086182c974db39d4974cda37d7a2aef6ed06398dfb1c8"
+    },
+    {
+      "id": "scene05-beat6-moving-late",
+      "time": 329.85439999998687,
+      "display": "冒頭の入力まで動かすと、この山の中心と幅が決まります。次は、この幅が80%の予測をどう動かすかを調べます。",
+      "image_sha256": "e9515b1528df671ef3f5685f7145979ee6cdcd06e6dc75ff57bb6e787068dda0"
+    },
+    {
+      "id": "scene05-beat6-after",
+      "time": 331.8479999999868,
+      "display": "冒頭の入力まで動かすと、この山の中心と幅が決まります。次は、この幅が80%の予測をどう動かすかを調べます。",
+      "image_sha256": "1a7d796752e94419e955be10b23e2b9c57fbc93400ddca2516f4a6d6ed398de5"
+    },
+    {
+      "id": "scene06-beat4-moving-early",
+      "time": 363.24693333331794,
+      "display": "幅を広げると、低い確率を出す候補も無視できなくなります。この例では、緑の平均確率が、赤い点より半分に近づきます。",
+      "image_sha256": "2fbf2e3c22a21c20b5cb0dfddf2dc101f8025949f5eafb94229a259c3f860fb7"
+    },
+    {
+      "id": "scene06-beat4-moving-late",
+      "time": 368.987733333318,
+      "display": "幅を広げると、低い確率を出す候補も無視できなくなります。この例では、緑の平均確率が、赤い点より半分に近づきます。",
+      "image_sha256": "7284218a6d04789a91e414061583eb44139fe58758196af7a8fe9c9d70628aa0"
+    },
+    {
+      "id": "scene06-beat4-after",
+      "time": 370.98133333331793,
+      "display": "幅を広げると、低い確率を出す候補も無視できなくなります。この例では、緑の平均確率が、赤い点より半分に近づきます。",
+      "image_sha256": "73fb650159a84060dccfca52b5be8fc7b9f25805b5d5408867218da22c81efa3"
+    },
+    {
+      "id": "scene06-beat5-moving-early",
+      "time": 373.4789333333174,
+      "display": "幅を狭めると、候補の予測がそろい、2つの確率も近づきます。平均した数を曲げることと、曲げた数を平均することは、一般には違います。",
+      "image_sha256": "4b06e764ae7c033d58654def8c24b8391bc57810567619820dc55f2cd37eeed5"
+    },
+    {
+      "id": "scene06-beat5-moving-late",
+      "time": 380.1157333333174,
+      "display": "幅を狭めると、候補の予測がそろい、2つの確率も近づきます。平均した数を曲げることと、曲げた数を平均することは、一般には違います。",
+      "image_sha256": "50563cc3bf3ed4a15111fa44ceb74a0ce60019d00227fab38a31fd2177c7c822"
+    },
+    {
+      "id": "scene06-beat5-after",
+      "time": 382.40799999998404,
+      "display": "幅を狭めると、候補の予測がそろい、2つの確率も近づきます。平均した数を曲げることと、曲げた数を平均することは、一般には違います。",
+      "image_sha256": "a579c3fc927c7944505ef65196106fab8fad2c8e81f70d75fd4b52f28b72c723"
+    },
+    {
+      "id": "scene07-beat5-moving-early",
+      "time": 436.9541333333138,
+      "display": "縮める係数$\\kappa$は、分散が大きいほど小さくなります。平均を固定すると、出力確率は半分へ近づきます。",
+      "image_sha256": "67129f112f301db1c3f81a7aad07bfaac9f68425c6bd8f1257e6d610252b4068"
+    },
+    {
+      "id": "scene07-beat5-moving-late",
+      "time": 442.01653333331376,
+      "display": "縮める係数$\\kappa$は、分散が大きいほど小さくなります。平均を固定すると、出力確率は半分へ近づきます。",
+      "image_sha256": "e1ce2ed01f508a81fd340698853a1a44070dffd805abb4565b30f34f819b30a1"
+    },
+    {
+      "id": "scene07-beat5-after",
+      "time": 443.78399999998044,
+      "display": "縮める係数$\\kappa$は、分散が大きいほど小さくなります。平均を固定すると、出力確率は半分へ近づきます。",
+      "image_sha256": "5a76326342ae7d214d72af890cf58dbe35d25a25efcd1133bd862a4f3c3c19d3"
+    },
+    {
+      "id": "scene08-beat1-moving-early",
+      "time": 459.7679999999794,
+      "display": "最初と同じ10点、同じ入力$x\\simeq1.819$です。赤のMAP予測80%は、重みの広がりを入れると緑の約76%に変わります。",
+      "image_sha256": "91f106aac47cb8a0bbe48dfc7d9f3b2940bb8cccc8b464f7a65d501b35d79797"
+    },
+    {
+      "id": "scene08-beat1-moving-late",
+      "time": 464.02399999997937,
+      "display": "最初と同じ10点、同じ入力$x\\simeq1.819$です。赤のMAP予測80%は、重みの広がりを入れると緑の約76%に変わります。",
+      "image_sha256": "e636822ebcf0bde30e529104963109a567ec0dc3c2866149182cd7b3e0c406e8"
+    },
+    {
+      "id": "scene08-beat1-after",
+      "time": 465.52266666664605,
+      "display": "最初と同じ10点、同じ入力$x\\simeq1.819$です。赤のMAP予測80%は、重みの広がりを入れると緑の約76%に変わります。",
+      "image_sha256": "d79ac6a26b6bd281f1e7dc5bbb3c9a5526d43108527e318d2a5ba701cb0490d9"
+    },
+    {
+      "id": "scene08-beat2-moving-early",
+      "time": 467.6346666666454,
+      "display": "確率が$0.5$になる場所は、平均ロジットが0の場所です。縮める係数は正なので、この境界はマップ推定と一致します。",
+      "image_sha256": "ff4e97df6379eba1a28f58f1a2397edf2ae3c8a78b2385b2d03e0f28857333d6"
+    },
+    {
+      "id": "scene08-beat2-moving-late",
+      "time": 473.13866666664535,
+      "display": "確率が$0.5$になる場所は、平均ロジットが0の場所です。縮める係数は正なので、この境界はマップ推定と一致します。",
+      "image_sha256": "d95887cc7a1954b3ac4ca785faf8df302fb7d761206a072091fea657563d2d3c"
+    },
+    {
+      "id": "scene08-beat2-after",
+      "time": 475.053333333312,
+      "display": "確率が$0.5$になる場所は、平均ロジットが0の場所です。縮める係数は正なので、この境界はマップ推定と一致します。",
+      "image_sha256": "c208984baa13026f69081d40a63f351bba3ff25d14225fcc16e4be09789ae7f4"
+    },
+    {
+      "id": "scene08-beat3-moving-early",
+      "time": 476.5301333333115,
+      "display": "0.8を基準にすると、赤の交点は冒頭の入力、緑はもっと右です。同じ10点でも、重みの迷いを入れると判断が変わります。",
+      "image_sha256": "95f944e2deb33b65e04fa56e91713ecfa5375d1093d6308beff4f985c05513af"
+    },
+    {
+      "id": "scene08-beat3-moving-late",
+      "time": 480.12053333331147,
+      "display": "0.8を基準にすると、赤の交点は冒頭の入力、緑はもっと右です。同じ10点でも、重みの迷いを入れると判断が変わります。",
+      "image_sha256": "c92eebe9b16b828436a6e377405dac6db648475d7813481683067ef1533276f0"
+    },
+    {
+      "id": "scene08-beat3-after",
+      "time": 481.39733333331145,
+      "display": "0.8を基準にすると、赤の交点は冒頭の入力、緑はもっと右です。同じ10点でも、重みの迷いを入れると判断が変わります。",
+      "image_sha256": "5f51f94d948a783d4c6e847fe35766b14d53600982a5c5c356d824dcf9efe0d3"
+    },
+    {
+      "id": "scene08-beat5-moving-early",
+      "time": 497.94773333331034,
+      "display": "観測から事後分布の頂上と曲率を求め、ガウス分布で近似します。次に、新しい入力へ射影し、候補ごとのクラス確率を平均します。",
+      "image_sha256": "53a79ee07029ef908161c1f44834f961cabf7ed4397a74352630c8cd5c15da1b"
+    },
+    {
+      "id": "scene08-beat5-moving-late",
+      "time": 504.5909333333103,
+      "display": "観測から事後分布の頂上と曲率を求め、ガウス分布で近似します。次に、新しい入力へ射影し、候補ごとのクラス確率を平均します。",
+      "image_sha256": "c5a34838b5df3b1920f5f91baf776b45ce5f9e5995722bbbf4b57588f490cd5b"
+    },
+    {
+      "id": "scene08-beat5-after",
+      "time": 506.8853333333103,
+      "display": "観測から事後分布の頂上と曲率を求め、ガウス分布で近似します。次に、新しい入力へ射影し、候補ごとのクラス確率を平均します。",
+      "image_sha256": "2bad6c77bee79e56a0acc85df8993bfa3e8ceacd7443400f4785d383d86f28a4"
+    },
+    {
+      "id": "scene08-beat6-moving-early",
+      "time": 509.86239999997633,
+      "display": "最初の問いの答えです。80%から約76%へ変わったのは、候補ごとの確率を平均したから。境界の位置だけでは見えない重みの迷いを、予測確率へ引き継げました。",
+      "image_sha256": "228b43e2647def6326e1c918f6c1c13fe1010c6467b016a0231cb3811f8b4e39"
+    },
+    {
+      "id": "scene08-beat6-moving-late",
+      "time": 517.8495999999764,
+      "display": "最初の問いの答えです。80%から約76%へ変わったのは、候補ごとの確率を平均したから。境界の位置だけでは見えない重みの迷いを、予測確率へ引き継げました。",
+      "image_sha256": "6463cc6625d0d48402b1a1ae78d21fd7d5460010521b383ba04960f4bf965be0"
+    },
+    {
+      "id": "scene08-beat6-after",
+      "time": 520.5919999999763,
+      "display": "最初の問いの答えです。80%から約76%へ変わったのは、候補ごとの確率を平均したから。境界の位置だけでは見えない重みの迷いを、予測確率へ引き継げました。",
+      "image_sha256": "ef29d5ba6925aa7f6132122ca1f697b251de43f32cee3c6b7f2aebc86ce78417"
     },
     {
       "id": "scene01-03-01-early",
-      "time": 18.36213333333329,
-      "display": "$w_0$を動かすと、曲線の位置が変わります。",
-      "image_sha256": "d18bf48d2b1410da224b01e640acb0e7e9326480f7cccc0dd7a185468a39b9ab"
+      "time": 21.001813333333285,
+      "display": "ところが、重みの候補も考えると、予測は約76%になります。",
+      "image_sha256": "7ea80a8f3f5b8dd7d664c422a95be16bc016d5f7cba8281d4bd1e0cbe52a7ef2"
     },
     {
       "id": "scene01-03-01-late",
-      "time": 20.970666666666624,
-      "display": "$w_0$を動かすと、曲線の位置が変わります。",
-      "image_sha256": "fdc4c153cda9dbf3fbf8f1f36884dfd9818a1635148e59d0afb40795143fcc4e"
+      "time": 28.71839999999995,
+      "display": "ところが、重みの候補も考えると、予測は約76%になります。",
+      "image_sha256": "7a0baaf79342f633cb9876099350a62a57217a19a680478674ab00baf09029ff"
     },
     {
       "id": "scene05-04-02-early",
-      "time": 305.9121066666548,
+      "time": 305.7121066666548,
       "display": "入力を動かすと、射影する向きが変わり、山の中心も移動します。",
-      "image_sha256": "7e23254fe9c633e7cb636f9c1efa066c7ee3efe3bcc3b0121a1d794773205685"
+      "image_sha256": "e2309d96fa931fcb3f77117c097cf24f2a64bb3b954939775189be5dde213389"
     },
     {
       "id": "scene05-04-02-late",
-      "time": 309.78986666665475,
+      "time": 309.58986666665476,
       "display": "入力を動かすと、射影する向きが変わり、山の中心も移動します。",
-      "image_sha256": "e1cf0bbeb22f3f8ba6f2fb0438ddba3ca9156300b262d34ae074a2c167041523"
+      "image_sha256": "58de7d1fc2f7cd7100ffa78f1436d20a63a218753954433c09279b5f2aed97ee"
     },
     {
       "id": "scene08-01-02-early",
-      "time": 460.2339199999793,
-      "display": "重みの広がりを反映すると、同じ座標の上で緑の曲線へ変わります。",
-      "image_sha256": "8955be14d61835d7575552d9636d192d4b437f5081afe23b9844e266f47d1dd8"
+      "time": 459.2005333333127,
+      "display": "赤のMAP予測80%は、重みの広がりを入れると緑の約76%に変わります。",
+      "image_sha256": "093d630c907b9bce7610961b53efb08479d2b163e1e97fa0f5852e3fcf552e63"
     },
     {
       "id": "scene08-01-02-late",
-      "time": 464.0415999999793,
-      "display": "重みの広がりを反映すると、同じ座標の上で緑の曲線へ変わります。",
-      "image_sha256": "2d9b664c15dd40038a11a8edcb20861eafd6a52c722b84b738044bd1e87c9cd3"
+      "time": 464.37866666664604,
+      "display": "赤のMAP予測80%は、重みの広がりを入れると緑の約76%に変わります。",
+      "image_sha256": "be8b6fb7de92e1023864fc840f045b8e4a35094e9f5f376b53efbd71cbab6146"
     }
   ],
   "sync": [
     {
       "id": "scene01-03-01",
-      "sentence_start": 17.93333333333329,
-      "pcm_onset": 18.0255,
-      "action_start": 17.93333333333329,
-      "action_end": 21.506666666666625
+      "sentence_start": 19.733333333333285,
+      "pcm_onset": 19.830208333333335,
+      "action_start": 19.733333333333285,
+      "action_end": 30.30399999999995
     },
     {
       "id": "scene05-04-02",
-      "sentence_start": 305.27466666665475,
-      "pcm_onset": 305.3466666666565,
-      "action_start": 305.27466666665475,
-      "action_end": 310.58666666665476
+      "sentence_start": 305.07466666665476,
+      "pcm_onset": 305.14662499998985,
+      "action_start": 305.07466666665476,
+      "action_end": 310.3866666666548
     },
     {
       "id": "scene08-01-02",
-      "sentence_start": 459.6079999999793,
-      "pcm_onset": 459.67195833331266,
-      "action_start": 459.6079999999793,
-      "action_end": 464.8239999999793
+      "sentence_start": 458.3493333333127,
+      "pcm_onset": 458.4025833333127,
+      "action_start": 458.3493333333127,
+      "action_end": 465.44266666664606
     },
     {
       "id": "scene01-recap-02",
-      "sentence_start": 40.338666666666704,
-      "pcm_onset": 40.436708333333335,
-      "action_start": 40.333333333333655,
-      "action_end": 43.733333333333825,
+      "sentence_start": 43.976000000000276,
+      "pcm_onset": 44.07245833333333,
+      "action_start": 44.000000000000504,
+      "action_end": 47.266666666667334,
       "phase": "sigmoid each candidate then average"
     },
     {
       "id": "scene04-aid-02",
-      "sentence_start": 247.33066666665795,
-      "pcm_onset": 247.4221249999943,
-      "action_start": 247.33333333332442,
-      "action_end": 250.73333333332423,
+      "sentence_start": 247.99733333332458,
+      "pcm_onset": 248.08862499999427,
+      "action_start": 247.99999999999105,
+      "action_end": 251.39999999999085,
       "phase": "coefficient on all cells"
     }
   ],

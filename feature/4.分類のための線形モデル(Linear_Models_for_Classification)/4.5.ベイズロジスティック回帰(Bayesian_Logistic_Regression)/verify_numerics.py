@@ -69,6 +69,13 @@ grid = np.linspace(-1.7,3,20001)
 report['threshold08_map_x'] = float((np.log(4)-MAP[0])/MAP[1])
 report['threshold08_bayes_x'] = float(np.interp(.8,predict(grid),grid))
 assert report['threshold08_bayes_x'] > report['threshold08_map_x']
+assert abs(PROBE_X-report['threshold08_map_x']) < 1e-12
+assert abs(PROBE_MAP_P-.8) < 1e-12
+assert round(100*PROBE_INTEGRAL_P) == round(100*PROBE_APPROX_P) == 76
+assert abs(float(predictive_integral(*stats([PROBE_X]))[0])-PROBE_INTEGRAL_P) < 1e-12
+report['story_probe'] = dict(x=PROBE_X, map=PROBE_MAP_P,
+                             integral=PROBE_INTEGRAL_P, approximation=PROBE_APPROX_P,
+                             variance=PROBE_VAR)
 
 # The precision card is an illustrative observation, independent of the fitted data.
 phi_example = np.array([1.,2.])

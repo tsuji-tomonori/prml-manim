@@ -28,6 +28,20 @@ for scene in timeline:
    for suffix,fraction in [('early',.12),('late',.88)]:
     shots.append(dict(id=cue['id']+'-'+suffix,time=cue['start']+fraction*(cue['end']-cue['start']),display=cue['display']))
 
+# Inspect the story's prediction reveal, parameter motion, and return to the
+# same input while the narrated animations are running, as well as afterward.
+story_beats={'scene01': [0,1,2,3,5,6], 'scene05': [3,4,5],
+             'scene06': [3,4], 'scene07': [4], 'scene08': [0,1,2,4,5]}
+for scene in timeline:
+ for index in story_beats.get(scene['id'], []):
+  beat=scene['beats'][index]
+  begin,end=beat['action_start'],beat['action_end']
+  for suffix,fraction in [('moving-early',.2),('moving-late',.8)]:
+   shots.append(dict(id=f"{scene['id']}-beat{index+1}-{suffix}",
+                     time=begin+fraction*(end-begin),display=beat['display']))
+  shots.append(dict(id=f"{scene['id']}-beat{index+1}-after",
+                    time=min(beat['end']-.05,end+.08),display=beat['display']))
+
 # Three scene actions, before/after positions and measured PCM onset.
 sync=[]
 for i,j,k in [(0,2,0),(4,3,1),(7,0,1)]:
