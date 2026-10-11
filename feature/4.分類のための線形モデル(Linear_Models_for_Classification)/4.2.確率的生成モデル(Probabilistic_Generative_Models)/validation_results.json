@@ -8,300 +8,300 @@
         "width": 854,
         "height": 480,
         "r_frame_rate": "15/1",
-        "duration": "787.999344"
+        "duration": "762.866344"
       },
       {
         "codec_name": "aac",
         "codec_type": "audio",
         "r_frame_rate": "0/0",
-        "duration": "788.032000"
+        "duration": "762.901333"
       }
     ],
     "format": {
-      "duration": "788.032000"
+      "duration": "762.902000"
     }
   },
-  "stream_difference": 0.03265600000008817,
+  "stream_difference": 0.03498899999999594,
   "silences_over_3s": 0,
   "volume_db": {
-    "mean_volume": -26.8,
-    "max_volume": -5.4
+    "mean_volume": -26.6,
+    "max_volume": -5.8
   },
-  "max_scene_clock_error": 7.851497230149107e-11,
-  "max_sentence_clock_error": 6.795630724809598e-11,
+  "max_scene_clock_error": 7.761968845443334e-11,
+  "max_sentence_clock_error": 6.744471647834871e-11,
   "sync": [
     {
       "scene": "scene04",
       "beat": 2,
-      "action_start": 286.66666666665554,
-      "action_end": 296.92799999998886,
+      "action_start": 273.19999999998964,
+      "action_end": 283.34399999998965,
       "speech_onsets": [
-        286.7217083333229,
-        290.9712499999896
+        273.255041666657,
+        277.5519583333237
       ],
       "display": [
-        "赤の事前確率を、ゼロ点五からゼロ点八へ増やします。",
-        "赤い領域が広がり、固定した白い点も、赤らしいと判断されるようになります。"
+        "赤の事前確率を、0.5から0.8へ増やします。",
+        "固定した白い点の判定が、青から赤へ変わります。境界も同時に動きます。"
       ]
     },
     {
       "scene": "scene05",
       "beat": 5,
-      "action_start": 390.7333333333163,
-      "action_end": 400.8133333333163,
+      "action_start": 374.79999999998387,
+      "action_end": 384.8373333333172,
       "speech_onsets": [
-        390.82941666665226,
-        395.1292083333189
+        374.8727916666531,
+        379.15283333331973
       ],
       "display": [
-        "では、緑の分布だけ、広がりと傾きを変えてみましょう。",
+        "緑の広がりと傾きだけ変えると、境界はどうなるでしょう。",
         "赤と青の境界は直線のままですが、緑と接する境界が曲がり始めます。"
       ]
     },
     {
       "scene": "scene07",
       "beat": 2,
-      "action_start": 545.9333333333363,
-      "action_end": 555.064000000003,
+      "action_start": 524.7999999999862,
+      "action_end": 533.9306666666529,
       "speech_onsets": [
-        546.0281666666604,
-        550.3060416666603
+        524.8891249999784,
+        529.1728333333118
       ],
       "display": [
         "平均はその点に引かれ、共分散の楕円も大きく伸びます。",
-        "同じ一つの点の移動が、平面全体の境界を変えてしまいました。"
+        "同じ1つの点の移動が、平面全体の境界を変えてしまいました。"
       ]
     }
   ],
-  "sha256": "32b192b945d86930af7644e867436b10f049f021e379e6bcde0ccfab1287eec2",
+  "sha256": "f76f1eb06f6d3575d81382146368aabe63e38385d53265724bffa04f96d13a20",
   "full_listening": false,
   "card_sync": [
     {
       "scene": "scene01",
-      "start": 23.599999999999937,
-      "end": 33.999999999999936,
-      "duration": 10.399999999999999,
+      "start": 20.73333333333328,
+      "end": 31.133333333333283,
+      "duration": 10.400000000000002,
       "actions": [
         {
           "name": "R1.2 select observed areas",
-          "start": 23.599999999999937,
-          "end": 25.133333333333265,
+          "start": 20.73333333333328,
+          "end": 22.26666666666661,
           "sentence_id": "scene01-recap-01",
-          "voiced_start": 23.644541666666665,
-          "voiced_end": 28.988,
-          "overlap": 1.4887916666666001
+          "voiced_start": 20.777083333333334,
+          "voiced_end": 26.121791666666667,
+          "overlap": 1.4895833333332753
         },
         {
           "name": "R1.2 gather equal height",
-          "start": 25.133333333333265,
-          "end": 26.799999999999926,
+          "start": 22.26666666666661,
+          "end": 23.93333333333327,
           "sentence_id": "scene01-recap-01",
-          "voiced_start": 23.644541666666665,
-          "voiced_end": 28.988,
+          "voiced_start": 20.777083333333334,
+          "voiced_end": 26.121791666666667,
           "overlap": 1.6666666666666607
         },
         {
           "name": "R1.2 normalize to one",
-          "start": 26.799999999999926,
-          "end": 29.13333333333325,
+          "start": 23.93333333333327,
+          "end": 26.266666666666595,
           "sentence_id": "scene01-recap-01",
-          "voiced_start": 23.644541666666665,
-          "voiced_end": 28.988,
-          "overlap": 2.1880000000000734
+          "voiced_start": 20.777083333333334,
+          "voiced_end": 26.121791666666667,
+          "overlap": 2.188458333333397
         },
         {
           "name": "R1.2 boxes to classes",
-          "start": 29.13333333333325,
-          "end": 29.73333333333325,
+          "start": 26.266666666666595,
+          "end": 26.866666666666593,
           "sentence_id": "scene01-recap-02",
-          "voiced_start": 29.200166666666668,
-          "voiced_end": 33.539125,
-          "overlap": 0.5331666666665811
+          "voiced_start": 26.33341666666667,
+          "voiced_end": 30.672458333333335,
+          "overlap": 0.5332499999999243
         },
         {
           "name": "R1.2 connect class labels",
-          "start": 29.73333333333325,
-          "end": 33.59999999999999,
+          "start": 26.866666666666593,
+          "end": 30.733333333333245,
           "sentence_id": "scene01-recap-02",
-          "voiced_start": 29.200166666666668,
-          "voiced_end": 33.539125,
-          "overlap": 3.8057916666667495
+          "voiced_start": 26.33341666666667,
+          "voiced_end": 30.672458333333335,
+          "overlap": 3.8057916666667424
         }
       ]
     },
     {
       "scene": "scene03",
-      "start": 173.3999999999953,
-      "end": 183.93333333332862,
+      "start": 166.06666666666237,
+      "end": 176.5999999999957,
       "duration": 10.533333333333331,
       "actions": [
         {
           "name": "R2.3 mean and covariance",
-          "start": 173.3999999999953,
-          "end": 179.53333333332827,
+          "start": 166.06666666666237,
+          "end": 172.19999999999536,
           "sentence_id": "scene03-recap-01",
-          "voiced_start": 173.47391666666195,
-          "voiced_end": 179.40220833332862,
-          "overlap": 5.9282916666666665
+          "voiced_start": 166.14083333332903,
+          "voiced_end": 172.0687499999957,
+          "overlap": 5.927916666666675
         },
         {
           "name": "R2.3 clear explanation",
-          "start": 179.53333333332827,
-          "end": 179.9999999999949,
+          "start": 172.19999999999536,
+          "end": 172.666666666662,
           "sentence_id": "scene03-recap-02",
-          "voiced_start": 179.57404166666194,
-          "voiced_end": 183.43045833332863,
-          "overlap": 0.4259583333329715
+          "voiced_start": 172.2408749999957,
+          "voiced_end": 176.09629166666238,
+          "overlap": 0.4257916666662993
         },
         {
           "name": "R2.3 translate same shape",
-          "start": 179.9999999999949,
-          "end": 182.7333333333281,
+          "start": 172.666666666662,
+          "end": 175.39999999999517,
           "sentence_id": "scene03-recap-02",
-          "voiced_start": 179.57404166666194,
-          "voiced_end": 183.43045833332863,
+          "voiced_start": 172.2408749999957,
+          "voiced_end": 176.09629166666238,
           "overlap": 2.733333333333178
         },
         {
           "name": "R2.3 shared covariance",
-          "start": 182.7333333333281,
-          "end": 183.53333333332805,
+          "start": 175.39999999999517,
+          "end": 176.19999999999513,
           "sentence_id": "scene03-recap-02",
-          "voiced_start": 179.57404166666194,
-          "voiced_end": 183.43045833332863,
-          "overlap": 0.6971250000005398
+          "voiced_start": 172.2408749999957,
+          "voiced_end": 176.09629166666238,
+          "overlap": 0.6962916666672072
         }
       ]
     },
     {
       "scene": "scene06",
-      "start": 489.1333333333107,
-      "end": 500.86666666664405,
+      "start": 470.5999999999784,
+      "end": 482.33333333331177,
       "duration": 11.733333333333348,
       "actions": [
         {
           "name": "V08d diagonal squares",
-          "start": 489.1333333333107,
-          "end": 493.1333333333105,
+          "start": 470.5999999999784,
+          "end": 474.5999999999782,
           "sentence_id": "scene06-aid-01",
-          "voiced_start": 489.21033333331445,
-          "voiced_end": 493.08033333331446,
+          "voiced_start": 470.67699999998206,
+          "voiced_end": 474.54699999998206,
           "overlap": 3.8700000000000045
         },
         {
           "name": "V08d cross products",
-          "start": 493.1333333333105,
-          "end": 496.73333333331027,
+          "start": 474.5999999999782,
+          "end": 478.199999999978,
           "sentence_id": "scene06-aid-02",
-          "voiced_start": 493.2544166666478,
-          "voiced_end": 496.6393749999811,
-          "overlap": 3.3849583333333157
+          "voiced_start": 474.7219999999821,
+          "voiced_end": 478.1060416666487,
+          "overlap": 3.384041666666633
         },
         {
           "name": "V08d sum all residual tables",
-          "start": 496.73333333331027,
-          "end": 498.7999999999768,
+          "start": 478.199999999978,
+          "end": 480.26666666664454,
           "sentence_id": "scene06-aid-03",
-          "voiced_start": 496.81291666664777,
-          "voiced_end": 500.3682916666478,
-          "overlap": 1.9870833333290534
+          "voiced_start": 478.2794999999821,
+          "voiced_end": 481.8349583333154,
+          "overlap": 1.9871666666624606
         },
         {
           "name": "V08d divide by N",
-          "start": 498.7999999999768,
-          "end": 500.4666666666434,
+          "start": 480.26666666664454,
+          "end": 481.9333333333111,
           "sentence_id": "scene06-aid-03",
-          "voiced_start": 496.81291666664777,
-          "voiced_end": 500.3682916666478,
-          "overlap": 1.568291666670973
+          "voiced_start": 478.2794999999821,
+          "voiced_end": 481.8349583333154,
+          "overlap": 1.5682916666708593
         }
       ]
     },
     {
       "scene": "scene08",
-      "start": 628.0000000000683,
-      "end": 638.0000000000683,
+      "start": 604.6666666667164,
+      "end": 614.6666666667164,
       "duration": 10.0,
       "actions": [
         {
           "name": "R2.1 binary probabilities",
-          "start": 628.0000000000683,
-          "end": 631.8666666667381,
+          "start": 604.6666666667164,
+          "end": 608.5333333333862,
           "sentence_id": "scene08-recap-01",
-          "voiced_start": 628.0705833333726,
-          "voiced_end": 631.7870000000393,
-          "overlap": 3.716416666666646
+          "voiced_start": 604.7377916666896,
+          "voiced_end": 608.4532916666897,
+          "overlap": 3.71550000000002
         },
         {
           "name": "R2.1 choose one",
-          "start": 631.8666666667381,
-          "end": 633.2000000000725,
+          "start": 608.5333333333862,
+          "end": 609.8666666667206,
           "sentence_id": "scene08-recap-02",
-          "voiced_start": 631.9080000000392,
-          "voiced_end": 634.9063333333726,
-          "overlap": 1.2920000000332266
+          "voiced_start": 608.5746250000229,
+          "voiced_end": 611.573000000023,
+          "overlap": 1.292041666697628
         },
         {
           "name": "R2.1 choose zero",
-          "start": 633.2000000000725,
-          "end": 635.0000000000739,
+          "start": 609.8666666667206,
+          "end": 611.666666666722,
           "sentence_id": "scene08-recap-02",
-          "voiced_start": 631.9080000000392,
-          "voiced_end": 634.9063333333726,
-          "overlap": 1.7063333333001083
+          "voiced_start": 608.5746250000229,
+          "voiced_end": 611.573000000023,
+          "overlap": 1.706333333302382
         },
         {
           "name": "R2.1 one parameter per word",
-          "start": 635.0000000000739,
-          "end": 637.4666666667425,
+          "start": 611.666666666722,
+          "end": 614.1333333333906,
           "sentence_id": "scene08-recap-03",
-          "voiced_start": 635.1132500000392,
-          "voiced_end": 637.3557500000393,
-          "overlap": 2.2425000000000637
+          "voiced_start": 611.7800833333563,
+          "voiced_end": 614.0224166666897,
+          "overlap": 2.242333333333363
         }
       ]
     },
     {
       "scene": "scene09",
-      "start": 700.6666666667928,
-      "end": 711.2666666667928,
+      "start": 676.5333333334403,
+      "end": 687.1333333334403,
       "duration": 10.600000000000023,
       "actions": [
         {
           "name": "R2.4 three factors",
-          "start": 700.6666666667928,
-          "end": 703.2000000001282,
+          "start": 676.5333333334403,
+          "end": 679.0666666667756,
           "sentence_id": "scene09-recap-01",
-          "voiced_start": 700.7370416667844,
-          "voiced_end": 706.9437916667845,
-          "overlap": 2.4629583333437495
+          "voiced_start": 676.604375000098,
+          "voiced_end": 682.8066666667647,
+          "overlap": 2.462291666677629
         },
         {
-          "name": "R2.4 meaning frames",
-          "start": 703.2000000001282,
-          "end": 707.0666666667979,
+          "name": "R2.4 meaning labels",
+          "start": 679.0666666667756,
+          "end": 682.9333333334454,
           "sentence_id": "scene09-recap-01",
-          "voiced_start": 700.7370416667844,
-          "voiced_end": 706.9437916667845,
-          "overlap": 3.743791666656307
+          "voiced_start": 676.604375000098,
+          "voiced_end": 682.8066666667647,
+          "overlap": 3.739999999989095
         },
         {
           "name": "R2.4 class parameters",
-          "start": 707.0666666667979,
-          "end": 708.9333333334661,
+          "start": 682.9333333334454,
+          "end": 684.8000000001135,
           "sentence_id": "scene09-recap-02",
-          "voiced_start": 707.1518750001178,
-          "voiced_end": 710.7657916667845,
-          "overlap": 1.7814583333482688
+          "voiced_start": 683.018875000098,
+          "voiced_end": 686.6362916667647,
+          "overlap": 1.7811250000155496
         },
         {
           "name": "R2.4 common input factor",
-          "start": 708.9333333334661,
-          "end": 710.8666666668009,
+          "start": 684.8000000001135,
+          "end": 686.7333333334484,
           "sentence_id": "scene09-recap-02",
-          "voiced_start": 707.1518750001178,
-          "voiced_end": 710.7657916667845,
-          "overlap": 1.8324583333184137
+          "voiced_start": 683.018875000098,
+          "voiced_end": 686.6362916667647,
+          "overlap": 1.8362916666511637
         }
       ]
     }

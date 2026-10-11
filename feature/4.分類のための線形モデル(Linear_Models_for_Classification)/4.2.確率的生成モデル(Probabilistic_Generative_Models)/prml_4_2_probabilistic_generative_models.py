@@ -5,7 +5,7 @@ from scene_support import NarratedScene
 from caption_layout import jp, tex
 from generative_model import (MEANS,COV,OTHER_COV,RED_POINTS,BLUE_POINTS,BINARY_MU,
     sigmoid,normal1,posterior,linear_params,covariances,fit,contaminated,
-    binary_scores,softmax,decision_paths)
+    binary_scores,softmax,decision_paths,OPENING_X,OPENING_PRIOR,opening_evidence)
 
 RED_CLS=ManimColor('#FF6B77'); BLUE_CLS=ManimColor('#58B5ED'); GREEN_CLS=ManimColor('#77D49A')
 GOLD=ManimColor('#FFE079'); ORANGE_CLS=ManimColor('#FFB45B'); PURPLE_CLS=ManimColor('#C29AFF'); MUTED=ManimColor('#A8B2C5')
@@ -108,9 +108,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         saved = [m for m in self.mobjects if m is not self.subtitle]
         header = [m for m in saved if m.get_center()[1] > 3]
         self.clear()
-        self.add(*header, RoundedRectangle(width=10.4, height=4.45,
-            corner_radius=.12, color=AID_OPERATION, stroke_width=1.2).move_to([0,.1,0]),
-            jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
+        self.add(*header, jp(title,23).move_to([-4.85,2.02,0],aligned_edge=LEFT))
         return saved
 
     def restore_body(self, saved):
@@ -219,13 +217,11 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
             for x,z,word,c in [(-2,'0','ない',BLUE_CLS),(2,'1','ある',GREEN_CLS)]])
         probs=VGroup(tex(r'1-\mu',30,BLUE_CLS).move_to([-2,.1,0]),tex(r'\mu',30,GREEN_CLS).move_to([2,1,0]))
         a,b,c=[self.sentence_duration(i) for i in range(3)]
-        selected=SurroundingRectangle(VGroup(bars[1],probs[1]),color=GOLD,buff=.15)
-        zero=SurroundingRectangle(VGroup(bars[0],probs[0]),color=GOLD,buff=.15)
         self.add(labels)
         self.beat(phases=[
             ('R2.1 binary probabilities',a,lambda:AnimationGroup(FadeIn(bars),FadeIn(probs))),
-            ('R2.1 choose one',b*.43,lambda:Create(selected)),
-            ('R2.1 choose zero',b*.57,lambda:Transform(selected,zero)),
+            ('R2.1 choose one',b*.43,lambda:Indicate(VGroup(bars[1],probs[1]),color=GOLD,scale_factor=1.03)),
+            ('R2.1 choose zero',b*.57,lambda:Indicate(VGroup(bars[0],probs[0]),color=GOLD,scale_factor=1.03)),
             ('R2.1 one parameter per word',c,lambda:FadeIn(tex(r'\mu\ \longrightarrow\ \mu_{k1},\mu_{k2},\mu_{k3}',29).move_to([0,.55,0]))),
         ])
         self.restore_body(saved)
@@ -244,51 +240,64 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
             VGroup(*eq[3:]).move_to([2.9,y,0])
             return eq
         eq=equation(r'\eta',.6)
-        boxes=VGroup(*[SurroundingRectangle(part,color=color,buff=.15) for part,color in
-            [(eq[1],MUTED),(eq[2],PURPLE_CLS),(eq[3:],GOLD)]])
-        meanings=VGroup(*[jp(word,21,color).next_to(box,DOWN,buff=.25) for word,color,box in
-            zip(['入力だけ','正規化係数','両者の結合'],[MUTED,PURPLE_CLS,GOLD],boxes)])
+        meanings=VGroup(*[jp(word,21,color).next_to(part,DOWN,buff=.25) for word,color,part in
+            zip(['入力だけ','正規化係数','両者の結合'],[MUTED,PURPLE_CLS,GOLD],[eq[1],eq[2],VGroup(*eq[3:])])])
         first=equation(r'\lambda_1',.65);second=equation(r'\lambda_2',-.55)
-        common=VGroup(*[SurroundingRectangle(e[1],color=GOLD,buff=.14) for e in [first,second]])
         a,b=[self.sentence_duration(i) for i in range(2)]
         self.beat(phases=[
             ('R2.4 three factors',a*.4,lambda:FadeIn(eq)),
-            ('R2.4 meaning frames',a*.6,lambda:AnimationGroup(Create(boxes),FadeIn(meanings))),
-            ('R2.4 class parameters',b*.5,lambda:AnimationGroup(FadeOut(boxes),FadeOut(meanings),ReplacementTransform(eq,first),FadeIn(second))),
-            ('R2.4 common input factor',b*.5,lambda:Create(common)),
+            ('R2.4 meaning labels',a*.6,lambda:FadeIn(meanings)),
+            ('R2.4 class parameters',b*.5,lambda:AnimationGroup(FadeOut(meanings),ReplacementTransform(eq,first),FadeIn(second))),
+            ('R2.4 common input factor',b*.5,lambda:AnimationGroup(Indicate(first[1],color=GOLD),Indicate(second[1],color=GOLD))),
         ])
         self.restore_body(saved)
 
     def bayes(self):
         ax=self.axes(yr=(0,.48,.1),height=3.2,labels=('x',r'p(x\mid C_k)'))
-        x=ValueTracker(0);scale=ValueTracker(1)
+        x=ValueTracker(OPENING_X);prior=ValueTracker(OPENING_PRIOR);weighted=ValueTracker(0)
         grid=np.linspace(-3.5,3.5,180)
-        curves=always_redraw(lambda:VGroup(*[path(ax,np.c_[grid,scale.get_value()*normal1(grid,m)],c) for m,c in [(-1.1,RED_CLS),(1.1,BLUE_CLS)]]))
+        factors=lambda:[prior.get_value(),1-prior.get_value()]
+        curves=always_redraw(lambda:VGroup(*[
+            path(ax,np.c_[grid,((1-weighted.get_value())+weighted.get_value()*p)*normal1(grid,m)],c)
+            for m,p,c in [(-1.1,factors()[0],RED_CLS),(1.1,factors()[1],BLUE_CLS)]]))
         guide=always_redraw(lambda:Line(ax.c2p(x.get_value(),0),ax.c2p(x.get_value(),.46),color=WHITE,stroke_width=1.5))
-        self.add(guide);note=self.note('赤：クラス1　青：クラス2　／　自作の密度')
-        self.beat(Create(curves))
-        f=self.formula(r'p(x\mid C_k)');self.beat(x.animate.set_value(-1.1))
+        focus=always_redraw(lambda:Dot(ax.c2p(x.get_value(),0),radius=.08,color=GOLD))
+        self.add(guide)
+        note=self.note('青の密度が高い観測 x=0.4')
+        self.beat(phases=[('draw both densities',self.sentence_duration(0),
+                          lambda:AnimationGroup(Create(curves),FadeIn(focus))),
+                          ('predict the class',self.sentence_duration(1),
+                          lambda:Indicate(focus,color=GOLD))])
+        prob=lambda:np.array([normal1(x.get_value(),-1.1)*factors()[0],normal1(x.get_value(),1.1)*factors()[1]])/sum([normal1(x.get_value(),-1.1)*factors()[0],normal1(x.get_value(),1.1)*factors()[1]])
+        bars=self.probability_bars(prob);self.remove(bars)
+        surprise=jp(f'ところが赤の事後確率 {opening_evidence()[2][0]:.3f}',24,RED_CLS).move_to(note)
+        self.beat(FadeIn(bars),Transform(note,surprise))
         self.bayes_recap()
-        self.remove(f);f=self.formula(r'q_k=',r'p(x\mid C_k)',r'p(C_k)');f[2].set_color(ORANGE_CLS)
-        self.beat(scale.animate.set_value(.5),Transform(ax.marks[-1],tex('q_k',24).move_to(ax.marks[-1])))
-        prob=lambda:np.array([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])/sum([normal1(x.get_value(),-1.1),normal1(x.get_value(),1.1)])
-        heights=always_redraw(lambda:VGroup(*[Dot(ax.c2p(x.get_value(),.5*normal1(x.get_value(),m)),radius=.07,color=c) for m,c in [(-1.1,RED_CLS),(1.1,BLUE_CLS)]]))
-        self.add(heights);bars=self.probability_bars(prob)
-        # Keep the always_redraw group intact: animating its children separately
-        # makes Scene restructure the group and drops the parent's updater.
-        self.beat(Circumscribe(heights,color=MUTED),Circumscribe(bars,color=GOLD))
+        self.remove(note)
+        self.slider(prior,.2,.8,[0,2.55,0],r'p(C_1)',width=3.3)
+        f=self.formula(r'q_k=',r'p(x\mid C_k)',r'p(C_k)');f[2].set_color(ORANGE_CLS)
+        self.beat(prior.animate.set_value(.5),weighted.animate.set_value(1),
+                  Transform(ax.marks[-1],tex('q_k',24).move_to(ax.marks[-1])))
+        heights=always_redraw(lambda:VGroup(*[Dot(ax.c2p(x.get_value(),p*normal1(x.get_value(),m)),radius=.07,color=c)
+            for m,p,c in [(-1.1,factors()[0],RED_CLS),(1.1,factors()[1],BLUE_CLS)]]))
+        self.add(heights)
+        self.beat(phases=[('raise red prior',self.sentence_duration(0),
+                          lambda:prior.animate.set_value(OPENING_PRIOR)),
+                          ('reveal reversal',self.sentence_duration(1),
+                          lambda:Indicate(bars[1],color=RED_CLS,scale_factor=1.08))])
         self.beat(x.animate.set_value(1.1))
         f=self.equation(f,r'p(C_1\mid x)=',r'\frac{q_1}{q_1+q_2}',r'=\frac{p(x\mid C_1)p(C_1)}{\sum_jp(x\mid C_j)p(C_j)}',colors={1:GOLD})
-        self.beat(x.animate.set_value(0),Circumscribe(f,color=MUTED,buff=.1))
+        self.beat(x.animate.set_value(OPENING_X),Circumscribe(f,color=MUTED,buff=.1))
 
     def logit(self):
         ax=self.axes((-5,5,1),(0,1,.5),labels=('a',r'p(C_1\mid x)'),height=3.3)
-        a=ValueTracker(0);grid=np.linspace(-5,5,180)
+        opening_support=opening_evidence()[1]
+        a=ValueTracker(np.log(opening_support[0]/opening_support[1]));grid=np.linspace(-5,5,180)
         curve=path(ax,np.c_[grid,sigmoid(grid)],GOLD)
         dot=always_redraw(lambda:Dot(ax.c2p(a.get_value(),sigmoid(a.get_value())),radius=.075,color=WHITE))
         guide=always_redraw(lambda:DashedLine(ax.c2p(a.get_value(),0),ax.c2p(a.get_value(),sigmoid(a.get_value())),color=MUTED))
         self.add(dot,guide);self.probability_bars(lambda:np.array([sigmoid(a.get_value()),sigmoid(-a.get_value())]))
-        f=self.formula(r'\frac{q_1}{q_2}=1\quad\Rightarrow\quad p(C_1\mid x)=\frac12')
+        f=self.formula(fr'\frac{{q_1}}{{q_2}}={opening_support[0]/opening_support[1]:.2f}\quad\Rightarrow\quad p(C_1\mid x)={opening_evidence()[2][0]:.3f}')
         self.beat(Indicate(dot))
         self.remove(f);f=self.formula(r'a=\ln\frac{q_1}{q_2}',r'\qquad q_1/q_2=3\Rightarrow p=3/4');f[0].set_color(GOLD)
         self.beat(a.animate.set_value(np.log(3)))
@@ -334,12 +343,14 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         ax=self.axes();prior=ValueTracker(.5);get=lambda:[prior.get_value(),1-prior.get_value()]
         self.add(self.field(ax,priors=get),self.ellipses(ax),self.dots(ax))
         boundary=self.boundary(ax,priors=get);self.add(boundary)
-        point=np.array([0,-.45]);self.add(Dot(ax.c2p(*point),radius=.08,color=WHITE))
+        point=np.array([.2,-.45]);point_dot=Dot(ax.c2p(*point),radius=.08,color=WHITE);self.add(point_dot)
         self.probability_bars(lambda:posterior(point,priors=get()))
         slider=self.slider(prior,.2,.8,[0,2.55,0],r'p(C_1)',width=3.3)
         f=self.formula(r'w_0=-\tfrac12\mu_1^T\Sigma^{-1}\mu_1+\tfrac12\mu_2^T\Sigma^{-1}\mu_2',r'+\ln\frac{p(C_1)}{p(C_2)}',size=29);f[1].set_color(ORANGE_CLS)
         self.beat(Indicate(boundary,scale_factor=1,color=GOLD))
-        self.beat(prior.animate.set_value(.8))
+        self.beat(phases=[('raise red prior',self.sentence_duration(0),lambda:prior.animate.set_value(.8)),
+                          ('observe changed class',self.sentence_duration(1),
+                           lambda:AnimationGroup(Indicate(point_dot,color=GOLD),Indicate(boundary,color=GOLD)))])
         self.beat(Circumscribe(f[1],color=ORANGE_CLS),Indicate(boundary,scale_factor=1,color=GOLD))
         self.beat(prior.animate.set_value(.2))
         ghosts=VGroup(*[path(ax,p,MUTED,1.2).set_opacity(.5) for pi in [.2,.5,.8] for p in decision_paths(priors=[pi,1-pi])])
@@ -355,7 +366,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         ell=always_redraw(lambda:self.ellipses(ax,MEANS,covs()));self.add(ell)
         point=always_redraw(lambda:Dot(ax.c2p(x.get_value(),y.get_value()),color=WHITE,radius=.075));self.add(point)
         self.probability_bars(get,3)
-        note=self.note('色の混合比＝三つの事後確率')
+        note=self.note('色の混合比＝3つの事後確率')
         self.beat(x.animate.set_value(0),y.animate.set_value(.5))
         self.beat(x.animate.set_value(1.2),y.animate.set_value(-.4))
         f=self.formula(r'a_k=\ln[p(x\mid C_k)p(C_k)],\qquad',r'p(C_k\mid x)=\frac{e^{a_k}}{\sum_j e^{a_j}}',size=29);f[1].set_color(GOLD)
@@ -404,7 +415,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         ell=always_redraw(lambda:self.ellipses(ax,means(),covs()))
         boundary=self.boundary(ax,means,covs,priors);self.add(dots,ell,boundary)
         focus=always_redraw(lambda:Circle(radius=.13,color=GOLD).move_to(ax.c2p(*contaminated(t.get_value())[0])))
-        self.add(focus);self.note('赤い一点だけを移動し、最尤推定を毎回やり直す')
+        self.add(focus);self.note('赤い1点だけを移動し、最尤推定を毎回やり直す')
         r2=lambda:np.sum((contaminated(t.get_value())[0]-means()[0])**2)
         num=readout(r'\|r\|^2=',r2,[4.6,.8,0],GOLD);self.add(num)
         f=self.formula(r'\hat\mu_1=\mathrm{mean}(C_1),\qquad\hat\Sigma=\frac1N\sum_n r_nr_n^T',size=30)
@@ -417,7 +428,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
 
     def discrete(self):
         combos=VGroup(*[VGroup(*[Square(.34,fill_color=GOLD if b=='1' else MUTED,fill_opacity=.7 if b=='1' else .12,stroke_width=1) for b in f'{n:03b}']).arrange(RIGHT,buff=.1) for n in range(8)]).arrange_in_grid(rows=2,cols=4,buff=(.5,.6)).move_to([0,.8,0])
-        note=self.note('例：三つの単語が、ある＝1／ない＝0')
+        note=self.note('例：3つの単語が、ある＝1／ない＝0')
         self.beat(FadeIn(combos))
         f=self.formula(r'D=3:\ 2^3-1=7\qquad\longrightarrow\qquad D=10:\ 2^{10}-1=1023')
         self.beat(Circumscribe(f,color=GOLD),Indicate(combos))
@@ -452,7 +463,7 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
             return Transform(bit_mobs[i][1],tex(str(value),34,GOLD).move_to(bit_mobs[i][1]))
         self.beat(phases=[('add word 1',.7,lambda:switch(0,1)),('explain contribution',self.beat_cues()[-1]['end']-.7,lambda:Circumscribe(params[:2],color=GOLD))])
         self.equation(f,r'a_k=\sum_i x_i',r'\ln\frac{\mu_{ki}}{1-\mu_{ki}}',r'+\sum_i\ln(1-\mu_{ki})+\ln p(C_k)',colors={1:GOLD},size=29)
-        self.beat(phases=[('add word 3',.7,lambda:switch(2,1)),('explain posterior',self.beat_cues()[-1]['end']-.7,lambda:Circumscribe(bars,color=GOLD))])
+        self.beat(phases=[('add word 3',.7,lambda:switch(2,1)),('explain posterior',self.beat_cues()[-1]['end']-.7,lambda:Indicate(bars[4],color=BLUE_CLS,scale_factor=1.08))])
 
     def family(self):
         self.note('指数型分布族：共通する「書き方」から考える')
@@ -470,9 +481,21 @@ class PRML42ProbabilisticGenerativeModels(NarratedScene):
         f=self.formula(r'a(x)=',r'(\lambda_1-\lambda_2)^Tx',r'+\ln\frac{g(\lambda_1)p(C_1)}{g(\lambda_2)p(C_2)}',size=34,y=.75);f[1].set_color(GOLD)
         k=self.formula(r'a_k\equiv\lambda_k^Tx+\ln g(\lambda_k)+\ln p(C_k)',size=30,y=-.6)
         self.beat(Circumscribe(f,color=GOLD),Circumscribe(k,color=MUTED))
+        # Return to the exact one-dimensional observation, means, scale and priors of scene 1.
         self.remove(*[m for m in self.mobjects if m is not self.subtitle and m.get_center()[1]<3])
-        ax=self.axes();t=ValueTracker(0);means=lambda:MEANS;covs=lambda:covariances(t.get_value())
-        self.add(self.field(ax,means,covs,lambda:[1/3]*3),always_redraw(lambda:self.ellipses(ax,MEANS,covs())),self.boundary(ax,means,covs,lambda:[1/3]*3))
-        f=self.formula(r'p(x\mid C_k),p(C_k)\quad\xrightarrow{\mathrm{Bayes}}\quad p(C_k\mid x)',size=34)
-        self.beat(Circumscribe(f,color=GOLD))
-        self.beat(phases=[('different covariance',self.sentence_duration(0),lambda:t.animate.set_value(1)),('next section',self.sentence_duration(1),lambda:Circumscribe(f[-1],color=MUTED))])
+        ax=self.axes(yr=(0,.48,.1),height=3.2,labels=('x',r'q_k'))
+        prior=ValueTracker(.5);x=OPENING_X;grid=np.linspace(-3.5,3.5,180)
+        curves=always_redraw(lambda:VGroup(*[
+            path(ax,np.c_[grid,p*normal1(grid,m)],c)
+            for m,p,c in [(-1.1,prior.get_value(),RED_CLS),(1.1,1-prior.get_value(),BLUE_CLS)]]))
+        guide=Line(ax.c2p(x,0),ax.c2p(x,.46),color=WHITE,stroke_width=1.5)
+        prob=lambda:np.array([normal1(x,-1.1)*prior.get_value(),normal1(x,1.1)*(1-prior.get_value())])/(
+            normal1(x,-1.1)*prior.get_value()+normal1(x,1.1)*(1-prior.get_value()))
+        bars=self.probability_bars(prob)
+        self.slider(prior,.2,.8,[0,2.55,0],r'p(C_1)',width=3.3)
+        result=self.formula(fr'x={OPENING_X:.1f},\quad p(C_1)=0.5,\quad p(C_1\mid x)={opening_evidence(.5)[2][0]:.3f}',size=32)
+        target=MathTex(fr'x={OPENING_X:.1f},\quad p(C_1)={OPENING_PRIOR:.1f},\quad p(C_1\mid x)={opening_evidence()[2][0]:.3f}',font_size=32).move_to(result)
+        self.beat(phases=[('same observation',self.sentence_duration(0),lambda:AnimationGroup(Create(curves),FadeIn(guide))),
+                          ('change prior only',self.sentence_duration(1),lambda:AnimationGroup(prior.animate.set_value(OPENING_PRIOR),Transform(result,target)))])
+        self.beat(phases=[('confirm opening result',self.sentence_duration(0),lambda:Indicate(bars[1],color=RED_CLS,scale_factor=1.08)),
+                          ('next section',self.sentence_duration(1),lambda:Indicate(result,color=GOLD))])

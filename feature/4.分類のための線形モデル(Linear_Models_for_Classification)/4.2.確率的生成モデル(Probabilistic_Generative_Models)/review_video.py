@@ -16,6 +16,18 @@ for s in timeline:
   for c in b['cues']:
    if '$' in c['display']:
     frames.append(dict(name=c['id']+'-math',time=(c['start']+c['end'])/2,reason='math',display=c['display']))
+# Inspect the approach, midpoint, and result of the story's moving comparisons.
+transitions={'scene01':[1,2,4,5,8], 'scene03':[3,4,5,6,8],
+             'scene04':[2,4,5], 'scene05':[5,7], 'scene06':[5,10],
+             'scene07':[2,4], 'scene08':[6,8], 'scene09':[7,8]}
+for scene in timeline:
+ for beat_number in transitions.get(scene['id'],[]):
+  beat=scene['beats'][beat_number-1]
+  for fraction in [.12,.5,.92]:
+   frames.append(dict(name=f"{scene['id']}-beat{beat_number:02}-motion-{fraction}",
+       time=beat['start']+fraction*(beat['end']-beat['start']),reason='motion'))
+  frames.append(dict(name=f"{scene['id']}-beat{beat_number:02}-after",
+      time=min(beat['end']+.12,timeline[-1]['end']-.1),reason='motion-after'))
 # Every new card: before, during each operation, and after restoring the body.
 for scene in timeline:
  for b in scene['beats']:
