@@ -27,6 +27,12 @@ def main():
     for scene in timeline:
         entry=entries[scene['id']]
         assert abs(scene['end']-scene['start']-entry['duration'])<1/15
+        moving = {'scene01-02-01','scene01-05-01','scene01-06-01','scene01-07-01',
+                  'scene03-03-01','scene03-05-01','scene04-03-01','scene04-04-01',
+                  'scene05-02-01','scene05-03-01','scene05-aid-02',
+                  'scene06-03-01','scene06-04-01','scene06-aid-01',
+                  'scene07-04-01','scene07-05-01','scene08-04-01',
+                  'scene09-02-01','scene09-03-01','scene09-04-01','scene09-07-01'}
         for index,b in enumerate(scene['beats']):
             cue=entry['subtitle_cues'][index]
             assert b['display']==cue['display']
@@ -34,6 +40,14 @@ def main():
             # Every beat is sampled near its end, after formula transitions.
             t=b['start']+.80*(b['end']-b['start'])
             records.append(dict(id=b['id'],time=t,display=b['display'],symbol='$' in b['display']))
+            if b['id'] in moving:
+                records.append(dict(id=b['id']+'-mid',time=b['start']+.35*(b['end']-b['start']),
+                                    display=b['display'],symbol='$' in b['display']))
+                records.append(dict(id=b['id']+'-late',time=b['start']+.95*(b['end']-b['start']),
+                                    display=b['display'],symbol='$' in b['display']))
+                if index+1 < len(scene['beats']):
+                    records.append(dict(id=b['id']+'-after',time=b['end']+.08,
+                                        display=scene['beats'][index+1]['display'],symbol=False))
         selected = [b for b in scene['beats'] if b['id'] in
                     ['scene03-03-01','scene06-04-01','scene08-04-01',
                      'scene05-aid-02','scene06-aid-01']]

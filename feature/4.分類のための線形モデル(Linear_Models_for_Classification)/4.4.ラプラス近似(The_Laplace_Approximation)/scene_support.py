@@ -129,8 +129,8 @@ class NarratedScene(Scene):
         group=VGroup(rail,dot,tex(label,24,color).move_to([-4.1,y,0]),tex(f'{low:g}',17,MUTED).move_to([-3,y-.25,0]),tex(f'{high:g}',17,MUTED).move_to([3,y-.25,0]))
         self.add(group);return group
 
-    def number(self,label,fn,pos,color=GOLD):
-        prefix=tex(label,25,color);n=DecimalNumber(fn(),num_decimal_places=3,font_size=25,color=color)
+    def number(self,label,fn,pos,color=GOLD,decimals=3):
+        prefix=tex(label,25,color);n=DecimalNumber(fn(),num_decimal_places=decimals,font_size=25,color=color)
         g=VGroup(prefix,n).arrange(RIGHT,buff=.12).move_to(pos);left=n.get_left().copy()
         n.add_updater(lambda m:m.set_value(fn()).move_to(left,aligned_edge=LEFT))
         self.add(g);return g
@@ -143,10 +143,8 @@ class NarratedScene(Scene):
         self.add(title)
         self.formula = None
         self.caption = None
-        frame = RoundedRectangle(width=11.6, height=4.8, corner_radius=.12,
-                                 stroke_color='#FFFF00', stroke_width=1.5).move_to([0,.2,0])
         label = jp(heading,25).move_to([-5.35,2.05,0],aligned_edge=LEFT)
-        self.add(frame,label)
+        self.add(label)
         return saved
 
     def restore_body(self, saved):

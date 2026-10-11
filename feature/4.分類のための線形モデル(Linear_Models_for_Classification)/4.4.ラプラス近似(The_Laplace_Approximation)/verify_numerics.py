@@ -21,6 +21,14 @@ def main():
     assert abs(np.trapezoid(f(g),g)-Z)<1e-8
     assert abs(np.trapezoid(gaussian(g),g)-1)<1e-10
     assert abs(np.trapezoid(local(g),g)-ZL)<1e-10
+    # The opening prediction and the return use the same computed example.
+    segments={q['id']:q['display'] for scene in SCENES for beat in scene['beats']
+              for q in beat['segments']}
+    for key in ['scene01-05-01','scene04-02-01','scene09-07-01']:
+        assert f'{Z:.3f}' in segments[key],key
+    for key in ['scene01-06-01','scene04-02-01','scene09-07-01']:
+        assert f'{ZL:.3f}' in segments[key],key
+    assert round(100*abs(ZL/Z-1),1)==3.7
     assert abs(np.trapezoid((g-Z0)**2*gaussian(g),g)-1/A)<1e-9
     # Local fit matches log value, slope, curvature; normalized heights need not.
     assert abs(local(Z0)-f(Z0))<1e-12
@@ -63,6 +71,6 @@ def main():
     assert {f.name for f in (root/'assets/voicevox').glob('*.wav')}=={e['id']+'.wav' for e in entries}
     rows=json.loads((root/'reading_check.json').read_text())['sentences']
     assert [(r['id'],r['speech'],r['display']) for r in rows]==[(q['id'],q['speech'],q['display']) for s in SCENES for b in s['beats'] for q in b['segments']]
-    print(json.dumps(dict(check_groups=8,mode=Z0,precision=A,variance=1/A,Z=Z,Z_laplace=ZL,relative_integral_error=ZL/Z-1,mean=MEAN,peak_p=float(pdf(Z0)),peak_q=float(gaussian(Z0)),areas=areas,evidence=[evidence(.8,5),evidence(.3,5),evidence(.3,8)],bic_penalties={str(n):[float(m/2*np.log(n)) for m in [2,5]] for n in [20,200]},audio_seconds=sum(e['duration'] for e in entries)),indent=2))
+    print(json.dumps(dict(check_groups=9,mode=Z0,precision=A,variance=1/A,Z=Z,Z_laplace=ZL,relative_integral_error=ZL/Z-1,mean=MEAN,peak_p=float(pdf(Z0)),peak_q=float(gaussian(Z0)),areas=areas,evidence=[evidence(.8,5),evidence(.3,5),evidence(.3,8)],bic_penalties={str(n):[float(m/2*np.log(n)) for m in [2,5]] for n in [20,200]},audio_seconds=sum(e['duration'] for e in entries)),indent=2))
 
 if __name__=='__main__':main()
