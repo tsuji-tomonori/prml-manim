@@ -1,15 +1,16 @@
 {
-  "video_sha256": "2b5a9c092e3bbc831a3da8bf7e14ae23e75e736f04d363c766d8b48dfc9c9c54",
+  "video_sha256": "c975dc2a5770868e4d7947f7a8b803d19c9396055c4e547773059082682240f7",
   "frame_count": 148,
   "inspected_count": 148,
-  "method": "原寸の37枚の2×2シートを目視。最終描画で不変の135画像はSHA256一致を確認し、変更13画像を4シートで再確認。軸・目盛り等は5枚を2倍拡大して確認。",
+  "method": "旧版で目視済みの138枚は最終版PNGのSHA256一致を確認。変更10枚を原寸の3枚のシートで目視し、場面6の前・途中・後8枚を2倍拡大して確認。",
   "full_frame_review": false,
   "full_listen": false,
   "findings": [
-    "冒頭の失敗で誤差2.0を発話中に表示し、結末では同じ曲線と失敗点から0.875へ移る",
-    "9シーン全57 beat、6件の数式字幕、復習2場面と積の微分補足を確認",
-    "確認画像で装飾枠、字幕・式・ラベル・目盛りの重なりやはみ出しは見つからない",
-    "動作途中・直後の点、行列、楕円、面積帯と字幕の対応を確認"
+    "場面6の誤差グラフはx軸が下、y軸が左にあり、対応する端にラベルを配置した",
+    "誤差ラベルと同節の英語説明を日本語化し、目盛り「−1」と軸線の重なりを解消した",
+    "計算量グラフのラベルと上端目盛りに余白があり、変更10枚で新たな重なり・はみ出しを発見しなかった",
+    "字幕が言及する誤差曲線は該当発話中も表示され、暗くなっていない",
+    "そのほか138枚は旧版の目視記録と画像ハッシュが一致した"
   ],
   "frames": [
     {
@@ -206,7 +207,7 @@
       "id": "scene02-beat6",
       "time": 127.26666666666497,
       "kind": "beat",
-      "sha256": "b1516c1f0c5c73a6676c6ae0a851945932d8f797d77de5fc4332d68a71e1bed7",
+      "sha256": "1dc966f275e6783523fe914e385087c6bb2b1be18bd490aefd1fa28633ab8ea2",
       "inspected": true
     },
     {
@@ -291,7 +292,7 @@
       "id": "scene03-beat6",
       "time": 197.23333333332755,
       "kind": "beat",
-      "sha256": "74c5d32716a05820ea66a79e214a6e9c9b0ff9674d73475aa9ede5abaac7b401",
+      "sha256": "ea35b8fb2a4bf4401d13cac8af79725590f583a9158d148e98c89791d32e18e3",
       "inspected": true
     },
     {
@@ -566,28 +567,28 @@
       "id": "scene06-beat3",
       "time": 386.39999999998355,
       "kind": "beat",
-      "sha256": "7d56885c36462b76bb097ebd2cdc93d10a6c80ba0b7893a917a4e4cb95989351",
+      "sha256": "d700921b8ef6ece42fc0dfe4ec4ea3a10a9ff0d343e2a61514144af25e703244",
       "inspected": true
     },
     {
       "id": "scene06-beat4",
       "time": 397.6333333333162,
       "kind": "beat",
-      "sha256": "f3c198fd6442ab1d46e50531fe2e650e6795f5f180ba388f8f15ec61aeab084b",
+      "sha256": "37f1c322105f4aa01fa768fdc92a8da47a7954e02e5e5b8a8a559dcfc6112b92",
       "inspected": true
     },
     {
       "id": "scene06-beat5",
       "time": 409.53333333331557,
       "kind": "beat",
-      "sha256": "61fc03c51c300edde6a22118026a1b322d1a4852101fd7fe71441a93e35a6bc7",
+      "sha256": "85f660a1056028c0c4d63e48d057537497945133efc81c15feb6428ef9631172",
       "inspected": true
     },
     {
       "id": "scene06-beat6",
       "time": 422.13333333331485,
       "kind": "beat",
-      "sha256": "0a635d1fb8f4bd3ff1facf160c3d7f8782971b1937113629ce875a23a130f9ea",
+      "sha256": "b41785f2999de7f79403867f3689b8a85db26e1cf008e725c23bddcc8a931538",
       "inspected": true
     },
     {
@@ -671,14 +672,14 @@
       "id": "scene07-beat7",
       "time": 506.0999999999767,
       "kind": "beat",
-      "sha256": "2a1b18729d7625f1a8ce8dd0f6f9a730c516edd6fc55abe9ed2670c6261680fa",
+      "sha256": "50338741eb233b17d5142d93fc02b451eabfd655e14d6ba18b524dbacb68602c",
       "inspected": true
     },
     {
       "id": "scene07-before",
       "time": 427.8999999999808,
       "kind": "transition",
-      "sha256": "31a338eae77f94f7d7e4f788505f9485c65c6af8eaa3ec1eb2c136ca7186c543",
+      "sha256": "31150a346845a1b34f07bd372d05337178290301ccd1dc53358bc5298c862e30",
       "inspected": true
     },
     {
@@ -939,14 +940,14 @@
       "id": "scene09-beat1",
       "time": 600.4000000000422,
       "kind": "beat",
-      "sha256": "40c121863d0c946c860cee0fa88d0e416c865bb0eae7fe8708764f66dcbbdf98",
+      "sha256": "6aa4f24b031fbb205866600a0dba59a6d4da8caa32acc67bc91156dc42c07ee6",
       "inspected": true
     },
     {
       "id": "scene09-beat2",
       "time": 611.8000000000504,
       "kind": "beat",
-      "sha256": "5cc52bd334cf458afc62f1e763cdc2a2784f78fa22ab4896d1a7f2d0178830bb",
+      "sha256": "4d042d1c8707f3284ac2c7d504cb28f18637f443d8068de9a114b824f4247573",
       "inspected": true
     },
     {
@@ -1054,5 +1055,8 @@
       "sha256": "1fd4f34d209a6c487f985fba6c6a8ac17a2c57b541b1b475fda3f46985154664",
       "inspected": true
     }
-  ]
+  ],
+  "inspected_this_run": 10,
+  "unchanged_previously_inspected": 138,
+  "enlarged_detail_frames_inspected": 8
 }
