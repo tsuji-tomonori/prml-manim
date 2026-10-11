@@ -7,6 +7,15 @@
     "norm_weak": 23.74454095113122,
     "norm_strong": 0.009008260851251336
   },
+  "story_point": {
+    "index": 39,
+    "x": 0.6577966101694914,
+    "observation": -0.9596661860546575,
+    "weak_prediction": -0.591763538997847,
+    "selected_prediction": -0.904331489044528,
+    "weak_absolute_error": 0.36790264705681053,
+    "selected_absolute_error": 0.0553346970101295
+  },
   "affine_invariance_max_error": 8.326672684688674e-15,
   "early_stop": {
     "step": 220,
@@ -70,5 +79,5 @@
     0.44999999999999657,
     0.5500000000000006
   ],
-  "checks_passed": 13
+  "checks_passed": 14
 }

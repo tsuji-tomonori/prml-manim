@@ -9,6 +9,7 @@ T = np.sin(2*np.pi*X) + np.random.default_rng(SEED).normal(0, .22, len(X))
 XV = np.linspace(.01, .99, 60)
 TV = np.sin(2*np.pi*XV) + np.random.default_rng(SEED+1).normal(0, .22, len(XV))
 GRID = np.linspace(0, 1, 241)
+STORY_VALIDATION_INDEX = 39
 
 
 def unpack(w):

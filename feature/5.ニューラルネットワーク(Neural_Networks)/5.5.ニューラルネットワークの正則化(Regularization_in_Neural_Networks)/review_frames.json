@@ -1,572 +1,852 @@
 [
   {
+    "id": "scene01-01-01-before",
+    "time": 0,
+    "file": "scene01-01-01-before.png"
+  },
+  {
+    "id": "scene01-01-01-sync-0.1",
+    "time": 0.54,
+    "file": "scene01-01-01-sync-0.1.png"
+  },
+  {
+    "id": "scene01-01-01-sync-0.5",
+    "time": 2.7,
+    "file": "scene01-01-01-sync-0.5.png"
+  },
+  {
+    "id": "scene01-01-01-sync-0.9",
+    "time": 4.86,
+    "file": "scene01-01-01-sync-0.9.png"
+  },
+  {
+    "id": "scene01-01-02-sync-0.1",
+    "time": 6.133333333333331,
+    "file": "scene01-01-02-sync-0.1.png"
+  },
+  {
     "id": "scene01-01-02",
-    "time": 5.616,
+    "time": 8.901333333333334,
     "file": "scene01-01-02.png"
   },
   {
+    "id": "scene01-01-02-sync-0.5",
+    "time": 9.066666666666654,
+    "file": "scene01-01-02-sync-0.5.png"
+  },
+  {
+    "id": "scene01-01-02-sync-0.9",
+    "time": 11.999999999999977,
+    "file": "scene01-01-02-sync-0.9.png"
+  },
+  {
+    "id": "scene01-01-01-after",
+    "time": 12.933333333333307,
+    "file": "scene01-01-01-after.png"
+  },
+  {
     "id": "scene01-02-02",
-    "time": 13.906666666666666,
+    "time": 19.698666666666668,
     "file": "scene01-02-02.png"
   },
   {
     "id": "scene01-03-02",
-    "time": 21.933333333333334,
+    "time": 29.792,
     "file": "scene01-03-02.png"
   },
   {
     "id": "scene01-04-02",
-    "time": 30.08,
+    "time": 37.946666666666665,
     "file": "scene01-04-02.png"
   },
   {
     "id": "scene01-recap-roles-01-before",
-    "time": 31.86666666666658,
+    "time": 39.73333333333363,
     "file": "scene01-recap-roles-01-before.png"
   },
   {
     "id": "scene01-recap-roles-01-sync-0.1",
-    "time": 32.59333333333327,
+    "time": 40.46000000000033,
     "file": "scene01-recap-roles-01-sync-0.1.png"
   },
   {
     "id": "scene01-recap-roles-01-sync-0.5",
-    "time": 34.700000000000045,
+    "time": 42.5666666666671,
     "file": "scene01-recap-roles-01-sync-0.5.png"
   },
   {
     "id": "scene01-recap-roles-01-sync-0.9",
-    "time": 36.806666666666814,
+    "time": 44.67333333333387,
     "file": "scene01-recap-roles-01-sync-0.9.png"
   },
   {
     "id": "scene01-recap-roles-02-sync-0.1",
-    "time": 37.88666666666687,
+    "time": 45.75333333333393,
     "file": "scene01-recap-roles-02-sync-0.1.png"
   },
   {
     "id": "scene01-recap-roles-02",
-    "time": 39.91733333333333,
+    "time": 47.784,
     "file": "scene01-recap-roles-02.png"
   },
   {
     "id": "scene01-recap-roles-02-sync-0.5",
-    "time": 40.10000000000031,
+    "time": 47.966666666667365,
     "file": "scene01-recap-roles-02-sync-0.5.png"
   },
   {
     "id": "scene01-recap-roles-02-sync-0.9",
-    "time": 42.31333333333375,
+    "time": 50.18000000000081,
     "file": "scene01-recap-roles-02-sync-0.9.png"
   },
   {
     "id": "scene01-recap-roles-01-after",
-    "time": 43.06666666666712,
+    "time": 50.933333333334176,
     "file": "scene01-recap-roles-01-after.png"
   },
   {
     "id": "scene01-05-02",
-    "time": 49.016,
+    "time": 57.8,
     "file": "scene01-05-02.png"
   },
   {
     "id": "scene01-06-02",
-    "time": 58.208,
+    "time": 66.10133333333334,
     "file": "scene01-06-02.png"
   },
   {
     "id": "scene02-01-02",
-    "time": 66.89600000000132,
+    "time": 75.20000000000125,
     "file": "scene02-01-02.png"
   },
   {
     "id": "scene02-02-02",
-    "time": 75.31200000000132,
+    "time": 83.57866666666791,
     "file": "scene02-02-02.png"
   },
   {
     "id": "scene02-03-01",
-    "time": 79.89066666666798,
+    "time": 88.15733333333459,
     "file": "scene02-03-01.png"
   },
   {
     "id": "scene02-03-02",
-    "time": 83.86400000000131,
+    "time": 92.13066666666792,
     "file": "scene02-03-02.png"
   },
   {
+    "id": "scene02-04-01-before",
+    "time": 94.19999999999976,
+    "file": "scene02-04-01-before.png"
+  },
+  {
+    "id": "scene02-04-01-sync-0.1",
+    "time": 94.81999999999974,
+    "file": "scene02-04-01-sync-0.1.png"
+  },
+  {
+    "id": "scene02-04-01-sync-0.5",
+    "time": 96.49999999999964,
+    "file": "scene02-04-01-sync-0.5.png"
+  },
+  {
+    "id": "scene02-04-01-sync-0.9",
+    "time": 98.17999999999955,
+    "file": "scene02-04-01-sync-0.9.png"
+  },
+  {
+    "id": "scene02-04-02-sync-0.1",
+    "time": 99.1599999999995,
+    "file": "scene02-04-02-sync-0.1.png"
+  },
+  {
     "id": "scene02-04-02",
-    "time": 92.78400000000131,
+    "time": 101.21066666666792,
     "file": "scene02-04-02.png"
   },
   {
+    "id": "scene02-04-02-sync-0.5",
+    "time": 101.39999999999937,
+    "file": "scene02-04-02-sync-0.5.png"
+  },
+  {
+    "id": "scene02-04-02-sync-0.9",
+    "time": 103.63999999999923,
+    "file": "scene02-04-02-sync-0.9.png"
+  },
+  {
+    "id": "scene02-04-01-after",
+    "time": 104.39999999999921,
+    "file": "scene02-04-01-after.png"
+  },
+  {
     "id": "scene02-05-02",
-    "time": 101.24266666666797,
+    "time": 109.84266666666792,
     "file": "scene02-05-02.png"
   },
   {
     "id": "scene02-06-02",
-    "time": 109.21866666666799,
+    "time": 117.46666666666792,
     "file": "scene02-06-02.png"
   },
   {
     "id": "scene03-01-02",
-    "time": 118.04533333333208,
+    "time": 126.85333333333162,
     "file": "scene03-01-02.png"
   },
   {
     "id": "scene03-02-02",
-    "time": 127.06399999999874,
+    "time": 135.8639999999983,
     "file": "scene03-02-02.png"
   },
   {
     "id": "scene03-03-02",
-    "time": 136.3866666666654,
+    "time": 145.18666666666496,
     "file": "scene03-03-02.png"
   },
   {
     "id": "scene03-recap-prior-01-before",
-    "time": 139.2666666666639,
+    "time": 148.0666666666634,
     "file": "scene03-recap-prior-01-before.png"
   },
   {
     "id": "scene03-recap-prior-01-sync-0.1",
-    "time": 140.07999999999717,
+    "time": 148.87999999999667,
     "file": "scene03-recap-prior-01-sync-0.1.png"
   },
   {
     "id": "scene03-recap-prior-01-sync-0.5",
-    "time": 142.53333333333038,
+    "time": 151.33333333332988,
     "file": "scene03-recap-prior-01-sync-0.5.png"
   },
   {
     "id": "scene03-recap-prior-01-sync-0.9",
-    "time": 144.98666666666358,
+    "time": 153.78666666666308,
     "file": "scene03-recap-prior-01-sync-0.9.png"
   },
   {
     "id": "scene03-recap-prior-02-sync-0.1",
-    "time": 146.0066666666635,
+    "time": 154.806666666663,
     "file": "scene03-recap-prior-02-sync-0.1.png"
   },
   {
     "id": "scene03-recap-prior-02",
-    "time": 147.42933333333207,
+    "time": 156.22933333333162,
     "file": "scene03-recap-prior-02.png"
   },
   {
     "id": "scene03-recap-prior-02-sync-0.5",
-    "time": 147.63333333333009,
+    "time": 156.43333333332959,
     "file": "scene03-recap-prior-02-sync-0.5.png"
   },
   {
     "id": "scene03-recap-prior-02-sync-0.9",
-    "time": 149.25999999999667,
+    "time": 158.05999999999617,
     "file": "scene03-recap-prior-02-sync-0.9.png"
   },
   {
     "id": "scene03-recap-prior-01-after",
-    "time": 149.8666666666633,
+    "time": 158.6666666666628,
     "file": "scene03-recap-prior-01-after.png"
   },
   {
     "id": "scene03-04-02",
-    "time": 157.17599999999874,
+    "time": 165.9759999999983,
     "file": "scene03-04-02.png"
   },
   {
     "id": "scene03-05-02",
-    "time": 167.42399999999873,
+    "time": 176.22399999999828,
     "file": "scene03-05-02.png"
   },
   {
     "id": "scene03-06-02",
-    "time": 177.09333333333208,
+    "time": 185.14666666666497,
     "file": "scene03-06-02.png"
   },
   {
     "id": "scene04-01-02",
-    "time": 186.1333333333282,
+    "time": 194.25333333332782,
     "file": "scene04-01-02.png"
   },
   {
+    "id": "scene04-02-01-before",
+    "time": 196.26666666666065,
+    "file": "scene04-02-01-before.png"
+  },
+  {
+    "id": "scene04-02-01-sync-0.1",
+    "time": 196.8333333333273,
+    "file": "scene04-02-01-sync-0.1.png"
+  },
+  {
+    "id": "scene04-02-01-sync-0.5",
+    "time": 198.29999999999387,
+    "file": "scene04-02-01-sync-0.5.png"
+  },
+  {
+    "id": "scene04-02-01-sync-0.9",
+    "time": 199.76666666666046,
+    "file": "scene04-02-01-sync-0.9.png"
+  },
+  {
+    "id": "scene04-02-02-sync-0.1",
+    "time": 200.6266666666604,
+    "file": "scene04-02-02-sync-0.1.png"
+  },
+  {
     "id": "scene04-02-02",
-    "time": 194.21333333332822,
+    "time": 202.4133333333278,
     "file": "scene04-02-02.png"
   },
   {
+    "id": "scene04-02-02-sync-0.5",
+    "time": 202.59999999999363,
+    "file": "scene04-02-02-sync-0.5.png"
+  },
+  {
+    "id": "scene04-02-02-sync-0.9",
+    "time": 204.57333333332684,
+    "file": "scene04-02-02-sync-0.9.png"
+  },
+  {
+    "id": "scene04-02-01-after",
+    "time": 205.26666666666014,
+    "file": "scene04-02-01-after.png"
+  },
+  {
     "id": "scene04-03-02",
-    "time": 202.04533333332824,
+    "time": 210.37866666666116,
     "file": "scene04-03-02.png"
   },
   {
     "id": "scene04-04-02",
-    "time": 210.98666666666156,
+    "time": 219.31999999999448,
     "file": "scene04-04-02.png"
   },
   {
     "id": "scene04-05-02",
-    "time": 219.37866666666156,
+    "time": 227.71199999999448,
     "file": "scene04-05-02.png"
   },
   {
     "id": "scene04-06-02",
-    "time": 229.92799999999488,
+    "time": 238.26133333332783,
     "file": "scene04-06-02.png"
   },
   {
+    "id": "scene05-01-01-before",
+    "time": 242.3333333333247,
+    "file": "scene05-01-01-before.png"
+  },
+  {
+    "id": "scene05-01-01-sync-0.1",
+    "time": 243.106666666658,
+    "file": "scene05-01-01-sync-0.1.png"
+  },
+  {
+    "id": "scene05-01-01-sync-0.5",
+    "time": 245.3999999999912,
+    "file": "scene05-01-01-sync-0.5.png"
+  },
+  {
+    "id": "scene05-01-01-sync-0.9",
+    "time": 247.6933333333244,
+    "file": "scene05-01-01-sync-0.9.png"
+  },
+  {
+    "id": "scene05-01-02-sync-0.1",
+    "time": 248.71999999999102,
+    "file": "scene05-01-02-sync-0.1.png"
+  },
+  {
     "id": "scene05-01-02",
-    "time": 239.13333333332517,
+    "time": 250.34666666665802,
     "file": "scene05-01-02.png"
   },
   {
+    "id": "scene05-01-02-sync-0.5",
+    "time": 250.53333333332424,
+    "file": "scene05-01-02-sync-0.5.png"
+  },
+  {
+    "id": "scene05-01-02-sync-0.9",
+    "time": 252.34666666665746,
+    "file": "scene05-01-02-sync-0.9.png"
+  },
+  {
+    "id": "scene05-01-01-after",
+    "time": 252.99999999999076,
+    "file": "scene05-01-01-after.png"
+  },
+  {
     "id": "scene05-02-02",
-    "time": 247.67466666665848,
+    "time": 258.874666666658,
     "file": "scene05-02-02.png"
   },
   {
     "id": "scene05-03-02",
-    "time": 257.07733333332516,
+    "time": 268.2773333333247,
     "file": "scene05-03-02.png"
   },
   {
     "id": "scene05-04-02",
-    "time": 265.7626666666585,
+    "time": 276.96266666665804,
     "file": "scene05-04-02.png"
   },
   {
     "id": "scene05-05-02",
-    "time": 273.94933333332517,
+    "time": 285.1493333333247,
     "file": "scene05-05-02.png"
   },
   {
     "id": "scene05-06-02",
-    "time": 283.1706666666585,
+    "time": 294.41333333332466,
     "file": "scene05-06-02.png"
   },
   {
     "id": "scene06-01-02",
-    "time": 291.54133333332226,
+    "time": 304.4853333333216,
     "file": "scene06-01-02.png"
   },
   {
     "id": "scene06-02-01",
-    "time": 296.9546666666556,
+    "time": 309.8879999999883,
     "file": "scene06-02-01.png"
   },
   {
     "id": "scene06-02-02",
-    "time": 302.24533333332226,
+    "time": 315.178666666655,
     "file": "scene06-02-02.png"
   },
   {
     "id": "scene06-03-01-before",
-    "time": 304.8666666666545,
+    "time": 317.7999999999871,
     "file": "scene06-03-01-before.png"
   },
   {
     "id": "scene06-03-01-sync-0.1",
-    "time": 305.74666666665445,
+    "time": 318.67999999998705,
     "file": "scene06-03-01-sync-0.1.png"
   },
   {
     "id": "scene06-03-01",
-    "time": 308.45333333332223,
+    "time": 321.38666666665495,
     "file": "scene06-03-01.png"
   },
   {
     "id": "scene06-03-01-sync-0.5",
-    "time": 308.4666666666543,
+    "time": 321.3999999999869,
     "file": "scene06-03-01-sync-0.5.png"
   },
   {
     "id": "scene06-03-01-sync-0.9",
-    "time": 311.18666666665416,
+    "time": 324.11999999998676,
     "file": "scene06-03-01-sync-0.9.png"
   },
   {
     "id": "scene06-03-02-sync-0.1",
-    "time": 312.47333333332074,
+    "time": 325.40666666665334,
     "file": "scene06-03-02-sync-0.1.png"
   },
   {
     "id": "scene06-03-02",
-    "time": 314.69333333332224,
+    "time": 327.62666666665496,
     "file": "scene06-03-02.png"
   },
   {
     "id": "scene06-03-02-sync-0.5",
-    "time": 314.89999999998724,
+    "time": 327.83333333331984,
     "file": "scene06-03-02-sync-0.5.png"
   },
   {
     "id": "scene06-03-02-sync-0.9",
-    "time": 317.3266666666538,
+    "time": 330.2599999999864,
     "file": "scene06-03-02-sync-0.9.png"
   },
   {
     "id": "scene06-03-01-after",
-    "time": 318.1333333333204,
+    "time": 331.066666666653,
     "file": "scene06-03-01-after.png"
   },
   {
     "id": "scene06-04-02",
-    "time": 325.69333333332224,
+    "time": 338.62666666665496,
     "file": "scene06-04-02.png"
   },
   {
     "id": "scene06-05-02",
-    "time": 334.93333333332225,
+    "time": 347.86666666665496,
     "file": "scene06-05-02.png"
   },
   {
     "id": "scene06-06-02",
-    "time": 344.46666666665556,
+    "time": 357.3253333333216,
     "file": "scene06-06-02.png"
   },
   {
     "id": "scene07-01-02",
-    "time": 353.7279999999854,
+    "time": 367.23999999998466,
     "file": "scene07-01-02.png"
   },
   {
     "id": "scene07-02-02",
-    "time": 363.64799999998536,
+    "time": 377.1146666666514,
     "file": "scene07-02-02.png"
   },
   {
     "id": "scene07-03-01-before",
-    "time": 365.66666666665105,
+    "time": 379.13333333331695,
     "file": "scene07-03-01-before.png"
   },
   {
     "id": "scene07-03-01-sync-0.1",
-    "time": 366.37999999998436,
+    "time": 379.84666666665026,
     "file": "scene07-03-01-sync-0.1.png"
   },
   {
     "id": "scene07-03-01-sync-0.5",
-    "time": 368.4333333333176,
+    "time": 381.8999999999835,
     "file": "scene07-03-01-sync-0.5.png"
   },
   {
     "id": "scene07-03-01-sync-0.9",
-    "time": 370.48666666665076,
+    "time": 383.95333333331666,
     "file": "scene07-03-01-sync-0.9.png"
   },
   {
     "id": "scene07-03-02-sync-0.1",
-    "time": 371.41999999998404,
+    "time": 384.88666666664994,
     "file": "scene07-03-02-sync-0.1.png"
   },
   {
     "id": "scene07-03-02",
-    "time": 372.9279999999854,
+    "time": 386.39466666665135,
     "file": "scene07-03-02.png"
   },
   {
     "id": "scene07-03-02-sync-0.5",
-    "time": 373.099999999984,
+    "time": 386.5666666666499,
     "file": "scene07-03-02-sync-0.5.png"
   },
   {
     "id": "scene07-03-02-sync-0.9",
-    "time": 374.7799999999839,
+    "time": 388.2466666666498,
     "file": "scene07-03-02-sync-0.9.png"
   },
   {
     "id": "scene07-03-01-after",
-    "time": 375.39999999998383,
+    "time": 388.86666666664973,
     "file": "scene07-03-01-after.png"
   },
   {
     "id": "scene07-04-02",
-    "time": 383.1839999999854,
+    "time": 396.6506666666513,
     "file": "scene07-04-02.png"
   },
   {
     "id": "scene07-05-02",
-    "time": 394.62933333331875,
+    "time": 408.09599999998466,
     "file": "scene07-05-02.png"
   },
   {
     "id": "scene07-06-02",
-    "time": 403.1919999999854,
+    "time": 417.4106666666513,
     "file": "scene07-06-02.png"
   },
   {
     "id": "scene08-01-02",
-    "time": 411.6933333333154,
+    "time": 427.5333333333146,
     "file": "scene08-01-02.png"
   },
   {
+    "id": "scene08-02-01-before",
+    "time": 429.79999999998074,
+    "file": "scene08-02-01-before.png"
+  },
+  {
+    "id": "scene08-02-01-sync-0.1",
+    "time": 430.3599999999807,
+    "file": "scene08-02-01-sync-0.1.png"
+  },
+  {
+    "id": "scene08-02-01-sync-0.5",
+    "time": 431.7999999999806,
+    "file": "scene08-02-01-sync-0.5.png"
+  },
+  {
+    "id": "scene08-02-01-sync-0.9",
+    "time": 433.23999999998057,
+    "file": "scene08-02-01-sync-0.9.png"
+  },
+  {
+    "id": "scene08-02-02-sync-0.1",
+    "time": 434.0733333333138,
+    "file": "scene08-02-02-sync-0.1.png"
+  },
+  {
     "id": "scene08-02-02",
-    "time": 419.90399999998215,
+    "time": 435.7706666666479,
     "file": "scene08-02-02.png"
   },
   {
+    "id": "scene08-02-02-sync-0.5",
+    "time": 435.96666666664703,
+    "file": "scene08-02-02-sync-0.5.png"
+  },
+  {
+    "id": "scene08-02-02-sync-0.9",
+    "time": 437.8599999999803,
+    "file": "scene08-02-02-sync-0.9.png"
+  },
+  {
     "id": "scene08-aid-convolution-01-before",
-    "time": 422.26666666664784,
+    "time": 438.1333333333136,
     "file": "scene08-aid-convolution-01-before.png"
   },
   {
+    "id": "scene08-02-01-after",
+    "time": 438.5333333333136,
+    "file": "scene08-02-01-after.png"
+  },
+  {
     "id": "scene08-aid-convolution-01-sync-0.1",
-    "time": 422.85999999998114,
+    "time": 438.7266666666469,
     "file": "scene08-aid-convolution-01-sync-0.1.png"
   },
   {
     "id": "scene08-aid-convolution-01-sync-0.5",
-    "time": 424.4333333333144,
+    "time": 440.2999999999802,
     "file": "scene08-aid-convolution-01-sync-0.5.png"
   },
   {
     "id": "scene08-aid-convolution-01-sync-0.9",
-    "time": 426.0066666666476,
+    "time": 441.8733333333134,
     "file": "scene08-aid-convolution-01-sync-0.9.png"
   },
   {
     "id": "scene08-aid-convolution-02-sync-0.1",
-    "time": 426.75333333331423,
+    "time": 442.61999999998,
     "file": "scene08-aid-convolution-02-sync-0.1.png"
   },
   {
     "id": "scene08-aid-convolution-02-sync-0.5",
-    "time": 428.16666666664753,
+    "time": 444.0333333333133,
     "file": "scene08-aid-convolution-02-sync-0.5.png"
   },
   {
     "id": "scene08-aid-convolution-02",
-    "time": 428.1786666666488,
+    "time": 444.0453333333146,
     "file": "scene08-aid-convolution-02.png"
   },
   {
     "id": "scene08-aid-convolution-02-sync-0.9",
-    "time": 429.57999999998077,
+    "time": 445.44666666664654,
     "file": "scene08-aid-convolution-02-sync-0.9.png"
   },
   {
     "id": "scene08-aid-convolution-03-sync-0.1",
-    "time": 430.4999999999807,
+    "time": 446.36666666664644,
     "file": "scene08-aid-convolution-03-sync-0.1.png"
   },
   {
     "id": "scene08-aid-convolution-03",
-    "time": 432.5946666666488,
+    "time": 448.4613333333146,
     "file": "scene08-aid-convolution-03.png"
   },
   {
     "id": "scene08-aid-convolution-03-sync-0.5",
-    "time": 432.7666666666472,
+    "time": 448.633333333313,
     "file": "scene08-aid-convolution-03-sync-0.5.png"
   },
   {
     "id": "scene08-aid-convolution-03-sync-0.9",
-    "time": 435.03333333331375,
+    "time": 450.8999999999795,
     "file": "scene08-aid-convolution-03-sync-0.9.png"
   },
   {
     "id": "scene08-aid-convolution-01-after",
-    "time": 435.7999999999804,
+    "time": 451.66666666664617,
     "file": "scene08-aid-convolution-01-after.png"
   },
   {
     "id": "scene08-03-02",
-    "time": 440.5599999999821,
+    "time": 456.4266666666479,
     "file": "scene08-03-02.png"
   },
   {
     "id": "scene08-04-02",
-    "time": 449.21333333331546,
+    "time": 465.0799999999813,
     "file": "scene08-04-02.png"
   },
   {
     "id": "scene08-05-02",
-    "time": 458.5733333333154,
+    "time": 474.4399999999813,
     "file": "scene08-05-02.png"
   },
   {
     "id": "scene08-06-02",
-    "time": 469.9359999999821,
+    "time": 486.8533333333146,
     "file": "scene08-06-02.png"
   },
   {
     "id": "scene09-recap-mixture-01-before",
-    "time": 472.3999999999783,
+    "time": 490.3999999999773,
     "file": "scene09-recap-mixture-01-before.png"
   },
   {
     "id": "scene09-recap-mixture-01-sync-0.1",
-    "time": 473.1199999999783,
+    "time": 491.11999999997727,
     "file": "scene09-recap-mixture-01-sync-0.1.png"
   },
   {
     "id": "scene09-recap-mixture-01-sync-0.5",
-    "time": 475.19999999997816,
+    "time": 493.19999999997714,
     "file": "scene09-recap-mixture-01-sync-0.5.png"
   },
   {
     "id": "scene09-recap-mixture-01-sync-0.9",
-    "time": 477.27999999997803,
+    "time": 495.279999999977,
     "file": "scene09-recap-mixture-01-sync-0.9.png"
   },
   {
     "id": "scene09-recap-mixture-02-sync-0.1",
-    "time": 478.31333333331133,
+    "time": 496.3133333333103,
     "file": "scene09-recap-mixture-02-sync-0.1.png"
   },
   {
     "id": "scene09-recap-mixture-02",
-    "time": 480.1573333333116,
+    "time": 498.1573333333106,
     "file": "scene09-recap-mixture-02.png"
   },
   {
     "id": "scene09-recap-mixture-02-sync-0.5",
-    "time": 480.3666666666445,
+    "time": 498.3666666666435,
     "file": "scene09-recap-mixture-02-sync-0.5.png"
   },
   {
     "id": "scene09-recap-mixture-02-sync-0.9",
-    "time": 482.41999999997773,
+    "time": 500.4199999999767,
     "file": "scene09-recap-mixture-02-sync-0.9.png"
   },
   {
     "id": "scene09-recap-mixture-01-after",
-    "time": 483.13333333331104,
+    "time": 501.13333333331,
     "file": "scene09-recap-mixture-01-after.png"
   },
   {
     "id": "scene09-01-02",
-    "time": 490.090666666645,
+    "time": 508.3146666666439,
     "file": "scene09-01-02.png"
   },
   {
     "id": "scene09-02-01",
-    "time": 495.81866666664496,
+    "time": 514.0186666666439,
     "file": "scene09-02-01.png"
   },
   {
     "id": "scene09-02-02",
-    "time": 500.94933333331164,
+    "time": 519.1493333333106,
     "file": "scene09-02-02.png"
   },
   {
+    "id": "scene09-03-01-before",
+    "time": 521.4666666666503,
+    "file": "scene09-03-01-before.png"
+  },
+  {
+    "id": "scene09-03-01-sync-0.1",
+    "time": 522.0733333333174,
+    "file": "scene09-03-01-sync-0.1.png"
+  },
+  {
+    "id": "scene09-03-01-sync-0.5",
+    "time": 523.6999999999853,
+    "file": "scene09-03-01-sync-0.5.png"
+  },
+  {
+    "id": "scene09-03-01-sync-0.9",
+    "time": 525.3266666666533,
+    "file": "scene09-03-01-sync-0.9.png"
+  },
+  {
+    "id": "scene09-03-02-sync-0.1",
+    "time": 526.3933333333208,
+    "file": "scene09-03-02-sync-0.1.png"
+  },
+  {
     "id": "scene09-03-02",
-    "time": 510.6293333333117,
+    "time": 528.8293333333106,
     "file": "scene09-03-02.png"
   },
   {
+    "id": "scene09-03-02-sync-0.5",
+    "time": 529.0333333333228,
+    "file": "scene09-03-02-sync-0.5.png"
+  },
+  {
+    "id": "scene09-03-02-sync-0.9",
+    "time": 531.673333333325,
+    "file": "scene09-03-02-sync-0.9.png"
+  },
+  {
+    "id": "scene09-03-01-after",
+    "time": 532.5333333333256,
+    "file": "scene09-03-01-after.png"
+  },
+  {
     "id": "scene09-04-02",
-    "time": 521.482666666645,
+    "time": 539.6826666666439,
     "file": "scene09-04-02.png"
   },
   {
     "id": "scene09-05-02",
-    "time": 531.682666666645,
+    "time": 549.8826666666439,
     "file": "scene09-05-02.png"
   },
   {
+    "id": "scene09-06-01-before",
+    "time": 553.0000000000088,
+    "file": "scene09-06-01-before.png"
+  },
+  {
+    "id": "scene09-06-01-sync-0.1",
+    "time": 553.8400000000094,
+    "file": "scene09-06-01-sync-0.1.png"
+  },
+  {
+    "id": "scene09-06-01-sync-0.5",
+    "time": 556.4000000000113,
+    "file": "scene09-06-01-sync-0.5.png"
+  },
+  {
+    "id": "scene09-06-01-sync-0.9",
+    "time": 558.9600000000133,
+    "file": "scene09-06-01-sync-0.9.png"
+  },
+  {
+    "id": "scene09-06-02-sync-0.1",
+    "time": 560.3000000000145,
+    "file": "scene09-06-02-sync-0.1.png"
+  },
+  {
     "id": "scene09-06-02",
-    "time": 542.3653333333116,
+    "time": 562.9013333333106,
     "file": "scene09-06-02.png"
+  },
+  {
+    "id": "scene09-06-02-sync-0.5",
+    "time": 563.1000000000167,
+    "file": "scene09-06-02-sync-0.5.png"
+  },
+  {
+    "id": "scene09-06-02-sync-0.9",
+    "time": 565.900000000019,
+    "file": "scene09-06-02-sync-0.9.png"
+  },
+  {
+    "id": "scene09-06-01-final",
+    "time": 566.385,
+    "file": "scene09-06-01-final.png"
   }
 ]
