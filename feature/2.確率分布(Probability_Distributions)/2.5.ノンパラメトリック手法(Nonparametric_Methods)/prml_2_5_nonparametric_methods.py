@@ -96,11 +96,11 @@ class PRML25NonparametricMethods(NarratedScene):
 
     def slider(self,tracker,lo,hi,label,pos=(0,2.18,0),color=VOLUME,integer=False):
         base=NumberLine(x_range=[lo,hi],length=4.0,include_ticks=False,color=MUTED).move_to(pos)
-        g=VGroup(base,tex(label,27,color).next_to(base,LEFT,buff=.3))
+        g=VGroup(base)
         knob=Dot(radius=.065,color=color)
         knob.add_updater(lambda m:m.move_to(base.n2p(round(tracker.get_value()) if integer else tracker.get_value())))
         g.add(knob)
-        g.add(readout('=',lambda:round(tracker.get_value()) if integer else tracker.get_value(),np.array(pos)+RIGHT*3.0,color,0 if integer else 3))
+        g.add(readout(f'{label}=',lambda:round(tracker.get_value()) if integer else tracker.get_value(),np.array(pos)+RIGHT*3.0,color,0 if integer else 3))
         self.add(g)
         return g
 
@@ -175,7 +175,10 @@ class PRML25NonparametricMethods(NarratedScene):
         # explicitly: a surrounding rectangle on a zero-height bar is unreadable.
         select=Rectangle(width=.8,height=.52,color=COUNT,stroke_width=2).move_to(ax.c2p(.52,0)+UP*.26)
         zero=tex(r'n_i=0',25,COUNT).next_to(select,UP,buff=.12)
-        f=self.formula(r'\text{area}=n_i/N',colors={'n_i':COUNT,'N':DATA})
+        area_value=MathTex('=',r'n_i','/','N',font_size=30)
+        area_value.set_color_by_tex('n_i',COUNT)
+        area_value.set_color_by_tex('N',DATA)
+        f=VGroup(jp('面積',30),area_value).arrange(RIGHT,buff=.18).move_to([0,-2.55,0]);self.add(f)
         self.beat(Create(select),FadeIn(zero))
         self.remove(f)
         f=self.formula(r'p_i={n_i\over N\Delta_i},\qquad p_i\Delta_i={n_i\over N}',colors={'n_i':COUNT,r'\Delta_i':VOLUME})
@@ -468,7 +471,8 @@ class PRML25NonparametricMethods(NarratedScene):
         width=lambda:(1-mode.get_value())*.12+mode.get_value()*2*float(knn_radius(x.get_value(),7))
         win=self.window(ax,x,width,4.4);rug=self.rug(ax,lambda p:abs(p-x.get_value())<=width()/2)
         self.add(rug,win,curve(ax,GRID,kde(GRID,.06),MODEL))
-        f=self.formula(r'V\ \mathrm{fixed}\quad\longleftrightarrow\quad K\ \mathrm{fixed}',colors={'V':VOLUME,'K':COUNT})
+        f=VGroup(tex('V',32,VOLUME),jp('を固定',28),tex(r'\longleftrightarrow',32),
+                 tex('K',32,COUNT),jp('を固定',28)).arrange(RIGHT,buff=.18).move_to([0,-2.55,0]);self.add(f)
         self.beat(mode.animate.set_value(1),x.animate.set_value(.5))
         links=VGroup(*[Line(ax.c2p(.5,4.5),ax.c2p(p,0),stroke_width=.6,color=COUNT,stroke_opacity=.35) for p in SAMPLES])
         self.remove(f);f=VGroup(tex('N',32,COUNT),jp('個の寄与を、評価のたびに足す',24)).arrange(RIGHT,buff=.2).move_to([0,-2.55,0]);self.add(f)
