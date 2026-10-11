@@ -1,4 +1,4 @@
-"""Verify final media, clocks, hashes, captions and three animation/audio pairings."""
+"""Verify final media, clocks, hashes, captions and every animation/audio pairing."""
 import hashlib,json,re,subprocess,wave
 from pathlib import Path
 import numpy as np
@@ -24,12 +24,7 @@ def main():
         for cue,expected in zip(cues,entry['subtitle_cues']):
             assert cue['id']==expected['id'] and cue['display']==expected['display']
             errors.append(abs(cue['start']-scene['start']-expected['start']));count+=1
-        selected=[]
-        if scene['id'] in ('scene02','scene06','scene08'):
-            # Preserve the existing checks by cue ID, independent of insertions.
-            anchor={'scene02':'scene02-04-01','scene06':'scene06-04-01','scene08':'scene08-02-01'}[scene['id']]
-            selected.extend(b for b in scene['beats'] if b['cues'][0]['id']==anchor)
-        selected.extend(b for b in scene['beats'] if 'recap-' in b['cues'][0]['id'] or 'aid-' in b['cues'][0]['id'] or b['cues'][0]['id']=='scene07-03-01')
+        selected=scene['beats']
         with wave.open(str(ROOT/entry['path'])) as wav:
             rate=wav.getframerate();samples=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16)
         for b in selected:
@@ -44,6 +39,7 @@ def main():
     display='\n'.join(s['display'] for scene in SCENES for b in scene['beats'] for s in b['segments'])
     (ROOT/'media/display.txt').write_text(display)
     assert not re.search('エックス|ラムダ|ミュー|シグマ|アルファ|ガンマ|タウ|クシー',display)
+    assert not re.search(r'[一二三四五六七八九十](?:個|点|本|倍|つ|画素|番|次元)|[一二三四五六七八九十]分の[一二三四五六七八九十]',display)
     readings=json.loads((ROOT/'reading_check.json').read_text())['sentences']
     expected=[s for scene in SCENES for b in scene['beats'] for s in b['segments']]
     assert [(r['id'],r['speech'],r['display']) for r in readings]==[(s['id'],s['speech'],s['display']) for s in expected]

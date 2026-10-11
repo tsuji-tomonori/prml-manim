@@ -9,6 +9,8 @@ OUT=ROOT/'media/review'
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
+    duration=float(__import__('json').loads(subprocess.check_output(
+        ['ffprobe','-v','error','-show_entries','format=duration','-of','json',str(VIDEO)]))['format']['duration'])
     timeline=json.loads((ROOT/'scene_timeline.json').read_text())
     frames={}
     for scene in timeline:
@@ -19,9 +21,16 @@ def main():
                 if '$' in c['display']:frames[c['id']]=(c['start']+c['end'])/2
         for b in scene['beats']:
             first=b['cues'][0]['id']
-            if 'recap-' in first or 'aid-' in first or first in ('scene06-03-01','scene07-03-01'):
+            if 'recap-' in first or 'aid-' in first or first in (
+                    'scene01-01-01','scene02-04-01','scene04-02-01',
+                    'scene05-01-01','scene06-03-01','scene07-03-01',
+                    'scene08-02-01','scene09-03-01','scene09-06-01'):
                 frames[first+'-before']=max(0,b['start']-.2)
-                frames[first+'-after']=b['end']+.2
+                after=b['end']+.2
+                if after<duration-.25:
+                    frames[first+'-after']=after
+                else:
+                    frames[first+'-final']=duration-.25
                 for cue,action in zip(b['cues'],b['actions']):
                     for fraction in (.1,.5,.9):
                         frames[f"{cue['id']}-sync-{fraction}"]=action['start']+(action['end']-action['start'])*fraction

@@ -18,6 +18,20 @@ def main():
     assert np.linalg.norm(ws[-1])<np.linalg.norm(ws[0])
     assert m.mse(ws[i],m.XV,m.TV)<m.mse(ws[0],m.XV,m.TV)
     results['ridge']={'best_lambda':float(10**logs[i]),'validation_mse':m.mse(ws[i],m.XV,m.TV),'weak_validation_mse':m.mse(ws[0],m.XV,m.TV),'norm_weak':float(np.linalg.norm(ws[0])),'norm_strong':float(np.linalg.norm(ws[-1]))}
+    story_index=m.STORY_VALIDATION_INDEX
+    story_x=float(m.XV[story_index]);story_t=float(m.TV[story_index])
+    story_weak=float(m.predict(m.fit(10),story_x))
+    story_selected=float(m.predict(m.ridge_weights(-3),story_x))
+    assert not np.isclose(story_x,m.X).any()
+    assert abs(story_weak-story_t)>abs(story_selected-story_t)
+    assert np.isclose(story_x,.6577966101694914)
+    assert np.isclose(story_t,-.9596661860546575)
+    assert np.isclose(story_weak,-.591763538997847)
+    assert np.isclose(story_selected,-.904331489044528)
+    results['story_point']={'index':story_index,'x':story_x,'observation':story_t,
+                            'weak_prediction':story_weak,'selected_prediction':story_selected,
+                            'weak_absolute_error':abs(story_weak-story_t),
+                            'selected_absolute_error':abs(story_selected-story_t)}
     # Full affine change of units on both input and output.
     w=m.fit(3);a,b,v,c=m.unpack(w);A,B,C,D=2.3,.7,1.4,-.6
     transformed=np.r_[a/A,b-a*B/A,C*v,C*c+D]
@@ -84,7 +98,7 @@ def main():
     areas=np.trapezoid(components,u,axis=0)
     assert np.max(abs(areas-[.45,.55]))<1e-12
     results['recap_mixture_component_areas']=areas.tolist()
-    results['checks_passed']=13
+    results['checks_passed']=14
     Path('numerical_results.json').write_text(json.dumps(results,indent=2)+'\n')
     print(json.dumps(results,indent=2))
 if __name__=='__main__':main()
