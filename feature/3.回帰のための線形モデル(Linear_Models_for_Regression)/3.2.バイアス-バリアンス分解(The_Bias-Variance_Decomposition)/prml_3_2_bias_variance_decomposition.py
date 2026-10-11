@@ -299,7 +299,9 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         self.beat(selected.animate.set_value(80))
 
     def algebra(self):
-        note=tex(r'x\ \mathrm{fixed},\quad y=y(x;\mathcal D),\quad m=\mathbb E_{\mathcal D}[y]',29,MEAN).move_to([0,2.05,0])
+        note=VGroup(jp('入力 x を固定',24,MEAN),
+                    tex(r'y=y(x;\mathcal D),\quad m=\mathbb E_{\mathcal D}[y]',29,MEAN))
+        note.arrange(RIGHT,buff=.28).move_to([0,2.05,0])
         self.add(note)
         f=tex('(y-h)^2',43).move_to([0,.8,0])
         self.beat(FadeIn(f),pulse(note,scale_factor=1.02))
@@ -346,7 +348,10 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         self.beat(tr.animate.set_value(BEST))
         for mob in list(self.mobjects):
             if 2.05<mob.get_center()[1]<2.4: self.drop(mob)
-        warning=tex(r'\min_{\lambda\geq0,\mathbf w}\left[E_D(\mathbf w)+\frac\lambda2\|\mathbf w\|^2\right]\ \Rightarrow\ \lambda=0\ \mathrm{is\ optimal}',28).move_to([0,2.18,0])
+        warning=VGroup(
+            tex(r'\min_{\lambda\geq0,\mathbf w}\left[E_D(\mathbf w)+\frac\lambda2\|\mathbf w\|^2\right]\ \Rightarrow\ \lambda=0',28),
+            jp('が最適',23),
+        ).arrange(RIGHT,buff=.12).move_to([0,2.18,0])
         self.add(warning)
         self.beat(pulse(warning,scale_factor=1.01))
 
@@ -359,7 +364,7 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         f[0].set_color(BIAS);f[1].set_color(VAR)
         self.beat(x.animate.set_value(.95))
         self.drop(f)
-        loss=self.formula(r'\mathbb E_{\mathcal D}[\mathbb E[L]]=',r'B^2','+','V','+',r'\underbrace{\iint(h-t)^2p(x,t)\,dx\,dt}_{\mathrm{noise}}',size=28)
+        loss=self.formula(r'\mathbb E_{\mathcal D}[\mathbb E[L]]=',r'B^2','+','V','+',r'\underbrace{\iint(h-t)^2p(x,t)\,dx\,dt}_{\sigma^2}',size=28)
         loss[1].set_color(BIAS);loss[3].set_color(VAR);loss[5].set_color(NOISE)
         self.beat(x.animate.set_value(.15),pulse(loss,scale_factor=1.01))
         self.drop(loss)
@@ -398,7 +403,10 @@ class PRML32BiasVarianceDecomposition(NarratedScene):
         gap=always_redraw(lambda:Line(chart.c2p(tr.get_value(),np.interp(tr.get_value(),LOG_LAMBDAS,METRICS[:,0]+METRICS[:,1])),
               chart.c2p(tr.get_value(),np.interp(tr.get_value(),LOG_LAMBDAS,METRICS[:,2])),color=NOISE,stroke_width=5))
         self.add(gap)
-        self.drop(best_note);self.formula(r'\mathrm{noise}=\sigma^2=0.25^2=0.0625',size=31)
+        self.drop(best_note)
+        noise_note=VGroup(jp('ノイズの分散',25),
+                          tex(r'=\sigma^2=0.25^2=0.0625',31))
+        self.add(noise_note.arrange(RIGHT,buff=.15).move_to([0,-2.48,0]))
         self.beat(tr.animate.set_value(3))
 
     def limits(self):
