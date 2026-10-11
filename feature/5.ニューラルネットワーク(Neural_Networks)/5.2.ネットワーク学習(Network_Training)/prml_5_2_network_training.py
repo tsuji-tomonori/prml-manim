@@ -24,20 +24,23 @@ class PRML52NetworkTraining(NarratedScene):
         ax=self.plot_axes(x=(-1.8,1.8,.6),y=(-1.2,1.2,.6),width=8,height=3.35,center=(-1,-.15,0),labels=('x',r't,\ y'))
         for label in ax.x_axis.numbers:
             label.set_y(ax.c2p(0,-1.2)[1]-.2)
-        w=ValueTracker(.2)
+        w=ValueTracker(STORY_START_W)
         dots=VGroup(*[Dot(ax.c2p(x,t),radius=.065,color=BLUE) for x,t in zip(X,T)])
         g=always_redraw(lambda:curve(ax,lambda x:prediction(x,w.get_value()),color=RED))
         self.add(dots,g,knob('w=',w,.1,1.4,at=(-1,-2.5,0)))
+        focus=Circle(radius=.18,color=YELLOW,stroke_width=2).move_to(dots[STORY_POINT_INDEX])
+        self.add(focus,jp('注目する1点',19,YELLOW).move_to([4.8,1.8,0]),
+                 number(r'|r_9|=',lambda:story_point_residual(w.get_value()),[5,1.1,0],YELLOW,places=3),
+                 number('E=',lambda:regression_error(w.get_value()),[5,-1.05,0],GREEN,places=3))
         self.equation(r'y(x,w)=',r'w',r'\tanh(1.8x)-0.35\tanh(3(x-0.5))',size=28)[1].set_color(RED)
-        self.beat(w.animate.set_value(.35))
-        self.beat(w.animate.set_value(1.15))
+        self.beat(Indicate(focus,scale_factor=1.3))
+        self.beat(w.animate.set_value(REG_W))
         residual=always_redraw(lambda:VGroup(*[Line(ax.c2p(x,t),ax.c2p(x,prediction(x,w.get_value())),color=YELLOW,stroke_width=2.5) for x,t in zip(X,T)]))
-        self.add(residual, *[jp(t,19,co).move_to([5,1.7-.45*i,0]) for i,(t,co) in enumerate([('青：観測',BLUE),('赤：予測',RED),('黄：ずれ',YELLOW)])])
-        self.beat(w.animate.set_value(1.4))
+        self.add(residual, *[jp(t,18,co).move_to([5,.65-.4*i,0]) for i,(t,co) in enumerate([('青：観測',BLUE),('赤：予測',RED),('黄：ずれ',YELLOW)])])
+        self.beat(Indicate(focus,scale_factor=1.25))
         f=self.equation(r'E(w)=\frac12\sum_{n=1}^N',r'(y(x_n,w)-t_n)^2');f[1].set_color(YELLOW)
-        self.add(number('E=',lambda:regression_error(w.get_value()),[5,.05,0],YELLOW))
-        self.beat(w.animate.set_value(1.1))
-        self.beat(w.animate.set_value(.2))
+        self.beat(Indicate(f[1],scale_factor=1.05))
+        self.beat(w.animate.set_value(STORY_START_W))
         self.beat(w.animate.set_value(REG_W))
 
     def gaussian(self):
@@ -118,7 +121,8 @@ class PRML52NetworkTraining(NarratedScene):
         g=curve(ax,landscape,color=BLUE); q=ValueTracker(-2.1)
         dot=always_redraw(lambda:Dot(ax.c2p(q.get_value(),landscape(q.get_value())),color=YELLOW,radius=.085))
         tangent=always_redraw(lambda:curve(ax,lambda x:landscape(q.get_value())+landscape_grad(q.get_value())*(x-q.get_value()),lo=q.get_value()-.25,hi=q.get_value()+.25,color=GREEN))
-        self.add(g,dot,note('誤差の形を調べる説明用の断面'))
+        slice_note=note('誤差の形を調べる説明用の断面')
+        self.add(g,dot,slice_note)
         self.equation(r'E(w)=0.18(w^2-2.2)^2+0.16w+0.45',size=29)
         self.beat(q.animate.set_value(-1.9))
         self.add(tangent)
@@ -126,6 +130,7 @@ class PRML52NetworkTraining(NarratedScene):
         r=ValueTracker(2.1);rd=always_redraw(lambda:Dot(ax.c2p(r.get_value(),landscape(r.get_value())),color=RED,radius=.085))
         self.add(rd)
         self.beat(q.animate.set_value(STATIONARY[0]),r.animate.set_value(STATIONARY[2]))
+        self.remove(slice_note)
         labels=VGroup(jp('大域最小',23,GREEN).move_to([-3,-2.1,0]),jp('局所最小',23,RED).move_to([2.5,-2.1,0]))
         self.add(labels);self.beat(Indicate(labels,scale_factor=1.07))
         self.equation(r'\nabla E(w)=0\quad\text{(stationary)}')
@@ -240,11 +245,11 @@ class PRML52NetworkTraining(NarratedScene):
         self.beat(q.animate.set_value(20))
 
     def online(self):
-        self.add(jp('復習: 3.1 一例ずつの勾配で更新',20).move_to([0,2.94,0]))
+        self.add(jp('復習: 3.1 1例ずつの勾配で更新',20).move_to([4.65,1.7,0]))
         ax=self.plot_axes(x=(-1.6,1.8,.8),y=(0,10,2),width=8.4,height=3.2,center=(-.7,-.1,0),labels=('w','E'))
         total=curve(ax,scalar_error,color=BLUE)
         pieces=VGroup(*[curve(ax,lambda w,t=t:.5*(w-t)**2,color=co).set_stroke(width=1.6) for t,co in zip(TARGETS,[RED,GREEN,PURPLE,YELLOW])])
-        self.add(total,pieces,note('青：全体の和　細い曲線：一例の誤差'))
+        self.add(total,pieces,note('青：全体の和　細い曲線：1例の誤差'))
         self.equation(r'y(x_n,w)=w',r'\quad E_n=\frac12(w-t_n)^2',r'\quad E=\sum_nE_n',size=30)
         self.beat(LaggedStart(*[Indicate(p,scale_factor=1.02) for p in pieces],lag_ratio=.2))
         q=ValueTracker(0);path=batch_online()
@@ -263,15 +268,38 @@ class PRML52NetworkTraining(NarratedScene):
         q.set_value(0);self.beat(q.animate.set_value(16))
         self.equation(r'p(t\mid x,w)\ \longrightarrow\ E(w)\ \longrightarrow\ \nabla E\ \longrightarrow\ w_{\rm new}',size=32)
         self.beat(q.animate.set_value(24))
+        self.clear()
+        self.add(jp('最初の13点へ',32).move_to([0,3.35,0]))
+        ax=self.plot_axes(x=(-1.8,1.8,.6),y=(-1.2,1.2,.6),width=8,height=3.35,
+                          center=(-1,-.15,0),labels=('x',r't,\ y'))
+        for label in ax.x_axis.numbers:
+            label.set_y(ax.c2p(0,-1.2)[1]-.2)
+        w=ValueTracker(STORY_START_W)
+        dots=VGroup(*[Dot(ax.c2p(x,t),radius=.065,color=BLUE) for x,t in zip(X,T)])
+        line=always_redraw(lambda:curve(ax,lambda x:prediction(x,w.get_value()),color=RED))
+        focus=Circle(radius=.18,color=YELLOW,stroke_width=2).move_to(dots[STORY_POINT_INDEX])
+        residual=always_redraw(lambda:Line(ax.c2p(X[STORY_POINT_INDEX],T[STORY_POINT_INDEX]),
+                                          ax.c2p(X[STORY_POINT_INDEX],prediction(X[STORY_POINT_INDEX],w.get_value())),
+                                          color=YELLOW,stroke_width=4))
+        total_label=number('E=',lambda:regression_error(w.get_value()),[5,-.1,0],GREEN,places=3)
+        self.add(dots,line,residual,focus,knob('w=',w,.1,1.4,at=(-1,-2.5,0)),
+                 jp('同じ入力・同じ観測',19,YELLOW).move_to([5,1.7,0]),
+                 number(r'|r_9|=',lambda:story_point_residual(w.get_value()),[5,.75,0],YELLOW,places=3),
+                 total_label)
+        self.equation(r'E(w)=\frac12\sum_{n=1}^{13}(y(x_n,w)-t_n)^2',size=30)
+        self.beat(Indicate(focus,scale_factor=1.25))
+        def next_question():
+            formula=self.equation(r'\nabla E(w)\quad\longrightarrow\quad w_{\rm new}',size=35)
+            return Indicate(formula,scale_factor=1.04)
+        self.beat(actions=[lambda:w.animate.set_value(REG_W),
+                           lambda:Indicate(total_label,scale_factor=1.1),next_question])
 
     def body_card(self,label):
         """Temporarily replace the body; keep trackers and the original PCM clock."""
         saved=[m for m in self.mobjects if m is not self.subtitle]
         self.clear()
         self.add(*[m for m in saved if m.get_center()[1]>3.1])
-        self.add(RoundedRectangle(width=10.4,height=4.6,corner_radius=.12,
-                                  color='#FFFF00',stroke_width=1.2).move_to([0,.1,0]),
-                 jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
+        self.add(jp(label,23).move_to([-4.85,2.06,0],aligned_edge=LEFT))
         return saved
 
     def restore_body(self,saved):
