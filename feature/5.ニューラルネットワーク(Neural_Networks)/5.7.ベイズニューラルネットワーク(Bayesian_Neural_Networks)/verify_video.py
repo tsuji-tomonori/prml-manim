@@ -31,12 +31,17 @@ for scene,entry in zip(timeline,manifest['scenes']):
  for beat in scene['beats']:
   added=any('-recap-' in c['id'] or '-aid-' in c['id'] for c in beat['cues'])
   selected=[c for c in beat['cues'] if added or c['id'] in
-            ['scene01-03-02','scene05-04-01','scene09-05-01']]
+            ['scene01-02-01','scene01-02-02','scene01-03-02','scene05-04-01',
+             'scene09-05-01','scene09-07-01','scene09-07-02',
+             'scene09-08-01','scene09-08-02','scene09-09-01','scene09-09-02']]
   if added:
    low,high=(5,20) if '-aid-' in beat['cues'][0]['id'] else (10,30)
    assert low<=beat['end']-beat['start']<=high
    for suffix,t in [('before',max(0,beat['start']-.2)),('after',beat['end']+.2)]:
     shots.append(dict(id=beat['cues'][0]['id']+'-'+suffix,time=t,display='transition'))
+  if beat['cues'][0]['id'] in ['scene09-07-01','scene09-08-01','scene09-09-01']:
+   for suffix,t in [('before',beat['start']-.2),('after',min(beat['end']+.2,timeline[-1]['end']-.1))]:
+    shots.append(dict(id=beat['cues'][0]['id']+'-'+suffix,time=t,display='return to opening'))
   for cue in selected:
    audio_cue=next(c for c in entry['subtitle_cues'] if c['id']==cue['id'])
    with wave.open(str(d/entry['path'])) as wav:
@@ -44,7 +49,7 @@ for scene,entry in zip(timeline,manifest['scenes']):
    start=int(audio_cue['start']*rate);end=int(audio_cue['end']*rate)
    idx=np.flatnonzero(abs(pcm[start:end])>10**(-45/20))
    onset=scene['start']+(start+int(idx[0]))/rate
-   if added:
+   if beat.get('actions'):
     action=next(a for a in beat['actions'] if abs(a['start']-cue['start'])<1/15)
     assert abs(action['end']-cue['end'])<=1/15
    else:
@@ -52,7 +57,8 @@ for scene,entry in zip(timeline,manifest['scenes']):
    sync.append(dict(id=cue['id'],sentence_start=cue['start'],pcm_onset=onset,
                     action_start=action['start'],action_end=action['end']))
    for suffix,fraction in [('early',.08),('middle',.5),('late',.94)]:
-    shots.append(dict(id=cue['id']+'-'+suffix,time=action['start']+fraction*(action['end']-action['start']),display=cue['display']))
+    shots.append(dict(id=cue['id']+'-'+suffix,
+                      time=cue['start']+fraction*(cue['end']-cue['start']),display=cue['display']))
 assert sum('-recap-' in c['id'] or '-aid-' in c['id'] for c in sync)==11
 for s in shots:
  p=out/(s['id']+'.png')
@@ -109,7 +115,7 @@ for scene,entry in zip(timeline,manifest['scenes']):
   assert wav.getframerate()==rate and wav.getnchannels()==1
   source=np.frombuffer(wav.readframes(wav.getnframes()),dtype=np.int16).astype(float)
  for cue in entry['subtitle_cues']:
-  if '-recap-' not in cue['id'] and '-aid-' not in cue['id']:continue
+  if '-recap-' not in cue['id'] and '-aid-' not in cue['id'] and not cue['id'].startswith(('scene09-07-', 'scene09-08-', 'scene09-09-')):continue
   a,b=[round(cue[k]*rate) for k in ('start','end')]
   template=source[a:b];expected=scene['start']+cue['start']
   start=max(0,round((expected-.12)*rate));end=round((expected+.12)*rate)+len(template)
