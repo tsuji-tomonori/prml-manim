@@ -103,6 +103,17 @@ def bars(getter,pos,width=3.6,labels=True):
     return VGroup(g,nums)
 
 
+def formula_dissolve(current,target):
+    """Replace an equation without crossing unrelated glyphs through one another."""
+    original=current.copy()
+    def update(mob,alpha):
+        if alpha<.18:
+            mob.become(original).set_opacity(1-alpha/.18)
+        else:
+            mob.become(target).set_opacity(min(1,(alpha-.18)/.18))
+    return UpdateFromAlphaFunc(current,update,rate_func=linear)
+
+
 class PRML56MixtureDensityNetworks(Scene):
     def construct(self):
         self.camera.background_color=BG
@@ -164,8 +175,12 @@ class PRML56MixtureDensityNetworks(Scene):
             if a>0:visual.append(Wait(a))
             prepared=[prepare_animation(a) for a in animations]
             for anim in prepared:
-                if isinstance(anim,(Write,FadeIn,FadeOut,Create)) or (isinstance(anim,Transform) and isinstance(anim.mobject,MathTex)):
-                    anim.set_run_time(min(1.8,(b-a)*.25))
+                if isinstance(anim,UpdateFromAlphaFunc) and isinstance(anim.mobject,MathTex):
+                    anim.set_run_time(min(1.2,(b-a)*.25))
+                elif isinstance(anim,Transform) and isinstance(anim.mobject,MathTex):
+                    anim.set_run_time(min(1.2,(b-a)*.25))
+                elif isinstance(anim,(Write,FadeIn,FadeOut,Create)):
+                    anim.set_run_time((b-a)*.8)
                 else:
                     anim.set_run_time(b-a)
             visual.append(AnimationGroup(*prepared,Wait(b-a)) if prepared else Wait(b-a))
@@ -194,19 +209,23 @@ class PRML56MixtureDensityNetworks(Scene):
     def robot_scene(self):
         q=ValueTracker(-.7); r=ValueTracker(.2)
         arm=always_redraw(lambda:self.arm(q.get_value(),r.get_value(),C[0]))
-        target=Dot([-.6,-.4,0],color=YELLOW,radius=.11)
+        target=Dot([-.6,-.4,0],color=YELLOW,radius=.11).set_z_index(10)
         angle=np.arccos(.6)
         self.add(target,arm,self.note('棒の長さ：1 ＋ 1　　目標までの距離：1.2'))
         self.beat(q.animate.set_value(angle),r.animate.set_value(-2*angle))
         ghost=self.arm(angle,-2*angle,C[0]).set_opacity(.3)
         self.add(ghost)
-        self.beat(q.animate.set_value(-angle),r.animate.set_value(2*angle))
+        self.beat(sentence_actions=[
+            lambda:AnimationGroup(q.animate.set_value(-angle),r.animate.set_value(2*angle)),
+            lambda:Wait(1)])
         f=self.formula(r'(\theta_1,\theta_2)\ \longrightarrow\ (x_1,x_2)')
         self.beat(Write(f),Indicate(target))
         red=always_redraw(lambda:self.arm(q.get_value(),r.get_value(),RED))
         self.remove(arm);self.add(red)
         inv=self.formula(r'(x_1,x_2)\ \longrightarrow\ \{\mathrm{A},\mathrm{B}\}')
-        self.beat(Transform(f,inv),q.animate.set_value(0),r.animate.set_value(0))
+        self.beat(sentence_actions=[
+            lambda:Wait(1),
+            lambda:AnimationGroup(formula_dissolve(f,inv),q.animate.set_value(0),r.animate.set_value(0))])
         error=Line(target.get_center(),[1,-.4,0],color=RED,stroke_width=5)
         label=readout(r'\|\mathrm{error}\|=',lambda:.8,[3,1,0],RED)
         self.beat(Create(error),FadeIn(label),Indicate(red))
@@ -223,11 +242,13 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(FadeIn(dots),Create(f))
         newdots=VGroup(*[Dot(ax.c2p(v,u),radius=.032,color=C[0]) for u,v in zip(t,x)])
         newlab=VGroup(tex('x',24).move_to(lab[0]),tex('t',24).move_to(lab[1]))
-        self.beat(Transform(dots,newdots),FadeOut(f),Transform(lab,newlab))
+        self.beat(sentence_actions=[
+            lambda:AnimationGroup(Transform(dots,newdots),FadeOut(f),Transform(lab,newlab)),
+            lambda:Wait(1)])
         xv=ValueTracker(.14)
         scan=always_redraw(lambda:Line(ax.c2p(xv.get_value(),0),ax.c2p(xv.get_value(),1),color=YELLOW))
         self.add(scan,readout('x=',xv.get_value,[4.9,2,0],YELLOW))
-        self.beat(xv.animate.set_value(.5))
+        self.beat(sentence_actions=[lambda:xv.animate.set_value(.5),lambda:Wait(1)])
         self.mean_recap()
         mean=curve(ax,u,mean_prediction(self.model['mean_weights'],u),RED,4)
         formula=self.formula(r'\min_y\ \mathbb{E}[(t-y)^2\mid x]\quad\Rightarrow\quad y=\mathbb{E}[t\mid x]',size=28)
@@ -236,7 +257,7 @@ class PRML56MixtureDensityNetworks(Scene):
         marks=VGroup(*[Circle(radius=.18,color=c).move_to(ax.c2p(.5,mu)) for c,mu in zip(C,mus)])
         self.beat(Create(marks),mean.animate.set_stroke(opacity=.3))
         eq=self.formula(r'p(t\mid x)\quad\text{?}',size=38)
-        self.beat(Transform(formula,eq),xv.animate.set_value(.62))
+        self.beat(formula_dissolve(formula,eq),xv.animate.set_value(.62))
 
     def mixture_scene(self):
         ax,lab=axes(xrange=(-.2,1.2,.2),yrange=(0,5,1),width=9,height=2.9,center=(0,-.1,0),xlabel='t',ylabel='p')
@@ -250,7 +271,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.beat(FadeIn(graph),Write(self.note('確率 ＝ 区間に対応する面積',GREEN)))
         self.add(slider(mu,.15,.85,(-3,-2.3,0),label=r'\mu',color=C[1]),readout(r'\mu=',mu.get_value,[3,-2.3,0],C[1]))
         self.beat(mu.animate.set_value(.22))
-        self.beat(sig.animate.set_value(.16))
+        self.beat(sentence_actions=[lambda:Wait(1),lambda:sig.animate.set_value(.16)])
         self.mixture_recap()
         self.beat(blend.animate.set_value(1),sig.animate.set_value(.095))
         prob=bars(lambda:pars()[0],[0,2.15,0],width=5)
@@ -286,12 +307,12 @@ class PRML56MixtureDensityNetworks(Scene):
         count=self.formula(r'K=3,\quad 3K=9',size=32)
         self.beat(Write(count),Indicate(net[3]))
         soft=self.formula(r'\pi_k={e^{a_k^\pi}\over\sum_l e^{a_l^\pi}},\quad\sum_k\pi_k=1',size=30).set_color(C[0])
-        self.beat(Transform(count,soft),xv.animate.set_value(.6))
+        self.beat(formula_dissolve(count,soft),xv.animate.set_value(.6))
         sigma=self.formula(r'\sigma_k=e^{a_k^\sigma}>0,\qquad \mathrm{Var}_k=\sigma_k^2',size=31).set_color(C[2])
-        self.beat(Transform(count,sigma),Indicate(net[3][6:]))
+        self.beat(formula_dissolve(count,sigma),Indicate(net[3][6:]))
         mean=self.formula(r'\mu_k=a_k^\mu',size=36).set_color(C[1])
-        self.beat(Transform(count,mean),xv.animate.set_value(.85))
-        self.beat(xv.animate.set_value(.15),Transform(count,self.formula(r'x\ \longrightarrow\ (\pi_k,\mu_k,\sigma_k)\ \longrightarrow\ p(t\mid x)')))
+        self.beat(formula_dissolve(count,mean),xv.animate.set_value(.85))
+        self.beat(xv.animate.set_value(.15),formula_dissolve(count,self.formula(r'x\ \longrightarrow\ (\pi_k,\mu_k,\sigma_k)\ \longrightarrow\ p(t\mid x)')))
 
     def training_scene(self):
         ax,lab=axes(xrange=(-.15,1.15,.25),yrange=(0,7,2),width=8.7,height=3.0,center=(0,-.2,0),xlabel='t',ylabel='p')
@@ -324,7 +345,7 @@ class PRML56MixtureDensityNetworks(Scene):
         self.add(counter,loss)
         self.beat(step.animate.set_value(100))
         floor=self.formula(r'\sigma_k=0.012+e^{a_k^\sigma}\quad\text{(experiment)}',size=31)
-        self.beat(Transform(eq,floor),Indicate(graph))
+        self.beat(formula_dissolve(eq,floor),Indicate(graph))
 
     def responsibility_scene(self):
         p=np.array([.28,.42,.30]); mu=np.array([.2,.5,.8]);sig=np.array([.13,.11,.12])
@@ -344,10 +365,10 @@ class PRML56MixtureDensityNetworks(Scene):
         prior=jp('観測前',21,MUTED).move_to([3.8,1.65,0]);post=jp('観測後',21,YELLOW).move_to([3.8,1,0])
         priorbar=bars(lambda:p,[3.8,1.35,0],width=3.1,labels=False)
         self.beat(FadeIn(priorbar),Write(prior),Write(post),tv.animate.set_value(.3))
-        self.beat(Transform(eq,self.formula(r'{\partial E_n\over\partial a_k^\pi}=\pi_k-\gamma_k')),tv.animate.set_value(.78))
+        self.beat(formula_dissolve(eq,self.formula(r'{\partial E_n\over\partial a_k^\pi}=\pi_k-\gamma_k')),tv.animate.set_value(.78))
         derivatives=VGroup(tex(r'{\partial E_n\over\partial a_k^\mu}=\gamma_k{\mu_k-t_n\over\sigma_k^2}',28,C[1]),
                            tex(r'{\partial E_n\over\partial a_k^\sigma}=\gamma_k\left(1-{(t_n-\mu_k)^2\over\sigma_k^2}\right)',28,C[2])).arrange(RIGHT,buff=.8).move_to([0,2.08,0])
-        self.beat(Transform(eq,derivatives),tv.animate.set_value(.57))
+        self.beat(formula_dissolve(eq,derivatives),tv.animate.set_value(.57))
         arrow=Arrow([4,-2.2,0],[-4,-2.2,0],color=YELLOW)
         self.beat(GrowArrow(arrow),Write(self.note('出力の勾配 → 共有する隠れ層 → 重みの更新',YELLOW)))
 
@@ -370,7 +391,7 @@ class PRML56MixtureDensityNetworks(Scene):
         graph=mix_graph(da,lambda:self.p(xv.get_value()),True)
         self.add(scan,da,dl,graph,slider(xv,.12,.88,(-3,-2.3,0),width=4,label='x'),readout('x=',xv.get_value,[3.7,-2.35,0],YELLOW))
         self.beat(xv.animate.set_value(.18))
-        self.beat(xv.animate.set_value(.5))
+        self.beat(sentence_actions=[lambda:Wait(1),lambda:xv.animate.set_value(.5)])
         self.beat(xv.animate.set_value(.88))
         means=VGroup(*[curve(ax,xs[(p[:,k]>.02)&(m[:,k]>=0)&(m[:,k]<=1)],m[:,k][(p[:,k]>.02)&(m[:,k]>=0)&(m[:,k]<=1)],C[k],2) for k in range(3)])
         self.beat(Create(means),xv.animate.set_value(.5))
@@ -388,10 +409,10 @@ class PRML56MixtureDensityNetworks(Scene):
         eq=self.formula(r'm=\mathbb{E}[t\mid x]=\sum_k\pi_k\mu_k',size=34)
         self.add(ax,lab,graph)
         self.beat(Write(eq),Create(meanline))
-        self.beat(sep.animate.set_value(.4))
+        self.beat(sentence_actions=[lambda:Wait(1),lambda:sep.animate.set_value(.4)])
         var=VGroup(tex(r's^2=',30),tex(r'\sum_k\pi_k\underbrace{\sigma_k^2}_{\text{within}}',30,C[0]),tex('+',30),tex(r'\sum_k\pi_k\underbrace{(\mu_k-m)^2}_{\text{between}}',30,C[1])).arrange(RIGHT,buff=.15).move_to([0,2.2,0])
         nums=VGroup(readout(r'\mathrm{within}=',within,[-3,-2.2,0],C[0],3),readout(r'\mathrm{between}=',between,[3,-2.3,0],C[1],3))
-        self.beat(Transform(eq,var),FadeIn(nums))
+        self.beat(formula_dissolve(eq,var),FadeIn(nums))
         self.beat(sep.animate.set_value(.46),width.animate.set_value(.2),second.animate.set_value(.2))
         self.remove(nums,meanline)
         approx=always_redraw(lambda:Line(ax.c2p(pars()[1][np.argmax(pars()[0])],0),ax.c2p(pars()[1][np.argmax(pars()[0])],3.2),color=C[1]))
@@ -399,35 +420,41 @@ class PRML56MixtureDensityNetworks(Scene):
         mode=lambda:float(grid[np.argmax(density(grid,*pars()))])
         modepoint=always_redraw(lambda:Dot(ax.c2p(mode(),float(density(mode(),*pars()))),color=YELLOW,radius=.08))
         self.add(approx,modepoint,self.note('橙の線：最大の混合係数の中心　／　黄色の点：数値的なモード',YELLOW))
-        self.beat(Transform(eq,self.formula(r'\mathrm{mode}=\arg\max_t p(t\mid x),\qquad \widetilde t=\mu_{\arg\max_k\pi_k}',size=30)),weight.animate.set_value(.65))
+        self.beat(formula_dissolve(eq,self.formula(r'\mathrm{mode}=\arg\max_t p(t\mid x),\qquad \widetilde t=\mu_{\arg\max_k\pi_k}',size=30)),weight.animate.set_value(.65))
         self.beat(second.animate.set_value(.055),width.animate.set_value(.22))
 
     def recap_scene(self):
         a=np.arccos(.6)
         upper=self.arm(a,-2*a,C[0],origin=(-4.4,0,0),scale=1.5)
         lower=self.arm(-a,2*a,C[1],origin=(-4.4,0,0),scale=1.5)
-        self.add(Dot([-2.6,0,0],color=YELLOW))
-        self.beat(FadeIn(upper),FadeIn(lower))
-        xv=ValueTracker(.5)
-        ax,lab=density_axes(lambda:self.p(xv.get_value()),width=5.4,height=3.0,center=(3,-.25,0))
-        graph=mix_graph(ax,lambda:self.p(xv.get_value()),True)
-        eq=self.formula(r'x\longrightarrow (\pi,\mu,\sigma)\longrightarrow p(t\mid x)')
+        average=self.arm(0,0,RED,origin=(-4.4,0,0),scale=1.5)
+        target=Dot([-2.6,0,0],color=YELLOW,radius=.11).set_z_index(10)
+        miss=Line(target.get_center(),[-1.4,0,0],color=RED,stroke_width=4)
+        self.add(target,self.note('同じ腕：棒は各1、目標1.2、角度平均の外れ0.8'))
+        self.beat(sentence_actions=[
+            lambda:AnimationGroup(FadeIn(average),Create(miss)),
+            lambda:AnimationGroup(FadeIn(upper),FadeIn(lower),FadeOut(average),FadeOut(miss))])
+        ax,lab=axes(xrange=(-1.4,1.4,.7),yrange=(0,2,.5),width=5.3,height=3.0,
+                    center=(3,-.25,0),xlabel=r'\theta_1',ylabel='p')
+        pars=lambda:(np.array([.5,.5]),np.array([a,-a]),np.array([.13,.13]))
+        graph=mix_graph(ax,pars,True)
+        eq=self.formula(r'p(\theta_1\mid x)={1\over2}{\cal N}(\theta_1\mid a,s^2)+{1\over2}{\cal N}(\theta_1\mid-a,s^2)',size=29)
         self.beat(Create(ax),FadeIn(lab),FadeIn(graph),Write(eq))
-        self.beat(Transform(eq,self.formula(r'E=-\sum_n\ln p(t_n\mid x_n),\qquad\gamma_k\longrightarrow\nabla_w E')),xv.animate.set_value(.6))
+        self.beat(formula_dissolve(eq,self.formula(r'E=-\sum_n\ln p(t_n\mid x_n),\qquad\gamma_k\longrightarrow\nabla_w E')))
         dimensions=self.formula(r't\in\mathbb{R}^{D}:\quad K(D+2)\ \text{outputs (isotropic)}',size=30)
-        self.beat(Transform(eq,dimensions),xv.animate.set_value(.3))
+        self.beat(formula_dissolve(eq,dimensions))
         distinction=self.formula(r'p(t\mid x,w_{\mathrm{ML}})\qquad\qquad p(w\mid\mathcal{D})',size=34)
-        self.beat(Transform(eq,distinction),xv.animate.set_value(.85))
-        self.beat(Transform(eq,self.formula(r'x\quad\longrightarrow\quad p(t\mid x)',size=36)),xv.animate.set_value(.5),Indicate(upper),Indicate(lower))
+        self.beat(formula_dissolve(eq,distinction))
+        resolved=self.formula(r'\theta_1=+\arccos(0.6)\ \longrightarrow\ \|\mathrm{error}\|=0',size=34)
+        self.beat(sentence_actions=[
+            lambda:lower.animate.set_opacity(.2),
+            lambda:AnimationGroup(formula_dissolve(eq,resolved),upper[:2].animate.set_stroke(width=10),Indicate(target))])
 
     def body_card(self,label):
         """Temporarily remove the body, keeping its objects and tracker states intact."""
         saved=[m for m in self.mobjects if m is not self.subtitle]
         self.clear();self.subtitle=None
-        self.add(self.heading,
-                 RoundedRectangle(width=10.6,height=4.8,corner_radius=.12,
-                                  color='#FFFF00',stroke_width=1.2).move_to([0,0,0]),
-                 jp(label,23).move_to([-4.95,2.08,0],aligned_edge=LEFT))
+        self.add(self.heading,jp(label,23).move_to([-4.95,2.08,0],aligned_edge=LEFT))
         return saved
 
     def restore_body(self,saved):
