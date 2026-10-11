@@ -23,8 +23,8 @@
   },
   "silence_intervals": 0,
   "volume": [
-    "[Parsed_volumedetect_0 @ 0x591bc2fc9b00] mean_volume: -26.6 dB",
-    "[Parsed_volumedetect_0 @ 0x591bc2fc9b00] max_volume: -6.1 dB"
+    "[Parsed_volumedetect_0 @ 0x6052357ed000] mean_volume: -26.6 dB",
+    "[Parsed_volumedetect_0 @ 0x6052357ed000] max_volume: -6.1 dB"
   ],
   "frames": [
     {
@@ -1508,23 +1508,24 @@
       ]
     }
   ],
-  "mp4_sha256": "f4935730398ab27e37a060cd6171ca124b02752cdb0f24b586ee35f58f216b2b",
+  "mp4_sha256": "9e712589953538f91f6bec69380ebe04e4115b282eab3742b6efaad0e3aeefc4",
   "visual_review": {
-    "first_pass_contact_sheets_viewed": 39,
-    "intermediate_changed_contact_sheets_viewed": 12,
-    "final_changed_contact_sheets_viewed": 6,
-    "final_representative_frames": 233,
-    "final_contact_sheets": 39,
-    "pixel_identical_to_intermediate": 243,
-    "changed_from_intermediate": 29,
-    "zoomed_final_frames": [
-      "scene01-beat02-50",
-      "scene09-beat07-50",
-      "scene05-aid-newton-01-sentence2-0.85",
-      "scene07-beat03-50"
+    "representative_scenes_viewed": 9,
+    "zoomed_final_frames_viewed": [
+      99,
+      107,
+      112,
+      117,
+      228,
+      233,
+      237,
+      242,
+      445,
+      462,
+      470
     ],
-    "finding": "代表フレームで装飾枠、ラベル重なり、字幕・式の読みにくさを認めず。冒頭の見出しを結果の拍で切替え、同じ保留点と0.621を結末で確認。",
-    "scope": "各beatの15/50/85%、数式字幕、補足・復習の直前・途中・直後。全フレームの人手検査ではない。"
+    "assessment": "場面2の赤・青の同一点は白い塗りに隠れず、完全分離の注記は日本語で読める。比較式・凡例も英語の説明表記を解消。縦軸ラベルは軸端にあり、確認フレームで文字の重なりや画面外へのはみ出しを認めない。",
+    "scope": "全9場面の代表フレーム一覧、変更箇所の前・途中・後の拡大11フレームを目視。全フレームの人手検査ではない。"
   },
   "full_listening": false
 }
