@@ -251,7 +251,9 @@ class PRML34BayesianModelComparison(Scene):
                   ReplacementTransform(legend,posterior_legend))
         flow=jp('事前から係数を選ぶ → 観測を生成する',24,GREEN).move_to([0,2.25,0])
         self.remove(legend,*legend,posterior_legend,*posterior_legend)
-        self.beat(FadeIn(flow),pulse(f2))
+        # Keep the heading legible from the first frame of its spoken explanation.
+        self.add(flow)
+        self.beat(pulse(f2))
 
     def models(self):
         self.bayes_recap()

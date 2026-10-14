@@ -64,7 +64,9 @@ class PRML51FeedForwardNetworkFunctions(NarratedScene):
         c=ValueTracker(.18); v=ValueTracker(.35)
         pts=VGroup(*[Dot(ax.c2p(x,y),color=C1,radius=.095) for x,y in zip(STORY_X,STORY_Y)])
         single=curve(ax,story_one_unit,color=YELLOW_ACC)
-        miss=Line(ax.c2p(1,STORY_Y[-1]),ax.c2p(1,story_one_unit(1)),color=YELLOW_ACC,stroke_width=4)
+        # This residual is a guide, distinct from the solid yellow function.
+        miss=DashedLine(ax.c2p(1,STORY_Y[-1]),ax.c2p(1,story_one_unit(1)),
+                        color=MUTED,stroke_width=2,dash_length=.09,dashed_ratio=.5)
         self.legend([('3点',C1),('1ユニット',YELLOW_ACC),('2ユニット',OUT)])
         values=tex(r't(-1)=t(1)=0.034,\quad t(0)=1.084',22,C1).move_to([3.7,1.45,0])
         hint=jp('左と中央に合わせた1本',22,YELLOW_ACC).move_to([1.9,-2.35,0])
