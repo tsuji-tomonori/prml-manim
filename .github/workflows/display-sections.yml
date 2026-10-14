@@ -7,10 +7,21 @@ on:
       - 'feature/5.*/5.1.*/**'
       - 'scripts/review_display_sections.py'
       - '.github/workflows/display-sections.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'feature/3.*/3.4.*/**'
+      - 'feature/5.*/5.1.*/**'
+      - 'scripts/review_display_sections.py'
+      - '.github/workflows/display-sections.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: display-sections-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   review:
@@ -19,9 +30,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        section: ['3.4', '5.1']
+        include:
+          - section: '3.4'
+            directory: 'feature/3.回帰のための線形モデル(Linear_Models_for_Regression)/3.4.ベイズモデル比較(Bayesian_Model_Comparison)'
+          - section: '5.1'
+            directory: 'feature/5.ニューラルネットワーク(Neural_Networks)/5.1.フィードフォワードネットワーク関数(Feed-forward_Network_Functions)'
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ matrix.directory }}
+            scripts
       - uses: astral-sh/setup-uv@v6
       - name: Install rendering dependencies
         run: |
@@ -29,7 +48,9 @@ jobs:
           sudo apt-get install -y pkg-config libcairo2-dev libpango1.0-dev ffmpeg dvisvgm texlive-latex-extra texlive-fonts-recommended fonts-noto-cjk
       - run: uv sync --frozen
       - name: Verify numerics, captions, full preview and PCM synchronization
-        run: uv run python scripts/review_display_sections.py --section '${{ matrix.section }}' --quality low
+        env:
+          QUALITY: ${{ github.event_name == 'pull_request' && 'low' || 'high' }}
+        run: uv run python scripts/review_display_sections.py --section '${{ matrix.section }}' --quality "$QUALITY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
