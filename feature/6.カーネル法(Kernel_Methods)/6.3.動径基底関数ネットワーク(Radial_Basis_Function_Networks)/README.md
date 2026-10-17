@@ -2,18 +2,20 @@
 
 ## 物語の設計
 
+[完成動画（480p15）](media/videos/prml_6_3_radial_basis_function_networks/480p15/PRML63RadialBasisFunctionNetworks.mp4) ／ [全文台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
+
 全編の問いは「3点をぴったり通る局所的な予測が、少し外へ行くとどうして消えるのか」。6.2と同じ入力 $x=(-1,0,1)$、目標 $t=(1,0,1)$ を使う。右端の未観測点 $x_*=2.5$ の目標を、最後の点 $t=1$ に近いと予想させる。幅 $\sigma=0.7$ の3つのガウス基底を各点に置き、全点を補間する重みを求めると、3点では誤差0なのに $f(2.5)=0.131365$。なぜ外で消えるのかを、山の高さ・重み・正規化という順で調べる。最後は同じ3点、同じ $x_*=2.5$、同じ幅で正規化した Nadaraya–Watson 回帰を計算し、$y(2.5)=0.983401$ に戻る。外挿値はモデルの選択に依存し、遠方の予測精度を保証するものではない。
 
-| シーン | 疑問→実験→発見 | 原典 |
-|---|---|---|
-| 1 消える予測 | 6.2の距離の山を3点へ置く→外で小さい | §6.3 pp.299–300, (6.38) |
-| 2 山を足す仕組み | 中心からの距離を動かす→3つの山の線形和 | (6.38) |
-| 3 ぴったり通る代償 | 最小二乗で重みを求める→訓練3点は一致、外は不確実 | p.299 |
-| 4 山の合計を1に | 同じ軸で生の山と正規化した山を切り替え→遠方でも重みの総和が1 | (6.40)–(6.41), 図6.2 |
-| 5 近い点の投票 | 同じ3点・同じ幅で正規化の分子と分母を動かす→近い点の目標が主に残る | (6.45)–(6.46) |
-| 6 なぜこの比になる？ | 入力と目標の小さな密度の山を重ね、条件付き平均へ→比の式 | (6.42)–(6.47), 図6.3 |
-| 7 何個の中心が要る？ | 中心を減らして計算量と形の変化を見る→固定した少数中心で重みを学習 | p.300–301 |
-| 8 冒頭の点へ戻る | 3点・幅0.7・入力2.5を再表示→0.131365と0.983401の差の原因を確かめる | (6.38), (6.41), (6.45) |
+| シーン | 開始秒 | 尺 | 疑問→実験→発見 | 原典 |
+|---|---:|---:|---|---|
+| 1 消える予測 | 0.000 | 65.200秒 | 6.2の距離の山を3点へ置く→外で小さい | §6.3 pp.299–300, (6.38) |
+| 2 山を並べる | 65.200 | 57.333秒 | 中心からの距離を動かす→3つの山の線形和 | (6.38) |
+| 3 ぴったり通る代償 | 122.533 | 64.267秒 | 最小二乗で重みを求める→訓練3点は一致、外は不確実 | p.299 |
+| 4 山の合計を1に | 186.800 | 55.533秒 | 同じ軸で生の山と正規化した山を切り替える | (6.40)–(6.41), 図6.2 |
+| 5 近い点の投票 | 242.333 | 60.600秒 | 同じ3点・同じ幅で分子と分母を動かす | (6.45)–(6.46) |
+| 6 確率からも同じ比へ | 302.933 | 63.067秒 | 入力と目標の密度を重ね、条件付き平均へ | (6.42)–(6.47), 図6.3 |
+| 7 中心を減らすと？ | 366.000 | 61.800秒 | 中心を3本から2本へ減らし、最小二乗で係数を学習 | pp.300–301 |
+| 8 同じ点へ戻る | 427.800 | 63.467秒 | 入力2.5の0.131365と0.983401を再比較 | (6.38), (6.41), (6.45) |
 
 ## 視覚補足と章をまたぐ復習
 
@@ -31,7 +33,30 @@ Bishop (2006), *Pattern Recognition and Machine Learning*, 印刷pp.299–303（
 - 自作の1次元3点 $x=(-1,0,1)$、$t=(1,0,1)$。6.2の点と目標を再利用。未観測入力 $x_*=2.5$、共通のガウス幅 $\sigma=0.7$。
 - 生の基底は $h_n(x)=\exp[-(x-x_n)^2/(2\sigma^2)]$。補間の重みは3×3の行列 $H_{in}=h_n(x_i)$ を `numpy.linalg.solve(H,t)` で求める。今回は $H$ が正則である。この例の完全一致を一般のデータ・基底へ無条件に広げない。
 - 正規化は $q_n(x)=h_n(x)/\sum_m h_m(x)$。今回のガウスは有限の $x$ で分母が正。Nadaraya–Watson の係数は $t_n$、補間で学習した $w_n$ を流用しない。確率的導出では各成分密度の目標方向の平均を0とする。入力方向の山は正のガウス形で、共通の正規化係数は比で相殺される。
+- 図6.3に対応する2次元の楕円は位置関係の模式図であり、幅や面積を原典のデータから推定したものではない。正規化係数 $q_n(x)$ は $x$ について正規化した重みで、一般に対称な半正定値カーネルとは限らない。
 - $x_*=2.5$ は訓練範囲の外。正規化回帰の値は右端の目標1へ近づくが、外挿の真値が1であるとは主張しない。
+
+## ファイルと再生成
+
+- `rbf_model.py`、`verify_numerics.py`、`numerical_validation.json`: 補間、正規化、2中心の最小二乗を自作データから再計算。
+- `narration_content.py`、`narration_script.md`: 8シーン・56 beat・112文の `display` / `speech`。
+- `make_voicevox_narration.py`、`assets/voicevox/`: WhiteCUL 8 WAVとハッシュ・字幕時刻付き manifest。
+- `check_narration_readings.py`、`reading_check.json` / `.md`: 全112文の `audio_query` 読みと修正履歴。辞書登録なし。
+- `scene_support.py`、`prml_6_3_radial_basis_function_networks.py`: PCM同期の字幕・描画と時刻記録。
+- `verify_caption_layout.py`、`verify_video.py`: 字幕寸法、完成MP4・WAV・タイムラインの整合。
+
+対象ディレクトリで、メインの `.venv` を使って実行する。プレビューと抽出フレームはGit管理外。
+
+```bash
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_6_3_radial_basis_function_networks.py PRML63RadialBasisFunctionNetworks
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
+```
 
 ## VOICEVOX クレジット
 
