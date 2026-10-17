@@ -19,6 +19,10 @@ assert abs(b['lower'] + 26.686791384115736) < 1e-11
 assert abs(b['kl'] - .1662068282180016) < 1e-11
 assert np.isclose(new['pi'][0], q[:, 0].mean())
 assert np.allclose(new['mu'], (q * POINTS[:, None]).sum(axis=0) / q.sum(axis=0))
+mid = {k: .5 * (old[k] + new[k]) for k in ('mu', 'sigma', 'pi')}
+mid_step = decomposition(q, mid['mu'], mid['sigma'], mid['pi'])
+assert a['lower'] < mid_step['lower'] < b['lower']
+assert mid_step['observed'] >= mid_step['lower']
 # Independently sum the 2 latent alternatives per point and their KL terms.
 manual_log = sum(np.log(sum(components(x, old['mu'], old['sigma'], old['pi'])[k]
                             for k in range(2))) for x in POINTS)
@@ -36,6 +40,7 @@ result = dict(points=POINTS.tolist(), initial={k: v.tolist() for k, v in INITIAL
               probe_red=float(q[PROBE_INDEX, 0]), first_update={k: new[k].tolist() for k in ('mu', 'sigma', 'pi')},
               before={k: a[k] for k in ('q', 'entropy', 'lower', 'kl', 'observed')},
               after={k: b[k] for k in ('q', 'entropy', 'lower', 'kl', 'observed')},
+              generalized_step={k: mid_step[k] for k in ('q', 'entropy', 'lower', 'kl', 'observed')},
               pi_slice=dict(old=.65, bound_max=opt_pi, old_value={k: old_slice[k] for k in ('lower', 'kl', 'observed')},
                             new_value={k: new_slice[k] for k in ('lower', 'kl', 'observed')}))
 with open('numerical_validation.json', 'w') as output:
