@@ -23,12 +23,13 @@ def expanded_interval(left=INITIAL[0],right=INITIAL[1],height=HEIGHT,width=WIDTH
 
 def fixed_demo():
     left,right=expanded_interval()
+    expanded=[left,right]
     trial1=2.
     if f(trial1)>=HEIGHT:raise RuntimeError('Expected first trial outside slice')
     right=trial1
     trial2=1.4
     if not left<trial2<right or f(trial2)<=HEIGHT:raise RuntimeError('Expected second trial inside slice')
-    return dict(start=0.,height=HEIGHT,initial=list(INITIAL),expanded=[left,2.3],
+    return dict(start=0.,height=HEIGHT,initial=list(INITIAL),expanded=expanded,
                 rejected=trial1,shrunk=[left,right],accepted=trial2)
 
 def slice_step(z,rng,width=WIDTH):
