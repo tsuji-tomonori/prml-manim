@@ -1,0 +1,764 @@
+{
+  "count": 126,
+  "math_count": 7,
+  "max_width": 9.953125,
+  "max_height": 0.6187500000000004,
+  "sentences": [
+    {
+      "id": "scene01-01-01",
+      "width": 6.792187500000001,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene01-01-02",
+      "width": 7.245312500000001,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene01-02-01",
+      "width": 8.853125,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene01-02-02",
+      "width": 6.046875,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene01-03-01",
+      "width": 7.875,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene01-03-02",
+      "width": 3.6945312500000003,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene01-04-01",
+      "width": 4.690625,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene01-04-02",
+      "width": 6.92578125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene01-05-01",
+      "width": 6.241406250000001,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene01-05-02",
+      "width": 4.90625,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene01-06-01",
+      "width": 7.103125,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene01-06-02",
+      "width": 8.325000000000001,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene01-07-01",
+      "width": 6.643750000000001,
+      "height": 0.28671875000000036,
+      "math": false
+    },
+    {
+      "id": "scene01-07-02",
+      "width": 5.7914062500000005,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene02-01-01",
+      "width": 7.6921875,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene02-01-02",
+      "width": 6.98203125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene02-02-01",
+      "width": 7.09765625,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene02-02-02",
+      "width": 7.089062500000001,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene02-03-01",
+      "width": 4.540625,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene02-03-02",
+      "width": 6.95078125,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene02-04-01",
+      "width": 6.0390625,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene02-04-02",
+      "width": 5.893750000000001,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene02-05-01",
+      "width": 7.052460674669977,
+      "height": 0.38131207933347433,
+      "math": true
+    },
+    {
+      "id": "scene02-05-02",
+      "width": 7.24375,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene02-06-01",
+      "width": 6.99375,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene02-06-02",
+      "width": 7.203125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene02-07-01",
+      "width": 6.6953125,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene02-07-02",
+      "width": 5.5882812500000005,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene03-01-01",
+      "width": 7.09453125,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene03-01-02",
+      "width": 6.496875,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene03-02-01",
+      "width": 6.0453125000000005,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene03-02-02",
+      "width": 6.331250000000001,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene03-03-01",
+      "width": 6.5,
+      "height": 0.28671875000000036,
+      "math": false
+    },
+    {
+      "id": "scene03-03-02",
+      "width": 9.04453125,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene03-04-01",
+      "width": 5.258655344803909,
+      "height": 0.42129541409575744,
+      "math": true
+    },
+    {
+      "id": "scene03-04-02",
+      "width": 7.203125,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene03-05-01",
+      "width": 7.0875,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene03-05-02",
+      "width": 6.4750000000000005,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene03-06-01",
+      "width": 6.0625,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene03-06-02",
+      "width": 6.190625000000001,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene03-07-01",
+      "width": 6.64453125,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene03-07-02",
+      "width": 4.84765625,
+      "height": 0.2781250000000002,
+      "math": false
+    },
+    {
+      "id": "scene04-01-01",
+      "width": 7.2406250000000005,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene04-01-02",
+      "width": 6.800000000000001,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene04-02-01",
+      "width": 8.196093750000001,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene04-02-02",
+      "width": 7.68828125,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene04-03-01",
+      "width": 5.73125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene04-03-02",
+      "width": 8.6953125,
+      "height": 0.28671875000000036,
+      "math": false
+    },
+    {
+      "id": "scene04-04-01",
+      "width": 3.0219796971975508,
+      "height": 0.6187500000000004,
+      "math": true
+    },
+    {
+      "id": "scene04-04-02",
+      "width": 6.390625,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene04-05-01",
+      "width": 7.4,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene04-05-02",
+      "width": 6.3453125,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene04-06-01",
+      "width": 7.961770942039449,
+      "height": 0.38131207933347433,
+      "math": true
+    },
+    {
+      "id": "scene04-06-02",
+      "width": 7.54765625,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene04-07-01",
+      "width": 8.33203125,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene04-07-02",
+      "width": 5.446875,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene05-01-01",
+      "width": 6.040625,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene05-01-02",
+      "width": 5.596875000000001,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene05-02-01",
+      "width": 5.446875,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene05-02-02",
+      "width": 5.1312500000000005,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene05-03-01",
+      "width": 5.0953125,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene05-03-02",
+      "width": 6.496875,
+      "height": 0.2859375000000002,
+      "math": false
+    },
+    {
+      "id": "scene05-04-01",
+      "width": 3.8032507953645047,
+      "height": 0.6187500000000004,
+      "math": true
+    },
+    {
+      "id": "scene05-04-02",
+      "width": 7.37109375,
+      "height": 0.2859375000000002,
+      "math": false
+    },
+    {
+      "id": "scene05-05-01",
+      "width": 4.5125,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene05-05-02",
+      "width": 8.43203125,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene05-06-01",
+      "width": 4.840625,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene05-06-02",
+      "width": 6.6312500000000005,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene05-07-01",
+      "width": 6.64609375,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene05-07-02",
+      "width": 8.453125,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene06-01-01",
+      "width": 6.34140625,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene06-01-02",
+      "width": 5.74765625,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene06-02-01",
+      "width": 4.2796875000000005,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene06-02-02",
+      "width": 7.296093750000001,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene06-03-01",
+      "width": 5.74375,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene06-03-02",
+      "width": 6.853125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene06-04-01",
+      "width": 5.34140625,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene06-04-02",
+      "width": 6.0,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene06-05-01",
+      "width": 3.903125,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene06-05-02",
+      "width": 5.7953125000000005,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene06-06-01",
+      "width": 6.479687500000001,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene06-06-02",
+      "width": 6.68828125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene06-07-01",
+      "width": 7.275,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene06-07-02",
+      "width": 4.24921875,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene07-01-01",
+      "width": 6.1507812500000005,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene07-01-02",
+      "width": 6.925000000000001,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene07-02-01",
+      "width": 2.5715751237375666,
+      "height": 0.6187500000000004,
+      "math": true
+    },
+    {
+      "id": "scene07-02-02",
+      "width": 5.8796875,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene07-03-01",
+      "width": 5.9296875,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene07-03-02",
+      "width": 7.890625,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene07-04-01",
+      "width": 6.4578125,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene07-04-02",
+      "width": 5.29375,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene07-05-01",
+      "width": 4.96224799577522,
+      "height": 0.43000264157763457,
+      "math": true
+    },
+    {
+      "id": "scene07-05-02",
+      "width": 6.384375,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene07-06-01",
+      "width": 8.12109375,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene07-06-02",
+      "width": 6.325,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene07-07-01",
+      "width": 7.143750000000001,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene07-07-02",
+      "width": 6.34375,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene08-01-01",
+      "width": 5.143750000000001,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene08-01-02",
+      "width": 7.4320312500000005,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene08-02-01",
+      "width": 6.1921875,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene08-02-02",
+      "width": 6.84375,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene08-03-01",
+      "width": 6.792187500000001,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene08-03-02",
+      "width": 6.025,
+      "height": 0.2843749999999998,
+      "math": false
+    },
+    {
+      "id": "scene08-04-01",
+      "width": 7.246875,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene08-04-02",
+      "width": 5.73203125,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene08-05-01",
+      "width": 4.87578125,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene08-05-02",
+      "width": 7.29375,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene08-06-01",
+      "width": 9.953125,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene08-06-02",
+      "width": 9.3296875,
+      "height": 0.2859375000000002,
+      "math": false
+    },
+    {
+      "id": "scene08-07-01",
+      "width": 6.38828125,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene08-07-02",
+      "width": 6.025,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene09-01-01",
+      "width": 4.515625,
+      "height": 0.28125,
+      "math": false
+    },
+    {
+      "id": "scene09-01-02",
+      "width": 5.4265625,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene09-02-01",
+      "width": 6.643750000000001,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene09-02-02",
+      "width": 7.684375,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene09-03-01",
+      "width": 4.3625,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene09-03-02",
+      "width": 7.040625,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene09-04-01",
+      "width": 6.3460937500000005,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene09-04-02",
+      "width": 6.603125,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene09-05-01",
+      "width": 6.245312500000001,
+      "height": 0.28515625,
+      "math": false
+    },
+    {
+      "id": "scene09-05-02",
+      "width": 7.2914062500000005,
+      "height": 0.28359374999999964,
+      "math": false
+    },
+    {
+      "id": "scene09-06-01",
+      "width": 9.0453125,
+      "height": 0.2820312500000002,
+      "math": false
+    },
+    {
+      "id": "scene09-06-02",
+      "width": 6.67578125,
+      "height": 0.28281250000000036,
+      "math": false
+    },
+    {
+      "id": "scene09-07-01",
+      "width": 7.28203125,
+      "height": 0.2859375000000002,
+      "math": false
+    },
+    {
+      "id": "scene09-07-02",
+      "width": 5.54453125,
+      "height": 0.28125,
+      "math": false
+    }
+  ]
+}

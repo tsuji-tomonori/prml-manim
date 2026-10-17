@@ -1,0 +1,37 @@
+{
+  "shape": [
+    12,
+    12
+  ],
+  "flipped": 14,
+  "flip_fraction": 0.09722222222222222,
+  "target": [
+    5,
+    5
+  ],
+  "target_observation": 1,
+  "target_neighbours": [
+    -1,
+    -1,
+    -1,
+    -1
+  ],
+  "target_local_energy": {
+    "black": -1.9,
+    "white": 1.9
+  },
+  "sweep_changes": [
+    8,
+    0
+  ],
+  "initial_agreement": 130,
+  "restored_agreement": 138,
+  "restored_fraction": 0.9583333333333334,
+  "energies": [
+    -378.40000000000083,
+    -404.80000000000086,
+    -404.80000000000086
+  ],
+  "small_partition": 6.172322539260975,
+  "grid_2x2_partition": 16.986362382408668
+}
