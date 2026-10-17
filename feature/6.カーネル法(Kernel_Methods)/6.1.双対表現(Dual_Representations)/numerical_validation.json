@@ -67,5 +67,7 @@
   ],
   "prediction": 0.368421052631579,
   "expected_fraction": "7/19",
+  "alternative_prediction": 0.3023255813953488,
+  "alternative_kernel": "(1+xz)^3",
   "primal_dual_max_error": 2.220446049250313e-16
 }

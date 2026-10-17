@@ -4,7 +4,7 @@ import json
 from fractions import Fraction as F
 from pathlib import Path
 import numpy as np
-from dual_model import X,T,LAMBDA,PROBE,PHI,K,W,A,K_PROBE,PREDICTION,CONTRIBUTIONS,kernel,phi,primal,dual
+from dual_model import X,T,LAMBDA,PROBE,PHI,K,W,A,K_PROBE,PREDICTION,CONTRIBUTIONS,kernel,phi,primal,dual,alternative_kernel,ALT_K,ALT_A,ALT_PREDICTION
 
 assert [F(str(v)) for v in X] == [F(-1),F(0),F(1)]
 assert [F(str(v)) for v in T] == [F(1),F(0),F(1)]
@@ -27,6 +27,10 @@ for x in np.linspace(-1.5,1.5,31):
 for lam in [.1,.5,1,2]:
     assert np.allclose(primal(lam),PHI.T@dual(lam),atol=1e-12)
 assert np.all(np.linalg.eigvalsh(K)>=-1e-12)
-result=dict(x=X.tolist(),target=T.tolist(),lambda_value=LAMBDA,phi=PHI.tolist(),K=K.tolist(),w=W.tolist(),a=A.tolist(),probe=PROBE,k_probe=K_PROBE.tolist(),contributions=CONTRIBUTIONS.tolist(),prediction=PREDICTION,expected_fraction='7/19',primal_dual_max_error=max(abs(float(phi(x)@W)-float(kernel(X,x)@A)) for x in np.linspace(-1.5,1.5,31)))
+assert np.all(np.linalg.eigvalsh(ALT_K)>=-1e-12)
+assert abs(ALT_PREDICTION-13/43)<1e-12
+assert abs(ALT_PREDICTION-PREDICTION)>.05
+assert np.allclose(ALT_K, np.stack([np.ones_like(X),np.sqrt(3)*X,np.sqrt(3)*X**2,X**3],axis=1) @ np.stack([np.ones_like(X),np.sqrt(3)*X,np.sqrt(3)*X**2,X**3],axis=1).T)
+result=dict(x=X.tolist(),target=T.tolist(),lambda_value=LAMBDA,phi=PHI.tolist(),K=K.tolist(),w=W.tolist(),a=A.tolist(),probe=PROBE,k_probe=K_PROBE.tolist(),contributions=CONTRIBUTIONS.tolist(),prediction=PREDICTION,expected_fraction='7/19',alternative_prediction=ALT_PREDICTION,alternative_kernel='(1+xz)^3',primal_dual_max_error=max(abs(float(phi(x)@W)-float(kernel(X,x)@A)) for x in np.linspace(-1.5,1.5,31)))
 Path('numerical_validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print('PASS',result['prediction'],result['primal_dual_max_error'])

@@ -30,3 +30,12 @@ def primal(lam=LAMBDA):
 
 def dual(lam=LAMBDA):
     return np.linalg.solve(K + lam*np.eye(len(X)), T)
+
+# A second valid polynomial kernel used only in the closing comparison.
+def alternative_kernel(x,z):
+    x, z = np.asarray(x,dtype=float), np.asarray(z,dtype=float)
+    return (1+x*z)**3
+
+ALT_K = alternative_kernel(X[:,None],X[None,:])
+ALT_A = np.linalg.solve(ALT_K+LAMBDA*np.eye(len(X)),T)
+ALT_PREDICTION = float(alternative_kernel(X,PROBE)@ALT_A)
