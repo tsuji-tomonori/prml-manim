@@ -5,7 +5,7 @@ from narration_content import SCENES,script_hash
 root=Path(__file__).resolve().parent
 path=root/'assets/voicevox/manifest.json'
 entries={e['id']:e for e in json.loads(path.read_text()).get('scenes',[])} if path.exists() else {}
-lines=['# PRML 11.3 ギブスサンプリング 台本','','原文: Bishop (2006), §11.3、印刷 pp.542–546 / PDF pp.562–566。','公式正誤表: pp.526–536 の Box–Muller、図11.4、(11.37)、(11.37) などの訂正を確認。','字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。','']
+lines=['# PRML 11.3 ギブスサンプリング 台本','','原文: Bishop (2006), §11.3、印刷 pp.542–546 / PDF pp.562–566。','公式正誤表: p.544の条件付き分布の余分な波括弧と、p.545式(11.50)のαの添字を確認。','字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。','']
 start=0.
 for s in SCENES:
     e=entries.get(s['id'],{});ds=e.get('beat_durations',[])
