@@ -17,5 +17,5 @@ for s in SCENES:
         for seg in b['segments']:lines += [f"- {seg['id']} 字幕: {seg['display']}",f"  音声: {seg['speech']}"]
         lines += ['']
     start=start+duration if current and start is not None else None
-lines += ['## 内容の対応と条件','','- 自作の16点と初期値は mixture_model.py と README.md に記載。','- 責務、EM、対数尤度と特異点の数値は verify_numerics.py で独立に照合。','- 元の PDF と公式正誤表の照合範囲は README.md を参照。','']
+lines += ['## 内容の対応と条件','','- 自作の16点と初期値は mixture_model.py と README.md に記載。','- 負担率、EM、対数尤度と特異点の数値は verify_numerics.py で独立に照合。','- 元の PDF と公式正誤表の照合範囲は README.md を参照。','']
 (root/'narration_script.md').write_text('\n'.join(lines))

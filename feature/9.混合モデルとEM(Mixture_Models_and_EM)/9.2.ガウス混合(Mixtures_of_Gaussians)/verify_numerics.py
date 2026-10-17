@@ -31,8 +31,20 @@ for index, state in enumerate(states):
 assert all(b >= a-1e-10 for a, b in zip(independent, independent[1:]))
 assert np.isclose(states[0]['gamma'][PROBE_INDEX, 0], .5636, atol=.0001)
 assert np.isclose(states[0]['log_likelihood'], -27.73748, atol=.00001)
-collapse = {str(s): dict(log_likelihood=collapsed_example(s)[0], probe_density=collapsed_example(s)[1]) for s in (.03, .005, .001)}
+collapse = {}
+for scale in (.03, .005, .001):
+    # This is a separate parameter path, not an EM trajectory.
+    q = []
+    for x in POINTS:
+        broad = .9*np.exp(-float(x)**2/(2*1.55**2))/(1.55*np.sqrt(2*np.pi))
+        narrow = .1*np.exp(-(float(x)-.15)**2/(2*scale**2))/(scale*np.sqrt(2*np.pi))
+        q.append(broad+narrow)
+    expected = float(sum(np.log(q)))
+    ll, probe_density = collapsed_example(scale)
+    assert abs(ll-expected) < 1e-11 and abs(probe_density-q[PROBE_INDEX]) < 1e-11
+    collapse[str(scale)] = dict(log_likelihood=ll, probe_density=probe_density)
 assert collapse['0.03']['log_likelihood'] < collapse['0.005']['log_likelihood'] < collapse['0.001']['log_likelihood']
+assert round(collapse['0.005']['probe_density'], 3) == 8.209
 result = dict(point_count=len(POINTS), initial_probe_responsibility=states[0]['gamma'][PROBE_INDEX].tolist(),
               log_likelihood=independent, states=[dict(mu=s['mu'].tolist(), sigma=s['sigma'].tolist(),
               pi=s['pi'].tolist(), probe_responsibility=s['gamma'][PROBE_INDEX].tolist()) for s in states],

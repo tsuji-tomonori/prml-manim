@@ -255,24 +255,36 @@ class PRML92GaussianMixtures(NarratedScene):
         self.say('2本の重み付き密度', self.show_bars(STATES[0]['gamma'][PROBE_INDEX, 0], raw=True))
         self.say('合計を1に正規化', self.show_bars(STATES[0]['gamma'][PROBE_INDEX, 0]),
                  self.show_formula(r'\gamma_{nk}=\frac{\pi_k\mathcal N(x_n\mid\mu_k,\Sigma_k)}{\sum_j\pi_j\mathcal N(x_n\mid\mu_j,\Sigma_j)}', GREEN))
-        self.say('事後確率＝責務', self.show_value('赤56.4%・青43.6%', YELLOW))
+        self.say('事後確率＝負担率', self.show_value('赤56.4%・青43.6%', YELLOW))
         self.say('今度は全16点へ', Indicate(self.dots, color=YELLOW, scale_factor=1.02))
 
     def likelihood(self):
         self.setup_plot()
         self.say('全16点の緑の密度', Indicate(self.curves[2], color=GREEN, scale_factor=1))
-        self.say('点ごとの対数を足す', self.show_formula(r'\ln p(X)=\sum_n\ln p(x_n)', YELLOW))
-        self.say('内側で山を足す', self.show_formula(r'\ln p(X)=\sum_n\ln\!\left(\sum_k\pi_k\mathcal N(x_n\mid\mu_k,\Sigma_k)\right)', GREEN))
+        examples = VGroup()
+        weighted = components(POINTS, INITIAL['mu'], INITIAL['sigma'], INITIAL['pi']).sum(axis=1)
+        for i in (0, PROBE_INDEX):
+            x = POINTS[i]
+            examples.add(Line(point(x, 0), point(x, weighted[i]), color=YELLOW, stroke_width=2.5))
+        self.say('2点の例：積を対数で和へ', FadeIn(examples),
+                 self.show_formula(r'\ln[p(x_1)p(x_9)]=\ln p(x_1)+\ln p(x_9)', YELLOW))
+        self.say('内側で山を足す', FadeOut(examples), self.show_formula(r'\ln p(X)=\sum_n\ln\!\left(\sum_k\pi_k\mathcal N(x_n\mid\mu_k,\Sigma_k)\right)', GREEN))
         self.say('初期の対数尤度', self.show_value(r'\ell=-27.737', GREEN, math=True))
-        self.say('別の極限操作', self.show_formula(r'\sigma_1\rightarrow 0', RED), FadeIn(self.probe))
+        separate = dict(mu=np.array([.15, 0.]), sigma=np.array([.03, 1.55]),
+                        pi=np.array([.1, .9]))
+        broad_blue = density_curve(separate['mu'], separate['sigma'], separate['pi'], 1)
+        self.say('別の極限操作', Succession(FadeOut(self.curves), FadeIn(broad_blue)),
+                 self.show_formula(r'\sigma_1\rightarrow 0', RED),
+                 self.show_value('別の設定：赤を0.15に固定', RED), FadeIn(self.probe))
         spike = Arrow([xcoord(.15), -1.4, 0], [xcoord(.15), 1.95, 0], color=RED,
                       stroke_width=4, buff=0, max_tip_length_to_length_ratio=.10)
         self.say('1点で密度が上昇', FadeIn(spike),
                  self.show_value('幅0.005：密度8.209', RED))
         self.say('潰れた解に注意', self.show_formula(r'\sigma\rightarrow0:\quad\ell\rightarrow+\infty', YELLOW),
-                 FadeOut(spike))
-        self.say('通常の山へ戻る', self.show_formula(r'\sigma_1=0.9,\quad\sigma_2=1.2', BLUE),
-                 Indicate(self.curves, color=YELLOW, scale_factor=1))
+                 Indicate(spike, color=YELLOW, scale_factor=1))
+        self.say('通常の山へ戻る', Succession(AnimationGroup(FadeOut(spike), FadeOut(broad_blue)),
+                                                  FadeIn(self.curves)),
+                 self.show_formula(r'\sigma_1=0.9,\quad\sigma_2=1.2', BLUE))
 
     def e_step(self):
         self.setup_plot()
@@ -283,7 +295,7 @@ class PRML92GaussianMixtures(NarratedScene):
         self.say('真ん中は混色', *[self.dots[i].animate.set_color(ink_color(STATES[0]['gamma'][i, 0])) for i in mid])
         self.say('右端はほぼ青', *[self.dots[i].animate.set_color(ink_color(STATES[0]['gamma'][i, 0])) for i in (14, 15)])
         rest = [i for i in range(16) if i not in (0, 1, 14, 15, *mid)]
-        self.say('全点の責務を表示', *[self.dots[i].animate.set_color(ink_color(STATES[0]['gamma'][i, 0])) for i in rest])
+        self.say('全点の負担率を表示', *[self.dots[i].animate.set_color(ink_color(STATES[0]['gamma'][i, 0])) for i in rest])
         hard = DashedLine([xcoord(0), -1.5, 0], [xcoord(0), 1.8, 0], color=PURPLE,
                           stroke_width=2, dash_length=.12)
         self.say('硬い境界との違い', FadeIn(hard))
@@ -301,14 +313,14 @@ class PRML92GaussianMixtures(NarratedScene):
         end = STATES[1]
         stage_mu = dict(mu=end['mu'], sigma=start['sigma'], pi=start['pi'], gamma=start['gamma'])
         stage_sigma = dict(mu=end['mu'], sigma=end['sigma'], pi=start['pi'], gamma=start['gamma'])
-        self.say('責務を重りにする', self.show_formula(r'N_k=\sum_n\gamma_{nk}', YELLOW))
+        self.say('負担率を重りにする', self.show_formula(r'N_k=\sum_n\gamma_{nk}', YELLOW))
         self.say('濃い点ほど強く引く', self.show_formula(r'\mu_k=\frac{\sum_n\gamma_{nk}x_n}{N_k}', GREEN))
         self.say('中心を重心へ動かす', self.update_curves(stage_mu, recolor=False),
                  self.animate_params(stage_mu, 'mu'))
         self.say('新しい中心からのずれ', Indicate(self.curves[0], color=RED, scale_factor=1))
         self.say('広がりも更新', self.update_curves(stage_sigma, recolor=False),
                  self.animate_params(stage_sigma, 'sigma'), self.show_formula(r'\sigma_k^2=\frac{\sum_n\gamma_{nk}(x_n-\mu_k)^2}{N_k}', GREEN))
-        self.say('責務の合計が混合比', self.update_curves(end, recolor=False),
+        self.say('負担率の合計が混合比', self.update_curves(end, recolor=False),
                  self.animate_params(end, 'pi'), self.show_formula(r'\pi_k=\frac{N_k}{N}', YELLOW))
         self.say('3つのつまみを更新', Indicate(self.params, color=YELLOW, scale_factor=1.02))
         self.say('新しい山でもう1度E', self.update_curves(end, recolor=True),
@@ -324,7 +336,7 @@ class PRML92GaussianMixtures(NarratedScene):
                         for j in range(n-1)])
         dots = VGroup(*[Dot([xx[j], yy[j], 0], radius=.07, color=YELLOW) for j in range(n)])
         labels = VGroup(*[J(str(indexes[j]), 16, MUTED).move_to([xx[j], -1.33, 0]) for j in range(5)])
-        title = J('EM 往復回数 →', 17, MUTED).move_to([4.15, -1.62, 0])
+        title = J('抜粋した往復 →', 17, MUTED).move_to([4.15, -1.62, 0])
         return VGroup(path, dots, labels, title)
 
     def iteration(self):
@@ -353,6 +365,6 @@ class PRML92GaussianMixtures(NarratedScene):
         self.say('この位置の山の高さ', self.show_bars(STATES[0]['gamma'][PROBE_INDEX, 0], raw=True))
         self.say('赤が0.564で優勢', self.show_bars(STATES[0]['gamma'][PROBE_INDEX, 0]),
                  self.show_formula(r'\gamma_1=0.564,\quad\gamma_2=0.436', GREEN))
-        self.say('責務で山を作り直す', Indicate(self.curves, color=YELLOW, scale_factor=1))
+        self.say('負担率で山を作り直す', Indicate(self.curves, color=YELLOW, scale_factor=1))
         self.say('局所解と特異点に注意', self.show_value('対数尤度と幅を確認', RED))
         self.say('9.3でEMの一般形へ', Indicate(self.probe, color=YELLOW, scale_factor=1.2))
