@@ -3,8 +3,9 @@ import json
 from pathlib import Path
 import numpy as np
 from scipy.integrate import quad
-from scipy.stats import t,norm
-from mixture_model import fit,posterior,responsibilities,expected_logs,K,D,ALPHA0,NU0
+from scipy.special import gammaln
+from scipy.stats import t,norm,wishart,dirichlet
+from mixture_model import fit,posterior,responsibilities,expected_logs,log_b,K,D,ALPHA0,NU0
 
 x,h=fit(steps=50)
 assert x.shape==(80,2) and len(h)==51
@@ -42,6 +43,14 @@ assert np.min(np.diff([s['bound'] for s in strong]))>-1e-8
 
 # 1-D marginal of each multivariate Student component integrates to one.
 p=posterior(x,final['r'])
+elnpi,elnlam=expected_logs(p)
+for k in active:
+    nu=p['nu'][k];w=p['w'][k]
+    entropy_from_terms=-log_b(w,nu)-.5*(nu-D-1)*elnlam[k]+.5*nu*D
+    assert abs(entropy_from_terms-wishart.entropy(df=nu,scale=w))<1e-9
+dirichlet_entropy_from_terms=-(gammaln(p['alpha'].sum())-gammaln(p['alpha']).sum()
+                               +np.dot(p['alpha']-1,elnpi))
+assert abs(dirichlet_entropy_from_terms-dirichlet.entropy(p['alpha']))<1e-7
 integrals=[]
 tail_predicted=tail_fixed=0.
 for k in active:
@@ -50,11 +59,14 @@ for k in active:
     value=quad(lambda z:t.pdf(z,df,loc=p['mean'][k,0],scale=np.sqrt(scale_matrix[0,0])),
                -np.inf,np.inf,epsabs=1e-9)[0]
     integrals.append(value)
+assert np.allclose(integrals,1,atol=1e-8)
+for k in range(K):
+    df=p['nu'][k]+1-D
+    scale_matrix=np.linalg.inv(p['w'][k])*(1+p['beta'][k])/(df*p['beta'][k])
     weight=p['alpha'][k]/p['alpha'].sum()
     tail_predicted+=weight*t.pdf(3.5,df,loc=p['mean'][k,0],scale=np.sqrt(scale_matrix[0,0]))
     plug=np.sqrt(np.linalg.inv(p['nu'][k]*p['w'][k])[0,0])
     tail_fixed+=weight*norm.pdf(3.5,loc=p['mean'][k,0],scale=plug)
-assert np.allclose(integrals,1,atol=1e-8)
 assert 1.9<tail_predicted/tail_fixed<2.
 result=dict(seed=1023,n=80,k=K,alpha0=ALPHA0,
             initial_bound=h[0]['bound'],final_bound=final['bound'],

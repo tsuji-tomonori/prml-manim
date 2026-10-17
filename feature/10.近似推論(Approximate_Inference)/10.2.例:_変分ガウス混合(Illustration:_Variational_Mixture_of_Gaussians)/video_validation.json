@@ -1,0 +1,1589 @@
+{
+  "duration": 502.066667,
+  "audio_duration": 502.101333,
+  "resolution": [
+    854,
+    480
+  ],
+  "fps": 15,
+  "scene_timing_max_error": 3.851141627819743e-12,
+  "long_silence_count": 0,
+  "mean_volume_db": -26.4,
+  "max_volume_db": -7.5,
+  "full_decode": "passed",
+  "reading_count": 108,
+  "caption_count": 108,
+  "video_sha256": "0957445524542ee4a0673e0b873dc40b8e262ecd07f1e2aa4ce60e268f4f76eb",
+  "frame_count": 170,
+  "review_sheet_count": 11,
+  "manual_review": "Extraction only; see the work report for actual frame review.",
+  "audio_alignment": {
+    "count": 108,
+    "minimum_correlation": 0.9993468707704645,
+    "maximum_absolute_offset": 0.021333333333333333,
+    "sentences": [
+      {
+        "id": "scene01-01-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9997307359964452
+      },
+      {
+        "id": "scene01-01-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9997463388358926
+      },
+      {
+        "id": "scene01-02-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.999729151307358
+      },
+      {
+        "id": "scene01-02-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998422923812144
+      },
+      {
+        "id": "scene01-03-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998845563130337
+      },
+      {
+        "id": "scene01-03-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9996408491791833
+      },
+      {
+        "id": "scene01-04-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998828948109844
+      },
+      {
+        "id": "scene01-04-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9997565657594937
+      },
+      {
+        "id": "scene01-05-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998907242575062
+      },
+      {
+        "id": "scene01-05-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998682547098486
+      },
+      {
+        "id": "scene01-06-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998400607677226
+      },
+      {
+        "id": "scene01-06-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9998825668194267
+      },
+      {
+        "id": "scene01-07-01",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.99984901279387
+      },
+      {
+        "id": "scene01-07-02",
+        "offset_seconds": 0.021333333333333333,
+        "correlation": 0.9997411312744375
+      },
+      {
+        "id": "scene02-01-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999324323564744
+      },
+      {
+        "id": "scene02-01-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9997705177952841
+      },
+      {
+        "id": "scene02-02-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999024040312394
+      },
+      {
+        "id": "scene02-02-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.999777668462945
+      },
+      {
+        "id": "scene02-03-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999717420609475
+      },
+      {
+        "id": "scene02-03-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9996729304618425
+      },
+      {
+        "id": "scene02-04-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999157882696678
+      },
+      {
+        "id": "scene02-04-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9998907109875057
+      },
+      {
+        "id": "scene02-05-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999622416602265
+      },
+      {
+        "id": "scene02-05-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9997812371023744
+      },
+      {
+        "id": "scene02-06-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999501549499709
+      },
+      {
+        "id": "scene02-06-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999640340094134
+      },
+      {
+        "id": "scene02-07-01",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9999130860427183
+      },
+      {
+        "id": "scene02-07-02",
+        "offset_seconds": 0.020666666666666667,
+        "correlation": 0.9998822157449865
+      },
+      {
+        "id": "scene03-01-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998057153148944
+      },
+      {
+        "id": "scene03-01-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999889952255836
+      },
+      {
+        "id": "scene03-02-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999164975125953
+      },
+      {
+        "id": "scene03-02-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998725411713241
+      },
+      {
+        "id": "scene03-03-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999463931921849
+      },
+      {
+        "id": "scene03-03-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997321489774678
+      },
+      {
+        "id": "scene03-04-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999371906408873
+      },
+      {
+        "id": "scene03-04-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997142808623716
+      },
+      {
+        "id": "scene03-05-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999257320596119
+      },
+      {
+        "id": "scene03-05-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998088652172284
+      },
+      {
+        "id": "scene03-06-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997380241237067
+      },
+      {
+        "id": "scene03-06-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998486084376988
+      },
+      {
+        "id": "scene03-07-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9996984693381369
+      },
+      {
+        "id": "scene03-07-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998648648733633
+      },
+      {
+        "id": "scene04-01-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9996639147573934
+      },
+      {
+        "id": "scene04-01-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999824540621392
+      },
+      {
+        "id": "scene04-02-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999859019460291
+      },
+      {
+        "id": "scene04-02-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998132046302903
+      },
+      {
+        "id": "scene04-03-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.99994948786778
+      },
+      {
+        "id": "scene04-03-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997188951423702
+      },
+      {
+        "id": "scene04-04-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999893866313685
+      },
+      {
+        "id": "scene04-04-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997559092736893
+      },
+      {
+        "id": "scene04-05-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998570936757264
+      },
+      {
+        "id": "scene04-05-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998305074735286
+      },
+      {
+        "id": "scene04-06-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999554277763749
+      },
+      {
+        "id": "scene04-06-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999838723286156
+      },
+      {
+        "id": "scene04-07-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998651481340706
+      },
+      {
+        "id": "scene04-07-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998029504087956
+      },
+      {
+        "id": "scene05-01-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998171940908112
+      },
+      {
+        "id": "scene05-01-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999801580667943
+      },
+      {
+        "id": "scene05-02-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999782801915303
+      },
+      {
+        "id": "scene05-02-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999111186514487
+      },
+      {
+        "id": "scene05-03-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999577255692512
+      },
+      {
+        "id": "scene05-03-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9993468707704645
+      },
+      {
+        "id": "scene05-04-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999198518916393
+      },
+      {
+        "id": "scene05-04-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997981408108289
+      },
+      {
+        "id": "scene05-05-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999661616836016
+      },
+      {
+        "id": "scene05-05-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9996560189864289
+      },
+      {
+        "id": "scene05-06-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999886759208805
+      },
+      {
+        "id": "scene05-06-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997233149987939
+      },
+      {
+        "id": "scene05-07-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9995837729436066
+      },
+      {
+        "id": "scene05-07-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999322337484328
+      },
+      {
+        "id": "scene06-01-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999590002872587
+      },
+      {
+        "id": "scene06-01-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9998407107527777
+      },
+      {
+        "id": "scene06-02-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.99989496659525
+      },
+      {
+        "id": "scene06-02-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9997477169680857
+      },
+      {
+        "id": "scene06-03-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999821190119028
+      },
+      {
+        "id": "scene06-03-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9996147673693654
+      },
+      {
+        "id": "scene06-04-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999036343865241
+      },
+      {
+        "id": "scene06-04-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9997402293326862
+      },
+      {
+        "id": "scene06-05-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999043683576689
+      },
+      {
+        "id": "scene06-05-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9997504586087391
+      },
+      {
+        "id": "scene06-06-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999885717057828
+      },
+      {
+        "id": "scene06-06-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9997390068523136
+      },
+      {
+        "id": "scene06-07-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9998840803720471
+      },
+      {
+        "id": "scene06-07-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9996781449525941
+      },
+      {
+        "id": "scene07-01-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9998752260877938
+      },
+      {
+        "id": "scene07-01-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9996854170279418
+      },
+      {
+        "id": "scene07-02-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9998158186832086
+      },
+      {
+        "id": "scene07-02-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999318784158129
+      },
+      {
+        "id": "scene07-03-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999295872300212
+      },
+      {
+        "id": "scene07-03-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9998786978068958
+      },
+      {
+        "id": "scene07-04-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9997294181487054
+      },
+      {
+        "id": "scene07-04-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.99968689741266
+      },
+      {
+        "id": "scene07-05-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9997813363199022
+      },
+      {
+        "id": "scene07-05-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.9996621415139377
+      },
+      {
+        "id": "scene07-06-01",
+        "offset_seconds": 0.021,
+        "correlation": 0.9999388782356803
+      },
+      {
+        "id": "scene07-06-02",
+        "offset_seconds": 0.021,
+        "correlation": 0.999777415470627
+      },
+      {
+        "id": "scene08-01-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998923150668276
+      },
+      {
+        "id": "scene08-01-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999029486601567
+      },
+      {
+        "id": "scene08-02-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999287468833448
+      },
+      {
+        "id": "scene08-02-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999619196924205
+      },
+      {
+        "id": "scene08-03-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998550072642672
+      },
+      {
+        "id": "scene08-03-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997606147073851
+      },
+      {
+        "id": "scene08-04-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9999801095164025
+      },
+      {
+        "id": "scene08-04-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998354948743324
+      },
+      {
+        "id": "scene08-05-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998069591376261
+      },
+      {
+        "id": "scene08-05-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9998920516248745
+      },
+      {
+        "id": "scene08-06-01",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.999861212021528
+      },
+      {
+        "id": "scene08-06-02",
+        "offset_seconds": 0.02033333333333333,
+        "correlation": 0.9997413043427912
+      }
+    ]
+  },
+  "frames": [
+    {
+      "id": "scene01-01-onset",
+      "time": 0.9333333333333335,
+      "phase": "onset",
+      "sha256": "92d91771ee7dd12cb5c487c4956b2c5f8f94cd790fda4615b6a0ad871a29e9ed"
+    },
+    {
+      "id": "scene01-01-middle",
+      "time": 5.133333333333334,
+      "phase": "middle",
+      "sha256": "dc9fb9a6245645b3334af46d3adb3f3a6fb3832da6915a193c22cc0ebe7cf1cc"
+    },
+    {
+      "id": "scene01-01-after",
+      "time": 8.773333333333333,
+      "phase": "after",
+      "sha256": "addc712f00f7ef3a24223d70458bdeff1cb925ebf5e9439987248191ce10b87d"
+    },
+    {
+      "id": "scene01-02-onset",
+      "time": 10.33333333333332,
+      "phase": "onset",
+      "sha256": "b2028c2024956470dd3c8ae4bbe797a12cb6e3f7926d0331b5a79417d2d760f3"
+    },
+    {
+      "id": "scene01-02-middle",
+      "time": 14.833333333333321,
+      "phase": "middle",
+      "sha256": "6fbeb05bb982f8aae3c7c6b7347aed9996c2ec8030c5df4f653af8702b0484d5"
+    },
+    {
+      "id": "scene01-02-after",
+      "time": 18.73333333333332,
+      "phase": "after",
+      "sha256": "3050eb8fc402439efb1d0cfe870d9ff2a1ccbb0442fe8e164365f1011ec3fdd2"
+    },
+    {
+      "id": "scene01-03-onset",
+      "time": 19.899999999999952,
+      "phase": "onset",
+      "sha256": "57ef43dd41c249cccc96d3fb782c1b766b0fb8fc3a053d8805f5f758ec741909"
+    },
+    {
+      "id": "scene01-03-middle",
+      "time": 22.449999999999953,
+      "phase": "middle",
+      "sha256": "6593f8b613f59bff34fa7a1f3500a19e4e5e4f9f078aa3c5e8f68adecfd7d709"
+    },
+    {
+      "id": "scene01-03-after",
+      "time": 24.659999999999954,
+      "phase": "after",
+      "sha256": "4f59d8171b2f186a6cca7b3df00917b3b91035b48f06f6d7d68ba95f6a92aae8"
+    },
+    {
+      "id": "scene01-04-onset",
+      "time": 25.766666666666598,
+      "phase": "onset",
+      "sha256": "b0cc44cac96f2b4f18bfa9b095f6ee6ae474ffb62e579898850e3610c5d4de43"
+    },
+    {
+      "id": "scene01-04-middle",
+      "time": 29.2166666666666,
+      "phase": "middle",
+      "sha256": "6cb1371ca4886919e85a1279b8387f7a51785a584cdc83ed3aa8433d0f3e1066"
+    },
+    {
+      "id": "scene01-04-after",
+      "time": 32.2066666666666,
+      "phase": "after",
+      "sha256": "5cf61a8c31d14bf3083ef5704202956e352fde9ccd5220422bbb971b6480bbd7"
+    },
+    {
+      "id": "scene01-05-onset",
+      "time": 33.606666666666605,
+      "phase": "onset",
+      "sha256": "f37e61ce0a0517a6aa4841535d9607ce1220a9d78fede6d9e59b48f6a144eb71"
+    },
+    {
+      "id": "scene01-05-middle",
+      "time": 37.83666666666661,
+      "phase": "middle",
+      "sha256": "7dd4185855d8114e24c524cabeeb90da5d63fc7ddf5d7af70510026e9fc7cf04"
+    },
+    {
+      "id": "scene01-05-after",
+      "time": 41.502666666666606,
+      "phase": "after",
+      "sha256": "78f829c4be862c75f01e5aaf5b7645180127982b77bab64b86bf43ba65e79ba7"
+    },
+    {
+      "id": "scene01-06-onset",
+      "time": 42.90666666666708,
+      "phase": "onset",
+      "sha256": "c1b626fdd786af48e434f7de9500a34c0c47eabdb7174aae155a3aa554e18a70"
+    },
+    {
+      "id": "scene01-06-middle",
+      "time": 46.68666666666707,
+      "phase": "middle",
+      "sha256": "1cc2b58eb35e071712756b5e976ff8b1d180ef027985d40381628c1efbb1b322"
+    },
+    {
+      "id": "scene01-06-after",
+      "time": 49.962666666667076,
+      "phase": "after",
+      "sha256": "972f5b86d836aaaa9428755dc6775071624f16c15b0688ac1dc7d28d05f1d17a"
+    },
+    {
+      "id": "scene01-07-onset",
+      "time": 51.36666666666749,
+      "phase": "onset",
+      "sha256": "1f569842a5fa21ea7eb8c4db70f26d569ce216e02a457ef032ddb792f5afd2df"
+    },
+    {
+      "id": "scene01-07-middle",
+      "time": 55.416666666667496,
+      "phase": "middle",
+      "sha256": "13b40130b945b6def9d3bf17450f97500737d796e26f30951657651e5812f964"
+    },
+    {
+      "id": "scene01-07-after",
+      "time": 58.926666666667494,
+      "phase": "after",
+      "sha256": "b755ad6259960a72aedb209622d069706d55d7b4f3beff35596cf6632848a1b4"
+    },
+    {
+      "id": "scene01-end",
+      "time": 59.31666666666794,
+      "phase": "transition",
+      "sha256": "6d7a4359f36dad11e384e827c966d3b24f11ce2e239cf96ac3ab8b27e233200c"
+    },
+    {
+      "id": "scene02-01-onset",
+      "time": 60.620000000001276,
+      "phase": "onset",
+      "sha256": "0e5de89d7029ade13e2db0c72e6fa72dc67cc20f64651aced4f937a7dd5d45fa"
+    },
+    {
+      "id": "scene02-01-middle",
+      "time": 65.81000000000128,
+      "phase": "middle",
+      "sha256": "23355db492604d944e01c95dc1d432a202d95457efeaf75eb0e1e00cf7b1c475"
+    },
+    {
+      "id": "scene02-01-after",
+      "time": 70.30800000000127,
+      "phase": "after",
+      "sha256": "eb03cf4c4c19976f4e23c4ee1d8f024ab2e22a4fe03ff56ef37c403170d0b497"
+    },
+    {
+      "id": "scene02-02-onset",
+      "time": 71.7000000000011,
+      "phase": "onset",
+      "sha256": "52675031a984786fbd68dd9ad800679fc065d125c53da93a0f594b3dde6b5d6d"
+    },
+    {
+      "id": "scene02-02-middle",
+      "time": 74.85000000000109,
+      "phase": "middle",
+      "sha256": "5de0e69e3cb175582c3f7bda01e109be1ea026f9eb76c1c45ca651817ff112a7"
+    },
+    {
+      "id": "scene02-02-after",
+      "time": 77.58000000000109,
+      "phase": "after",
+      "sha256": "d1c4dcbc46b140c614252ebd19bfc90e351a1b7257a617dc932203b2f2be1800"
+    },
+    {
+      "id": "scene02-03-onset",
+      "time": 78.86666666666736,
+      "phase": "onset",
+      "sha256": "755411990449336758630e06a2da8a700a30b0122c771a98536de79ff2dff912"
+    },
+    {
+      "id": "scene02-03-middle",
+      "time": 82.76666666666736,
+      "phase": "middle",
+      "sha256": "382dc7a857516fa5a480697453aa663bf74a435c192ab454fb899845a0a67146"
+    },
+    {
+      "id": "scene02-03-after",
+      "time": 86.14666666666737,
+      "phase": "after",
+      "sha256": "07020f7ff5212f0a54a332b9ce8ea2f1b1e71a4e5e5353484e6745d53d299ac3"
+    },
+    {
+      "id": "scene02-04-onset",
+      "time": 87.85333333333354,
+      "phase": "onset",
+      "sha256": "c33e950caa262e71716f702724809bee427a92f5563a535b5325e57032b6aa49"
+    },
+    {
+      "id": "scene02-04-middle",
+      "time": 93.19333333333353,
+      "phase": "middle",
+      "sha256": "c33e950caa262e71716f702724809bee427a92f5563a535b5325e57032b6aa49"
+    },
+    {
+      "id": "scene02-04-after",
+      "time": 97.82133333333353,
+      "phase": "after",
+      "sha256": "401ee493cb8b7bbd0e25e8dddcde63e00a4a316d74fe9478ed3a1c6b9b3d4cbf"
+    },
+    {
+      "id": "scene02-05-onset",
+      "time": 99.30666666666619,
+      "phase": "onset",
+      "sha256": "d85372312ef173fbc319169cad8386a1ebbf979eb9577b5c738073f85d57db8d"
+    },
+    {
+      "id": "scene02-05-middle",
+      "time": 102.78666666666619,
+      "phase": "middle",
+      "sha256": "5fb5a9d29268a1f953b3d53d4b2f88b7453439dc7e0613e7bba203fd6362403b"
+    },
+    {
+      "id": "scene02-05-after",
+      "time": 105.8026666666662,
+      "phase": "after",
+      "sha256": "5076747f427ba0d3596816cba7ac93662a089ac746211d5964554c54ac6baaad"
+    },
+    {
+      "id": "scene02-06-onset",
+      "time": 107.10666666666576,
+      "phase": "onset",
+      "sha256": "0c74e73800246c1b1b69d51dd6af965295837666d2bbf522f1c30cdea906e968"
+    },
+    {
+      "id": "scene02-06-middle",
+      "time": 110.88666666666576,
+      "phase": "middle",
+      "sha256": "479d283e09a0eab67effcf2d719688feb056912545b6eede40e649fd8041ecdd"
+    },
+    {
+      "id": "scene02-06-after",
+      "time": 114.16266666666576,
+      "phase": "after",
+      "sha256": "1ee73afc3009baef3ec11a907a7344e18fa5f4da4fa15e21867c532aca3f97fc"
+    },
+    {
+      "id": "scene02-07-onset",
+      "time": 115.37999999999862,
+      "phase": "onset",
+      "sha256": "5e9284abca1b8f3225fd9a980b4c51254acbfa0fc9f0a939e95700647dabbfb2"
+    },
+    {
+      "id": "scene02-07-middle",
+      "time": 118.58999999999861,
+      "phase": "middle",
+      "sha256": "f57d700f849e64c49c6850746e2b8abc8ff001d2720f21c80d83e2057f8c518b"
+    },
+    {
+      "id": "scene02-07-after",
+      "time": 121.37199999999862,
+      "phase": "after",
+      "sha256": "a18c19903a26ad3c41bafc185ddad6a82d6e63b8050ed24f2cd80e3f8e39fd7c"
+    },
+    {
+      "id": "scene02-end",
+      "time": 121.6499999999982,
+      "phase": "transition",
+      "sha256": "a18c19903a26ad3c41bafc185ddad6a82d6e63b8050ed24f2cd80e3f8e39fd7c"
+    },
+    {
+      "id": "scene03-01-onset",
+      "time": 122.71999999999821,
+      "phase": "onset",
+      "sha256": "9701c5d837e6f8fb637056a4d86f74b096d4742bafddcfda4c94f25177070f1f"
+    },
+    {
+      "id": "scene03-01-middle",
+      "time": 126.85999999999821,
+      "phase": "middle",
+      "sha256": "8fc9f54647cf76a76e5712c526d69ccfcc3fba3635c61d18bdf98a5fa990b29a"
+    },
+    {
+      "id": "scene03-01-after",
+      "time": 130.44799999999822,
+      "phase": "after",
+      "sha256": "5bc415213c43ee9098ad7767f823c0c9aa9410f6cd152295d6e2ef0ef7c27106"
+    },
+    {
+      "id": "scene03-02-onset",
+      "time": 132.06666666666436,
+      "phase": "onset",
+      "sha256": "2ab1c51a5bc699725565d0b7f38cea803b0d48fadfb0f3a4a3ef737b1f5deac7"
+    },
+    {
+      "id": "scene03-02-middle",
+      "time": 136.86666666666437,
+      "phase": "middle",
+      "sha256": "2cc3af7b352e6c3070dad3de5cdc3117f3a40fe0f4bfe2c736d652f9095ac2ad"
+    },
+    {
+      "id": "scene03-02-after",
+      "time": 141.02666666666437,
+      "phase": "after",
+      "sha256": "d6d06eb8cfab230041c221d1a49c27d1f061efb6e529bbd853cd7861499b9aa5"
+    },
+    {
+      "id": "scene03-03-onset",
+      "time": 142.51999999999708,
+      "phase": "onset",
+      "sha256": "70d29826ac1fb47deb2a9566af9e705d3ecdc21b1968caecf130b30b49f3d0b2"
+    },
+    {
+      "id": "scene03-03-middle",
+      "time": 146.3599999999971,
+      "phase": "middle",
+      "sha256": "5b8fdde80c09ca5eb1bca36c808b0346f76e89624a592a69a30c4191ec7465b3"
+    },
+    {
+      "id": "scene03-03-after",
+      "time": 149.6879999999971,
+      "phase": "after",
+      "sha256": "097d5b1c100aa2be90591b42659c734fcd3db9080d3e77be35e3655f1d978b5d"
+    },
+    {
+      "id": "scene03-04-onset",
+      "time": 151.1999999999966,
+      "phase": "onset",
+      "sha256": "8e39f5db022ea6b339d1b7f56eb747d4136b3bd80717d73bed84b4917fc530db"
+    },
+    {
+      "id": "scene03-04-middle",
+      "time": 155.6999999999966,
+      "phase": "middle",
+      "sha256": "f4827505a33bc37854dedfd0864746f39a6893916f517c173b3802947cdabcfd"
+    },
+    {
+      "id": "scene03-04-after",
+      "time": 159.5999999999966,
+      "phase": "after",
+      "sha256": "b0186c5cbfd4326b4e505f74bf6cf76cea74d3d21988155ea916c1c48223996a"
+    },
+    {
+      "id": "scene03-05-onset",
+      "time": 161.07999999999603,
+      "phase": "onset",
+      "sha256": "69c893ba02740af0ce49090ec2136461bfc96c335bfc142bd3109fed27f9dacf"
+    },
+    {
+      "id": "scene03-05-middle",
+      "time": 165.03999999999604,
+      "phase": "middle",
+      "sha256": "0659ebb2604fdbe430be4baa2b9bdbdc6050ba31ea518ab122a67b47cca5960c"
+    },
+    {
+      "id": "scene03-05-after",
+      "time": 168.47199999999606,
+      "phase": "after",
+      "sha256": "7b6d4d187cc6503291e6695b3a73b3f0e5342305e2746eaa11834969ee54873a"
+    },
+    {
+      "id": "scene03-06-onset",
+      "time": 169.92666666666221,
+      "phase": "onset",
+      "sha256": "f49cc4932b72be9b653543dcf364fc3fab24206b2de33ec97158c0fc11612188"
+    },
+    {
+      "id": "scene03-06-middle",
+      "time": 174.0966666666622,
+      "phase": "middle",
+      "sha256": "21c9ec059d894e4145262ac918def22ffb14913bd07bffe9dbb561efa337dcab"
+    },
+    {
+      "id": "scene03-06-after",
+      "time": 177.7106666666622,
+      "phase": "after",
+      "sha256": "bccdb84e29c80e269375483ea219db5bd235b376c8b618795bc1e1fef9375754"
+    },
+    {
+      "id": "scene03-07-onset",
+      "time": 179.119999999995,
+      "phase": "onset",
+      "sha256": "8827e5196caaf7b88f581eee76c25c6ae99c04e292a302770859e260cefa6195"
+    },
+    {
+      "id": "scene03-07-middle",
+      "time": 182.959999999995,
+      "phase": "middle",
+      "sha256": "8827e5196caaf7b88f581eee76c25c6ae99c04e292a302770859e260cefa6195"
+    },
+    {
+      "id": "scene03-07-after",
+      "time": 186.287999999995,
+      "phase": "after",
+      "sha256": "7b6587d6ddc6fad33a53dab7b0605048c965bff40989c57e4f29d9bc88396f99"
+    },
+    {
+      "id": "scene03-end",
+      "time": 186.64999999999452,
+      "phase": "transition",
+      "sha256": "7b6587d6ddc6fad33a53dab7b0605048c965bff40989c57e4f29d9bc88396f99"
+    },
+    {
+      "id": "scene04-01-onset",
+      "time": 187.7066666666612,
+      "phase": "onset",
+      "sha256": "615e80ea84a31b8774358f4744cfc541a37ba80f347e79cff334031f3215c516"
+    },
+    {
+      "id": "scene04-01-middle",
+      "time": 191.78666666666118,
+      "phase": "middle",
+      "sha256": "37f3fedf00d07acc1c3f890d5449b6ae48460bf1394014e3a6d1c6242496f283"
+    },
+    {
+      "id": "scene04-01-after",
+      "time": 195.32266666666118,
+      "phase": "after",
+      "sha256": "b08504b8122bcbde3ae2886ef4801a4c9b1921251bc3267ba8bbb2d7951ffaac"
+    },
+    {
+      "id": "scene04-02-onset",
+      "time": 196.85999999999402,
+      "phase": "onset",
+      "sha256": "99d7165a2cc90690779bec7b5266a25e139c2b0e6b9d1389ddb6220a86a61bdd"
+    },
+    {
+      "id": "scene04-02-middle",
+      "time": 201.32999999999402,
+      "phase": "middle",
+      "sha256": "6e818124ba03a037cc4157bbfe263f3f78942662d29fce0e836e7bdd0bff6ed1"
+    },
+    {
+      "id": "scene04-02-after",
+      "time": 205.203999999994,
+      "phase": "after",
+      "sha256": "e14fe05dde389365bddb4f8199d455fee5ccbdd66e26c3f19f3cfd2150725895"
+    },
+    {
+      "id": "scene04-03-onset",
+      "time": 206.99333333332677,
+      "phase": "onset",
+      "sha256": "bf5437740de4c49902861f98dd7326ea7df5a80c7d15745431f34040c8b96c20"
+    },
+    {
+      "id": "scene04-03-middle",
+      "time": 212.36333333332678,
+      "phase": "middle",
+      "sha256": "d4b3366511a1c068ff704556d5ad32e4962547a67bf5b47967458f84755506be"
+    },
+    {
+      "id": "scene04-03-after",
+      "time": 217.01733333332677,
+      "phase": "after",
+      "sha256": "af4aee32856c389d5ba0a7ea764edc6067b3cec19c179f06914d7acbb7ac06b3"
+    },
+    {
+      "id": "scene04-04-onset",
+      "time": 218.78666666665944,
+      "phase": "onset",
+      "sha256": "d8874d7bda862ea957f65cfe229a5b4fab74e552f83027353fa94bee3c57aa4a"
+    },
+    {
+      "id": "scene04-04-middle",
+      "time": 223.52666666665942,
+      "phase": "middle",
+      "sha256": "a8950efb86ce860211c2cce78cca5cceaa3567c2ccc7152ea85e42c2ed10e730"
+    },
+    {
+      "id": "scene04-04-after",
+      "time": 227.63466666665943,
+      "phase": "after",
+      "sha256": "0bdd6a43ea223fbdfa53decfe29bdf6982e133e3a8c8aa7c0de71c0c6ea29443"
+    },
+    {
+      "id": "scene04-05-onset",
+      "time": 229.18666666665882,
+      "phase": "onset",
+      "sha256": "d54e48da665a4c616398e87c1357551c8c0d95fb48b9f8dd10c2637467bbe835"
+    },
+    {
+      "id": "scene04-05-middle",
+      "time": 233.32666666665884,
+      "phase": "middle",
+      "sha256": "47ee7b089507606c939fcf264db3c9f6d44b0ac21d65064abe6b298577457a50"
+    },
+    {
+      "id": "scene04-05-after",
+      "time": 236.91466666665883,
+      "phase": "after",
+      "sha256": "f1c07bea2413c96d38eb9bc77d5043743bda390b8e3a5812e76a1ae8eb77b6cc"
+    },
+    {
+      "id": "scene04-06-onset",
+      "time": 238.25999999999163,
+      "phase": "onset",
+      "sha256": "a826d2799aa666d901de20953a7814d845964e94495e33cfadeca36402044005"
+    },
+    {
+      "id": "scene04-06-middle",
+      "time": 241.82999999999166,
+      "phase": "middle",
+      "sha256": "47015646e5a26aa20a3ee1c0febe41763c39ae82e7e14c23255ea07f5f69f177"
+    },
+    {
+      "id": "scene04-06-after",
+      "time": 244.92399999999165,
+      "phase": "after",
+      "sha256": "6a4f7a11d143a346de6bf0c389b169019726f67e682962669c3789d726e2d399"
+    },
+    {
+      "id": "scene04-07-onset",
+      "time": 246.1799999999912,
+      "phase": "onset",
+      "sha256": "5837785633c7c973bb18b3c3f7663f955a22917d64cc8f6a70946d1023daa5bd"
+    },
+    {
+      "id": "scene04-07-middle",
+      "time": 249.6899999999912,
+      "phase": "middle",
+      "sha256": "837019cdcb19d696a012925a156b370a9e2dd3abde9bd34aa4e098a47cd53345"
+    },
+    {
+      "id": "scene04-07-after",
+      "time": 252.73199999999122,
+      "phase": "after",
+      "sha256": "bcb464e301c6d64eb0c641799ce79f2c63c7d795a444493965d74c04789b703f"
+    },
+    {
+      "id": "scene04-end",
+      "time": 253.04999999999075,
+      "phase": "transition",
+      "sha256": "bcb464e301c6d64eb0c641799ce79f2c63c7d795a444493965d74c04789b703f"
+    },
+    {
+      "id": "scene05-01-onset",
+      "time": 254.2533333333241,
+      "phase": "onset",
+      "sha256": "4130518cf6337fc29bd169f85be34cdaa3fc8cf0dbf5dd075601b4e9155fc0e5"
+    },
+    {
+      "id": "scene05-01-middle",
+      "time": 258.9933333333241,
+      "phase": "middle",
+      "sha256": "b3e9909ba4bf378398d19814496eed55fe5c426db65dc8079c415eede9ee9ba1"
+    },
+    {
+      "id": "scene05-01-after",
+      "time": 263.1013333333241,
+      "phase": "after",
+      "sha256": "7a2f3f1ffa3bac495e8e703ab0e01ab3252b83835c6a91e3fbb95e0f28f6b5f6"
+    },
+    {
+      "id": "scene05-02-onset",
+      "time": 264.55999999999017,
+      "phase": "onset",
+      "sha256": "53ccc2e696230c54b8d9128f3ea6d414beb9a94b59344f30cc3cfe88b603f165"
+    },
+    {
+      "id": "scene05-02-middle",
+      "time": 268.2799999999902,
+      "phase": "middle",
+      "sha256": "85c33f3be4af78bf17eaf11e2b61cfdcf21ee85c0afec82224a691091d8e254b"
+    },
+    {
+      "id": "scene05-02-after",
+      "time": 271.5039999999902,
+      "phase": "after",
+      "sha256": "ddf820dd24821d878fe5d96bb893063bcdee15d67687706d6ed8d02bbbfea0db"
+    },
+    {
+      "id": "scene05-03-onset",
+      "time": 272.833333333323,
+      "phase": "onset",
+      "sha256": "bf0c79bc105f600fbb882e344f90060321250f84760a599c28af7d810a1b2bf0"
+    },
+    {
+      "id": "scene05-03-middle",
+      "time": 276.583333333323,
+      "phase": "middle",
+      "sha256": "074e277125c481bd48ea66f22242c17754f25f99b748a749fe93090c5be2a4aa"
+    },
+    {
+      "id": "scene05-03-after",
+      "time": 279.833333333323,
+      "phase": "after",
+      "sha256": "2e6a0e262057049d73eae5f5aee481d8f8f13324cdd862144161bd718e6fe844"
+    },
+    {
+      "id": "scene05-04-onset",
+      "time": 281.30666666665593,
+      "phase": "onset",
+      "sha256": "c755e2229cadf27c65009303959ae2828b8b2eb5b5dd00ca7902bc9e2a4af3a0"
+    },
+    {
+      "id": "scene05-04-middle",
+      "time": 285.6866666666559,
+      "phase": "middle",
+      "sha256": "033388a70f2c829e86135a64d68cdc8e672ae814a70066e6f692385395124286"
+    },
+    {
+      "id": "scene05-04-after",
+      "time": 289.4826666666559,
+      "phase": "after",
+      "sha256": "89f9884ced2f35c1339aec88482001a5071cf5036a0dd32dcc77f22306996954"
+    },
+    {
+      "id": "scene05-05-onset",
+      "time": 291.2866666666554,
+      "phase": "onset",
+      "sha256": "e4bd7dc1ef551bc2692958f204aecc992e28b79d7504001be76886619443cc58"
+    },
+    {
+      "id": "scene05-05-middle",
+      "time": 296.77666666665533,
+      "phase": "middle",
+      "sha256": "673d7a8a8d44bb632e2505c5280b15ac9c14990dba0a2c863dddca4d137a9b69"
+    },
+    {
+      "id": "scene05-05-after",
+      "time": 301.5346666666553,
+      "phase": "after",
+      "sha256": "990c7e8ddef2279508ff4a499d3501b24b4c981c38696d7778be601818194d81"
+    },
+    {
+      "id": "scene05-06-onset",
+      "time": 303.199999999988,
+      "phase": "onset",
+      "sha256": "1b863673eccdb501fe1ad3e074df1abf92bd0a5b681e3fc25afdc0bf8b806227"
+    },
+    {
+      "id": "scene05-06-middle",
+      "time": 307.399999999988,
+      "phase": "middle",
+      "sha256": "4f61b8cc62dbeef20a2e73a894b206978a623726de0a10805e0cde222669be7c"
+    },
+    {
+      "id": "scene05-06-after",
+      "time": 311.03999999998797,
+      "phase": "after",
+      "sha256": "3be9ec707a0004f12f50791e2fb67e669fde257385421a4f75d28980bd951af5"
+    },
+    {
+      "id": "scene05-07-onset",
+      "time": 312.5533333333208,
+      "phase": "onset",
+      "sha256": "92ec6827cf12508f2ca705b358bb880546710195ef68aeade6af0473808fa545"
+    },
+    {
+      "id": "scene05-07-middle",
+      "time": 316.8433333333208,
+      "phase": "middle",
+      "sha256": "f4019509ffd00c6468f39fea82d2a4066cf8bf5d2b0648f813b4d77b5bc2307e"
+    },
+    {
+      "id": "scene05-07-after",
+      "time": 320.5613333333208,
+      "phase": "after",
+      "sha256": "07c8ecf03a58672dc58a24663ef0d161d452d26b6aedd59b0b3daefef99d3dd9"
+    },
+    {
+      "id": "scene05-end",
+      "time": 320.9833333333203,
+      "phase": "transition",
+      "sha256": "07c8ecf03a58672dc58a24663ef0d161d452d26b6aedd59b0b3daefef99d3dd9"
+    },
+    {
+      "id": "scene06-01-onset",
+      "time": 321.9999999999869,
+      "phase": "onset",
+      "sha256": "d6e695740942d0506f06cf367ef587e37d8e4c04deecf50804d1f7bf4d8f981f"
+    },
+    {
+      "id": "scene06-01-middle",
+      "time": 325.8999999999869,
+      "phase": "middle",
+      "sha256": "db9977072cadba20a63375fcd666a76173d4f06ba2dc13f71c21b7bc02908378"
+    },
+    {
+      "id": "scene06-01-after",
+      "time": 329.27999999998696,
+      "phase": "after",
+      "sha256": "4f3a132965792da7a0e32990426ebd920343d9079749aa2192d63bec9aebc6a0"
+    },
+    {
+      "id": "scene06-02-onset",
+      "time": 330.87333333331975,
+      "phase": "onset",
+      "sha256": "a7f0606a9157adb9b4429dc8a022776e624c64b0a785a346b8082e89a16ddd35"
+    },
+    {
+      "id": "scene06-02-middle",
+      "time": 335.7033333333198,
+      "phase": "middle",
+      "sha256": "c1020cd264bebbedb95f409dce0ff7e6c371bc87a32e08ad0994f9336a681bd8"
+    },
+    {
+      "id": "scene06-02-after",
+      "time": 339.88933333331977,
+      "phase": "after",
+      "sha256": "281b10fda136fafe12f6c7ddd5722bf3f8e35bdf713a7f22fe49781abf57ce95"
+    },
+    {
+      "id": "scene06-03-onset",
+      "time": 341.47333333331915,
+      "phase": "onset",
+      "sha256": "b7475ebb82d08847043c243d0bd58738a97a3213e8c5c51dbed7816ba3f4f388"
+    },
+    {
+      "id": "scene06-03-middle",
+      "time": 345.70333333331916,
+      "phase": "middle",
+      "sha256": "2297d1853b051ed9b2ac42aa487157f836a872ad64da48627b9d3174e590b6bb"
+    },
+    {
+      "id": "scene06-03-after",
+      "time": 349.3693333333191,
+      "phase": "after",
+      "sha256": "8997f6cd7f45a8f3045a865c8bfc4a6f646fce14aadfae62e4ab1df34b5ecce8"
+    },
+    {
+      "id": "scene06-04-onset",
+      "time": 350.98666666665196,
+      "phase": "onset",
+      "sha256": "cb5b28ddf5fdcd38697059a02d90adc5aa58172b18390a8ad32d941a3a6e6b49"
+    },
+    {
+      "id": "scene06-04-middle",
+      "time": 355.72666666665197,
+      "phase": "middle",
+      "sha256": "ae52789b6f3aff7574b064211388de9c24a41d227458f2e4c35528d4f2c2ac63"
+    },
+    {
+      "id": "scene06-04-after",
+      "time": 359.83466666665197,
+      "phase": "after",
+      "sha256": "b33b8127f5bc943fe4ce64a07d452579dfb7c2e82daa881c3c3df9f7734a022a"
+    },
+    {
+      "id": "scene06-05-onset",
+      "time": 361.41999999998467,
+      "phase": "onset",
+      "sha256": "d733aab45f1dd1a21530bf95d8c81a3a47dcfe31bdf97aa0fa08f33a137edd0c"
+    },
+    {
+      "id": "scene06-05-middle",
+      "time": 365.7099999999847,
+      "phase": "middle",
+      "sha256": "2126fcbf76a959d1a94534a034479f6540da118e9f776995b26d789be0db8fa3"
+    },
+    {
+      "id": "scene06-05-after",
+      "time": 369.4279999999847,
+      "phase": "after",
+      "sha256": "8bf81ba971f47462889e53ccc339fca071ebde29d1daa2e3cd92a40929090e2c"
+    },
+    {
+      "id": "scene06-06-onset",
+      "time": 370.9866666666508,
+      "phase": "onset",
+      "sha256": "24cbe0a4b4c969cc9c0f2bee8a239d42ac54c0c0547951568076ac4ee01951c0"
+    },
+    {
+      "id": "scene06-06-middle",
+      "time": 375.4266666666508,
+      "phase": "middle",
+      "sha256": "7fed5e98aa124507ce0c8a0c6c73304648727c6e5677665b1aeedce3ccbed40a"
+    },
+    {
+      "id": "scene06-06-after",
+      "time": 379.27466666665083,
+      "phase": "after",
+      "sha256": "1c2915bdfdb8231cc72d42f3ee8f6f905d8373f2e0d8333ff065a2e68af4c915"
+    },
+    {
+      "id": "scene06-07-onset",
+      "time": 380.77333333331694,
+      "phase": "onset",
+      "sha256": "78fb6883367ba5903e9def411254836549e9257c7254fda176e9f322d337b474"
+    },
+    {
+      "id": "scene06-07-middle",
+      "time": 384.8533333333169,
+      "phase": "middle",
+      "sha256": "a824b8821794bfee452b7509e1ab78da062ad389e0d05fe7e319b087f2c110c7"
+    },
+    {
+      "id": "scene06-07-after",
+      "time": 388.3893333333169,
+      "phase": "after",
+      "sha256": "ebf6e4b35d154ac1fda75fad3dd84f433c523ccfa0d36439c9f3dad9b96d25e9"
+    },
+    {
+      "id": "scene06-end",
+      "time": 388.7833333333164,
+      "phase": "transition",
+      "sha256": "a824b8821794bfee452b7509e1ab78da062ad389e0d05fe7e319b087f2c110c7"
+    },
+    {
+      "id": "scene07-01-onset",
+      "time": 389.7733333333164,
+      "phase": "onset",
+      "sha256": "ded6381c14c4861070a9b652a8cb93fb0e5fecd48574ea27655c87b798fda9d3"
+    },
+    {
+      "id": "scene07-01-middle",
+      "time": 393.5533333333164,
+      "phase": "middle",
+      "sha256": "034f720b8ea2af84d7c27d5a486a4516d402641575dfd4eb3b244d9c2c3e9317"
+    },
+    {
+      "id": "scene07-01-after",
+      "time": 396.82933333331636,
+      "phase": "after",
+      "sha256": "c19c85602db4a75a405670fc7095f3f05258b715686198d343fae2f20c6274cf"
+    },
+    {
+      "id": "scene07-02-onset",
+      "time": 398.2133333333159,
+      "phase": "onset",
+      "sha256": "b54318a376a485651389fdfb68fa4e5e0f6eb0df8ed4ae3bdd432dd71689453a"
+    },
+    {
+      "id": "scene07-02-middle",
+      "time": 402.17333333331595,
+      "phase": "middle",
+      "sha256": "58b397b6487d7ed88b7bc938129db4d9b25e09283db222d953384e659f108aac"
+    },
+    {
+      "id": "scene07-02-after",
+      "time": 405.6053333333159,
+      "phase": "after",
+      "sha256": "e43e2ef469430c3270b5e28f4b27b703a37ed765aaf71545cef533a10bb94bac"
+    },
+    {
+      "id": "scene07-03-onset",
+      "time": 407.1199999999821,
+      "phase": "onset",
+      "sha256": "0903e7d386e20806eb857f52f5386f074b3c921dab4f420783be3149dbd5f000"
+    },
+    {
+      "id": "scene07-03-middle",
+      "time": 411.5599999999821,
+      "phase": "middle",
+      "sha256": "fbdc5c0d55ba39973cba0847a18fc628860a6a35f2641f2502866b6e17979950"
+    },
+    {
+      "id": "scene07-03-after",
+      "time": 415.4079999999821,
+      "phase": "after",
+      "sha256": "166abb5bafb0bd60c802607029f31f4398a00b7ac3fce8ac21bc3f9024dfe82b"
+    },
+    {
+      "id": "scene07-04-onset",
+      "time": 417.03999999998155,
+      "phase": "onset",
+      "sha256": "6487a30c73b4f5ce6babc64db449a2953e09b2cb67a559e340348027bba2dbe5"
+    },
+    {
+      "id": "scene07-04-middle",
+      "time": 421.7199999999815,
+      "phase": "middle",
+      "sha256": "ec2861a30997cb1338fed4c06e0441bea8df1f363bc5a87c04cb6fd06b46ea28"
+    },
+    {
+      "id": "scene07-04-after",
+      "time": 425.7759999999815,
+      "phase": "after",
+      "sha256": "accdd5358aa6fb57b47589a23b5bdb89d41825c28127d3d4faa3f6ce7e64de5e"
+    },
+    {
+      "id": "scene07-05-onset",
+      "time": 427.3333333333143,
+      "phase": "onset",
+      "sha256": "f1509bb9b3be49264b556a8ca620b93c93859e1b780761847865774c6139fd17"
+    },
+    {
+      "id": "scene07-05-middle",
+      "time": 431.53333333331426,
+      "phase": "middle",
+      "sha256": "0d4e58e68aa14c79e2fc8ee43256ce00b5a904920e9216f154cc04c413d1aa62"
+    },
+    {
+      "id": "scene07-05-after",
+      "time": 435.17333333331425,
+      "phase": "after",
+      "sha256": "2cc0bbadc26ed8e67f6070afcdea8a402f0ab468eb99ed3213c41bdc2c504c88"
+    },
+    {
+      "id": "scene07-06-onset",
+      "time": 436.5199999999804,
+      "phase": "onset",
+      "sha256": "852820ee8ef7e4fdb493a82fb6920836215f9589b58f34a6f4f57f2eee9e531a"
+    },
+    {
+      "id": "scene07-06-middle",
+      "time": 440.0599999999804,
+      "phase": "middle",
+      "sha256": "ab67c84a38d204986654e0d18339f82a4bf151856a754827e2d426834e77a99a"
+    },
+    {
+      "id": "scene07-06-after",
+      "time": 443.12799999998043,
+      "phase": "after",
+      "sha256": "ab67c84a38d204986654e0d18339f82a4bf151856a754827e2d426834e77a99a"
+    },
+    {
+      "id": "scene07-end",
+      "time": 443.44999999998,
+      "phase": "transition",
+      "sha256": "ad9c8c2b5d54af946788fe7a9e04e58d72f9eaca2f0d18ce1d77fdb138d10003"
+    },
+    {
+      "id": "scene08-01-onset",
+      "time": 444.46666666664663,
+      "phase": "onset",
+      "sha256": "0642219da7a2a33ef38efb8359e48b4131eea875e37257c26a07602b71e5c30f"
+    },
+    {
+      "id": "scene08-01-middle",
+      "time": 448.3666666666466,
+      "phase": "middle",
+      "sha256": "3dad18512b7bbe9e551dc8d4d9e09b213e2947f1e8f907c89cddb2468fbecedf"
+    },
+    {
+      "id": "scene08-01-after",
+      "time": 451.74666666664666,
+      "phase": "after",
+      "sha256": "fa1f51f35ff57968abfae899189f3e82172fc5fb0edec5e1906684be621b6cd3"
+    },
+    {
+      "id": "scene08-02-onset",
+      "time": 453.04666666664616,
+      "phase": "onset",
+      "sha256": "8814260c56db3e47a5b90e941c9ff4fb8789d20df2f65adb4a6e067f7afa24eb"
+    },
+    {
+      "id": "scene08-02-middle",
+      "time": 456.55666666664615,
+      "phase": "middle",
+      "sha256": "18ad036780f12e5ce555f52623934c647b74c9da097c406407394dd6bf7366aa"
+    },
+    {
+      "id": "scene08-02-after",
+      "time": 459.5986666666461,
+      "phase": "after",
+      "sha256": "fd5fbce8a78a7fe5d80a705cdc34f775a5d049660b06b119fe7cea293499fec0"
+    },
+    {
+      "id": "scene08-03-onset",
+      "time": 460.93333333331236,
+      "phase": "onset",
+      "sha256": "5167ddd8f8ea1677a66d8e63b9e83d53f9c3bf3878ae872f16c174bb58da018e"
+    },
+    {
+      "id": "scene08-03-middle",
+      "time": 464.83333333331234,
+      "phase": "middle",
+      "sha256": "84d9f3993546b6cb615379fb8d20d6426f3185a1d28dc2e9c6ef84d6bdf30d0b"
+    },
+    {
+      "id": "scene08-03-after",
+      "time": 468.2133333333124,
+      "phase": "after",
+      "sha256": "249c3c111206dbface4a827c958f49c9a31a097465932addd615f5df5d24438d"
+    },
+    {
+      "id": "scene08-04-onset",
+      "time": 470.07333333331184,
+      "phase": "onset",
+      "sha256": "f3ff24907e4071ba92248e54f0980ac45635f1d50da740578206def68b0d1420"
+    },
+    {
+      "id": "scene08-04-middle",
+      "time": 476.10333333331187,
+      "phase": "middle",
+      "sha256": "f6a437e1502b972a47aa5cda1bdcfe00d1e662f96a12d38dc0ec2a5eb23b2128"
+    },
+    {
+      "id": "scene08-04-after",
+      "time": 481.32933333331187,
+      "phase": "after",
+      "sha256": "d7ee629ecd7cc17bde5d6f1635ec78cf0fcc14b98b03ec1f8aa9513837940eee"
+    },
+    {
+      "id": "scene08-05-onset",
+      "time": 483.1733333333111,
+      "phase": "onset",
+      "sha256": "92ee9f13f96f2f34795eca9bfe981320de9b9cee9a7563634dc55d69bff14c65"
+    },
+    {
+      "id": "scene08-05-middle",
+      "time": 487.85333333331107,
+      "phase": "middle",
+      "sha256": "1ab021ebf9d5d2e58182c4852587712bc8264419a2b4d4321a78182424f9e270"
+    },
+    {
+      "id": "scene08-05-after",
+      "time": 491.90933333331105,
+      "phase": "after",
+      "sha256": "b5a6ed002befbd101681670a85c34cecde59b632537a39aab960401e2e8504dc"
+    },
+    {
+      "id": "scene08-06-onset",
+      "time": 493.4866666666438,
+      "phase": "onset",
+      "sha256": "e95726c8f29fb1b516fe1d0cbecaa9636584fdd819ae4588ca19bbeee2ef2bcd"
+    },
+    {
+      "id": "scene08-06-middle",
+      "time": 497.77666666664385,
+      "phase": "middle",
+      "sha256": "b1d32864bf0bd7383c7e3bbc8b39faf21dfe789614152dbc9b38a88e5761076e"
+    },
+    {
+      "id": "scene08-06-after",
+      "time": 501.49466666664387,
+      "phase": "after",
+      "sha256": "d7339d0a08ede8f5db962b658e8271ecb88dc1624a1f16a455af84cf6742be5d"
+    },
+    {
+      "id": "scene08-end",
+      "time": 501.9166666666433,
+      "phase": "transition",
+      "sha256": "96a8e75e97f175b0c7c64f7141ed0e9ce0d8ed0df49ac4a3075fa3e313f5abf6"
+    }
+  ]
+}
