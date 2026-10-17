@@ -806,7 +806,7 @@
       "title": "2つの接点を作る",
       "status": "generated",
       "path": "assets/voicevox/scene06.wav",
-      "script_sha256": "58c62f053a2ad6438b09d1e0779a26598e5750b0e4d7c4a400b23e6f4b84197b",
+      "script_sha256": "ad41a84a035476f0fd3384dc211b72348f4f7640bc5bb151d6b74dd9c88c3fc9",
       "wav_sha256": "e4c63924d0ee9d6dc7195004999de863e270c5821af77acbc0454af39b758a14",
       "duration": 62.8,
       "beat_durations": [
@@ -929,7 +929,7 @@
         {
           "beat_index": 6,
           "id": "scene06-07-01",
-          "display": "クシーを動かすと、2つの接点と青い曲線が連動します。",
+          "display": "$\\xi$を動かすと、2つの接点と青い曲線が連動します。",
           "speech": "クシーを動かすと、2つの接点と青い曲線が連動します。",
           "start": 45.4,
           "end": 49.89066666666667

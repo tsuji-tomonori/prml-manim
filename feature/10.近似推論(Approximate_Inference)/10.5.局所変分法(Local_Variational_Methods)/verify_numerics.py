@@ -5,7 +5,7 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.special import expit
 from local_bound_model import (MEAN,SD,bound,conjugate_exp,density,exact_expectation,
-                               integrated_bound,integrated_bound_quad,lam,optimum,tangent_exp)
+                               integrated_bound,integrated_bound_quad,lam,optimum,tangent_exp,upper_sigmoid)
 root=Path(__file__).resolve().parent
 xi, best=optimum()
 exact=exact_expectation()
@@ -26,6 +26,10 @@ for contact in (.5,1.,2.5):
     assert np.min(np.exp(-grid)-tangent_exp(grid,contact))>-1e-14
     eta=-np.exp(-contact)
     assert abs(eta*contact-conjugate_exp(eta)-np.exp(-contact))<1e-12
+for contact in (-2.,0.,2.):
+    grid=np.linspace(-12,12,2401)
+    assert np.min(upper_sigmoid(grid,contact)-expit(grid))>-2e-14
+    assert abs(upper_sigmoid(contact,contact)-expit(contact))<1e-14
 assert abs(lam(0)-.125)<1e-12
 result=dict(mean=MEAN,sd=SD,plug_in=float(expit(MEAN)),exact=exact,xi_opt=xi,bound_opt=best,
             xi_1=integrated_bound(1),xi_2_5=integrated_bound(2.5),

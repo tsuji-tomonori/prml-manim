@@ -20,6 +20,10 @@ def bound(x, xi):
     coefficient = lam(xi)
     return np.exp(log_expit(xi) + (x - xi) / 2 - coefficient * (x*x - xi*xi))
 
+def upper_sigmoid(x, xi):
+    """Exponential of a tangent to concave log sigmoid."""
+    return np.exp(log_expit(xi) + sigmoid(-xi) * (np.asarray(x)-xi))
+
 def density(x):
     return np.exp(-0.5 * ((x-MEAN)/SD)**2) / (SD*np.sqrt(2*np.pi))
 
