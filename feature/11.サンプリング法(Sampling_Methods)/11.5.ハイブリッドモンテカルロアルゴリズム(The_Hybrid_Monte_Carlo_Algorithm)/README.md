@@ -18,9 +18,9 @@
 
 ## 視覚補足と章をまたぐ復習
 
-- `p(z)` と運動量のガウス分布を結び付ける直前に、2.3「ガウス分布」の復習カードRを約12秒入れる。既存の中心と幅のベル図だけを再現し、過去節をimportしない。
-- 勾配による力を初めて読む箇所に、3.1「負の勾配」への短い復習カードRと、接線の傾きから逆向きの矢印へつなぐ視覚補足を合計約18秒入れる。
-- 位相空間の面積保存は図11.14をもとに、枠を装飾として使わず、領域自体の変形だけを描く。詳細釣り合いは順逆の矢印と採用率を同じ図で説明する。補足と復習の合計は本編の15%以内にする。
+- `p(z)` と運動量のガウス分布を結び付ける直前に、2.3「ガウス分布」の復習カードRを10.733秒入れる。既存の中心と幅のベル図だけを再現し、過去節をimportしない。
+- 勾配による力を初めて読む箇所に、3.1「負の勾配」への短い復習カードRと、接線の傾きから逆向きの矢印へつなぐ視覚補足を合計20.400秒入れる。復習では元図と同じ黄を増加の勾配、紫をその逆向きに使い、本編の黄色い力へ引き渡す。
+- 位相空間の面積保存は図11.14をもとに、枠を装飾として使わず、領域自体の変形だけを描く。詳細釣り合いは順逆の矢印と採用率を同じ図で説明する。補足と復習の合計は31.133秒で、音声528.867秒の約5.9%。本編の15%以内。
 
 ## 原文との照合
 
@@ -30,15 +30,41 @@ Bishop (2006) §11.5、印刷pp.548–554（PDF pp.568–574）、式(11.53)–(
 
 ## 数値例と近似の条件
 
-1変数の説明用密度は `p(z)=exp(-z²/2)/√(2π)`、`E(z)=z²/2`、`K(r)=r²/2`。`z=-2,r=0.5,ε=0.15,L=18` からのリープフロッグ結果、受理率は自作の数値検証で再計算する。各刻みは厳密な連続時間の力学ではなく、離散近似である。2変数の細長い例は独立なガウス分布を使い、全ての提案の優位を保証する例ではない。
+1変数の説明用密度は `p(z)=exp(-z²/2)/√(2π)`、`E(z)=z²/2`、`K(r)=r²/2`。`z=-2,r=0.5,ε=0.15,L=18` から `(z′,r′)=(2.0234500048,0.3951971615)`、`H₀=2.125`、`H₁=2.1252653592`、採用確率 `0.9997346760`。採否の一様乱数を説明用に `u=0.5` と固定すると採用される。刻み1.4、18回の別実験では `ΔH=0.1195015910`、採用確率 `0.8873625961`。数値は `hmc_model.py` と `verify_numerics.py` で再計算する。各刻みは厳密な連続時間の力学ではなく、離散近似である。2変数の細長い例は独立なガウス分布で、標準偏差 `(2,0.4)`、初期位置 `(-2,-0.2)`、初期運動量 `(1,0.2)`、刻み0.15、18回。終点は `(1.51556344,-0.13529434)`。幅の比5と二乗25は原典のオーダー比較の目安で、実際の反復回数・計算費用を意味しない。全ての提案の優位を保証する例ではない。図11.14のせん断は幅1.15、高さ1.16、面積1.334の説明用領域。scene07の小グラフの運動量点 `-1.3,0.2,1.0,-0.6` は説明用に固定した位置で、確率標本の代表値ではない。
 
 ## ファイルと再生成
 
-制作中。完成後に数値モデル、全文台本、VOICEVOX WAV、Manimコード、検証記録と再生成コマンドを記載する。
+[完成動画（480p15）](media/videos/prml_11_5_hybrid_monte_carlo/480p15/PRML115HybridMonteCarlo.mp4) ／ [全文台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
+
+- `hmc_model.py` / `verify_numerics.py` / `numerical_validation.json`: リープフロッグ、時間反転、位相空間の面積保存、採用率、細長い分布の数値を検証。
+- `narration_content.py` / `narration_script.md`: 9シーン・54拍・108文の字幕 `display` と読み上げ `speech`。
+- `make_voicevox_narration.py` / `assets/voicevox/`: WhiteCUL ノーマル（23）、話速1.08、抑揚1.08の9 WAVとSHA-256・文時刻付きmanifest。
+- `check_narration_readings.py` / `reading_check.json` / `.md`: 全文の `audio_query` 読み。
+- `scene_support.py` / `prml_11_5_hybrid_monte_carlo.py`: PCM時刻と同期した字幕と映像。
+- `verify_caption_layout.py` / `caption_validation.json`、`verify_video.py` / `video_validation.json`: 全字幕と完成映像の検査。
+
+対象ディレクトリでメイン作業ツリーの仮想環境を使う。
+
+```bash
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_11_5_hybrid_monte_carlo.py PRML115HybridMonteCarlo
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
+```
+
+VOICEVOX Engineが止まっている場合は、`.working/voicevox-engine-0.25.2/linux-cpu-x64/run --host 127.0.0.1 --port 50021`で起動し、自分で起動したものは音声生成後に停止する。辞書登録はしない。レビュー用フレームはGit管理外。
 
 ## 検証と限界
 
-制作中。実施済みの検証結果だけを完成後に記載する。
+`py_compile`、数値検証、字幕108文（うち数式を含む16文）の寸法検査が通った。字幕の最大幅は10.103 Manim単位、最大高は0.846単位。全文108文のVOICEVOX `audio_query` を読み確認し、誤読した「全歩」「等方的」は `speech` を直して音声を再生成した。
+
+Manim全編レンダリング後の480p15 MP4は528.867秒（8分49秒）、音声は528.896秒。`ffprobe` でH.264/AAC、854×480、15fpsを確認し、全編デコードが通った。`silencedetect`（-45dB・3秒以上）は0件、`volumedetect` は平均-26.3dB・最大-7.1dB。台本・字幕・WAVのハッシュと尺、画面時刻の整合を確認し、108文のWAVと動画音声の照合では最小相関0.99956、最大時刻差0.0214秒だった。
+
+9シーン54拍から強調・移動中と直後を含む225フレームを抽出し、15枚の一覧画像を目視した。復習小窓の枠、見出し間隔、細長い分布の目盛りを修正し、最終版で修正箇所の拡大フレームを再確認した。軸・数値・曲線・字幕の重なり、英語の説明注記、図の強調時刻も一覧画像で確認した。レビュー画像はGit管理外。全編を通した人手での実時間視聴と高画質版レンダリングは未実施。
 
 ## VOICEVOX クレジット
 
