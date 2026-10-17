@@ -37,7 +37,7 @@ def log_evidence(ell=ELL, noise_sd=NOISE_SD):
                  - len(T) / 2 * np.log(2 * np.pi))
 
 
-def prior_samples(grid, count=4, seed=6404, ell=ELL):
+def prior_samples(grid, count=4, seed=6402, ell=ELL):
     rng = np.random.default_rng(seed)
     gram = kernel(grid, grid, ell) + 1e-9 * np.eye(len(grid))
     return (np.linalg.cholesky(gram) @ rng.standard_normal((len(grid), count))).T
