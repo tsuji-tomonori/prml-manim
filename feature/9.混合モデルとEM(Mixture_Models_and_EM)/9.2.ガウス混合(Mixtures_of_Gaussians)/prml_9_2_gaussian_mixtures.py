@@ -268,7 +268,7 @@ class PRML92GaussianMixtures(NarratedScene):
             examples.add(Line(point(x, 0), point(x, weighted[i]), color=YELLOW, stroke_width=2.5))
         self.say('2点の例：積を対数で和へ', FadeIn(examples),
                  self.show_formula(r'\ln[p(x_1)p(x_9)]=\ln p(x_1)+\ln p(x_9)', YELLOW))
-        self.say('内側で山を足す', FadeOut(examples), self.show_formula(r'\ln p(X)=\sum_n\ln\!\left(\sum_k\pi_k\mathcal N(x_n\mid\mu_k,\Sigma_k)\right)', GREEN))
+        self.say('内側で山を足す', FadeOut(examples), self.show_formula(r'\ell=\sum_n\ln p(x_n)', GREEN))
         self.say('初期の対数尤度', self.show_value(r'\ell=-27.737', GREEN, math=True))
         separate = dict(mu=np.array([.15, 0.]), sigma=np.array([.03, 1.55]),
                         pi=np.array([.1, .9]))
