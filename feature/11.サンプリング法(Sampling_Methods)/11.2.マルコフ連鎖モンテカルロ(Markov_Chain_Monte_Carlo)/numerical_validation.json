@@ -1,0 +1,36 @@
+{
+  "truth": 0.17961888683382057,
+  "quadrature": 0.179618886833805,
+  "normalization": 1.0000000000000002,
+  "seed": 112,
+  "start": -1.0,
+  "steps": 12000,
+  "burn": 2000,
+  "walks": [
+    {
+      "scale": 0.35,
+      "first_right_step": 1183,
+      "first_24_right": 0,
+      "acceptance_rate": 0.7363333333333333,
+      "right_estimate": 0.4492,
+      "right_lag1_correlation": 0.9985852736656154
+    },
+    {
+      "scale": 0.8,
+      "first_right_step": 421,
+      "first_24_right": 0,
+      "acceptance_rate": 0.5315,
+      "right_estimate": 0.192,
+      "right_lag1_correlation": 0.9787278360564426
+    },
+    {
+      "scale": 2.2,
+      "first_right_step": 37,
+      "first_24_right": 0,
+      "acceptance_rate": 0.28875,
+      "right_estimate": 0.1786,
+      "right_lag1_correlation": 0.8084511226773063
+    }
+  ],
+  "asymmetric_pair_ratio": 0.04370500919292095
+}
