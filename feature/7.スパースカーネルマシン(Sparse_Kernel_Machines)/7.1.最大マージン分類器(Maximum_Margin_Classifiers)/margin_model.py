@@ -28,3 +28,21 @@ def soft_svm(c):
     xi=np.maximum(0.,1.-t*(x@w+b))
     primal=.5*w@w+c*xi.sum();dual=a.sum()-.5*a@q@a
     return dict(x=x,t=t,alpha=a,w=w,b=b,slack=xi,primal=primal,dual=dual,free=free,decision_x=-b/w[0])
+
+
+def nonlinear_shift(y):
+    return .22*np.sin(2*np.asarray(y))
+
+def warp_inputs(x):
+    """Inverse feature map: the six plotted points bend, their features stay X."""
+    result=np.array(x,dtype=float,copy=True)
+    result[...,0]+=nonlinear_shift(result[...,1])
+    return result
+
+def nonlinear_features(x):
+    result=np.array(x,dtype=float,copy=True)
+    result[...,0]-=nonlinear_shift(result[...,1])
+    return result
+
+def nonlinear_kernel(x,z):
+    return nonlinear_features(x)@nonlinear_features(z).T
