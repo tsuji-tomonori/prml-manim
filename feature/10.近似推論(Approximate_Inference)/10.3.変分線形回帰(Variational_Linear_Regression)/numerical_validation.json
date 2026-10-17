@@ -1,0 +1,33 @@
+{
+  "n": 10,
+  "dimension": 4,
+  "beta": 11.11111111111111,
+  "seed": 1030,
+  "probe": 1.35,
+  "fixed_weak": {
+    "mean": 2.4420023918541616,
+    "noise_variance": 0.09,
+    "weight_variance": 0.7199396770658956,
+    "true_mean": 2.4509562500000004
+  },
+  "fixed_strong": {
+    "mean": 1.2415670541165331,
+    "noise_variance": 0.09,
+    "weight_variance": 0.0768938941052972,
+    "true_mean": 2.4509562500000004
+  },
+  "mean_alpha": 1.8824003996369507,
+  "bound_initial": -10.311120792294993,
+  "bound_final": -10.274660530339965,
+  "prediction": {
+    "mean": 2.3468890698152314,
+    "noise_variance": 0.09,
+    "weight_variance": 0.5031294778067548,
+    "true_mean": 2.4509562500000004
+  },
+  "total_variance": 0.5931294778067547,
+  "standard_deviation": 0.770148997147146,
+  "monte_carlo_variance": 0.5939024942655422,
+  "monte_carlo_bound": -10.273107319525101,
+  "max_negative_bound_step": -5.329070518200751e-15
+}
