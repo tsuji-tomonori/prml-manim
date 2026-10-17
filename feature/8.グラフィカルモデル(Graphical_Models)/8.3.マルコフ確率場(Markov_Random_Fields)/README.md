@@ -38,13 +38,37 @@ Bishop (2006), *Pattern Recognition and Machine Learning* §8.3、印刷 pp.383�
 
 ## 数値例と近似の条件
 
-- 映像の二値画像は本動画用の自作データ。画素は $-1,+1$、上下左右の 4 近傍で結ぶ。反転位置、観測画像、ICM の更新順、一致率、冒頭の画素のエネルギーは実装から計算し、完成時にここへ記録する。
+- 映像の二値画像は本動画用の自作データ。画素は黒 $-1$、白 $+1$、上下左右の 4 近傍で結ぶ。$12\times12=144$ 画素のうち 14 画素を反転（約 9.72%）。`image_model.py` の `FLIPS` が 0 始まりの行・列を固定する。観測画像は元画像と 130/144 一致する。冒頭で注目する画素は行 5・列 5 の観測値 $+1$ で、上下左右の観測値はすべて $-1$。
 - エネルギーは原典 (8.42) の $E(x,y)=h\sum_i x_i-\beta\sum_{\{i,j\}}x_ix_j-\eta\sum_i x_iy_i$ を使う。説明用に $h=0,\beta=1,\eta=2.1$ とする。全てのポテンシャルが正である。局所の 2 候補は他の画素を固定して比較する。ICM は局所解に止まる場合がある。
+- 注目画素の局所エネルギーは白 $+1.9$、黒 $-1.9$。1 巡目で 8 画素が変化し、2 巡目で変化 0。復元画像は元画像と 138/144 一致（約 95.83%）。全体エネルギーは $-378.4\to-404.8$。座標・結果・候補差は `verify_numerics.py` で独立に検算する。
+- scene07 の 16 本の重み棒は、本編の 12×12 画像とは別の 2×2 の二値モデル。4 本の辺の係数を 0.13、4 個の画素の係数を 0.10 とし、各状態 $s\in\{-1,+1\}^4$ に $\exp[0.13(s_1s_2+s_1s_3+s_2s_4+s_3s_4)+0.10\sum_i s_i]$ を割り当てる。分配関数は $16.9863623824$。棒はこの式から生成する。主例の $\beta,\eta$ と混同しない。
 - 原典図 8.30 の 96%・99% は原典の画像と手法の結果であり、この自作画像の結果として表示しない。
 
 ## ファイルと再生成
 
-制作完了後に、実ファイルと検証コマンドを記録する。
+| 種類 | ファイル |
+|---|---|
+| 完成映像 | [480p15 MP4](media/videos/prml_8_3_markov_random_fields/480p15/PRML83MarkovRandomFields.mp4) |
+| 台本 | [実測時刻付き台本](narration_script.md)、[字幕と発話の定義](narration_content.py) |
+| 数値 | [固定した画像と ICM](image_model.py)、[独立した数値検証](verify_numerics.py)、[結果](numerical_validation.json) |
+| 音声 | [VOICEVOX 生成](make_voicevox_narration.py)、[scene01–09 WAV と manifest](assets/voicevox/)、[全文の読み確認](reading_check.md) |
+| 映像 | [Manim 本体](prml_8_3_markov_random_fields.py)、[字幕と音声同期](scene_support.py) |
+| 検証 | [字幕寸法](verify_caption_layout.py)、[完成映像](verify_video.py)、[結果](video_validation.json) |
+
+VOICEVOX Engine 0.25.2 が `localhost:50021` で起動した状態で、このディレクトリから実行する。worktree に `.venv` がない場合は、メインの `/home/t-tsuji/project/prml-manim/.venv` を使う。
+
+```bash
+python -W error -m py_compile *.py
+python verify_numerics.py
+python check_narration_readings.py
+python make_voicevox_narration.py
+python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_8_3_markov_random_fields.py PRML83MarkovRandomFields
+python verify_video.py
+```
+
+音声を変更したら `check_narration_readings.py` の結果を確認して WAV を再生成する。scene 単位で再開する場合は `make_voicevox_narration.py --from-scene scene05` のように指定できる。台本と WAV のハッシュが一致しなければ Manim は描画を停止する。レビュー画像は `media/review/` に生成し Git 管理しない。
 
 ## 検証と限界
 
