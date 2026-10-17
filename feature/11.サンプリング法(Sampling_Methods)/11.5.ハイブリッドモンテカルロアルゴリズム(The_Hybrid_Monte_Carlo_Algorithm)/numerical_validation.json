@@ -1,0 +1,49 @@
+{
+  "initial": [
+    -2.0,
+    0.5
+  ],
+  "epsilon": 0.15,
+  "steps": 18,
+  "final": [
+    2.023450004778786,
+    0.39519716151698236
+  ],
+  "initial_energy": 2.125,
+  "final_energy": 2.1252653591551742,
+  "energy_error": 0.00026535915517422737,
+  "acceptance": 0.9997346760494523,
+  "reverse_error": 8.881784197001252e-16,
+  "phase_volume_determinant": 1.0,
+  "detailed_balance_flow": 0.11940127983975346,
+  "coarse": {
+    "epsilon": 1.4,
+    "final": [
+      2.1184337600672283,
+      0.03523614828247523
+    ],
+    "energy_error": 0.1195015909691799,
+    "acceptance": 0.8873625960513858
+  },
+  "anisotropic": {
+    "sigmas": [
+      2.0,
+      0.4
+    ],
+    "start_position": [
+      -2.0,
+      -0.2
+    ],
+    "final_position": [
+      1.5155634419007793,
+      -0.13529434053346373
+    ],
+    "scale_ratio": 5,
+    "walk_scale_ratio_squared": 25
+  },
+  "momentum_check": {
+    "count": 50000,
+    "mean": -0.001994575044430373,
+    "variance": 0.9997026175172582
+  }
+}
