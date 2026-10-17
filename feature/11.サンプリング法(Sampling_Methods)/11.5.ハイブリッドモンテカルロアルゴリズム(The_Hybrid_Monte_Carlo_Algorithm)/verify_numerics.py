@@ -8,6 +8,7 @@ assert s.shape==(STEPS+1,2)
 assert abs(s[-1,0]-2.023450004778786)<1e-12
 assert abs(s[-1,1]-.39519716151698236)<1e-12
 assert abs(acceptance(s)-.9997346760494523)<1e-12
+assert .5<acceptance(s)
 assert abs(energy(*s[0])-2.125)<1e-12
 # Negative time steps undo a complete trajectory. Each shear has determinant one.
 back=leapfrog(*s[-1],epsilon=-EPSILON,steps=STEPS)
@@ -30,6 +31,6 @@ assert 2/.4==5 and (2/.4)**2==25
 rng=np.random.default_rng(115)
 refreshed=rng.normal(size=50000)
 assert abs(refreshed.mean())<.025 and abs(refreshed.var()-1)<.025
-out=dict(initial=[START_Z,START_R],epsilon=EPSILON,steps=STEPS,final=s[-1].tolist(),initial_energy=energy(*s[0]),final_energy=energy(*s[-1]),energy_error=energy(*s[-1])-energy(*s[0]),acceptance=acceptance(s),reverse_error=float(np.max(np.abs(back[-1]-s[0]))),phase_volume_determinant=1.,detailed_balance_flow=flow_forward,coarse=dict(epsilon=1.4,final=coarse[-1].tolist(),energy_error=energy(*coarse[-1])-energy(*coarse[0]),acceptance=acceptance(coarse)),anisotropic=dict(sigmas=[2.,.4],start_position=aniso[0][0].tolist(),final_position=aniso[-1][0].tolist(),scale_ratio=5,walk_scale_ratio_squared=25),momentum_check=dict(count=len(refreshed),mean=float(refreshed.mean()),variance=float(refreshed.var())))
+out=dict(initial=[START_Z,START_R],epsilon=EPSILON,steps=STEPS,final=s[-1].tolist(),initial_energy=energy(*s[0]),final_energy=energy(*s[-1]),energy_error=energy(*s[-1])-energy(*s[0]),acceptance=acceptance(s),uniform_draw=.5,accepted=True,reverse_error=float(np.max(np.abs(back[-1]-s[0]))),phase_volume_determinant=1.,detailed_balance_flow=flow_forward,coarse=dict(epsilon=1.4,final=coarse[-1].tolist(),energy_error=energy(*coarse[-1])-energy(*coarse[0]),acceptance=acceptance(coarse)),anisotropic=dict(sigmas=[2.,.4],start_position=aniso[0][0].tolist(),final_position=aniso[-1][0].tolist(),scale_ratio=5,walk_scale_ratio_squared=25),momentum_check=dict(count=len(refreshed),mean=float(refreshed.mean()),variance=float(refreshed.var())))
 Path('numerical_validation.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
 print(out)

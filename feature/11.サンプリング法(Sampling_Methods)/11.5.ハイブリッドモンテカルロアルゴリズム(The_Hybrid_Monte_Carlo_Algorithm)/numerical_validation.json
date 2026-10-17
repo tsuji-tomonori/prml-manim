@@ -13,6 +13,8 @@
   "final_energy": 2.1252653591551742,
   "energy_error": 0.00026535915517422737,
   "acceptance": 0.9997346760494523,
+  "uniform_draw": 0.5,
+  "accepted": true,
   "reverse_error": 8.881784197001252e-16,
   "phase_volume_determinant": 1.0,
   "detailed_balance_flow": 0.11940127983975346,
