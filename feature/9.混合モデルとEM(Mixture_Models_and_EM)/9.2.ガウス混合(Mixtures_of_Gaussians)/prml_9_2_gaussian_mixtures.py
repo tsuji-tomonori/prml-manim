@@ -188,7 +188,9 @@ class PRML92GaussianMixtures(NarratedScene):
         if self.bars is None:
             self.bars = target
             return FadeIn(target)
-        return Transform(self.bars, target)
+        previous = self.bars
+        self.bars = target
+        return Succession(FadeOut(previous), FadeIn(target))
 
     def say(self, message, *animations, color=MUTED):
         self.beat(self.note_anim(message, color), *animations)
