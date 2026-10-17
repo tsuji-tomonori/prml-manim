@@ -488,7 +488,7 @@
       "title": "古い1枚を外す",
       "status": "generated",
       "path": "assets/voicevox/scene04.wav",
-      "script_sha256": "3b86ab44e3acdfab7b53a4ab01d1983018fb0f3e3628ea0a70bb7e34a6491b4d",
+      "script_sha256": "6b557fd660bb32a44b954a9a85cfce267efa7ad9498e7f44ec6ef088c3098804",
       "wav_sha256": "57f4d2e30e830cfcc5f418b626825f2ea845b4f2ad4e3ea3c0f56df341669686",
       "duration": 68.73333333333333,
       "beat_durations": [
