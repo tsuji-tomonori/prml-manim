@@ -17,11 +17,26 @@
 | 7 事前の強さも未知なら | ガンマ事前とガウス事後の往復を図で示し、局所・大域の変分法を接続する | (10.165)–(10.183)、公式正誤表 |
 | 8 最初の点へ戻る | $(1.4,4)$ で約0.960と約0.744を同じ図で回収する | Fig.10.13、§10.7への接続 |
 
+## シーンと実測尺
+
+| シーン | 開始秒 | 音声尺（秒） | 視覚の中心 |
+|---|---:|---:|---|
+| scene01 境界からは遠いのに | 0.000 | 75.267 | 上へ動く点と、候補境界が開く分類平面 |
+| scene02 積分を止めるもの | 75.267 | 71.867 | 分類平面の横でシグモイドと局所下界を比較 |
+| scene03 10点に10個の接点 | 147.133 | 66.867 | 各観測の項から対数の二次曲線へ |
+| scene04 候補の雲を作る | 214.000 | 69.867 | 重みの楕円から境界の候補へ |
+| scene05 接点を雲に合わせる | 283.867 | 69.000 | 下界の上昇と接点の往復 |
+| scene06 境界が開く理由 | 352.867 | 74.600 | 同じ分類平面の境界と予測等高線 |
+| scene07 事前の強さも未知なら | 427.467 | 68.333 | 強さのガンマ分布の更新 |
+| scene08 最初の点へ戻る | 495.800 | 72.933 | 冒頭と同じ点・同じ2本の予測棒 |
+
+8シーン・64拍・128文。MP4映像568.733秒、MP4音声568.768秒（約9分29秒）。元WAVの合計は568.733秒。
+
 ## 視覚補足と章をまたぐ復習
 
-- シーン2で「復習: 4.5 ベイズロジスティック回帰」を約12秒。重みの候補から境界の候補を作り、確率を平均する元節の操作だけを再現する。字幕 `display` は `4.5`、音声 `speech` は「四章五節」。過去節は import しない。
-- シーン3で、10個の積を対数で和に変える操作を約10秒、点ごとの短い棒から1本の二次曲線へつなぐ。
-- シーン4で、$\phi^T S\phi$ が入力方向への広がりであることを約12秒の小窓で図解する。シーン5の期待値は平均と幅の2本の棒で示す。補足・復習は本編の15%以内にする。
+- シーン2の冒頭で「復習: 4.5 ベイズロジスティック回帰」を10.600秒。重みの候補から境界の候補を作り、確率を平均する元節の操作を縮約する。字幕 `display` は `4.5`、音声 `speech` は「四章五節」。過去節は import しない。
+- シーン3で、10個の積を対数で和に変える操作を7.600秒。観測ごとの棒と総和の式を対応させる。続く場面で重みを1方向に動かし、元の対数密度と二次下界を同軸で重ねる。
+- シーン4で、$\phi^T S\phi$ が入力方向への広がりであることを7.667秒の小窓で図解する。シーン5では二乗平均を中心の二乗と分散へ分ける9.467秒の補足を入れる。補足・復習の合計は35.334秒で全編の約6.2%。配色は共通仕様に合わせる。
 
 ## 原文との照合
 
@@ -31,13 +46,41 @@ Bishop (2006), *Pattern Recognition and Machine Learning* §10.6、印刷pp.498�
 
 - 自作データは左クラス5点・右クラス5点。$\phi=(1,x,y)^T$、ラベルは0/1、固定ガウス事前は $N(0,\alpha^{-1}I)$、$\alpha=0.4$。座標と反復停止条件は `variational_logistic_model.py` に固定する。これは原典図10.13のデータを転写したものではない。
 - 各データの $\xi_n>0$ に対し $\lambda(\xi_n)=\tanh(\xi_n/2)/(4\xi_n)$ を使う。10.5の訂正後の下界と符号を揃える。正規化した $q(w)$ 自体は元の事後への点ごとの下界ではない。
-- 代表重みでの $(1.4,4)$ の予測は約0.959890。変分ガウス事後の予測を120点Gauss–Hermiteで積分すると約0.743530。4.5の $\kappa$ 近似は約0.742395で、動画の約0.744は前者を丸めた値。真のベイズ事後予測の厳密値と呼ばない。
+- 代表重みでの $(1.4,4)$ の予測は約0.959890。変分ガウス事後の予測を320点Gauss–Hermiteで積分すると約0.743531。4.5の $\kappa$ 近似は約0.742395で、動画の約0.744は前者を丸めた値。真のベイズ事後予測の厳密値と呼ばない。
 - $y=0$ の同じ横位置では変分事後平均の予測が約0.936412。$y=4$ との差は、このデータと事前と変分近似の条件下で生じる。一般に学習点からの距離だけで予測分散が単調増加するとは言わない。
+- 分類平面の予測等高線は4.5で使った $\kappa(s^2)=(1+\pi s^2/8)^{-1/2}$ による近似を使う。上の点での等高線近似は約0.742395、横棒の約0.744はGauss–Hermite積分であり、描画方法の差を混同しない。候補境界は横方向の重みを事後平均に固定し、縦方向の重みを $-1.45,-0.75,0,0.75,1.45$ に動かした説明用の断面で、無作為標本ではない。
+- シーン3の10本の棒は、最終の事後平均 $m_N$ で評価した各観測の $-\log h_n(m_N,\xi_n)$。続く右図の赤と青は、他の重みを0に固定して横方向の重みだけを0〜4へ動かした、元の対数結合密度と下界の断面である。縦軸表示範囲は−8〜0で、それより低い部分は表示しない。
+- 固定事前の変分更新は59回で停止し、公式正誤表で訂正された(10.164)の下界は約−4.755089から約−3.607318へ単調上昇した。55点×3方向のGauss–Hermite求積による真の対数モデル証拠は約−2.591100で、下界の向きを独立に照合した。
+- §10.6.3の説明用例は別計算。$a_0=b_0=2$ のガンマ事前を置き、$q(w),q(\alpha),\xi$ を反復すると $E[\alpha]\approx0.836857$。冒頭と結末の固定 $\alpha=0.4$ の予測には混ぜない。ガンマ分布は形・率パラメータで記す。
 
 ## ファイルと再生成
 
-制作後に記載する。音声は VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.08）を使用し、クレジットはこのREADMEに記載する。
+[完成動画（480p15）](media/videos/prml_10_6_variational_logistic_regression/480p15/PRML106VariationalLogisticRegression.mp4) ／ [全文台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
+
+- `variational_logistic_model.py` / `verify_numerics.py` / `numerical_validation.json`: 固定事前と階層事前の反復、下界、独立なモデル証拠積分、予測積分を検証する。
+- `narration_content.py` / `export_narration_script.py` / `narration_script.md`: 8シーン・128文の字幕 `display` と読み `speech` の正本。
+- `make_voicevox_narration.py` / `assets/voicevox/`: 8 WAVと台本・WAVのハッシュ付きmanifest。`check_narration_readings.py` / `reading_check.json` / `.md` は全文の修正前後の `audio_query` 読みを保存する。
+- `scene_support.py` / `prml_10_6_variational_logistic_regression.py`: PCM時刻に字幕と図を合わせる。`verify_caption_layout.py` / `caption_validation.json` は全字幕の寸法を保存する。
+- `verify_video.py` / `video_validation.json`: MP4のストリーム、音声時刻、無音、全編デコード、抽出フレームを確認する。レビュー画像とプレビューはGit管理外に置く。
+
+音声は VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.08）。動画内にクレジットを出さず、このREADMEに記載する。Engine 0.25.2 を `127.0.0.1:50021` で使用し、辞書登録はしない。
+
+対象ディレクトリで、メイン作業ツリーの仮想環境を使用して再生成する。
+
+```bash
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_10_6_variational_logistic_regression.py PRML106VariationalLogisticRegression
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
+```
 
 ## 検証と限界
 
-制作後に実測値と未検証事項を記載する。
+- `py_compile`、`verify_numerics.py`、`check_narration_readings.py`、`verify_caption_layout.py`、`verify_video.py`、`git diff --check` が通った。128文の台本・字幕・WAVのハッシュと尺を照合した。全字幕の最大幅は10.291、高さは0.619で安全領域に収まった。
+- 音声または `add_sound` の変更後、キャッシュを消して全編を再レンダリングした。`ffprobe` で854×480、15 fps、映像568.733秒、音声568.768秒を確認した。音声の128文との照合は最低相関0.99957、最大時刻差0.0214秒。3秒以上の無音は0件で、平均音量−26.2 dB、最大音量−6.1 dB。全編デコードが成功した。
+- 完成MP4から392フレームを抽出し、全25枚のコンタクトシートを生成した。このうち9枚（各シーンから動きの途中・直後を含む144縮小フレーム）と8枚の拡大フレームを目視し、装飾枠、軸・数値・つまみ・注記の重なり、字幕と図の明るさ、英語の注記、曲線のはみ出しを確認した。確認した範囲で判読を妨げる問題は見つからなかった。
+- 全フレームの逐一目視と、完成動画を通しての耳による視聴は実施していない。音声の読みは128文すべてのVOICEVOX `audio_query` を確認し、誤読を `speech` で修正した。
