@@ -5,7 +5,7 @@ from narration_content import SCENES,script_hash
 root=Path(__file__).resolve().parent
 path=root/'assets/voicevox/manifest.json'
 entries={e['id']:e for e in json.loads(path.read_text()).get('scenes',[])} if path.exists() else {}
-lines=['# PRML 10.2 例：変分ガウス混合 台本','','原文: Bishop (2006), §10.2、印刷 pp.474–486 / PDF pp.494–506。','公式正誤表: pp.474–484 に訂正あり。','字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。','']
+lines=['# PRML 10.3 変分線形回帰 台本','','原文: Bishop (2006), §10.3、印刷 pp.486–490 / PDF pp.506–510。','公式正誤表: p.487 の図10.8、p.489 の式(10.110)と本文に訂正あり。','字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。','']
 start=0.
 for s in SCENES:
     e=entries.get(s['id'],{});ds=e.get('beat_durations',[])
@@ -17,5 +17,5 @@ for s in SCENES:
         for seg in b['segments']:lines += [f"- {seg['id']} 字幕: {seg['display']}",f"  音声: {seg['speech']}"]
         lines += ['']
     start=start+duration if current and start is not None else None
-lines += ['## 内容の対応と条件','','- 説明用の2変数ガウス分布と初期値は mixture_model.py と README.md に記載。','- 事後分布、下界、KL、各因子の分散の数値は verify_numerics.py で照合。','- 元の PDF と公式正誤表の照合範囲は README.md を参照。','']
+lines += ['## 内容の対応と条件','','- 自作10点、基底関数、ガンマ事前、初期精度は regression_model.py と README.md に記載。','- 変分更新、下界、予測分散の数値は verify_numerics.py で照合。','- 元の PDF と公式正誤表の照合範囲は README.md を参照。','']
 (root/'narration_script.md').write_text('\n'.join(lines))

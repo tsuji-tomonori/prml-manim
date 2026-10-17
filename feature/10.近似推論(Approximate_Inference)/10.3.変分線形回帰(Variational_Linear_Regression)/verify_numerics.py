@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import numpy as np
 from scipy.integrate import quad
-from scipy.stats import norm
+from scipy.stats import norm, gamma, multivariate_normal
 from regression_model import (N,DIM,A0,B0,BETA,X,T,PROBE,TRUE_W,
                               phi,step,fit,prediction,elbo)
 
@@ -32,11 +32,21 @@ rng=np.random.default_rng(10304)
 draws=rng.multivariate_normal(last['mean'],last['covariance'],size=250000)@phi([PROBE])[0]
 draws+=rng.normal(0,1/np.sqrt(BETA),len(draws))
 assert abs(draws.var()-total)<.012
+weights=rng.multivariate_normal(last['mean'],last['covariance'],size=100000)
+precisions=rng.gamma(last['a'],1/last['b'],size=len(weights))
+residuals=T[None,:]-weights@design.T
+log_likelihood=N/2*np.log(BETA/(2*np.pi))-BETA/2*np.sum(residuals**2,axis=1)
+log_weight_prior=DIM/2*(np.log(precisions)-np.log(2*np.pi))-precisions/2*np.sum(weights**2,axis=1)
+log_alpha_prior=gamma.logpdf(precisions,A0,scale=1/B0)
+log_q_weight=multivariate_normal.logpdf(weights,mean=last['mean'],cov=last['covariance'])
+log_q_alpha=gamma.logpdf(precisions,last['a'],scale=1/last['b'])
+sample_bound=float(np.mean(log_likelihood+log_weight_prior+log_alpha_prior-log_q_weight-log_q_alpha))
+assert abs(sample_bound-elbo(last))<.03
 result=dict(n=N,dimension=DIM,beta=BETA,seed=1030,probe=PROBE,
             fixed_weak=prediction(step(.01)),fixed_strong=prediction(step(100.)),
             mean_alpha=last['alpha'],bound_initial=history[0]['bound'],bound_final=last['bound'],
             prediction=p,total_variance=total,standard_deviation=np.sqrt(total),
-            monte_carlo_variance=float(draws.var()),
+            monte_carlo_variance=float(draws.var()),monte_carlo_bound=sample_bound,
             max_negative_bound_step=float(min(0,min(np.diff([s['bound'] for s in history])))))
 Path('numerical_validation.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n')
 print('PASS',result)

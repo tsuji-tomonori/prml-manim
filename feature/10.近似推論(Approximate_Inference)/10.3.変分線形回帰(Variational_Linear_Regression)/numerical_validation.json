@@ -28,5 +28,6 @@
   "total_variance": 0.5931294778067547,
   "standard_deviation": 0.770148997147146,
   "monte_carlo_variance": 0.5939024942655422,
+  "monte_carlo_bound": -10.273107319525101,
   "max_negative_bound_step": -5.329070518200751e-15
 }
