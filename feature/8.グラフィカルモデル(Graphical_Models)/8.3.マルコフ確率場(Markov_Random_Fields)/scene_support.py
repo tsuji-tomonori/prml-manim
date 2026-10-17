@@ -25,8 +25,8 @@ def caption_math(formula, kana_height):
     reference = MathTex(formula, 'x', font_size=26)
     # Measure actual glyphs: font_size has different meanings in Pango and TeX.
     scale = .67 * kana_height / reference[1].height
-    # Large operators and tall delimiters should remain inline-sized.
-    scale = min(scale, 1.20 * kana_height / reference[0].height)
+    # Keep summation signs legible while staying within the caption safe area.
+    scale = min(scale, 2.40 * kana_height / reference[0].height)
     reference.scale(scale)
     mob = reference[0].copy()
     mob.shift(LEFT * mob.get_center()[0] + DOWN * reference[1].get_center()[1])
