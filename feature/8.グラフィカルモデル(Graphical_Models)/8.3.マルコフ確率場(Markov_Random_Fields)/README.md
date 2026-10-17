@@ -67,14 +67,18 @@ python make_voicevox_narration.py
 python export_narration_script.py
 /home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
 /home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_8_3_markov_random_fields.py PRML83MarkovRandomFields
-python verify_video.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
 ```
 
 音声を変更したら `check_narration_readings.py` の結果を確認して WAV を再生成する。scene 単位で再開する場合は `make_voicevox_narration.py --from-scene scene05` のように指定できる。台本と WAV のハッシュが一致しなければ Manim は描画を停止する。レビュー画像は `media/review/` に生成し Git 管理しない。
 
 ## 検証と限界
 
-制作完了後に、実施した検証と未検証事項を記録する。
+- `python -W error -m py_compile *.py`、`verify_numerics.py`、`verify_caption_layout.py` を通過。全 126 字幕の最大幅は 9.953、最大高は 0.619。数式入り字幕は 7 文。
+- 9 シーン・63 ビート・126 文の manifest、台本、WAV ハッシュと字幕時刻を照合した。`audio_query` で全 126 文の読みを確認し、読みの修正履歴を `reading_check.json` / `.md` に保存した。
+- `--disable_caching --flush_cache -ql` で全編を再レンダリングした。`ffprobe` は H.264/AAC、854×480、15 fps、映像 518.929 秒、音声 518.976 秒。`silencedetect` の 3 秒以上の無音は 0 件、`volumedetect` は平均 -26.4 dB・最大 -6.0 dB。全編デコードを通過した。
+- MP4 と WAV の 126 文の波形照合は最小相関 0.999480、最大時刻差 0.021333 秒。261 フレームを抽出し、全 63 ビートの中間と、強調・移動・色替えのある 21 ビートの開始・序盤・終盤、計 126 代表フレーム以上を目視した。復習カードの枠と注記、数式字幕、近傍の強調、エネルギー棒、画素の更新、道徳化の線の変化を拡大確認し、意図しない重なりを認めなかった。
+- 高解像度版と動画全編の人手による聴取は未実施。指定された 480p15 の映像・音声について検証した。レビュー画像は Git 管理外の `media/review/` に保存する。
 
 ## VOICEVOX クレジット
 
