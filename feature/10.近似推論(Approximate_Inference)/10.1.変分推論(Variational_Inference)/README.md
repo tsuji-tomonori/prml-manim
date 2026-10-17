@@ -1,6 +1,8 @@
 # PRML 10.1 変分推論
 
-Manim と VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.08）で制作する日本語動画。9.4 で残した「事後分布を正確に求められないとき、下界をどう使うか」を受け継ぐ。
+Manim と VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.08）による日本語動画。9.4 で残した「事後分布を正確に求められないとき、下界をどう使うか」を受け継ぐ。全8シーン、音声実測9分6.73秒。
+
+[動画（480p15）](media/videos/prml_10_1_variational_inference/480p15/PRML101VariationalInference.mp4) ／ [全文台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
 
 ## 物語の設計
 
@@ -21,18 +23,16 @@ Manim と VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.0
 
 ## シーン
 
-実測の開始秒と尺は音声・映像の生成後に記録する。全8シーン、8〜13分を目標にする。
-
-| シーン | 主な図 | 原典 |
-|---|---|---|
-| 1 | 緑の相関楕円と青の因子化輪郭 | §10導入、§10.1、図10.2 |
-| 2 | 下界・KL・エビデンスの高さ | (10.2)–(10.4) |
-| 3 | 斜めの楕円、独立な軸、片方の平均 | (10.5)–(10.9) |
-| 4 | $m_1,m_2$ の交互更新軌跡と下界 | (10.9)–(10.15) |
-| 5 | 同じ軸の周辺密度と変分因子 | 図10.2、(10.12)–(10.15) |
-| 6 | 2峰性の分布と近似の切り替え | 図10.3、(10.16)–(10.18) |
-| 7 | 近似の家族の輪郭と到達可能な分布 | §10.1 pp.464–465 |
-| 8 | 冒頭の楕円、分散と下界の答え | §10.1全体 |
+| シーン | 開始秒 | 尺（秒） | 主な図 | 原典 |
+|---|---:|---:|---|---|
+| 1 | 0.000 | 73.333 | 緑の相関楕円と青の因子化輪郭 | §10導入、§10.1、図10.2 |
+| 2 | 73.333 | 72.933 | 下界・KL・エビデンスの高さ | (10.2)–(10.4) |
+| 3 | 146.267 | 63.667 | 斜めの楕円、独立な軸、片方の平均 | (10.5)–(10.9) |
+| 4 | 209.933 | 62.867 | $m_1,m_2$ の交互更新軌跡と下界 | (10.9)–(10.15) |
+| 5 | 272.800 | 72.267 | 同じ軸の周辺密度と変分因子 | 図10.2、(10.12)–(10.15) |
+| 6 | 345.067 | 64.600 | 2峰性の分布と近似の切り替え | 図10.3、(10.16)–(10.18) |
+| 7 | 409.667 | 61.467 | 分布族の輪郭と到達可能な分布 | §10.1 pp.464–465 |
+| 8 | 471.133 | 75.600 | 冒頭の楕円、分散と下界の答え | §10.1全体 |
 
 ## 視覚補足と章をまたぐ復習
 
@@ -41,7 +41,7 @@ Manim と VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.0
 - 交互更新前に、期待値を確率で重み付けした平均として短く図解する。説明用の正の重みを明記する。
 - 幅を比較する前に2.3の相関と周辺分布を短く復習し、斜めの楕円を軸へ投影する。字幕は `2.3`、読みは「二章三節」。
 
-補足・復習は合計で本編の15%以内を目安にする。入力は青 `#58C4DD`、操作は黄 `#FFFF00`、結果は緑 `#83C167`、比較は紫 `#9A72AC`、差は赤 `#FC6255`。通常のグラフに装飾枠は置かない。
+上記4か所の音声実測合計は42.4秒で、全編の7.8%。入力は青 `#58C4DD`、操作は黄 `#FFFF00`、結果は緑 `#83C167`、比較は紫 `#9A72AC`、差は赤 `#FC6255`。通常のグラフに装飾枠は置かない。
 
 ## 原文との照合
 
@@ -59,7 +59,33 @@ Bishop (2006), *Pattern Recognition and Machine Learning* §10.1、印刷pp.462�
 
 ## ファイルと再生成
 
-制作後にコマンドと検証結果を追記する。生成物は既存の節と同じく WAV、manifest、480p15 MP4 を Git 管理し、レビュー画像と一時ファイルは `.working/` または `/tmp` に置く。
+| 種類 | ファイル |
+|---|---|
+| 数値 | `variational_model.py`、`verify_numerics.py`、`numerical_validation.json` |
+| 台本 | `narration_content.py`、`narration_script.md`、`export_narration_script.py` |
+| 音声 | `make_voicevox_narration.py`、`assets/voicevox/`、`reading_check.json` / `.md` |
+| 映像 | `prml_10_1_variational_inference.py`、`scene_support.py`、480p15 MP4 |
+| 検証 | `verify_caption_layout.py`、`caption_validation.json`、`verify_video.py`、`video_validation.json` |
+
+このディレクトリでメイン作業ツリーの仮想環境を使う。Engineが停止しているときだけ、`.working/voicevox-engine-0.25.2/linux-cpu-x64/run --host 127.0.0.1 --port 50021` で起動する。レビュー画像と一時生成物は Git 管理しない。
+
+```bash
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_10_1_variational_inference.py PRML101VariationalInference
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
+```
+
+## 検証結果
+
+- `py_compile`、`verify_numerics.py`、`verify_caption_layout.py`、`verify_video.py`、`git diff --check` を実行して通過。数値検証では KL の解析値と独立した2次元数値積分が一致した。
+- 字幕112件の表示寸法を確認。最大幅10.582、最大高さ0.395 Manim単位で安全域内。全文の `display` と `speech`、読み確認記録、8本の WAV のハッシュと尺、manifest、映像タイムラインを照合した。
+- 480p15 MP4 の映像尺546.730秒、音声尺546.773秒。`ffprobe` で H.264/AAC を確認。112文の WAV とMP4音声の相関は最小0.99957、位置差は最大0.0214秒。`silencedetect`（−45 dB、3秒）で該当0件、`volumedetect` は平均−26.5 dB・最大−5.4 dB。全編デコードに成功。
+- 8シーンから動きの入口・途中・直後を含む288枚を抽出し、そのうち96枚を目視。冒頭で結果を伏せた時間、復習カード、軸・凡例・式・字幕の間隔、2峰性への切り替え、分布族を広げたときの数値と図の対応を確認した。全フレームを人間が通して視聴・聴取した検証ではない。
 
 ## VOICEVOX クレジット
 
