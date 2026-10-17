@@ -1,0 +1,92 @@
+# PRML 10.1 変分推論
+
+Manim と VOICEVOX:WhiteCUL（ノーマル、speaker 23、話速1.08、抑揚1.08）による日本語動画。9.4 で残した「事後分布を正確に求められないとき、下界をどう使うか」を受け継ぐ。全8シーン、音声実測9分6.73秒。
+
+[動画（480p15）](media/videos/prml_10_1_variational_inference/480p15/PRML101VariationalInference.mp4) ／ [全文台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
+
+## 物語の設計
+
+全編の問いは「2つの未知量を別々に近似すると、中心は合うのに、なぜ確信しすぎた細い分布になるのか」。説明用の固定例として、中心が $(0,0)$、精度行列が $\left(\begin{smallmatrix}2&-1.6\\-1.6&2\end{smallmatrix}\right)$ の相関した2変数ガウス事後分布を置く。冒頭では緑の斜めの楕円と、予想より細い青の近似を同じ軸に描く。各変数の真の周辺分散は $1.388889$、因子化した最適近似の分散は $0.5$。この差を結末で同じ例・同じ値へ戻って説明する。
+
+| シーン | 直前の疑問 → 実験 → 発見 |
+|---|---|
+| 1 細い輪郭の謎 | 9.4 の下界から本章へつなぎ、斜めの楕円に独立な近似を重ね、幅の意外さを問う |
+| 2 何を最適化する？ | 観測を固定して $\ln p(X)=\mathcal L(q)+\mathrm{KL}(q\|p)$ を高さで分け、下界を上げる意味を見つける |
+| 3 独立という制約 | $q(z_1,z_2)=q_1(z_1)q_2(z_2)$ で斜めの連動を外し、片方を固定した更新を導く |
+| 4 交互更新 | 2つの平均のつまみを順番に動かし、下界が上がって中心に近づく様子を追う |
+| 5 なぜ幅が細い？ | 真の周辺分布と変分因子の幅を同じ軸上で比較し、相関を表せない制約を発見する |
+| 6 KL の向き | 2峰性の模式図で $\mathrm{KL}(q\|p)$ と逆向きの近似を比べ、低確率の谷を避ける傾向を確かめる |
+| 7 制約の選び方 | 因子化した家族と相関も表す家族を比べ、計算可能な範囲で柔軟にする方針を得る |
+| 8 冒頭へ戻る | 同じ楕円・同じ分散に戻り、中心が合い幅が細くなる理由を下界と因子化から回収する |
+
+冒頭と結末では同じ $p(z_1,z_2\mid X)$ を使う。モデルエビデンスの数値だけを見せる場面では、説明用に $p(X)=0.2$ と定める。これはこの固定事後分布と両立する同時分布 $p(X,Z)=0.2p(Z\mid X)$ を定義するための値で、観測データから推定した値ではない。
+
+## シーン
+
+| シーン | 開始秒 | 尺（秒） | 主な図 | 原典 |
+|---|---:|---:|---|---|
+| 1 | 0.000 | 73.333 | 緑の相関楕円と青の因子化輪郭 | §10導入、§10.1、図10.2 |
+| 2 | 73.333 | 72.933 | 下界・KL・エビデンスの高さ | (10.2)–(10.4) |
+| 3 | 146.267 | 63.667 | 斜めの楕円、独立な軸、片方の平均 | (10.5)–(10.9) |
+| 4 | 209.933 | 62.867 | $m_1,m_2$ の交互更新軌跡と下界 | (10.9)–(10.15) |
+| 5 | 272.800 | 72.267 | 同じ軸の周辺密度と変分因子 | 図10.2、(10.12)–(10.15) |
+| 6 | 345.067 | 64.600 | 2峰性の分布と近似の切り替え | 図10.3、(10.16)–(10.18) |
+| 7 | 409.667 | 61.467 | 分布族の輪郭と到達可能な分布 | §10.1 pp.464–465 |
+| 8 | 471.133 | 75.600 | 冒頭の楕円、分散と下界の答え | §10.1全体 |
+
+## 視覚補足と章をまたぐ復習
+
+- 冒頭で9.4の下界の高さ図を短く再現し、「正確なEが難しい」という前節の問いを引き継ぐ。字幕は `9.4`、読みは「九章四節」。
+- 下界を説明する直前に1.6のKLダイバージェンスを4本の確率棒で短く復習する。字幕は `1.6`、読みは「一章六節」。
+- 交互更新前に、期待値を確率で重み付けした平均として短く図解する。説明用の正の重みを明記する。
+- 幅を比較する前に2.3の相関と周辺分布を短く復習し、斜めの楕円を軸へ投影する。字幕は `2.3`、読みは「二章三節」。
+
+上記4か所の音声実測合計は42.4秒で、全編の7.8%。入力は青 `#58C4DD`、操作は黄 `#FFFF00`、結果は緑 `#83C167`、比較は紫 `#9A72AC`、差は赤 `#FC6255`。通常のグラフに装飾枠は置かない。
+
+## 原文との照合
+
+Bishop (2006), *Pattern Recognition and Machine Learning* §10.1、印刷pp.462–474（PDF pp.482–494）を通読。図10.1–10.4をPDF画像で確認した。中心は式(10.2)–(10.18)。[公式正誤表](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/05/prml-errata-1st-20110921.pdf)を確認し、(10.1)の符号、(10.12)の添字、(10.20)の二乗、(10.28)–(10.36)の訂正を認識した。本編は(10.1)、(10.20)、(10.28)以降の誤植式を採用しない。
+
+物語の中心から外れるため、10.1.3 のガウス・ガンマ共役事前分布の詳細な更新式、10.1.4 のモデル比較、$\alpha$ ダイバージェンスの一般式は扱わない。ガウス例は10.1.2に沿う2変数の相関した事後分布として具体化する。
+
+## 数値例と近似の条件
+
+- 真の事後分布は $p(Z\mid X)=\mathcal N(0,\Lambda^{-1})$、$\Lambda=\left(\begin{smallmatrix}2&-1.6\\-1.6&2\end{smallmatrix}\right)$。これは説明用に定義した正定値行列で、相関係数は $0.8$。
+- 因子化した $q$ は各因子の形を最初からガウスと仮定せず、(10.9)から最適因子 $q_i=\mathcal N(m_i,0.5)$ が得られる。平均の更新は $m_1\leftarrow0.8m_2$、$m_2\leftarrow0.8m_1$。初期平均は $(1.5,0.8)$。最適平均は $(0,0)$。
+- 真の各周辺分散は $1/(2(1-0.8^2))=1.388889$、変分因子の分散は $1/2=0.5$。分散比は $0.36$。標準偏差比や密度の高さと混同しない。
+- この例の $\mathrm{KL}(q\|p)$ は初期約 $1.481$、最適約 $0.511$。$p(X)=0.2$ としたときの $\ln p(X)$ は約 $-1.609$。下界は初期約 $-3.090$、最適約 $-2.120$。
+- 2峰性の図は原典図10.3の傾向を示す模式図。数値最適化の結果とは呼ばない。因子化で中心が合うという記述は上記の単峰性ガウス例に限る。
+
+## ファイルと再生成
+
+| 種類 | ファイル |
+|---|---|
+| 数値 | `variational_model.py`、`verify_numerics.py`、`numerical_validation.json` |
+| 台本 | `narration_content.py`、`narration_script.md`、`export_narration_script.py` |
+| 音声 | `make_voicevox_narration.py`、`assets/voicevox/`、`reading_check.json` / `.md` |
+| 映像 | `prml_10_1_variational_inference.py`、`scene_support.py`、480p15 MP4 |
+| 検証 | `verify_caption_layout.py`、`caption_validation.json`、`verify_video.py`、`video_validation.json` |
+
+このディレクトリでメイン作業ツリーの仮想環境を使う。Engineが停止しているときだけ、`.working/voicevox-engine-0.25.2/linux-cpu-x64/run --host 127.0.0.1 --port 50021` で起動する。レビュー画像と一時生成物は Git 管理しない。
+
+```bash
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_10_1_variational_inference.py PRML101VariationalInference
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
+```
+
+## 検証結果
+
+- `py_compile`、`verify_numerics.py`、`verify_caption_layout.py`、`verify_video.py`、`git diff --check` を実行して通過。数値検証では KL の解析値と独立した2次元数値積分が一致した。
+- 字幕112件の表示寸法を確認。最大幅10.582、最大高さ0.395 Manim単位で安全域内。全文の `display` と `speech`、読み確認記録、8本の WAV のハッシュと尺、manifest、映像タイムラインを照合した。
+- 480p15 MP4 の映像尺546.730秒、音声尺546.773秒。`ffprobe` で H.264/AAC を確認。112文の WAV とMP4音声の相関は最小0.99957、位置差は最大0.0214秒。`silencedetect`（−45 dB、3秒）で該当0件、`volumedetect` は平均−26.5 dB・最大−5.4 dB。全編デコードに成功。
+- 8シーンから動きの入口・途中・直後を含む288枚を抽出し、そのうち96枚を目視。冒頭で結果を伏せた時間、復習カード、軸・凡例・式・字幕の間隔、2峰性への切り替え、分布族を広げたときの数値と図の対応を確認した。全フレームを人間が通して視聴・聴取した検証ではない。
+
+## VOICEVOX クレジット
+
+VOICEVOX:WhiteCUL
