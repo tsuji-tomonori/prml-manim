@@ -236,7 +236,7 @@ class PRML92GaussianMixtures(NarratedScene):
         recap_hills = recap_23_plot()
         self.say('2.3 で見た2つの山', FadeIn(recap), FadeIn(recap_box), FadeIn(recap_hills),
                  Indicate(self.curves[0], color=YELLOW, scale_factor=1))
-        self.say('赤い山の中心と幅', FadeOut(recap_hills), self.show_formula(r'\mu_1=-1.1,\quad\sigma_1=0.9', RED),
+        self.say('赤い山の中心と幅', Succession(FadeOut(recap_hills), self.show_formula(r'\mu_1=-1.1,\quad\sigma_1=0.9', RED)),
                  Indicate(self.curves[0], color=RED, scale_factor=1))
         self.say('青い山の中心と幅', self.show_formula(r'\mu_2=1.1,\quad\sigma_2=1.2', BLUE),
                  Indicate(self.curves[1], color=BLUE, scale_factor=1))
@@ -275,7 +275,7 @@ class PRML92GaussianMixtures(NarratedScene):
         separate = dict(mu=np.array([.15, 0.]), sigma=np.array([.03, 1.55]),
                         pi=np.array([.1, .9]))
         broad_blue = density_curve(separate['mu'], separate['sigma'], separate['pi'], 1)
-        self.say('別の極限操作', Succession(FadeOut(self.curves), FadeIn(broad_blue)),
+        self.say('別の極限操作', AnimationGroup(FadeOut(self.curves), FadeIn(broad_blue)),
                  self.show_formula(r'\sigma_1\rightarrow 0', RED),
                  self.show_value('別の設定：赤を0.15に固定', RED), FadeIn(self.probe))
         spike = Arrow([xcoord(.15), -1.4, 0], [xcoord(.15), 1.95, 0], color=RED,
@@ -284,9 +284,10 @@ class PRML92GaussianMixtures(NarratedScene):
                  self.show_value('幅0.005：密度8.209', RED))
         self.say('潰れた解に注意', self.show_formula(r'\sigma\rightarrow0:\quad\ell\rightarrow+\infty', YELLOW),
                  Indicate(spike, color=YELLOW, scale_factor=1))
-        self.say('通常の山へ戻る', Succession(AnimationGroup(FadeOut(spike), FadeOut(broad_blue)),
-                                                  FadeIn(self.curves)),
-                 self.show_formula(r'\sigma_1=0.9,\quad\sigma_2=1.2', BLUE))
+        self.say('通常の山へ戻る', AnimationGroup(FadeOut(spike), FadeOut(broad_blue),
+                                                    FadeIn(self.curves)),
+                 self.show_formula(r'\sigma_1=0.9,\quad\sigma_2=1.2', BLUE),
+                 self.show_value('初期の設定へ戻す', BLUE))
 
     def e_step(self):
         self.setup_plot()
@@ -334,8 +335,9 @@ class PRML92GaussianMixtures(NarratedScene):
         values = [STATES[i]['log_likelihood'] for i in indexes]
         yy = [-.95 + (v-values[0])*.60 for v in values]
         n = indexes.index(upto)+1
-        path = VGroup(*[Line([xx[j], yy[j], 0], [xx[j+1], yy[j+1], 0], color=GREEN, stroke_width=2.5)
-                        for j in range(n-1)])
+        path = VGroup(*([Line([xx[0], yy[0], 0], [xx[0]+.001, yy[0], 0], color=GREEN, stroke_width=2.5)]
+                        if n == 1 else [Line([xx[j], yy[j], 0], [xx[j+1], yy[j+1], 0], color=GREEN, stroke_width=2.5)
+                                       for j in range(n-1)]))
         dots = VGroup(*[Dot([xx[j], yy[j], 0], radius=.07, color=YELLOW) for j in range(n)])
         labels = VGroup(*[J(str(indexes[j]), 16, MUTED).move_to([xx[j], -1.33, 0]) for j in range(5)])
         title = J('抜粋した往復 →', 17, MUTED).move_to([4.15, -1.62, 0])
@@ -369,4 +371,5 @@ class PRML92GaussianMixtures(NarratedScene):
                  self.show_formula(r'\gamma_1=0.564,\quad\gamma_2=0.436', GREEN))
         self.say('負担率で山を作り直す', Indicate(self.curves, color=YELLOW, scale_factor=1))
         self.say('局所解と特異点に注意', self.show_value('対数尤度と幅を確認', RED))
-        self.say('9.3でEMの一般形へ', Indicate(self.probe, color=YELLOW, scale_factor=1.2))
+        self.say('9.3でEMの一般形へ', self.show_value('一般の潜在変数へ', PURPLE),
+                 Indicate(self.probe, color=YELLOW, scale_factor=1.2))
