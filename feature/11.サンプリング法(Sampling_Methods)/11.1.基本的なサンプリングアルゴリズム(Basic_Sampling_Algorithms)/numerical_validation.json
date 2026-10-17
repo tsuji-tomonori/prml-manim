@@ -1,0 +1,22 @@
+{
+  "true_probability": 0.17961888683382057,
+  "independent_integral": 0.179618886833805,
+  "target_integral": 1.0000000000000002,
+  "introductory_count": 24,
+  "introductory_right_count": 0,
+  "importance_count": 200,
+  "importance_right_count": 11,
+  "importance_estimate": 0.16381747884346182,
+  "importance_effective_sample_size": 85.97126894131523,
+  "rejection_envelope": 8.351770293348121,
+  "rejection_envelope_peak": 8.335100093161797,
+  "rejection_envelope_at": 2.1999999926240146,
+  "theoretical_acceptance": 0.11973509386344873,
+  "rejection_proposals": 2000,
+  "rejection_accepted": 236,
+  "rejection_estimate": 0.19491525423728814,
+  "resampling_count": 200,
+  "resampling_right_count": 33,
+  "resampling_distinct_count": 90,
+  "high_dimension_acceptance": 4.77118457098449e-05
+}
