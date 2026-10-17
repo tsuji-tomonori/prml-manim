@@ -1,0 +1,25 @@
+{
+  "source": "Bishop (2006) §8.2 pp.377–378, Eqs.8.30–8.33",
+  "joint_g0": {
+    "B=0,F=0": 0.009,
+    "B=0,F=1": 0.072,
+    "B=1,F=0": 0.072,
+    "B=1,F=1": 0.162
+  },
+  "p_g0": 0.315,
+  "p_f0_g0": 0.2571428571428571,
+  "p_f0_g0_b0": 0.1111111111111111,
+  "rational": {
+    "p_g0": "63/200",
+    "p_f0_g0": "9/35",
+    "p_f0_g0_b0": "1/9"
+  },
+  "checks": [
+    "joint probability sums to 1",
+    "printed gauge result",
+    "before/after collider dependence",
+    "8.1 rain fork: conditional independent, marginal dependent",
+    "illustrative chain: conditional independent, marginal dependent",
+    "illustrative noisy collider descendant: conditional dependent"
+  ]
+}
