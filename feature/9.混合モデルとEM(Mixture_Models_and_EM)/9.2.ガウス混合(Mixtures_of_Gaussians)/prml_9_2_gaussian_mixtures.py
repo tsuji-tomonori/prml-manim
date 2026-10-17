@@ -162,7 +162,7 @@ class PRML92GaussianMixtures(NarratedScene):
         return FadeIn(mob, rate_func=lambda t: smooth(min(1, 5*t)))
 
     def show_formula(self, formula, color=WHITE):
-        mob = tex(formula, 29, color)
+        mob = tex(formula, 37, color)
         if mob.width > 4.5:
             mob.scale_to_fit_width(4.5)
         if mob.height > 1.05:
