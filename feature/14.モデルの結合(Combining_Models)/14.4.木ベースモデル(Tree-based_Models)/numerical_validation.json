@@ -141,5 +141,19 @@
       "query_prediction": 14.0
     }
   ],
-  "pruned_prediction": 8.75
+  "pruned_prediction": 8.75,
+  "classification_impurity": {
+    "0": {
+      "entropy": -0.0,
+      "gini": 0.0
+    },
+    "0.5": {
+      "entropy": 0.6931471805599453,
+      "gini": 0.5
+    },
+    "1": {
+      "entropy": -0.0,
+      "gini": 0.0
+    }
+  }
 }
