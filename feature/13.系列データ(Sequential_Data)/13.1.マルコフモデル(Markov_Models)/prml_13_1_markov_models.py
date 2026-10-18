@@ -352,12 +352,14 @@ class PRML131MarkovModels(NarratedScene):
                     self.beat(phases=[('最初の重み', first, lambda: Wait()),
                                       ('観測で更新', duration-first,
                                        lambda a=initial, b=state:
-                                       AnimationGroup(FadeOut(a), FadeIn(b),
-                                                      lag_ratio=0))])
+                                       Succession(FadeOut(a, run_time=.05),
+                                                  FadeIn(b, run_time=.05),
+                                                  Wait(.90)))])
                     old = state
                     continue
                 transition = (FadeIn(state) if old is None else
-                              AnimationGroup(FadeOut(old), FadeIn(state), lag_ratio=0))
+                              Succession(FadeOut(old, run_time=.20),
+                                         FadeIn(state, run_time=.20), Wait(.60)))
                 duration = self.boundaries[bi] - (self.boundaries[bi-1] if bi else 0)
                 switch = min(1.2, duration*.20)
                 self.beat(phases=[('表示切替', switch, lambda a=transition: a),
