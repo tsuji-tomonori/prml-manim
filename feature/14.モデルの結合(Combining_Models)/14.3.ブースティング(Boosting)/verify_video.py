@@ -46,7 +46,7 @@ probe=json.loads(run(['ffprobe','-v','error','-show_entries','format=duration,si
 video=next(s for s in probe['streams'] if s['codec_type']=='video')
 audio=next(s for s in probe['streams'] if s['codec_type']=='audio')
 assert video['codec_name']=='h264' and audio['codec_name']=='aac'
-assert int(video['width'])==954 and int(video['height'])==480 and video['r_frame_rate']=='15/1'
+assert int(video['width'])==854 and int(video['height'])==480 and video['r_frame_rate']=='15/1'
 assert abs(float(video['duration'])-float(audio['duration']))<.1
 assert abs(float(video['duration'])-timeline[-1]['end'])<.1
 silence=run(['ffmpeg','-hide_banner','-i',str(VIDEO),'-map','0:a:0','-af','silencedetect=noise=-45dB:d=3','-f','null','-']).stderr
