@@ -220,6 +220,7 @@ class PRML121PrincipalComponentAnalysis(NarratedScene):
             count=ValueTracker(0 if si==6 else 1)
             reveal=ValueTracker(0 if si==0 else 1)
             self.add(graph_axes())
+            self.add(jp('説明用の13点',14,MUTED).move_to([-4.75,-2.55,0]))
             line=always_redraw(lambda: clipped_line(theta.get_value(),offset.get_value()).set_opacity(
                 0 if si==6 and round(count.get_value()) != 1 else 1))
             marks=always_redraw(lambda: reconstruction_marks(theta.get_value(),offset.get_value(),
@@ -250,7 +251,8 @@ class PRML121PrincipalComponentAnalysis(NarratedScene):
                 self.add(current_formula,current_note)
                 if old_panel is not None:self.remove(old_panel)
                 if si==0:
-                    old_panel=error_bars(chosen=0 if bi<4 else 1,visible=1 if bi<4 else 2)
+                    old_panel=error_bars(chosen=0 if bi<4 else 1,
+                                         visible=0 if bi<3 else 1 if bi==3 else 2)
                 elif si==1:
                     off=[1,.8,0,0,0,0][bi];old_panel=offset_panel(off)
                 elif si==6:
@@ -258,7 +260,9 @@ class PRML121PrincipalComponentAnalysis(NarratedScene):
                 elif si==3:
                     old_panel=recap_panel() if bi==0 else covariance_panel()
                 elif si==7:
-                    old_panel=whiten_panel() if bi>=3 else score_panel()
+                    old_panel=(score_panel() if bi==0 else
+                               error_bars(m_mode=True,chosen=1) if bi==1 else
+                               covariance_panel() if bi==2 else whiten_panel())
                 elif si==8:
                     old_panel=error_bars(chosen=0 if bi==0 else 1)
                 else:old_panel=None
@@ -270,7 +274,7 @@ class PRML121PrincipalComponentAnalysis(NarratedScene):
                     off=[1,.8,0,0,0,0][bi]
                     if abs(offset.get_value()-off)>1e-5:animations.append(offset.animate.set_value(off))
                 moving=bool(animations)
-                if not animations:
+                if not animations and not (si==6 and round(count.get_value())!=1):
                     animations=[ShowPassingFlash(line.copy().set_stroke(YELLOW,width=6),time_width=.22)]
                 self.beat(*animations,end_sentence=1 if moving else None,
                           actions=[dict(name='投影を動かす',start=0,end=self.durations[self.beat_index])])
