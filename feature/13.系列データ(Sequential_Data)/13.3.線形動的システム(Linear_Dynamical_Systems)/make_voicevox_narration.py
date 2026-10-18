@@ -67,7 +67,7 @@ def prepare_manifest():
     entries = [old[s["id"]] if valid_entry(s, old.get(s["id"], {})) else pending_entry(s)
                for s in SCENES]
     valid_ids = {e["id"] for e in entries if e["status"] == "generated"}
-    # Only narration assets belonging to this feature; old scene10..13 also go.
+    # Remove WAVs from obsolete scene IDs in this feature only.
     for path in OUTPUT_DIR.glob("scene*.wav"):
         if path.stem not in valid_ids:
             path.unlink()
