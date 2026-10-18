@@ -1,0 +1,21 @@
+{
+  "observations": [
+    "赤",
+    "赤",
+    "赤",
+    "青"
+  ],
+  "local_probability": "1/16",
+  "global_probability": "34/625",
+  "likelihood": {
+    "A": 0.1024,
+    "B": 0.0064
+  },
+  "posterior": {
+    "A": 0.9411764705882353,
+    "B": 0.058823529411764705
+  },
+  "predictive_red": 0.7647058823529411,
+  "exact_predictive_red": "13/17",
+  "enumeration": "passed"
+}
