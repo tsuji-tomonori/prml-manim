@@ -91,6 +91,7 @@ class NarratedScene(Scene):
         self.subtitle = None
         self.next_section(self.story['id'])
         title = jp(self.story['title'], 34).move_to([0, 3.35, 0])
+        self.main_title = title
         self.add(title)
         entry = self.manifest.get(self.story['id'], {})
         audio_valid = valid_entry(self.story, entry)

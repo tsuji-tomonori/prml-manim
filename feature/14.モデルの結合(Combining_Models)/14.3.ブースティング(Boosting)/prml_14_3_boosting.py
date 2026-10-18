@@ -153,9 +153,9 @@ def loss_panel(si,bi):
     expcurve=VMobject(stroke_color=GREEN,stroke_width=3).set_points_smoothly([P(a,np.exp(-a)) for a in z])
     g.add(expcurve)
     crosscurve=VMobject(stroke_color=RED,stroke_width=2.7).set_points_smoothly([P(a,np.log1p(np.exp(-a))/np.log(2)) for a in z])
-    if si==7 or bi>=1:g.add(crosscurve)
+    if si==7:g.add(crosscurve)
     g.add(txt('指数誤差',5.13,1.19,16,GREEN))
-    if si==7 or bi>=1:g.add(txt('交差エントロピー',5.19,.73,15,RED))
+    if si==7:g.add(txt('交差エントロピー',5.19,.73,15,RED))
     if si==6:
         zv=(0 if bi<2 else -1 if bi<4 else -1.6)
     else:zv=(-1 if bi<3 else -1.65)
@@ -194,14 +194,15 @@ class PRML143Boosting(NarratedScene):
                     if motions:
                         old_state=old
                         def finish(new=state,prior=old_state,target=focus):
-                            self.remove(prior);self.add(new)
+                            self.clear();self.add(self.main_title,self.subtitle,new)
                             return Indicate(target,color=target.get_color(),scale_factor=1.05)
                         self.beat(phases=[('境界と重みを動かす',enter,lambda parts=motions:AnimationGroup(*parts,lag_ratio=0)),
                                           ('結果を確認',duration-enter,finish)])
                     else:
-                        self.remove(old);self.add(state)
+                        self.clear();self.add(self.main_title,state)
                         self.beat(phases=[('図を更新',enter,lambda f=focus:Indicate(f,color=f.get_color(),scale_factor=1.07)),
                                           ('注目する量',duration-enter,lambda f=focus:Indicate(f,color=f.get_color(),scale_factor=1.05))])
+                self.clear();self.add(self.main_title,state,self.subtitle)
                 old=state;old_meta=meta
             self.timeline[-1]['end']=float(self.time)
         (Path(config.media_dir)/'prml143_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')

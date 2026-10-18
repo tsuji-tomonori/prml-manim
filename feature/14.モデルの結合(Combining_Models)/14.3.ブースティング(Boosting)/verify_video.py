@@ -92,7 +92,7 @@ for scene in timeline:
     for j,beat in enumerate(scene['beats'],1):
         for k,action in enumerate(beat.get('actions',[]),1):
             if action['name']=='breath':continue
-            if action['name'] in ('図を更新','表示切替','移動','候補を強調','高さを動かす','範囲を強調','曲線を強調','分布を動かす','つまみと曲線'):
+            if action['name'] in ('図を更新','表示切替','移動','候補を強調','高さを動かす','範囲を強調','曲線を強調','分布を動かす','つまみと曲線','図を導入','注目する量','境界と重みを動かす','結果を確認'):
                 shots.append(dict(id=f"{scene['id']}-{j:02d}-action-{k}-mid",
                                   time=(action['start']+action['end'])/2,
                                   phase='during-action'))
