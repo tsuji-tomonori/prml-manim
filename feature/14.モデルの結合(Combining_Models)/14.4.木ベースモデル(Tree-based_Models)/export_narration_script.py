@@ -5,7 +5,7 @@ from narration_content import SCENES,script_hash
 root=Path(__file__).resolve().parent
 path=root/'assets/voicevox/manifest.json'
 entries={e['id']:e for e in json.loads(path.read_text()).get('scenes',[])} if path.exists() else {}
-lines=['# PRML 14.3 ブースティング 台本','','原文: Bishop (2006), §14.3、印刷 pp.657–663 / PDF pp.677–683。','公式正誤表: p.659の「正解点の重みは不変」「しきい値境界は軸に垂直」を反映。','字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。','']
+lines=['# PRML 14.4 木ベースモデル 台本','','原文: Bishop (2006), §14.4、印刷 pp.663–666 / PDF pp.683–686。','公式正誤表: p.663の図14.5・14.6併記、p.666の交差エントロピーの負号と純粋な葉の条件を反映。','字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。','']
 start=0.
 for s in SCENES:
     e=entries.get(s['id'],{});ds=e.get('beat_durations',[])
@@ -17,5 +17,5 @@ for s in SCENES:
         for seg in b['segments']:lines += [f"- {seg['id']} 字幕: {seg['display']}",f"  音声: {seg['speech']}"]
         lines += ['']
     start=start+duration if current and start is not None else None
-lines += ['## 内容の対応と条件','','- 10点の決定株と3巡の数値例は boosting_model.py と README.md に記載。','- しきい値、重み更新、加重投票は verify_numerics.py で照合。','- 元の PDF と公式正誤表の照合範囲は README.md を参照。','']
+lines += ['## 内容の対応と条件','','- 4×4の回帰例と枝刈りの条件は tree_model.py と README.md に記載。','- 貪欲な分割、葉の平均、枝刈り費用は verify_numerics.py で照合。','- 元の PDF と公式正誤表の照合範囲は README.md を参照。','']
 (root/'narration_script.md').write_text('\n'.join(lines))
