@@ -18,9 +18,9 @@
 
 ## 視覚補足と章をまたぐ復習
 
-- scene04で2.3の共分散・ガウス楕円を10〜15秒の復習カードRとして再現する。既存節のコードはimportしない。分散の足し算は2本の幅を合成する小窓で示す。
-- scene06の条件付きガウスは、観測した点から線上へ戻す矢印と、点ごとの事後分布の幅を同時に示す短い本文カードにする。
-- scene07のEMは、点の潜在位置を決めて線を動かす2段階を図で示す。同じ章の12.1は冒頭の一言でつなぎ、復習カードを作らない。補足と復習は本編の15%以内に収める。
+- scene04冒頭に2.3の共分散・ガウス楕円を黄色い輪郭の復習カードRとして9.3秒再現する。既存節のコードはimportしない。続く主軸分散の棒グラフでは潜在変数・雑音・合計を同じ軸上で足す。
+- scene06の条件付きガウスは、観測した点から線上へ戻す矢印と、事前・事後の相対密度を同時に示す。雑音分散のつまみを1.000から最尤値0.046へ動かし、事後平均と幅を切り替える。
+- scene07のEMは、点の潜在位置を決めて線を動かす2段階と、実際に計算した更新角度を図で示す。同じ章の12.1は冒頭の一言でつなぎ、復習カードを作らない。復習9.3秒、事後分布の補足約17.8秒、EMの2段階の補足約17.8秒で合計約44.9秒、音声495.1秒の約9.1%。
 
 ## 原文との照合
 
@@ -28,15 +28,41 @@ Bishop (2006) §12.2、印刷pp.570–586（PDF pp.590–606）の全文と図12
 
 ## 数値例と近似の条件
 
-12.1の`pca_model.py`と同じ13点を対象節内に再現する。標本共分散は$1/N$で計算する。$D=2,M=1$とし、最尤解で$\lambda_1\simeq3.932411$、$\lambda_2\simeq0.045573$、$\mu=(1.15,0.35)$、$\sigma^2=\lambda_2$、$W=u_1\sqrt{\lambda_1-\lambda_2}$とする。主軸上のAを$\mu$、Bを$\mu+6u_1$とする。両者の直交再構成誤差は0。確率密度の比$p(B)/p(A)=\exp[-6^2/(2\lambda_1)]\simeq0.010282$で、密度そのものを確率とは呼ばない。Bは訓練点の主軸座標範囲（約−3.100〜3.030）より外にある。映像中の標本・等高線・曲線はこのモデルから計算し、乱数を使う場合は種を固定する。説明用の有限標本が厳密なガウス分布に従うと主張しない。
+12.1の`pca_model.py`と同じ13点を対象節内に再現する。標本共分散は$1/N$で計算する。$D=2,M=1$とし、最尤解で$\lambda_1\simeq3.932411$、$\lambda_2\simeq0.045573$、$\mu=(1.15,0.35)$、$\sigma^2=\lambda_2$、$W=u_1\sqrt{\lambda_1-\lambda_2}$とする。主軸上のAを$\mu$、Bを$\mu+6u_1$とする。両者の直交再構成誤差は0。確率密度の比$p(B)/p(A)=\exp[-6^2/(2\lambda_1)]\simeq0.010282$で、密度そのものを確率とは呼ばない。Bは訓練点の主軸座標範囲（約−3.100〜3.030）より外にある。映像中の標本・等高線・曲線はこのモデルから計算し、生成例の乱数種は122に固定する。scene06の事後分布の比較だけは、同じ$W$と説明用の$\sigma^2=1.000$を一時的に使い、最後に最尤値へ戻す。このとき最尤モデルの事後分散は約0.011589。scene07のEMは$W$を横向き・長さ$\sqrt{\lambda_1-\lambda_2}$、$\sigma^2=0.3$から始める自作計算で、1回目の角度は約34.916度、8回目は約35.388度。欠測例は$x_1=2.5$のみ観測し、最尤モデルでの$x_2$の条件付き平均は約1.292である。scene08の因子分析・ベイズ的PCAの図は模式図で、13点をこれらのモデルに改めて当てはめた結果ではない。説明用の有限標本が厳密なガウス分布に従うと主張しない。
 
 ## ファイルと再生成
 
-制作後に音声・動画・検証ファイルの保存先と実行手順を追記する。VOICEVOX:WhiteCUL、話者23、話速1.08、抑揚1.08。クレジットは動画外の本READMEに置く。
+[完成動画（480p15）](media/videos/prml_12_2_probabilistic_pca/480p15/PRML122ProbabilisticPCA.mp4) ／ [全文台本](narration_script.md) ／ [全文の読み確認](reading_check.md)
+
+- `pca_model.py` / `ppca_model.py` / `verify_numerics.py` / `numerical_validation.json`: 12.1と同じ13点、最尤モデル、密度比、事後分布、EM更新を再計算する。
+- `narration_content.py` / `narration_script.md`: 9シーン・55拍・110文の字幕`display`と読み上げ`speech`。
+- `make_voicevox_narration.py` / `assets/voicevox/`: WhiteCUL ノーマル（23）、話速1.08、抑揚1.08の9 WAVとSHA-256・文時刻付きmanifest。
+- `check_narration_readings.py` / `reading_check.json` / `.md`: 全110文の`audio_query`読み。
+- `scene_support.py` / `prml_12_2_probabilistic_pca.py`: PCM時刻と同期した字幕、生成モデル、楕円、分散、事後分布、EMの図。
+- `verify_caption_layout.py` / `caption_validation.json`、`verify_video.py` / `video_validation.json`: 字幕と完成映像の検査。
+
+対象ディレクトリでメイン作業ツリーの仮想環境を使う。
+
+```bash
+/home/t-tsuji/project/prml-manim/.venv/bin/python -m py_compile *.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_numerics.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python check_narration_readings.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python make_voicevox_narration.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python export_narration_script.py
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_caption_layout.py
+/home/t-tsuji/project/prml-manim/.venv/bin/manim --progress_bar none --disable_caching --flush_cache -ql prml_12_2_probabilistic_pca.py PRML122ProbabilisticPCA
+/home/t-tsuji/project/prml-manim/.venv/bin/python verify_video.py
+```
+
+VOICEVOX Engineが停止中なら、`.working/voicevox-engine-0.25.2/linux-cpu-x64/run --host 127.0.0.1 --port 50021`で起動し、自分で起動したEngineは生成後に停止する。レビュー用フレームはGit管理しない。VOICEVOX:WhiteCULのクレジットは動画外の本READMEに置く。
 
 ## 検証と限界
 
-制作後に実測結果を記録する。
+- `py_compile`、`verify_numerics.py`、`verify_caption_layout.py`を実行した。13点の固有分解、$C=S$、A/Bの密度比、事後分散、EMの対数尤度の単調増加、欠測時の条件付き平均を検査した。110字幕の最大幅は9.341、高さは0.458 Manim単位で、安全範囲内。
+- VOICEVOX Engine 0.25.2の`audio_query`を全110文に実行し、`reading_check.json` / `.md`へ保存した。「等方」「値」「0.046」「A」の誤読を`speech`で直し再生成した。辞書登録はせず、自分で起動したEngineは停止した。
+- 指定の`--disable_caching --flush_cache -ql`で全編を再レンダリングした。`verify_video.py`はmanifestのWAV SHA-256、9シーン・55拍・110字幕の時刻、MP4のH.264/AAC、854×480・15fps・495.133秒、音声495.168秒、文単位の音声相関（最小0.999480、最大時刻ずれ0.0214秒）、3秒以上の無音0件、平均音量−26.5dB・最大−5.8dB、全編デコードを確認した。
+- 代表284フレームを各拍の冒頭・途中・直後と動作中・直後から抽出し、18枚のシートを目視した。タイトル近くの潜在値ラベルと事後分布の雑音分散の表示を修正して再レンダリングし、変更53フレームを再確認した。残る231フレームは前回確認版とSHA-256が一致した。軸名・目盛り・字幕・式の重なり、曲線の範囲、発話中の明るさ、英語注記、枠の有無を確認した。レビュー画像はGit管理外。
+- 480p版の技術検査と代表フレーム目視を実施した。全編の実時間での通し視聴・試聴、全フレーム目視、1080p版のレンダリング、視聴者による理解度評価は未実施。
 
 ## VOICEVOX クレジット
 
