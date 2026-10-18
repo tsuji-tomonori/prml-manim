@@ -55,6 +55,7 @@
     0
   ],
   "viterbi_probability": 0.006718464000000004,
+  "local_path_probability": 0.0029859840000000014,
   "local_marginal_path": [
     0,
     0,

@@ -33,13 +33,15 @@ def main():
     marginal=infer(PATH_OBS)['gamma']
     local=tuple(np.argmax(marginal,axis=1))
     assert winner['path'] != local
+    local_probability=dict((z,p) for p,z in exhaustive(PATH_OBS))[local]
+    assert winner['probability'] > local_probability
     out=dict(observations=list(OBS), filter_day2=float(data['filter'][1,1]),
              smooth_day2=float(data['gamma'][1,1]), likelihood=likelihood,
              em_transition_counts=update['transition_counts'].tolist(),
              em_transition=update['a'].tolist(),em_emission=update['b'].tolist(),
              em_likelihood=update['new_likelihood'],path_observations=list(PATH_OBS),
              viterbi_path=list(winner['path']),viterbi_probability=winner['probability'],
-             local_marginal_path=[int(v) for v in local])
+             local_path_probability=local_probability,local_marginal_path=[int(v) for v in local])
     Path('numerical_validation.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(out,ensure_ascii=False,indent=2))
 
