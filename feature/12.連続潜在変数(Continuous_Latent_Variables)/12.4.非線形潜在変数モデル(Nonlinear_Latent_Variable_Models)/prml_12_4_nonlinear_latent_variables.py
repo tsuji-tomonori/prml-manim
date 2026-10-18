@@ -87,6 +87,31 @@ def wave_panel(stage):
         group.add(tex(r'A=\begin{pmatrix}1&.55\\ .45&1\end{pmatrix}',23,YELLOW).move_to([3.63,-2.02,0]))
     return group
 
+
+def tail_panel():
+    g=VGroup()
+    x0=3.65;y0=-1.52;sx=.60;sy=5.1
+    g.add(Line([1.80,y0,0],[5.55,y0,0],color=MUTED,stroke_width=1.4),
+          Line([1.80,y0,0],[1.80,.63,0],color=MUTED,stroke_width=1.4),
+          jp('密度',14,MUTED).move_to([1.59,.88,0]),
+          jp('値',14,MUTED).move_to([5.79,y0+.05,0]))
+    for z in [-3,0,3]:
+        x=x0+sx*z
+        g.add(Line([x,y0-.06,0],[x,y0+.06,0],color=MUTED,stroke_width=1),
+              jp(str(z),12,MUTED).move_to([x,y0-.24,0]))
+    for y in [0,.2,.4]:
+        yy=y0+sy*y
+        g.add(Line([1.74,yy,0],[1.86,yy,0],color=MUTED,stroke_width=1),
+              jp(f'{y:.1f}',12,MUTED).move_to([1.51,yy,0]))
+    z=np.linspace(-3,3,90)
+    gaussian=np.exp(-z*z/2)/np.sqrt(2*np.pi)
+    heavy=1/(np.pi*np.cosh(z))
+    g.add(line_from_points([[x0+sx*t,y0+sy*v,0] for t,v in zip(z,gaussian)],BLUE,2.8),
+          line_from_points([[x0+sx*t,y0+sy*v,0] for t,v in zip(z,heavy)],PURPLE,3.0))
+    g.add(jp('ガウス',15,BLUE).move_to([2.93,1.03,0]),
+          jp('裾が重い',15,PURPLE).move_to([4.42,1.03,0]))
+    return g
+
 def dependence_panel(stage):
     g=VGroup()
     x0=3.45; y0=-.36; sx=1.23;sy=.75
@@ -196,7 +221,7 @@ def score_panel(stage):
 def panel(si,bi):
     if si==0:return score_panel(0 if bi<3 else 1)
     if si==1:return wave_panel(0 if bi==0 else 1 if bi<4 else 4)
-    if si==2:return dependence_panel(bi)
+    if si==2:return tail_panel() if bi in (3,4) else dependence_panel(bi)
     if si==3:return network_panel(bi)
     if si==4:return latent_panel(bi)
     if si==5:return principal_panel(bi)
@@ -220,8 +245,8 @@ class PRML124NonlinearLatentVariables(NarratedScene):
                 note=jp(beat['visual_note'],16,MUTED).move_to([3.70,1.81,0])
                 if note.width>4.9:note.scale(4.9/note.width)
                 state=VGroup(formula,note,panel(si,bi),left_overlay(axes,si,bi))
-                anim=FadeIn(state) if old is None else ReplacementTransform(old,state)
-                self.beat(anim,actions=[dict(name='図を更新',start=0,end=self.durations[self.beat_index])])
+                anim=FadeIn(state) if old is None else AnimationGroup(FadeOut(old),FadeIn(state),lag_ratio=0)
+                self.beat(anim,end_sentence=1,actions=[dict(name='図を更新',start=0,end=self.sentence_duration(0))])
                 old=state
             self.timeline[-1]['end']=float(self.time)
         (Path(config.media_dir)/'prml124_timeline.json').write_text(json.dumps(self.timeline,ensure_ascii=False,indent=2)+'\n')
