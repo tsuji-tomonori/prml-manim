@@ -1,7 +1,7 @@
-# PRML 14.1 ベイズモデル平均 台本
+# PRML 14.2 コミッティ 台本
 
-原文: Bishop (2006), §14.1、印刷 pp.654–655 / PDF pp.674–675。
-公式正誤表: §14.1の該当箇所に訂正なし。
+原文: Bishop (2006), §14.2、印刷 pp.655–657 / PDF pp.675–677。
+公式正誤表: §14.2の該当箇所に訂正なし。
 字幕 display は記号、読み上げ speech は発音。各 beat は文 WAV の実測時間に同期する。
 
 ## scene01 5本の予測が割れた
@@ -494,6 +494,6 @@
 
 ## 内容の対応と条件
 
-- 離散例の全確率は model_average.py と README.md に記載。
-- 尤度、事後、予測確率は verify_numerics.py で照合。
+- 5本のブートストラップ回帰と無相関・相関実験は committee_model.py と README.md に記載。
+- 予測、二乗誤差、5分の1の条件は verify_numerics.py で照合。
 - 元の PDF と公式正誤表の照合範囲は README.md を参照。
